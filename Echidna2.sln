@@ -1,0 +1,30 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Echidna2", "Echidna2\Echidna2.csproj", "{CDE8C1D7-2590-4166-A742-9CE9E621D16D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Echidna2.Core", "Echidna2.Core\Echidna2.Core.csproj", "{FC0086DE-174A-4CAC-84B4-D4AEE8758996}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Echidna2.SourceGenerators", "Echidna2.SourceGenerators\Echidna2.SourceGenerators.csproj", "{A472D21C-7E78-4931-8599-4B0011ACD242}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CDE8C1D7-2590-4166-A742-9CE9E621D16D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CDE8C1D7-2590-4166-A742-9CE9E621D16D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CDE8C1D7-2590-4166-A742-9CE9E621D16D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CDE8C1D7-2590-4166-A742-9CE9E621D16D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FC0086DE-174A-4CAC-84B4-D4AEE8758996}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FC0086DE-174A-4CAC-84B4-D4AEE8758996}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FC0086DE-174A-4CAC-84B4-D4AEE8758996}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FC0086DE-174A-4CAC-84B4-D4AEE8758996}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A472D21C-7E78-4931-8599-4B0011ACD242}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A472D21C-7E78-4931-8599-4B0011ACD242}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A472D21C-7E78-4931-8599-4B0011ACD242}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A472D21C-7E78-4931-8599-4B0011ACD242}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+	EndGlobalSection
+EndGlobal
