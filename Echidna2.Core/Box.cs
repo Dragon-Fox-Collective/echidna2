@@ -1,30 +1,19 @@
-﻿using Echidna2.SourceGenerators;
+﻿namespace Echidna2.Core;
 
-namespace Echidna2.Core;
-
-public partial class Box(
-	[Component] IHierarchy? hierarchy = null,
-	[Component] IRectTransform? rectTransform = null)
-	: Entity
+public partial class Box : Entity
 {
+	public Box(
+		[Component] IHierarchy? hierarchy = null,
+		[Component] IRectTransform? rectTransform = null)
+	{
+		this.hierarchy = hierarchy ?? new Hierarchy();
+		this.rectTransform = rectTransform ?? new RectTransform(this.hierarchy);
+	}
+	
 	public override void Draw()
 	{
-		Console.WriteLine($"{GetChildren().FirstOrDefault()}");
 		Console.WriteLine("\u250c" + new string('\u2500', (int)Size.X) + "\u2510");
-		base.Draw();
+		hierarchy.Draw();
 		Console.WriteLine("\u2514" + new string('\u2500', (int)Size.X) + "\u2518");
 	}
-}
-
-
-// AUTO GENERATED CODE
-partial class Box : IHierarchy, IRectTransform
-{
-	private IHierarchy hierarchy = hierarchy ?? new Hierarchy();
-	private IRectTransform rectTransform = rectTransform ?? new RectTransform();
-	
-	public void AddChild(Entity entity) => hierarchy.AddChild(entity);
-	public IEnumerable<Entity> GetChildren() => hierarchy.GetChildren();
-	
-	public Vector2 Size => rectTransform.Size;
 }
