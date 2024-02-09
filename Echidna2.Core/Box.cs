@@ -1,6 +1,6 @@
 ﻿namespace Echidna2.Core;
 
-public partial class Box : IPropertyHaver
+public partial class Box
 {
 	public Box(
 		[Component] IHierarchy? hierarchy = null,
@@ -10,10 +10,24 @@ public partial class Box : IPropertyHaver
 		this.rectTransform = rectTransform ?? new RectTransform(this.hierarchy);
 	}
 	
+	public void PreUpdate()
+	{
+		rectTransform.PreUpdate();
+	}
+	
+	public void Update(double deltaTime)
+	{
+		rectTransform.Update(deltaTime);
+	}
+	
+	public void AddChild(object child) => hierarchy.AddChild(child);
+	public IEnumerable<object> GetChildren() => hierarchy.GetChildren();
+	public void PrintTree(int depth = 0) => hierarchy.PrintTree(depth);
+	
 	public void Draw()
 	{
 		Console.WriteLine("\u250c" + new string('\u2500', (int)Size.X) + "\u2510");
-		hierarchy.Draw();
+		rectTransform.Draw();
 		Console.WriteLine("\u2514" + new string('\u2500', (int)Size.X) + "\u2518");
 	}
 	

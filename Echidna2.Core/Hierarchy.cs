@@ -12,7 +12,9 @@ public partial class Hierarchy : IHierarchy
 {
 	private List<object> children = [];
 	
-	private bool updatedThisFrame = false;
+	private bool isPreUpdating = false;
+	private bool isUpdating = false;
+	private bool isDrawing = false;
 	
 	public Hierarchy(
 		[Component] INamed? named = null)
@@ -22,23 +24,35 @@ public partial class Hierarchy : IHierarchy
 	
 	public void PreUpdate()
 	{
-		updatedThisFrame = false;
+		if (isPreUpdating) return;
+		isPreUpdating = true;
+		
 		foreach (IUpdate child in children.OfType<IUpdate>())
 			child.PreUpdate();
+
+		isPreUpdating = false;
 	}
 	
 	public void Update(double deltaTime)
 	{
-		if (updatedThisFrame) return;
-		updatedThisFrame = true;
+		if (isUpdating) return;
+		isUpdating = true;
+		
 		foreach (IUpdate child in children.OfType<IUpdate>())
 			child.Update(deltaTime);
+		
+		isUpdating = false;
 	}
 	
 	public void Draw()
 	{
+		if (isDrawing) return;
+		isDrawing = true;
+		
 		foreach (IDraw child in children.OfType<IDraw>())
 			child.Draw();
+
+		isDrawing = false;
 	}
 	
 	public void AddChild(object child) => children.Add(child);

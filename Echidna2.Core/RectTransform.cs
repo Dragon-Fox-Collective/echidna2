@@ -1,7 +1,7 @@
 ﻿namespace Echidna2.Core;
 
 [ComponentImplementation<RectTransform>]
-public interface IRectTransform : IPropertyHaver
+public interface IRectTransform : IPropertyHaver, IHierarchy
 {
 	public Vector2 Size { get; }
 }

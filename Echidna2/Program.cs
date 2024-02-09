@@ -12,21 +12,26 @@ GameWindow gameWindow = new(
 	}
 );
 
-ReallyCoolPrefab world = new();
+Hierarchy worldHierarchy = new() { Name = "ReallyCoolPrefab hierarchy" };
+RectTransform worldRectTransform = new(new Hierarchy { Name = "ReallyCoolPrefab rect hierarchy" });
+ReallyCoolPrefab world = new(hierarchy: worldHierarchy, rectTransform: worldRectTransform);
 world.AddChild(new DebugEntity());
 
-Box pseudoBox = new(hierarchy: null, rectTransform: world);
+Box pseudoBox = new(hierarchy: null, rectTransform: worldRectTransform);
 world.AddChild(pseudoBox);
 
-world.AddChild(new Box());
+worldRectTransform.AddChild(new Box());
 
 Box bigBox = new();
-world.AddChild(bigBox);
+worldRectTransform.AddChild(bigBox);
 bigBox.AddChild(new Box());
 
 world.PrintTree();
+worldRectTransform.PrintTree();
+Console.WriteLine("ReallyCoolPrefab's properties: " + string.Join(", ", world.GetPropertyList()));
+world.PreUpdate();
+world.Update(0);
 world.Draw();
-Console.WriteLine(string.Join(", ", world.GetPropertyList()));
 
 // gameWindow.Load += world.Initialize;
 // gameWindow.Unload += world.Dispose;

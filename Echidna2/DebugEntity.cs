@@ -9,5 +9,6 @@ public class DebugEntity : IUpdate
 	public void Update(double deltaTime)
 	{
 		Console.WriteLine($"Updating {deltaTime}");
+		// Console.WriteLine(Environment.StackTrace);
 	}
 }
