@@ -1,4 +1,5 @@
 ﻿using Echidna2.Core;
+using OpenTK.Mathematics;
 
 namespace Echidna2.Rendering;
 
@@ -16,8 +17,8 @@ public class Camera
 		World?.Notify(new IUpdate.Notification(deltaTime));
 	}
 	
-	public void Render()
+	public void Render(Vector2i screenSize)
 	{
-		World?.Notify(new IDraw.Notification());
+		World?.Notify(new IDraw.Notification(screenSize));
 	}
 }

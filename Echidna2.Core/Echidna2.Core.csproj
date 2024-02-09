@@ -10,4 +10,8 @@
       <ProjectReference Include="..\Echidna2.SourceGenerators\Echidna2.SourceGenerators.csproj" OutputItemType="Analyzer" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="OpenTK.Mathematics" Version="4.8.2" />
+    </ItemGroup>
+
 </Project>

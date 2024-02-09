@@ -1,4 +1,6 @@
-﻿namespace Echidna2.Core;
+﻿using OpenTK.Mathematics;
+
+namespace Echidna2.Core;
 
 public interface INotificationListener<in T>
 {
@@ -35,7 +37,10 @@ public interface IUpdate : INotificationListener<IUpdate.Notification>
 
 public interface IDraw : INotificationListener<IDraw.Notification>
 {
-	public class Notification;
+	public class Notification(Vector2i screenSize)
+	{
+		public Vector2i ScreenSize { get; } = screenSize;
+	}
 	void INotificationListener<Notification>.OnNotify(Notification notification) => OnDraw();
 	public void OnDraw();
 }

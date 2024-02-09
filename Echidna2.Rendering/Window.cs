@@ -29,7 +29,7 @@ public class Window : IUpdate, IDraw
 		// gameWindow.MouseMove += args => world.MouseMove(args.Position, args.Delta);
 		// gameWindow.KeyDown += args => world.KeyDown(args.Key);
 		// gameWindow.KeyUp += args => world.KeyUp(args.Key);
-		// gameWindow.Run();
+		window.Resize += args => GL.Viewport(0, 0, args.Size.X, args.Size.Y);
 	}
 	
 	public void PreUpdate() => Camera?.RenderPreUpdate();
@@ -39,9 +39,9 @@ public class Window : IUpdate, IDraw
 	public void OnDraw()
 	{
 		GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit | ClearBufferMask.StencilBufferBit);
-		Camera?.Render();
+		Camera?.Render(window.Size);
 		window.SwapBuffers();
 	}
-
+	
 	public void Run() => window.Run();
 }
