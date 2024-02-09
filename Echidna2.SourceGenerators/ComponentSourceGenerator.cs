@@ -54,7 +54,7 @@ public class ComponentSourceGenerator : IIncrementalGenerator
 		ITypeSymbol? interfaceImplementationType = interfaceType.GetAttributes().Where(implAttribute => implAttribute.AttributeClass?.Name == "ComponentImplementationAttribute").Select(implAttribute => implAttribute.AttributeClass?.TypeArguments[0]).FirstOrDefault();
 		IMethodSymbol? interfaceImplementationConstructor = interfaceImplementationType?.GetMembers(".ctor").OfType<IMethodSymbol>().FirstOrDefault(method => method.Parameters.All(parameter => parameter.IsOptional));
 		
-		string source = $"// {isPrimaryConstructorParameter} {interfaceImplementationConstructor}\n";
+		string source = "";
 		source += $"namespace {symbol.ContainingNamespace};\n";
 		source += "\n";
 		source += $"partial class {classType.Name} : {interfaceType}\n";
@@ -73,7 +73,7 @@ public class ComponentSourceGenerator : IIncrementalGenerator
 			switch (member)
 			{
 				case IMethodSymbol method:
-					source += $"\t{method.DeclaredAccessibility.ToString().ToLower()} {method.ReturnType} {method.Name}({string.Join(", ", method.Parameters.Select(parameter => $"{(parameter.IsParams ? "params " : "")}{parameter.Type} {parameter.Name}"))}) => {symbol.Name}.{method.Name}({string.Join(", ", method.Parameters.Select(parameter => parameter.Name))});\n";
+					source += $"\t{method.DeclaredAccessibility.ToString().ToLower()} {method.ReturnType} {method.Name}({string.Join(", ", method.Parameters.Select(parameter => $"{(parameter.IsParams ? "params " : "")}{parameter.Type} {parameter.Name}{(parameter.HasExplicitDefaultValue ? $" = {parameter.ExplicitDefaultValue}" : "")}"))}) => {symbol.Name}.{method.Name}({string.Join(", ", method.Parameters.Select(parameter => parameter.Name))});\n";
 					break;
 				case IPropertySymbol property:
 					if (property is { GetMethod: not null, SetMethod: not null })

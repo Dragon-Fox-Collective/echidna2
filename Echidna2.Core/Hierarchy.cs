@@ -12,13 +12,25 @@ public partial class Hierarchy : IHierarchy
 {
 	private List<object> children = [];
 	
-	public Hierarchy([Component] INamed? named = null)
+	private bool updatedThisFrame = false;
+	
+	public Hierarchy(
+		[Component] INamed? named = null)
 	{
 		this.named = named ?? new Named(GetType().Name);
 	}
 	
+	public void PreUpdate()
+	{
+		updatedThisFrame = false;
+		foreach (IUpdate child in children.OfType<IUpdate>())
+			child.PreUpdate();
+	}
+	
 	public void Update(double deltaTime)
 	{
+		if (updatedThisFrame) return;
+		updatedThisFrame = true;
 		foreach (IUpdate child in children.OfType<IUpdate>())
 			child.Update(deltaTime);
 	}
@@ -35,8 +47,17 @@ public partial class Hierarchy : IHierarchy
 	
 	public void PrintTree(int depth = 0)
 	{
-		Console.WriteLine(new string(' ', depth * 2) + (depth > 0 ? "\u2514 " : "") + named.Name);
-		foreach (IHierarchy child in children.OfType<IHierarchy>())
-			child.PrintTree(depth + 1);
+		PrintLayer(depth, named.Name);
+		foreach (object child in children)
+		{
+			if (child is IHierarchy childHierarchy)
+				childHierarchy.PrintTree(depth + 1);
+			else if (child is INamed childNamed)
+				PrintLayer(depth + 1, childNamed.Name);
+			else
+				PrintLayer(depth + 1, child.GetType().Name);
+		}
 	}
+	
+	private static void PrintLayer(int depth, string name) => Console.WriteLine(new string(' ', depth * 2) + (depth > 0 ? "\u2514 " : "") + name);
 }

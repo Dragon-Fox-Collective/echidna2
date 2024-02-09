@@ -2,5 +2,6 @@
 
 public interface IUpdate
 {
+	public void PreUpdate();
 	public void Update(double deltaTime);
 }

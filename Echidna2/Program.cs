@@ -12,8 +12,11 @@ GameWindow gameWindow = new(
 	}
 );
 
-Hierarchy world = new();
+ReallyCoolPrefab world = new();
 world.AddChild(new DebugEntity());
+
+Box pseudoBox = new(hierarchy: null, rectTransform: world);
+world.AddChild(pseudoBox);
 
 world.AddChild(new Box());
 
@@ -23,10 +26,15 @@ bigBox.AddChild(new Box());
 
 world.PrintTree();
 world.Draw();
+Console.WriteLine(string.Join(", ", world.GetPropertyList()));
 
 // gameWindow.Load += world.Initialize;
 // gameWindow.Unload += world.Dispose;
-gameWindow.UpdateFrame += args => world.Update(args.Time);
+gameWindow.UpdateFrame += args =>
+{
+	world.PreUpdate();
+	world.Update(args.Time);
+};
 gameWindow.RenderFrame += _ => world.Draw();
 // gameWindow.MouseMove += args => world.MouseMove(args.Position, args.Delta);
 // gameWindow.KeyDown += args => world.KeyDown(args.Key);
