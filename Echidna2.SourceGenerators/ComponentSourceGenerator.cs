@@ -56,7 +56,7 @@ public class ComponentSourceGenerator : IIncrementalGenerator
 		ITypeSymbol? interfaceImplementationType = interfaceType.GetAttributes().Where(implAttribute => implAttribute.AttributeClass?.Name == "ComponentImplementationAttribute").Select(implAttribute => implAttribute.AttributeClass?.TypeArguments[0]).FirstOrDefault();
 		IMethodSymbol? interfaceImplementationConstructor = interfaceImplementationType?.GetMembers(".ctor").OfType<IMethodSymbol>().FirstOrDefault(method => method.Parameters.All(parameter => parameter.IsOptional));
 		
-		string source = "";
+		string source = "#nullable enable\n";
 		source += $"namespace {symbol.ContainingNamespace};\n";
 		source += "\n";
 		source += $"partial class {classType.Name} : {interfaceType}\n";

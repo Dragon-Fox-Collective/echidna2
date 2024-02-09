@@ -23,6 +23,7 @@ public partial class ReallyCoolPrefab
 	}
 	
 	public void AddChild(object child) => hierarchy.AddChild(child);
+	public bool RemoveChild(object child) => hierarchy.RemoveChild(child);
 	public IEnumerable<object> GetChildren() => hierarchy.GetChildren();
 	public void PrintTree(int depth = 0) => hierarchy.PrintTree(depth);
 	public void Draw() => hierarchy.Draw();

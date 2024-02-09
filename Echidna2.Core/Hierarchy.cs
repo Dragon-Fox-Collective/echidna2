@@ -4,6 +4,7 @@
 public interface IHierarchy : IUpdate, IDraw
 {
 	public void AddChild(object child);
+	public bool RemoveChild(object child);
 	public IEnumerable<object> GetChildren();
 	public void PrintTree(int depth = 0);
 }
@@ -56,7 +57,9 @@ public partial class Hierarchy : IHierarchy
 	}
 	
 	public void AddChild(object child) => children.Add(child);
-	
+
+	public bool RemoveChild(object child) => children.Remove(child);
+
 	public IEnumerable<object> GetChildren() => children;
 	
 	public void PrintTree(int depth = 0)
