@@ -6,10 +6,11 @@ using OpenTK.Windowing.Desktop;
 Console.WriteLine("Hello, World!");
 
 
-Hierarchy world = new();
+Hierarchy world = new() { Name = "Root" };
 world.AddChild(new DebugEntity());
 
-world.AddChild(new Rect { Position = Vector2.One });
+world.AddChild(new Rect { Position = (100, 0, 0) });
+
 
 new Window(new GameWindow(
 	new GameWindowSettings(),

@@ -34,7 +34,7 @@ public partial class Rect(
 	public void OnNotify(IDraw.Notification notification)
 	{
 		shader.Bind(viewMatrix, notification.ScreenSize);
-		shader.SetMatrix4(0, Matrix4.CreateScale(Vector3.One * 10) * Matrix4.CreateFromQuaternion(Quaternion.Identity) * Matrix4.CreateTranslation(Vector3.Zero));
+		shader.SetMatrix4(0, Matrix4.CreateScale(rectTransform.Size * 10) * Matrix4.CreateFromQuaternion(Quaternion.Identity) * Matrix4.CreateTranslation(rectTransform.Position));
 		mesh.Draw();
 	}
 }
