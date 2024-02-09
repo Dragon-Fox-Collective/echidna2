@@ -24,7 +24,7 @@ public partial class RectTransform(
 		
 		hierarchy.Update(deltaTime);
 		
-		Size = MaxChildSize + Vector2.One * 2;
+		Size = hierarchy.GetChildren().Any() ? MaxChildSize + Vector2.One * 2 : Vector2.One;
 	}
 	
 	public IEnumerable<string> GetPropertyList()

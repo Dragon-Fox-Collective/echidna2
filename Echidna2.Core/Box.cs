@@ -27,9 +27,9 @@ public partial class Box
 	
 	public void Draw()
 	{
-		Console.WriteLine(new string(' ', (int)Position.X) + "\u250c" + new string('\u2500', (int)Size.X) + "\u2510");
+		Console.WriteLine(new string('\u2502', (int)Position.X) + "\u250c" + new string('\u2500', (int)Size.X) + "\u2510");
 		rectTransform.Draw();
-		Console.WriteLine(new string(' ', (int)Position.X) + "\u2514" + new string('\u2500', (int)Size.X) + "\u2518");
+		Console.WriteLine(new string('\u2502', (int)Position.X) + "\u2514" + new string('\u2500', (int)Size.X) + "\u2518");
 	}
 	
 	public IEnumerable<string> GetPropertyList()
