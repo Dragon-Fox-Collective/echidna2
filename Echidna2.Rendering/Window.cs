@@ -13,18 +13,19 @@ public class Window : IUpdate, IDraw
 	public Window(GameWindow window)
 	{
 		this.window = window;
+		
 		window.Load += () =>
 		{
 			GL.ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 			GL.Enable(EnableCap.DepthTest);
 		};
-		// gameWindow.Unload += world.Dispose;
+		// window.Unload += world.Dispose;
 		window.UpdateFrame += args =>
 		{
 			PreUpdate();
-			Update(args.Time);
+			OnUpdate(args.Time);
 		};
-		window.RenderFrame += _ => Draw();
+		window.RenderFrame += _ => OnDraw();
 		// gameWindow.MouseMove += args => world.MouseMove(args.Position, args.Delta);
 		// gameWindow.KeyDown += args => world.KeyDown(args.Key);
 		// gameWindow.KeyUp += args => world.KeyUp(args.Key);
@@ -33,9 +34,9 @@ public class Window : IUpdate, IDraw
 	
 	public void PreUpdate() => Camera?.RenderPreUpdate();
 	
-	public void Update(double deltaTime) => Camera?.RenderUpdate(deltaTime);
+	public void OnUpdate(double deltaTime) => Camera?.RenderUpdate(deltaTime);
 	
-	public void Draw()
+	public void OnDraw()
 	{
 		GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit | ClearBufferMask.StencilBufferBit);
 		Camera?.Render();

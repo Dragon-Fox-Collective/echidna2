@@ -16,4 +16,10 @@
       <PackageReference Include="OpenTK.Windowing.Desktop" Version="4.8.2" />
     </ItemGroup>
 
+    <ItemGroup>
+      <None Update="global-coords.frag">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
 </Project>

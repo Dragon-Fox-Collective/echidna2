@@ -16,13 +16,13 @@ public partial class RectTransform(
 	
 	private Vector2 MaxChildSize => hierarchy.GetChildren().OfType<IRectTransform>().Where(transform => transform != this).Aggregate(Vector2.Zero, (accumulate, transform) => new Vector2(Math.Max(accumulate.X, transform.Size.X), Math.Max(accumulate.Y, transform.Size.Y)));
 	
-	public void PreNotify(IUpdate.Notification notification)
+	public void OnPreNotify(IUpdate.Notification notification)
 	{
 		foreach (object child in hierarchy.GetChildren())
 			if (child is IRectTransform rectTransform)
 				rectTransform.Position = Position + Vector2.One;
 	}
-	public void PostNotify(IUpdate.Notification notification)
+	public void OnPostNotify(IUpdate.Notification notification)
 	{
 		Size = hierarchy.GetChildren().Any() ? MaxChildSize + Vector2.One * 2 : Vector2.One;
 	}

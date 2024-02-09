@@ -2,13 +2,13 @@
 
 public interface INotificationListener<in T>
 {
-	public void Notify(T notification);
+	public void OnNotify(T notification);
 }
 
 public interface INotificationHook<in T>
 {
-	public void PreNotify(T notification);
-	public void PostNotify(T notification);
+	public void OnPreNotify(T notification);
+	public void OnPostNotify(T notification);
 }
 
 public interface INotificationPropagator
@@ -19,8 +19,8 @@ public interface INotificationPropagator
 public interface IPreUpdate : INotificationListener<IPreUpdate.Notification>
 {
 	public class Notification;
-	void INotificationListener<Notification>.Notify(Notification notification) => PreUpdate();
-	public void PreUpdate();
+	void INotificationListener<Notification>.OnNotify(Notification notification) => OnPreUpdate();
+	public void OnPreUpdate();
 }
 
 public interface IUpdate : INotificationListener<IUpdate.Notification>
@@ -29,13 +29,13 @@ public interface IUpdate : INotificationListener<IUpdate.Notification>
 	{
 		public double DeltaTime { get; } = deltaTime;
 	}
-	void INotificationListener<Notification>.Notify(Notification notification) => Update(notification.DeltaTime);
-	public void Update(double deltaTime);
+	void INotificationListener<Notification>.OnNotify(Notification notification) => OnUpdate(notification.DeltaTime);
+	public void OnUpdate(double deltaTime);
 }
 
 public interface IDraw : INotificationListener<IDraw.Notification>
 {
 	public class Notification;
-	void INotificationListener<Notification>.Notify(Notification notification) => Draw();
-	public void Draw();
+	void INotificationListener<Notification>.OnNotify(Notification notification) => OnDraw();
+	public void OnDraw();
 }

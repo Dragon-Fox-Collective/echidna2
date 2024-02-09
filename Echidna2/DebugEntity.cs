@@ -6,7 +6,7 @@ public class DebugEntity : IUpdate
 {
 	public void PreUpdate() { }
 	
-	public void Update(double deltaTime)
+	public void OnUpdate(double deltaTime)
 	{
 		Console.WriteLine($"Updating {deltaTime}");
 		// Console.WriteLine(Environment.StackTrace);

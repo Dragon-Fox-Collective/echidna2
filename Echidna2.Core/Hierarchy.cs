@@ -27,11 +27,11 @@ public partial class Hierarchy : IHierarchy
 		isNotifying = true;
 		
 		foreach (INotificationHook<T> child in children.OfType<INotificationHook<T>>())
-			child.PreNotify(notification);
+			child.OnPreNotify(notification);
 		foreach (INotificationListener<T> child in children.OfType<INotificationListener<T>>())
-			child.Notify(notification);
+			child.OnNotify(notification);
 		foreach (INotificationHook<T> child in children.OfType<INotificationHook<T>>())
-			child.PostNotify(notification);
+			child.OnPostNotify(notification);
 		foreach (INotificationPropagator child in children.OfType<INotificationPropagator>())
 			child.Notify(notification);
 		

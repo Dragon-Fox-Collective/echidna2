@@ -15,12 +15,12 @@ public partial class Box : INotificationHook<IDraw.Notification>
 	public IEnumerable<object> GetChildren() => hierarchy.GetChildren();
 	public void PrintTree(int depth = 0) => hierarchy.PrintTree(depth);
 	
-	public void PreNotify(IDraw.Notification notification)
+	public void OnPreNotify(IDraw.Notification notification)
 	{
 		Console.WriteLine(new string('\u2502', (int)Position.X) + "\u250c" + new string('\u2500', (int)Size.X) + "\u2510");
 	}
 	public void Notify<T>(T notification) => rectTransform.Notify(notification);
-	public void PostNotify(IDraw.Notification notification)
+	public void OnPostNotify(IDraw.Notification notification)
 	{
 		Console.WriteLine(new string('\u2502', (int)Position.X) + "\u2514" + new string('\u2500', (int)Size.X) + "\u2518");
 	}

@@ -1,73 +1,98 @@
-﻿using Echidna2.Core;
-using OpenTK.Graphics.OpenGL4;
+﻿using OpenTK.Graphics.OpenGL4;
 
 namespace Echidna2.Rendering;
 
 public class Mesh(float[] positions, float[] texCoords, float[] colors, uint[] indices, bool cullBackFaces = true)
 {
-	internal const int Dims = 3;
+	private const int Dims = 3;
 	
 	public int NumVertices => positions.Length / Dims;
 	
-	internal bool IsDirty = true;
-
+	private bool isDirty = true;
+	private bool hasBeenInitialized;
+	private bool hasBeenDisposed;
+	
 	public float[] Positions
 	{
 		get => positions;
 		set
 		{
 			positions = value;
-			IsDirty = true;
+			isDirty = true;
 		}
 	}
-
+	
 	public float[] TexCoords
 	{
 		get => texCoords;
 		set
 		{
 			texCoords = value;
-			IsDirty = true;
+			isDirty = true;
 		}
 	}
-
+	
 	public float[] Colors
 	{
 		get => colors;
 		set
 		{
 			colors = value;
-			IsDirty = true;
+			isDirty = true;
 		}
 	}
-
+	
 	public uint[] Indices
 	{
 		get => indices;
 		set
 		{
 			indices = value;
-			IsDirty = true;
+			isDirty = true;
 		}
 	}
 	
-	internal float[] Data = Array.Empty<float>();
+	private float[] data = Array.Empty<float>();
 	
-	internal int VertexBufferObject;
-	internal int ElementBufferObject;
-	internal int VertexArrayObject;
+	private int vertexBufferObject;
+	private int elementBufferObject;
+	private int vertexArrayObject;
 	
-	internal readonly bool CullBackFaces = cullBackFaces;
-	
-	internal bool HasBeenDisposed;
-	
-	public void Initialize()
+	public void Draw()
 	{
-		VertexBufferObject = GL.GenBuffer();
-		GL.BindBuffer(BufferTarget.ArrayBuffer, VertexBufferObject);
+		if (isDirty)
+			Clean();
 		
-		VertexArrayObject = GL.GenVertexArray();
-		GL.BindVertexArray(VertexArrayObject);
+		if (cullBackFaces)
+			GL.Enable(EnableCap.CullFace);
+		else
+			GL.Disable(EnableCap.CullFace);
+		
+		GL.Disable(EnableCap.Blend);
+		
+		GL.BindVertexArray(vertexArrayObject);
+		GL.DrawElements(PrimitiveType.Triangles, Indices.Length, DrawElementsType.UnsignedInt, 0);
+	}
+	
+	private void Clean()
+	{
+		isDirty = false;
+		if (!hasBeenInitialized)
+			Initialize();
+		RegenerateData();
+		BindData(vertexBufferObject, data);
+		BindIndices(elementBufferObject, Indices);
+	}
+	
+	private void Initialize()
+	{
+		hasBeenInitialized = true;
+		
+		vertexBufferObject = GL.GenBuffer();
+		GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBufferObject);
+		
+		vertexArrayObject = GL.GenVertexArray();
+		GL.BindVertexArray(vertexArrayObject);
 		
 		int[] widths = [3, 2, 3];
 		int stride = widths.Sum();
@@ -77,22 +102,8 @@ public class Mesh(float[] positions, float[] texCoords, float[] colors, uint[] i
 			GL.VertexAttribPointer(attribute, widths[attribute], VertexAttribPointerType.Float, false, stride * sizeof(float), offset * sizeof(float));
 		}
 		
-		ElementBufferObject = GL.GenBuffer();
-		GL.BindBuffer(BufferTarget.ElementArrayBuffer, ElementBufferObject);
-	}
-	
-	public void CleanIfDirty()
-	{
-		if (IsDirty)
-			Clean();
-	}
-	
-	public void Clean()
-	{
-		IsDirty = false;
-		RegenerateData();
-		BindData(VertexBufferObject, Data);
-		BindIndices(ElementBufferObject, Indices);
+		elementBufferObject = GL.GenBuffer();
+		GL.BindBuffer(BufferTarget.ElementArrayBuffer, elementBufferObject);
 	}
 	
 	private void RegenerateData()
@@ -100,12 +111,12 @@ public class Mesh(float[] positions, float[] texCoords, float[] colors, uint[] i
 		float[][] datasets = [Positions, TexCoords, Colors];
 		int[] widths = [3, 2, 3];
 		int stride = widths.Sum();
-		Data = new float[datasets.Sum(data => data.Length)];
+		data = new float[datasets.Sum(data => data.Length)];
 		
 		for (int i = 0; i < NumVertices; i++)
 		for (int dataset = 0, offset = 0; dataset < datasets.Length; offset += widths[dataset], dataset++)
 		for (int x = 0; x < widths[dataset]; x++)
-			Data[i * stride + offset + x] = datasets[dataset][i * widths[dataset] + x];
+			data[i * stride + offset + x] = datasets[dataset][i * widths[dataset] + x];
 	}
 	
 	private static void BindData(int vertexBufferObject, float[] data)
@@ -122,15 +133,15 @@ public class Mesh(float[] positions, float[] texCoords, float[] colors, uint[] i
 	
 	public void Dispose()
 	{
-		HasBeenDisposed = true;
-		GL.DeleteBuffer(VertexBufferObject);
-		GL.DeleteVertexArray(VertexArrayObject);
-		GL.DeleteBuffer(ElementBufferObject);
+		hasBeenDisposed = true;
+		GL.DeleteBuffer(vertexBufferObject);
+		GL.DeleteVertexArray(vertexArrayObject);
+		GL.DeleteBuffer(elementBufferObject);
 	}
 	
 	~Mesh()
 	{
-		if (!HasBeenDisposed)
+		if (!hasBeenDisposed)
 			Console.WriteLine("GPU Resource leak! Did you forget to call Dispose()?");
 	}
 }
