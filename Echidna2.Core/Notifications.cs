@@ -5,6 +5,12 @@ public interface INotificationListener<in T>
 	public void Notify(T notification);
 }
 
+public interface INotificationHook<in T>
+{
+	public void PreNotify(T notification);
+	public void PostNotify(T notification);
+}
+
 public interface INotificationPropagator
 {
 	public void Notify<T>(T notification);

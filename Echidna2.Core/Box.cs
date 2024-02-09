@@ -1,6 +1,6 @@
 ﻿namespace Echidna2.Core;
 
-public partial class Box
+public partial class Box : INotificationHook<IDraw.Notification>
 {
 	public Box(
 		[Component] IHierarchy? hierarchy = null,
@@ -10,25 +10,18 @@ public partial class Box
 		this.rectTransform = rectTransform ?? new RectTransform(this.hierarchy);
 	}
 	
-	public void PreUpdate()
-	{
-		rectTransform.PreUpdate();
-	}
-	
-	public void Update(double deltaTime)
-	{
-		rectTransform.Update(deltaTime);
-	}
-	
 	public void AddChild(object child) => hierarchy.AddChild(child);
 	public bool RemoveChild(object child) => hierarchy.RemoveChild(child);
 	public IEnumerable<object> GetChildren() => hierarchy.GetChildren();
 	public void PrintTree(int depth = 0) => hierarchy.PrintTree(depth);
 	
-	public void Draw()
+	public void PreNotify(IDraw.Notification notification)
 	{
 		Console.WriteLine(new string('\u2502', (int)Position.X) + "\u250c" + new string('\u2500', (int)Size.X) + "\u2510");
-		rectTransform.Draw();
+	}
+	public void Notify<T>(T notification) => rectTransform.Notify(notification);
+	public void PostNotify(IDraw.Notification notification)
+	{
 		Console.WriteLine(new string('\u2502', (int)Position.X) + "\u2514" + new string('\u2500', (int)Size.X) + "\u2518");
 	}
 	

@@ -5,6 +5,7 @@ namespace Echidna2.Rendering;
 
 public partial class Rect(
 	[Component] IRectTransform? rectTransform = null)
+	: IDraw
 {
 	private Mesh mesh = new([
 		-1.0f, +0.0f, -1.0f,
@@ -37,7 +38,5 @@ public partial class Rect(
 		
 		GL.BindVertexArray(mesh.VertexArrayObject);
 		GL.DrawElements(PrimitiveType.Triangles, mesh.Indices.Length, DrawElementsType.UnsignedInt, 0);
-		
-		rectTransform.Draw();
 	}
 }

@@ -12,21 +12,11 @@ public partial class ReallyCoolPrefab
 		this.rectTransform = rectTransform ?? new RectTransform(this.hierarchy);
 	}
 	
-	public void PreUpdate()
-	{
-		hierarchy.PreUpdate();
-	}
-	
-	public void Update(double deltaTime)
-	{
-		hierarchy.Update(deltaTime);
-	}
-	
 	public void AddChild(object child) => hierarchy.AddChild(child);
 	public bool RemoveChild(object child) => hierarchy.RemoveChild(child);
 	public IEnumerable<object> GetChildren() => hierarchy.GetChildren();
 	public void PrintTree(int depth = 0) => hierarchy.PrintTree(depth);
-	public void Draw() => hierarchy.Draw();
+	public void Notify<T>(T notification) => rectTransform.Notify(notification);
 	
 	public IEnumerable<string> GetPropertyList()
 	{
