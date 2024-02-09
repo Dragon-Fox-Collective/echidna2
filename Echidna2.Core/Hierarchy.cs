@@ -8,9 +8,14 @@ public interface IHierarchy : IUpdate, IDraw
 	public void PrintTree(int depth = 0);
 }
 
-public class Hierarchy : IHierarchy
+public partial class Hierarchy : IHierarchy
 {
 	private List<object> children = [];
+	
+	public Hierarchy([Component] INamed? named = null)
+	{
+		this.named = named ?? new Named(GetType().Name);
+	}
 	
 	public void Update(double deltaTime)
 	{
@@ -30,7 +35,7 @@ public class Hierarchy : IHierarchy
 	
 	public void PrintTree(int depth = 0)
 	{
-		Console.WriteLine(new string(' ', depth * 2) + "\u2514 " + ToString());
+		Console.WriteLine(new string(' ', depth * 2) + (depth > 0 ? "\u2514 " : "") + named.Name);
 		foreach (IHierarchy child in children.OfType<IHierarchy>())
 			child.PrintTree(depth + 1);
 	}

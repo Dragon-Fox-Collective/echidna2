@@ -6,7 +6,7 @@ public partial class Box
 		[Component] IHierarchy? hierarchy = null,
 		[Component] IRectTransform? rectTransform = null)
 	{
-		this.hierarchy = hierarchy ?? new Hierarchy();
+		this.hierarchy = hierarchy ?? new Hierarchy(new Named(GetType().Name));
 		this.rectTransform = rectTransform ?? new RectTransform(this.hierarchy);
 	}
 	

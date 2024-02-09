@@ -22,6 +22,7 @@ world.AddChild(bigBox);
 bigBox.AddChild(new Box());
 
 world.PrintTree();
+world.Draw();
 
 // gameWindow.Load += world.Initialize;
 // gameWindow.Unload += world.Dispose;

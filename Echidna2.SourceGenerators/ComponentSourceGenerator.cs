@@ -52,9 +52,9 @@ public class ComponentSourceGenerator : IIncrementalGenerator
 		INamedTypeSymbol classType = symbol.ContainingType;
 		INamedTypeSymbol interfaceType = (INamedTypeSymbol)symbol.Type.WithNullableAnnotation(NullableAnnotation.NotAnnotated);
 		ITypeSymbol? interfaceImplementationType = interfaceType.GetAttributes().Where(implAttribute => implAttribute.AttributeClass?.Name == "ComponentImplementationAttribute").Select(implAttribute => implAttribute.AttributeClass?.TypeArguments[0]).FirstOrDefault();
-		IMethodSymbol? interfaceImplementationConstructor = interfaceImplementationType?.GetMembers(".ctor").OfType<IMethodSymbol>().FirstOrDefault();
+		IMethodSymbol? interfaceImplementationConstructor = interfaceImplementationType?.GetMembers(".ctor").OfType<IMethodSymbol>().FirstOrDefault(method => method.Parameters.All(parameter => parameter.IsOptional));
 		
-		string source = "";
+		string source = $"// {isPrimaryConstructorParameter} {interfaceImplementationConstructor}\n";
 		source += $"namespace {symbol.ContainingNamespace};\n";
 		source += "\n";
 		source += $"partial class {classType.Name} : {interfaceType}\n";
@@ -62,7 +62,7 @@ public class ComponentSourceGenerator : IIncrementalGenerator
 		
 		if (interfaceImplementationType is not null && interfaceImplementationConstructor is not null)
 		{
-			if (isPrimaryConstructorParameter && interfaceImplementationConstructor.Parameters.Length == 0)
+			if (isPrimaryConstructorParameter)
 				source += $"\tprivate {interfaceType} {symbol.Name} = {symbol.Name} ?? new {interfaceImplementationType}();\n\n";
 			else
 				source += $"\tprivate {interfaceType} {symbol.Name};\n\n";
@@ -76,7 +76,12 @@ public class ComponentSourceGenerator : IIncrementalGenerator
 					source += $"\t{method.DeclaredAccessibility.ToString().ToLower()} {method.ReturnType} {method.Name}({string.Join(", ", method.Parameters.Select(parameter => $"{(parameter.IsParams ? "params " : "")}{parameter.Type} {parameter.Name}"))}) => {symbol.Name}.{method.Name}({string.Join(", ", method.Parameters.Select(parameter => parameter.Name))});\n";
 					break;
 				case IPropertySymbol property:
-					source += $"\t{property.DeclaredAccessibility.ToString().ToLower()} {property.Type} {property.Name} => {symbol.Name}.{property.Name};\n";
+					if (property is { GetMethod: not null, SetMethod: not null })
+						source += $"\t{property.DeclaredAccessibility.ToString().ToLower()} {property.Type} {property.Name} {{ get => {symbol.Name}.{property.Name}; set => {symbol.Name}.{property.Name} = value; }}\n";
+					else if (property is { GetMethod: not null })
+						source += $"\t{property.DeclaredAccessibility.ToString().ToLower()} {property.Type} {property.Name} => {symbol.Name}.{property.Name};\n";
+					else if (property is { SetMethod: not null })
+						source += $"\t{property.DeclaredAccessibility.ToString().ToLower()} {property.Type} {property.Name} {{ set => {symbol.Name}.{property.Name} = value; }}\n";
 					break;
 			}
 		}
