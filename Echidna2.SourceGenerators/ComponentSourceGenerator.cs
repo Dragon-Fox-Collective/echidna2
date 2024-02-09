@@ -75,7 +75,7 @@ public class ComponentSourceGenerator : IIncrementalGenerator
 			switch (member)
 			{
 				case IMethodSymbol method:
-					source += $"\t{method.DeclaredAccessibility.ToString().ToLower()} {method.ReturnType} {method.Name}({string.Join(", ", method.Parameters.Select(parameter => $"{(parameter.IsParams ? "params " : "")}{parameter.Type} {parameter.Name}{(parameter.HasExplicitDefaultValue ? $" = {parameter.ExplicitDefaultValue}" : "")}"))}) => {parameterFieldName}.{method.Name}({string.Join(", ", method.Parameters.Select(parameter => parameter.Name))});\n";
+					source += $"\t{method.DeclaredAccessibility.ToString().ToLower()} {method.ReturnType} {method.Name}{(method.IsGenericMethod ? "<" + string.Join(", ", method.TypeArguments) + ">" : "")}({string.Join(", ", method.Parameters.Select(parameter => $"{(parameter.IsParams ? "params " : "")}{parameter.Type} {parameter.Name}{(parameter.HasExplicitDefaultValue ? $" = {parameter.ExplicitDefaultValue}" : "")}"))}) => {parameterFieldName}.{method.Name}({string.Join(", ", method.Parameters.Select(parameter => parameter.Name))});\n";
 					break;
 				case IPropertySymbol property:
 					if (property is { GetMethod: not null, SetMethod: not null })

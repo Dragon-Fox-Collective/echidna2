@@ -1,4 +1,6 @@
-﻿namespace Echidna2.Core;
+﻿using JetBrains.Annotations;
+
+namespace Echidna2.Core;
 
 [AttributeUsage(AttributeTargets.Interface)]
-public class ComponentImplementationAttribute<T> : Attribute;
+public class ComponentImplementationAttribute<[UsedImplicitly] T> : Attribute;

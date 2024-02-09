@@ -1,7 +1,7 @@
 ﻿namespace Echidna2.Core;
 
 [ComponentImplementation<Hierarchy>]
-public interface IHierarchy : IUpdate, IDraw
+public interface IHierarchy : INotificationPropagator
 {
 	public void AddChild(object child);
 	public bool RemoveChild(object child);
@@ -13,9 +13,7 @@ public partial class Hierarchy : IHierarchy
 {
 	private List<object> children = [];
 	
-	private bool isPreUpdating = false;
-	private bool isUpdating = false;
-	private bool isDrawing = false;
+	private bool isNotifying = false;
 	
 	public Hierarchy(
 		[Component] INamed? named = null)
@@ -23,37 +21,17 @@ public partial class Hierarchy : IHierarchy
 		this.named = named ?? new Named(GetType().Name);
 	}
 	
-	public void PreUpdate()
+	public void Notify<T>(T notification)
 	{
-		if (isPreUpdating) return;
-		isPreUpdating = true;
+		if (isNotifying) return;
+		isNotifying = true;
 		
-		foreach (IUpdate child in children.OfType<IUpdate>())
-			child.PreUpdate();
-
-		isPreUpdating = false;
-	}
-	
-	public void Update(double deltaTime)
-	{
-		if (isUpdating) return;
-		isUpdating = true;
+		foreach (INotificationListener<T> child in children.OfType<INotificationListener<T>>())
+			child.Notify(notification);
+		foreach (INotificationPropagator child in children.OfType<INotificationPropagator>())
+			child.Notify(notification);
 		
-		foreach (IUpdate child in children.OfType<IUpdate>())
-			child.Update(deltaTime);
-		
-		isUpdating = false;
-	}
-	
-	public void Draw()
-	{
-		if (isDrawing) return;
-		isDrawing = true;
-		
-		foreach (IDraw child in children.OfType<IDraw>())
-			child.Draw();
-
-		isDrawing = false;
+		isNotifying = false;
 	}
 	
 	public void AddChild(object child) => children.Add(child);
