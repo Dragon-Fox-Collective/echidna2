@@ -21,7 +21,7 @@ Box bigBox = new();
 world.AddChild(bigBox);
 bigBox.AddChild(new Box());
 
-Console.WriteLine(string.Join(", ", world.GetChildren()));
+world.PrintTree();
 
 // gameWindow.Load += world.Initialize;
 // gameWindow.Unload += world.Dispose;
@@ -30,4 +30,4 @@ gameWindow.RenderFrame += _ => world.Draw();
 // gameWindow.MouseMove += args => world.MouseMove(args.Position, args.Delta);
 // gameWindow.KeyDown += args => world.KeyDown(args.Key);
 // gameWindow.KeyUp += args => world.KeyUp(args.Key);
-gameWindow.Run();
+// gameWindow.Run();

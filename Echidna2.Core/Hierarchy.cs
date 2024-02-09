@@ -5,6 +5,7 @@ public interface IHierarchy : IUpdate, IDraw
 {
 	public void AddChild(object child);
 	public IEnumerable<object> GetChildren();
+	public void PrintTree(int depth = 0);
 }
 
 public class Hierarchy : IHierarchy
@@ -26,4 +27,11 @@ public class Hierarchy : IHierarchy
 	public void AddChild(object child) => children.Add(child);
 	
 	public IEnumerable<object> GetChildren() => children;
+	
+	public void PrintTree(int depth = 0)
+	{
+		Console.WriteLine(new string(' ', depth * 2) + "\u2514 " + ToString());
+		foreach (IHierarchy child in children.OfType<IHierarchy>())
+			child.PrintTree(depth + 1);
+	}
 }
