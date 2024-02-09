@@ -1,6 +1,6 @@
 ﻿namespace Echidna2.Core;
 
-public partial class Box : Entity
+public partial class Box
 {
 	public Box(
 		[Component] IHierarchy? hierarchy = null,
@@ -10,7 +10,7 @@ public partial class Box : Entity
 		this.rectTransform = rectTransform ?? new RectTransform(this.hierarchy);
 	}
 	
-	public override void Draw()
+	public void Draw()
 	{
 		Console.WriteLine("\u250c" + new string('\u2500', (int)Size.X) + "\u2510");
 		hierarchy.Draw();

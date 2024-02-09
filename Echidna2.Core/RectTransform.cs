@@ -8,7 +8,9 @@ public interface IRectTransform
 
 public partial class RectTransform(
 	[Component] IHierarchy? hierarchy = null)
-	: Entity, IRectTransform
+	: IRectTransform
 {
-	public Vector2 Size => ((hierarchy.GetChildren().FirstOrDefault() as IRectTransform)?.Size ?? Vector2.Zero) + Vector2.One * 2;
+	public Vector2 Size => MaxChildSize + Vector2.One * 2;
+	
+	private Vector2 MaxChildSize => hierarchy.GetChildren().OfType<IRectTransform>().Where(transform => transform != this).Aggregate(Vector2.Zero, (accumulate, transform) => new Vector2(Math.Max(accumulate.X, transform.Size.X), Math.Max(accumulate.Y, transform.Size.Y)));
 }

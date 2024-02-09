@@ -49,11 +49,11 @@ public class ComponentSourceGenerator : IIncrementalGenerator
 	private static string GenerateCode(IParameterSymbol symbol, ParameterSyntax node)
 	{
 		bool isPrimaryConstructorParameter = node.Parent?.Parent is ClassDeclarationSyntax;
-		ITypeSymbol classType = symbol.ContainingType;
-		ITypeSymbol interfaceType = symbol.Type.WithNullableAnnotation(NullableAnnotation.NotAnnotated);
+		INamedTypeSymbol classType = symbol.ContainingType;
+		INamedTypeSymbol interfaceType = (INamedTypeSymbol)symbol.Type.WithNullableAnnotation(NullableAnnotation.NotAnnotated);
 		ITypeSymbol? interfaceImplementationType = interfaceType.GetAttributes().Where(implAttribute => implAttribute.AttributeClass?.Name == "ComponentImplementationAttribute").Select(implAttribute => implAttribute.AttributeClass?.TypeArguments[0]).FirstOrDefault();
-		IMethodSymbol? interfaceImplementationConstructor = interfaceImplementationType?.GetMembers().OfType<IMethodSymbol>().FirstOrDefault(method => method.Name == ".ctor");
-
+		IMethodSymbol? interfaceImplementationConstructor = interfaceImplementationType?.GetMembers(".ctor").OfType<IMethodSymbol>().FirstOrDefault();
+		
 		string source = "";
 		source += $"namespace {symbol.ContainingNamespace};\n";
 		source += "\n";
@@ -68,12 +68,12 @@ public class ComponentSourceGenerator : IIncrementalGenerator
 				source += $"\tprivate {interfaceType} {symbol.Name};\n\n";
 		}
 		
-		foreach (ISymbol member in symbol.Type.GetMembers().Where(member => member.IsAbstract && !member.Name.StartsWith("get_")))
+		foreach (ISymbol member in GetAllUnimplementedInterfaceMembers(classType, interfaceType))
 		{
 			switch (member)
 			{
 				case IMethodSymbol method:
-					source += $"\t{method.DeclaredAccessibility.ToString().ToLower()} {method.ReturnType} {method.Name}({string.Join(", ", method.Parameters.Select(parameter => $"{parameter.Type} {parameter.Name}"))}) => {symbol.Name}.{method.Name}({string.Join(", ", method.Parameters.Select(parameter => parameter.Name))});\n";
+					source += $"\t{method.DeclaredAccessibility.ToString().ToLower()} {method.ReturnType} {method.Name}({string.Join(", ", method.Parameters.Select(parameter => $"{(parameter.IsParams ? "params " : "")}{parameter.Type} {parameter.Name}"))}) => {symbol.Name}.{method.Name}({string.Join(", ", method.Parameters.Select(parameter => parameter.Name))});\n";
 					break;
 				case IPropertySymbol property:
 					source += $"\t{property.DeclaredAccessibility.ToString().ToLower()} {property.Type} {property.Name} => {symbol.Name}.{property.Name};\n";
@@ -84,4 +84,7 @@ public class ComponentSourceGenerator : IIncrementalGenerator
 		source += "}";
 		return source;
 	}
+	
+	private static IEnumerable<ISymbol> GetAllUnimplementedInterfaceMembers(INamedTypeSymbol classType, INamedTypeSymbol interfaceType) =>
+		interfaceType.AllInterfaces.Append(interfaceType).SelectMany(inter => inter.GetMembers().Where(member => member.IsAbstract && !member.Name.StartsWith("get_") && !member.Name.StartsWith("set_") && !classType.GetMembers(member.Name).Any()));
 }

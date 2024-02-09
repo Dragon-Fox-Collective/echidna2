@@ -1,34 +1,32 @@
 ﻿using Echidna2;
 using Echidna2.Core;
-using OpenTK.Mathematics;
 using OpenTK.Windowing.Desktop;
 
 Console.WriteLine("Hello, World!");
 
-Vector2i size = (1080, 720);
 GameWindow gameWindow = new(
 	new GameWindowSettings(),
 	new NativeWindowSettings
 	{
-		ClientSize = size,
+		ClientSize = (1080, 720),
 	}
 );
 
-Hierarchy hierarchy = new();
-hierarchy.AddChild(new DebugEntity());
+Hierarchy world = new();
+world.AddChild(new DebugEntity());
 
-Box box = new();
-hierarchy.AddChild(box);
+world.AddChild(new Box());
 
-Box box1 = new();
-hierarchy.AddChild(box1);
-Box box2 = new();
-box1.AddChild(box2);
+Box bigBox = new();
+world.AddChild(bigBox);
+bigBox.AddChild(new Box());
+
+Console.WriteLine(string.Join(", ", world.GetChildren()));
 
 // gameWindow.Load += world.Initialize;
 // gameWindow.Unload += world.Dispose;
-gameWindow.UpdateFrame += args => hierarchy.Update(args.Time);
-gameWindow.RenderFrame += _ => hierarchy.Draw();
+gameWindow.UpdateFrame += args => world.Update(args.Time);
+gameWindow.RenderFrame += _ => world.Draw();
 // gameWindow.MouseMove += args => world.MouseMove(args.Position, args.Delta);
 // gameWindow.KeyDown += args => world.KeyDown(args.Key);
 // gameWindow.KeyUp += args => world.KeyUp(args.Key);

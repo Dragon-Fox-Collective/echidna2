@@ -1,29 +1,29 @@
 ﻿namespace Echidna2.Core;
 
 [ComponentImplementation<Hierarchy>]
-public interface IHierarchy : IEntity
+public interface IHierarchy : IUpdate, IDraw
 {
-	public void AddChild(IEntity entity);
-	public IEnumerable<IEntity> GetChildren();
+	public void AddChild(object child);
+	public IEnumerable<object> GetChildren();
 }
 
-public class Hierarchy : Entity, IHierarchy
+public class Hierarchy : IHierarchy
 {
-	private List<IEntity> entities = [];
+	private List<object> children = [];
 	
-	public override void Update(double deltaTime)
+	public void Update(double deltaTime)
 	{
-		foreach (IEntity entity in entities)
-			entity.Update(deltaTime);
+		foreach (IUpdate child in children.OfType<IUpdate>())
+			child.Update(deltaTime);
 	}
 	
-	public override void Draw()
+	public void Draw()
 	{
-		foreach (IEntity entity in entities)
-			entity.Draw();
+		foreach (IDraw child in children.OfType<IDraw>())
+			child.Draw();
 	}
 	
-	public void AddChild(IEntity entity) => entities.Add(entity);
+	public void AddChild(object child) => children.Add(child);
 	
-	public IEnumerable<IEntity> GetChildren() => entities;
+	public IEnumerable<object> GetChildren() => children;
 }

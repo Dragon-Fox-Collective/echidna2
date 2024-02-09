@@ -2,9 +2,9 @@
 
 namespace Echidna2;
 
-public class DebugEntity : Entity
+public class DebugEntity : IUpdate
 {
-	public override void Update(double deltaTime)
+	public void Update(double deltaTime)
 	{
 		Console.WriteLine($"Updating {deltaTime}");
 	}
