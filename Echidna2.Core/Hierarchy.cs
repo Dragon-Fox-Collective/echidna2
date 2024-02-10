@@ -1,7 +1,7 @@
 ﻿namespace Echidna2.Core;
 
 [ComponentImplementation<Hierarchy>]
-public interface IHierarchy : INotificationPropagator
+public interface IHierarchy : INamed, INotificationPropagator
 {
 	public void AddChild(object child);
 	public bool RemoveChild(object child);
@@ -39,9 +39,9 @@ public partial class Hierarchy : IHierarchy
 	}
 	
 	public void AddChild(object child) => children.Add(child);
-
+	
 	public bool RemoveChild(object child) => children.Remove(child);
-
+	
 	public IEnumerable<object> GetChildren() => children;
 	
 	public void PrintTree(int depth = 0)
@@ -58,5 +58,5 @@ public partial class Hierarchy : IHierarchy
 		}
 	}
 	
-	private static void PrintLayer(int depth, string name) => Console.WriteLine(new string(' ', depth * 2) + (depth > 0 ? "\u2514 " : "") + name);
+	private static void PrintLayer(int depth, string name) => Console.WriteLine((depth > 0 ? new string(' ', (depth - 1) * 2) + "\u2514 " : "") + name);
 }

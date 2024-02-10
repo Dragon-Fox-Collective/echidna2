@@ -67,5 +67,7 @@ public struct Vector3(double x, double y, double z) : IEquatable<Vector3>, IEnum
 	public static Vector3 Cross(Vector3 a, Vector3 b) => new(a.Y * b.Z - a.Z * b.Y, a.Z * b.X - a.X * b.Z, a.X * b.Y - a.Y * b.X);
 	public static double Dot(Vector3 a, Vector3 b) => a.X * b.X + a.Y * b.Y + a.Z * b.Z;
 	
+	public static Vector3 FromXY(Vector2 xy, double z = 0) => new(xy.X, xy.Y, z);
+	
 	public static Vector3 Sum<T>(IEnumerable<T> source, Func<T, Vector3> selector) => source.Aggregate(Zero, (current, item) => current + selector(item));
 }

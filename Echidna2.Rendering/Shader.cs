@@ -13,12 +13,10 @@ public class Shader(string vertexSource, string fragmentSource)
 	private bool hasBeenInitialized;
 	private bool hasBeenDisposed;
 	
-	public void Bind(Matrix4 viewMatrix, Vector2i cameraSize)
+	public void Bind(Matrix4 viewMatrix, Matrix4 projectionMatrix)
 	{
 		if (!hasBeenInitialized)
 			Initialize();
-		
-		Matrix4 projectionMatrix = Matrix4.CreateOrthographic(cameraSize.X, cameraSize.Y, 1.0f, 101);
 		
 		GL.UseProgram(handle);
 		SetMatrix4("view", viewMatrix);

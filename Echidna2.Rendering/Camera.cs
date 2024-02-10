@@ -5,6 +5,10 @@ namespace Echidna2.Rendering;
 
 public class Camera
 {
+	public Vector2i Size { get; set; }
+	public double FarClipPlane { get; set; } = 1000;
+	public double NearClipPlane { get; set; } = 0.1;
+	
 	public INotificationPropagator? World { get; set; }
 	
 	public void RenderPreUpdate()
@@ -17,8 +21,8 @@ public class Camera
 		World?.Notify(new IUpdate.Notification(deltaTime));
 	}
 	
-	public void Render(Vector2i screenSize)
+	public void Render()
 	{
-		World?.Notify(new IDraw.Notification(screenSize));
+		World?.Notify(new IDraw.Notification(this));
 	}
 }
