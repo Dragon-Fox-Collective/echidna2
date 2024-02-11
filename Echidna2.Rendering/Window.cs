@@ -1,4 +1,5 @@
-﻿using Echidna2.Core;
+﻿using Echidna.Mathematics;
+using Echidna2.Core;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Windowing.Desktop;
 
@@ -6,6 +7,9 @@ namespace Echidna2.Rendering;
 
 public class Window : IUpdate, IDraw
 {
+	public delegate void ResizeHandler(Vector2 size);
+	public event ResizeHandler? Resize;
+	
 	private GameWindow window;
 	
 	public Camera? Camera { get; set; }
@@ -33,6 +37,7 @@ public class Window : IUpdate, IDraw
 		{
 			GL.Viewport(0, 0, args.Size.X, args.Size.Y);
 			if (Camera is not null) Camera.Size = args.Size;
+			Resize?.Invoke(args.Size.ToVector2());
 		};
 	}
 	

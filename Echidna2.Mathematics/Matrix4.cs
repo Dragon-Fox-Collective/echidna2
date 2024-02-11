@@ -109,8 +109,8 @@ public struct Matrix4(
 	public static Matrix4 OrthographicProjection(double width, double height, double zNear, double zFar) => new(
 		2 / width, 0, 0, 0,
 		0, 2 / height, 0, 0,
-		0, 0, 1 / (zNear - zFar), 0,
-		0, 0, zNear / (zNear - zFar), 1);
+		0, 0, 1 / (zNear - zFar), zNear / (zNear - zFar),
+		0, 0, 0, 1);
 	
 	public static Matrix4 PerspectiveProjection(double fieldOfView, double aspectRatio, double zNear, double zFar)
 	{

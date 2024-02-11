@@ -12,7 +12,7 @@ Console.WriteLine("Hello, World!");
 
 Hierarchy world = new() { Name = "Root" };
 
-Rect rect1 = new() { Name = "Rect1", Size = (500, 300), IsGlobal = true, Position = (100, 0) };
+Rect rect1 = new() { Name = "Rect1", IsGlobal = true };
 world.AddChild(rect1);
 HorizontalLayout layout = new() { Name = "Layout", AnchorPreset = AnchorPreset.Full };
 rect1.AddChild(layout);
@@ -26,18 +26,20 @@ layout.AddChild(rect4);
 
 world.PrintTree();
 
-new Window(new GameWindow(
+Window window = new(new GameWindow(
 	new GameWindowSettings(),
 	new NativeWindowSettings
 	{
-		ClientSize = (1080, 720),
+		ClientSize = (1280, 720),
 		Title = "Echidna Engine",
 		Icon = CreateWindowIcon("Echidna.png"),
 	}
 ))
 {
 	Camera = new Camera { World = world }
-}.Run();
+};
+window.Resize += size => rect1.Size = size;
+window.Run();
 return;
 
 
