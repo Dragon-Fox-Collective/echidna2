@@ -3,6 +3,11 @@
 [ComponentImplementation<Hierarchy>]
 public interface IHierarchy : INamed, INotificationPropagator
 {
+	public delegate void ChildAddedHandler(object child);
+	public event ChildAddedHandler? ChildAdded;
+	public delegate void ChildRemovedHandler(object child);
+	public event ChildRemovedHandler? ChildRemoved;
+	
 	public void AddChild(object child);
 	public bool RemoveChild(object child);
 	public IEnumerable<object> GetChildren();
@@ -11,6 +16,9 @@ public interface IHierarchy : INamed, INotificationPropagator
 
 public partial class Hierarchy : IHierarchy
 {
+	public event IHierarchy.ChildAddedHandler? ChildAdded;
+	public event IHierarchy.ChildRemovedHandler? ChildRemoved;
+	
 	private List<object> children = [];
 	
 	private bool isNotifying = false;
@@ -40,9 +48,21 @@ public partial class Hierarchy : IHierarchy
 		isNotifying = false;
 	}
 	
-	public void AddChild(object child) => children.Add(child);
+	public void AddChild(object child)
+	{
+		children.Add(child);
+		ChildAdded?.Invoke(child);
+	}
 	
-	public bool RemoveChild(object child) => children.Remove(child);
+	public bool RemoveChild(object child)
+	{
+		if (children.Remove(child))
+		{
+			ChildRemoved?.Invoke(child);
+			return true;
+		}
+		return false;
+	}
 	
 	public IEnumerable<object> GetChildren() => children;
 	

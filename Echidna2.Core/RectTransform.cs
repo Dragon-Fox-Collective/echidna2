@@ -5,6 +5,9 @@ namespace Echidna2.Core;
 [ComponentImplementation<RectTransform>]
 public interface IRectTransform : IHierarchy, INotificationHook<IUpdate.Notification>
 {
+	public delegate void LocalTransformChangedHandler();
+	public event LocalTransformChangedHandler? LocalTransformChanged;
+	
 	public Vector2 Position { get; set; }
 	public Vector2 Size { get; set; }
 	
@@ -26,6 +29,11 @@ public interface IRectTransform : IHierarchy, INotificationHook<IUpdate.Notifica
 	public double AnchorOffsetRight { get; set; }
 	public double AnchorOffsetBottom { get; set; }
 	public double AnchorOffsetTop { get; set; }
+	
+	public LayoutSizing HorizontalSizing { get; set; }
+	public LayoutSizing VerticalSizing { get; set; }
+	
+	public bool IsGlobal { get; set; }
 }
 
 [Flags]
@@ -61,17 +69,59 @@ public enum AnchorPreset
 	Full = RightOne | TopOne,
 }
 
-public partial class RectTransform(
-	[Component] IHierarchy? hierarchy = null)
-	: IRectTransform
+public enum LayoutSizing
 {
-	public Vector2 Position { get; set; }
+	Stretch,
+	FitBegin,
+	FitBottom = FitBegin,
+	FitLeft = FitBegin,
+	FitCenter,
+	FitEnd,
+	FitTop = FitEnd,
+	FitRight = FitEnd,
+	Expand,
+}
+
+public partial class RectTransform : IRectTransform
+{
+	public event IRectTransform.LocalTransformChangedHandler? LocalTransformChanged;
+	
+	private Vector2 position;
+	public Vector2 Position
+	{
+		get => position;
+		set
+		{
+			position = value;
+			RecalculateLocalTransform();
+		}
+	}
 	public Vector2 Size { get; set; }
 	
-	public Matrix4 LocalTransform { get; set; } = Matrix4.Identity;
+	private Matrix4 localTransform = Matrix4.Identity;
+	public Matrix4 LocalTransform
+	{
+		get => localTransform;
+		set
+		{
+			localTransform = value;
+			LocalTransformChanged?.Invoke();
+			if (IsGlobal)
+				GlobalTransform = localTransform;
+		}
+	}
 	public Matrix4 GlobalTransform { get; set; } = Matrix4.Identity;
 	
-	public int Depth { get; set; }
+	private int depth;
+	public int Depth
+	{
+		get => depth;
+		set
+		{
+			depth = value;
+			RecalculateLocalTransform();
+		}
+	}
 	
 	public Vector2 MinimumSize { get; set; }
 	
@@ -123,6 +173,37 @@ public partial class RectTransform(
 	public double AnchorOffsetBottom { get; set; }
 	public double AnchorOffsetTop { get; set; }
 	
+	public LayoutSizing HorizontalSizing { get; set; }
+	public LayoutSizing VerticalSizing { get; set; }
+	
+	public bool IsGlobal { get; set; } = false;
+	
+	private List<(IRectTransform child, IRectTransform.LocalTransformChangedHandler handler)> localTransformChangedHandlers = [];
+	
+	public RectTransform(
+		[Component] IHierarchy? hierarchy = null)
+	{
+		this.hierarchy = hierarchy ?? new Hierarchy();
+		ChildAdded += (child) =>
+		{
+			if (child is IRectTransform rectTransform)
+			{
+				IRectTransform.LocalTransformChangedHandler handler = () => rectTransform.GlobalTransform = GlobalTransform * rectTransform.LocalTransform;
+				localTransformChangedHandlers.Add((rectTransform, handler));
+				rectTransform.LocalTransformChanged += handler;
+			}
+		};
+		ChildRemoved += (child) =>
+		{
+			if (child is IRectTransform rectTransform)
+			{
+				(IRectTransform child, IRectTransform.LocalTransformChangedHandler handler) tuple = localTransformChangedHandlers.First(tuple => tuple.child == rectTransform);
+				rectTransform.LocalTransformChanged -= tuple.handler;
+				localTransformChangedHandlers.Remove(tuple);
+			}
+		};
+	}
+	
 	public void OnPreNotify(IUpdate.Notification notification)
 	{
 		foreach (IRectTransform child in GetChildren().OfType<IRectTransform>())
@@ -134,9 +215,6 @@ public partial class RectTransform(
 			child.Size = new Vector2(Math.Max(right - left, child.MinimumSize.X), Math.Max(top - bottom, child.MinimumSize.Y));
 			child.Position = new Vector2(left + right, bottom + top) / 2;
 			child.Depth = Depth + 1;
-			child.LocalTransform = Matrix4.Translation(child.Position.WithZ(child.Depth));
-			child.GlobalTransform = GlobalTransform * child.LocalTransform;
-			// FIXME: Root doesn't get its transforms updated. A use for an event?
 			
 			// Console.WriteLine($"{child.AnchorPreset} {left} {right} {bottom} {top} {child.Size} {child.Position} {child.Depth}");
 		}
@@ -148,5 +226,10 @@ public partial class RectTransform(
 	public void OnPostPropagate(IUpdate.Notification notification)
 	{
 		
+	}
+	
+	private void RecalculateLocalTransform()
+	{
+		LocalTransform = Matrix4.Translation(Position.WithZ(Depth));
 	}
 }

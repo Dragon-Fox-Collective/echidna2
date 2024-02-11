@@ -85,6 +85,9 @@ public class ComponentSourceGenerator : IIncrementalGenerator
 					else if (property is { SetMethod: not null })
 						source += $"\t{property.DeclaredAccessibility.ToString().ToLower()} {property.Type} {property.Name} {{ set => {parameterFieldName}.{property.Name} = value; }}\n";
 					break;
+				case IEventSymbol @event:
+					source += $"\t{@event.DeclaredAccessibility.ToString().ToLower()} event {@event.Type} {@event.Name} {{ add => {parameterFieldName}.{@event.Name} += value; remove => {parameterFieldName}.{@event.Name} -= value; }}\n";
+					break;
 			}
 		}
 		
@@ -93,5 +96,5 @@ public class ComponentSourceGenerator : IIncrementalGenerator
 	}
 	
 	private static IEnumerable<ISymbol> GetAllUnimplementedInterfaceMembers(INamedTypeSymbol classType, INamedTypeSymbol interfaceType) =>
-		interfaceType.AllInterfaces.Append(interfaceType).SelectMany(inter => inter.GetMembers().Where(member => member.IsAbstract && !member.Name.StartsWith("get_") && !member.Name.StartsWith("set_") && !classType.GetMembers(member.Name).Any()));
+		interfaceType.AllInterfaces.Append(interfaceType).SelectMany(inter => inter.GetMembers().Where(member => member.IsAbstract && !member.Name.StartsWith("get_") && !member.Name.StartsWith("set_") && !member.Name.StartsWith("add_") && !member.Name.StartsWith("remove_") && !classType.GetMembers(member.Name).Any()));
 }

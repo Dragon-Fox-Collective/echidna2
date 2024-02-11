@@ -7,7 +7,15 @@ public partial class HorizontalLayout(
 	{
 		foreach (IRectTransform child in rectTransform.GetChildren().OfType<IRectTransform>())
 		{
-			child.AnchorPreset = AnchorPreset.TallLeft;
+			child.AnchorPreset = child.VerticalSizing switch
+			{
+				LayoutSizing.Stretch => AnchorPreset.TallLeft,
+				LayoutSizing.FitBegin => AnchorPreset.BottomLeft,
+				LayoutSizing.FitCenter => AnchorPreset.CenterLeft,
+				LayoutSizing.FitEnd => AnchorPreset.TopLeft,
+				LayoutSizing.Expand => AnchorPreset.TallLeft,
+				_ => throw new IndexOutOfRangeException()
+			};
 		}
 		
 		rectTransform.OnPreNotify(notification);
@@ -15,7 +23,16 @@ public partial class HorizontalLayout(
 		double x = -Size.X / 2;
 		foreach (IRectTransform child in rectTransform.GetChildren().OfType<IRectTransform>())
 		{
-			child.Position = child.Position with { X = x + child.MinimumSize.X / 2 };
+			child.Position = (
+				x + child.MinimumSize.X / 2,
+				child.VerticalSizing switch {
+					LayoutSizing.Stretch => 0,
+					LayoutSizing.FitBegin => -Size.Y / 2 + child.MinimumSize.Y / 2,
+					LayoutSizing.FitCenter => 0,
+					LayoutSizing.FitEnd => +Size.Y / 2 - child.MinimumSize.Y / 2,
+					LayoutSizing.Expand => 0,
+					_ => throw new IndexOutOfRangeException()
+				});
 			x += child.MinimumSize.X;
 		}
 	}
