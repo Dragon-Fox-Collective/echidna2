@@ -7,12 +7,12 @@ Console.WriteLine("Hello, World!");
 
 Hierarchy world = new() { Name = "Root" };
 
-Rect rect1 = new() { Name = "Rect1" };
+Rect rect1 = new() { Name = "Rect1", Size = (500, 500) };
 world.AddChild(rect1);
-Rect rect2 = new() { Name = "Rect2", AnchorPreset = AnchorPreset.TallLeft, AnchorOffsetRight = 100 };
-rect1.AddChild(rect2);
-Rect rect3 = new() { Name = "Rect3", AnchorPreset = AnchorPreset.WideBottom, AnchorOffsetTop = 100 };
-rect2.AddChild(rect3);
+HorizontalLayout layout = new() { Name = "Layout", AnchorPreset = AnchorPreset.Full };
+rect1.AddChild(layout);
+Rect rect2 = new() { Name = "Rect2", MinimumSize = (100, 100) };
+layout.AddChild(rect2);
 
 
 world.PrintTree();

@@ -34,6 +34,8 @@ public partial class Hierarchy : IHierarchy
 			child.OnPostNotify(notification);
 		foreach (INotificationPropagator child in children.OfType<INotificationPropagator>())
 			child.Notify(notification);
+		foreach (INotificationHook<T> child in children.OfType<INotificationHook<T>>())
+			child.OnPostPropagate(notification);
 		
 		isNotifying = false;
 	}

@@ -8,7 +8,12 @@ public interface IRectTransform : IHierarchy, INotificationHook<IUpdate.Notifica
 	public Vector2 Position { get; set; }
 	public Vector2 Size { get; set; }
 	
+	public Matrix4 LocalTransform { get; set; }
+	public Matrix4 GlobalTransform { get; set; }
+	
 	public int Depth { get; set; }
+	
+	public Vector2 MinimumSize { get; set; }
 	
 	public AnchorPreset AnchorPreset { get; set; }
 	
@@ -63,7 +68,12 @@ public partial class RectTransform(
 	public Vector2 Position { get; set; }
 	public Vector2 Size { get; set; }
 	
+	public Matrix4 LocalTransform { get; set; } = Matrix4.Identity;
+	public Matrix4 GlobalTransform { get; set; } = Matrix4.Identity;
+	
 	public int Depth { get; set; }
+	
+	public Vector2 MinimumSize { get; set; }
 	
 	private AnchorPreset anchorPreset;
 	public AnchorPreset AnchorPreset
@@ -121,12 +131,21 @@ public partial class RectTransform(
 			double right = Size.X * (child.AnchorRight - 0.5) + child.AnchorOffsetRight;
 			double bottom = Size.Y * (child.AnchorBottom - 0.5) + child.AnchorOffsetBottom;
 			double top = Size.Y * (child.AnchorTop - 0.5) + child.AnchorOffsetTop;
-			child.Position = Position + new Vector2(left + right, bottom + top) / 2;
-			child.Size = new Vector2(right - left, top - bottom);
+			child.Size = new Vector2(Math.Max(right - left, child.MinimumSize.X), Math.Max(top - bottom, child.MinimumSize.Y));
+			child.Position = new Vector2(left + right, bottom + top) / 2;
 			child.Depth = Depth + 1;
+			child.LocalTransform = Matrix4.Translation(child.Position.WithZ(child.Depth));
+			child.GlobalTransform = GlobalTransform * child.LocalTransform;
+			// FIXME: Root doesn't get its transforms updated. A use for an event?
+			
+			// Console.WriteLine($"{child.AnchorPreset} {left} {right} {bottom} {top} {child.Size} {child.Position} {child.Depth}");
 		}
 	}
 	public void OnPostNotify(IUpdate.Notification notification)
+	{
+		
+	}
+	public void OnPostPropagate(IUpdate.Notification notification)
 	{
 		
 	}

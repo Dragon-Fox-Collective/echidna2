@@ -1,6 +1,7 @@
 ﻿using System.Drawing;
+using Echidna.Mathematics;
 using OpenTK.Graphics.OpenGL4;
-using OpenTK.Mathematics;
+using Vector4 = OpenTK.Mathematics.Vector4;
 
 namespace Echidna2.Rendering;
 
@@ -76,8 +77,16 @@ public class Shader(string vertexSource, string fragmentSource)
 	public int GetUniformLocation(string uniformName) => uniforms[uniformName];
 	public void SetInt(string name, int data) => GL.Uniform1(GetUniformLocation(name), data);
 	public void SetFloat(string name, float data) => GL.Uniform1(GetUniformLocation(name), data);
-	public void SetMatrix4(string name, Matrix4 data) => GL.UniformMatrix4(GetUniformLocation(name), true, ref data);
-	public void SetMatrix4(int location, Matrix4 data) => GL.UniformMatrix4(location, true, ref data);
+	public void SetMatrix4(string name, Matrix4 data)
+	{
+		OpenTK.Mathematics.Matrix4 openTKData = data;
+		GL.UniformMatrix4(GetUniformLocation(name), false, ref openTKData);
+	}
+	public void SetMatrix4(int location, Matrix4 data)
+	{
+		OpenTK.Mathematics.Matrix4 openTKData = data;
+		GL.UniformMatrix4(location, false, ref openTKData);
+	}
 	public void SetVector3(string name, Vector3 data) => GL.Uniform3(GetUniformLocation(name), data);
 	public void SetVector4(string name, Vector4 data) => GL.Uniform4(GetUniformLocation(name), data);
 	public void SetVector4(string name, Color data) => GL.Uniform4(GetUniformLocation(name), data);

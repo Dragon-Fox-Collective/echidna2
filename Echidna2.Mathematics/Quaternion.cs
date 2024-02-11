@@ -4,7 +4,7 @@ using QuaternionOpenTK = OpenTK.Mathematics.Quaternion;
 
 namespace Echidna.Mathematics;
 
-public struct Quaternion(double x, double y, double z, double w)
+public struct Quaternion(double x, double y, double z, double w) : IEquatable<Quaternion>
 {
 	public double X = x;
 	public double Y = y;
@@ -13,44 +13,12 @@ public struct Quaternion(double x, double y, double z, double w)
 	
 	public Vector3 XYZ => new(X, Y, Z);
 	
+	public override int GetHashCode() => HashCode.Combine(X, Y, Z, W);
+	public override bool Equals(object? obj) => obj is Quaternion other && other == this;
+	public bool Equals(Quaternion other) => other == this;
 	public override string ToString() => $"<{X}, {Y}, {Z}, {W}>";
 	
-	public Quaternion(Vector3 xyz, double w) : this(xyz.X, xyz.Y, xyz.Z, w) { }
-	
-	public static Quaternion Identity => new(0, 0, 0, 1);
-	
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public static Vector3 operator *(Quaternion quaternion, Vector3 vector)
-	{
-		double x2 = quaternion.X + quaternion.X;
-		double y2 = quaternion.Y + quaternion.Y;
-		double z2 = quaternion.Z + quaternion.Z;
-		
-		double wx2 = quaternion.W * x2;
-		double wy2 = quaternion.W * y2;
-		double wz2 = quaternion.W * z2;
-		double xx2 = quaternion.X * x2;
-		double xy2 = quaternion.X * y2;
-		double xz2 = quaternion.X * z2;
-		double yy2 = quaternion.Y * y2;
-		double yz2 = quaternion.Y * z2;
-		double zz2 = quaternion.Z * z2;
-		
-		return new Vector3(
-			vector.X * (1.0f - yy2 - zz2) + vector.Y * (xy2 - wz2) + vector.Z * (xz2 + wy2),
-			vector.X * (xy2 + wz2) + vector.Y * (1.0f - xx2 - zz2) + vector.Z * (yz2 - wx2),
-			vector.X * (xz2 - wy2) + vector.Y * (yz2 + wx2) + vector.Z * (1.0f - xx2 - yy2)
-		);
-	}
-	
-	public static Quaternion operator *(Quaternion a, Quaternion b) => new(b.W * a.XYZ + a.W * b.XYZ + a.XYZ.Cross(b.XYZ), a.W * b.W - a.XYZ.Dot(b.XYZ));
-	
-	public static implicit operator QuaternionSystem(Quaternion quaternion) => new((float)quaternion.X, (float)quaternion.Y, (float)quaternion.Z, (float)quaternion.W);
-	public static implicit operator Quaternion(QuaternionSystem quaternion) => new(quaternion.X, quaternion.Y, quaternion.Z, quaternion.W);
-	public static implicit operator QuaternionOpenTK(Quaternion quaternion) => new((float)quaternion.X, (float)quaternion.Y, (float)quaternion.Z, (float)quaternion.W);
-	public static implicit operator Quaternion(QuaternionOpenTK quaternion) => new(quaternion.X, quaternion.Y, quaternion.Z, quaternion.W);
-	public static implicit operator Quaternion((float pitch, float roll, float yaw) eulers) => FromEulerAngles(eulers);
-	public static implicit operator Quaternion((float X, float Y, float Z, float W) quaternion) => new(quaternion.X, quaternion.Y, quaternion.Z, quaternion.W);
+	public static Quaternion FromVector(Vector3 xyz, double w) => new(xyz.X, xyz.Y, xyz.Z, w);
 	
 	public static Quaternion FromAxisAngle(Vector3 axis, float angle)
 	{
@@ -148,6 +116,42 @@ public struct Quaternion(double x, double y, double z, double w)
 		}
 	}
 	public static Quaternion LookAt(Vector3 position, Vector3 target, Vector3 up) => LookToward(target - position, up);
+	
+	public static readonly Quaternion Identity = new(0, 0, 0, 1);
+	
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public static Vector3 operator *(Quaternion quaternion, Vector3 vector)
+	{
+		double x2 = quaternion.X + quaternion.X;
+		double y2 = quaternion.Y + quaternion.Y;
+		double z2 = quaternion.Z + quaternion.Z;
+		
+		double wx2 = quaternion.W * x2;
+		double wy2 = quaternion.W * y2;
+		double wz2 = quaternion.W * z2;
+		double xx2 = quaternion.X * x2;
+		double xy2 = quaternion.X * y2;
+		double xz2 = quaternion.X * z2;
+		double yy2 = quaternion.Y * y2;
+		double yz2 = quaternion.Y * z2;
+		double zz2 = quaternion.Z * z2;
+		
+		return new Vector3(
+			vector.X * (1.0f - yy2 - zz2) + vector.Y * (xy2 - wz2) + vector.Z * (xz2 + wy2),
+			vector.X * (xy2 + wz2) + vector.Y * (1.0f - xx2 - zz2) + vector.Z * (yz2 - wx2),
+			vector.X * (xz2 - wy2) + vector.Y * (yz2 + wx2) + vector.Z * (1.0f - xx2 - yy2)
+		);
+	}
+	public static Quaternion operator *(Quaternion a, Quaternion b) => FromVector(b.W * a.XYZ + a.W * b.XYZ + a.XYZ.Cross(b.XYZ), a.W * b.W - a.XYZ.Dot(b.XYZ));
+	public static bool operator ==(Quaternion a, Quaternion b) => Math.Abs(a.X - b.X) < double.Epsilon && Math.Abs(a.Y - b.Y) < double.Epsilon && Math.Abs(a.Z - b.Z) < double.Epsilon && Math.Abs(a.W - b.W) < double.Epsilon;
+	public static bool operator !=(Quaternion a, Quaternion b) => !(a == b);
+	
+	public static implicit operator QuaternionSystem(Quaternion quaternion) => new((float)quaternion.X, (float)quaternion.Y, (float)quaternion.Z, (float)quaternion.W);
+	public static implicit operator Quaternion(QuaternionSystem quaternion) => new(quaternion.X, quaternion.Y, quaternion.Z, quaternion.W);
+	public static implicit operator QuaternionOpenTK(Quaternion quaternion) => new((float)quaternion.X, (float)quaternion.Y, (float)quaternion.Z, (float)quaternion.W);
+	public static implicit operator Quaternion(QuaternionOpenTK quaternion) => new(quaternion.X, quaternion.Y, quaternion.Z, quaternion.W);
+	public static implicit operator Quaternion((float pitch, float roll, float yaw) eulers) => FromEulerAngles(eulers);
+	public static implicit operator Quaternion((float X, float Y, float Z, float W) quaternion) => new(quaternion.X, quaternion.Y, quaternion.Z, quaternion.W);
 	
 	public static double DegreesToRadians(double angle) => angle / 180 * Math.PI;
 	public static double RadiansToDegrees(double angle) => angle * 180 / Math.PI;

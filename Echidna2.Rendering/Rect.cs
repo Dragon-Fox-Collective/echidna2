@@ -1,6 +1,5 @@
 ﻿using Echidna2.Core;
-using OpenTK.Mathematics;
-using Vector3 = Echidna.Mathematics.Vector3;
+using Echidna.Mathematics;
 
 namespace Echidna2.Rendering;
 
@@ -30,15 +29,12 @@ public partial class Rect(
 		2, 1, 3
 	], false);
 	
-	private static Matrix4 viewMatrix = Matrix4.CreateTranslation(Vector3.Out).Inverted();
-	
 	public void OnNotify(IDraw.Notification notification)
 	{
-		shader.Bind(viewMatrix, Matrix4.CreateOrthographic(notification.Camera.Size.X, notification.Camera.Size.Y, (float)notification.Camera.NearClipPlane, (float)notification.Camera.FarClipPlane));
-		shader.SetMatrix4(0,
-			Matrix4.CreateScale(Vector3.FromXY(rectTransform.Size / 2))
-			* Matrix4.CreateFromQuaternion(Quaternion.Identity)
-			* Matrix4.CreateTranslation(Vector3.FromXY(rectTransform.Position, rectTransform.Depth + 1 - notification.Camera.FarClipPlane)));
+		shader.Bind(
+			Matrix4.Translation(Vector3.Out * (notification.Camera.FarClipPlane - 1)).Inverted,
+			Matrix4.OrthographicProjection(notification.Camera.Size.X, notification.Camera.Size.Y, (float)notification.Camera.NearClipPlane, (float)notification.Camera.FarClipPlane));
+		shader.SetMatrix4(0, rectTransform.GlobalTransform * Matrix4.Scale(rectTransform.Size.WithZ(1) / 2));
 		mesh.Draw();
 	}
 }

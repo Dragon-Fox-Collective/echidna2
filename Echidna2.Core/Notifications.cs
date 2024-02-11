@@ -9,6 +9,7 @@ public interface INotificationHook<in T>
 {
 	public void OnPreNotify(T notification);
 	public void OnPostNotify(T notification);
+	public void OnPostPropagate(T notification);
 }
 
 public interface INotificationPropagator
