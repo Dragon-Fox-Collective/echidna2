@@ -1,4 +1,6 @@
-﻿namespace Echidna2.Core;
+﻿using Echidna2.Core;
+
+namespace Echidna2.Gui;
 
 public partial class VerticalLayout(
 	[Component] IRectTransform? rectTransform = null)

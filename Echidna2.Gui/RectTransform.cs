@@ -1,6 +1,7 @@
-﻿using Echidna.Mathematics;
+﻿using Echidna2.Mathematics;
+using Echidna2.Core;
 
-namespace Echidna2.Core;
+namespace Echidna2.Gui;
 
 [ComponentImplementation<RectTransform>]
 public interface IRectTransform : IHierarchy, INotificationHook<IUpdate.Notification>

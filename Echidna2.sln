@@ -10,6 +10,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Echidna2.Rendering", "Echid
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Echidna2.Mathematics", "Echidna2.Mathematics\Echidna2.Mathematics.csproj", "{EC7DB4A4-2433-4F1D-BC38-FCCB8C222B54}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Echidna2.Gui", "Echidna2.Gui\Echidna2.Gui.csproj", "{1F8910C6-63D7-45AD-828A-64FB26FDAEF4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,6 +38,10 @@ Global
 		{EC7DB4A4-2433-4F1D-BC38-FCCB8C222B54}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EC7DB4A4-2433-4F1D-BC38-FCCB8C222B54}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EC7DB4A4-2433-4F1D-BC38-FCCB8C222B54}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1F8910C6-63D7-45AD-828A-64FB26FDAEF4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1F8910C6-63D7-45AD-828A-64FB26FDAEF4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1F8910C6-63D7-45AD-828A-64FB26FDAEF4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1F8910C6-63D7-45AD-828A-64FB26FDAEF4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 	EndGlobalSection

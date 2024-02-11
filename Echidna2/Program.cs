@@ -1,4 +1,4 @@
-﻿using Echidna2.Core;
+﻿using Echidna2.Gui;
 using Echidna2.Rendering;
 using OpenTK.Windowing.Common.Input;
 using OpenTK.Windowing.Desktop;

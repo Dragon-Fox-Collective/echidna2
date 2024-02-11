@@ -1,5 +1,5 @@
 ﻿using System.Drawing;
-using Echidna.Mathematics;
+using Echidna2.Mathematics;
 using OpenTK.Graphics.OpenGL4;
 using Vector4 = OpenTK.Mathematics.Vector4;
 

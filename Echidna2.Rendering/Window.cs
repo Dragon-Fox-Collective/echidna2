@@ -1,4 +1,4 @@
-﻿using Echidna.Mathematics;
+﻿using Echidna2.Mathematics;
 using Echidna2.Core;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Windowing.Desktop;

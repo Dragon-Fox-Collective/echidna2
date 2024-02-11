@@ -1,7 +1,8 @@
 ﻿using Echidna2.Core;
-using Echidna.Mathematics;
+using Echidna2.Mathematics;
+using Echidna2.Rendering;
 
-namespace Echidna2.Rendering;
+namespace Echidna2.Gui;
 
 public partial class Rect(
 	[Component] IRectTransform? rectTransform = null)

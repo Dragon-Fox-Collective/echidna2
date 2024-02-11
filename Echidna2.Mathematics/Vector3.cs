@@ -2,7 +2,7 @@
 using Vector3System = System.Numerics.Vector3;
 using Vector3OpenTK = OpenTK.Mathematics.Vector3;
 
-namespace Echidna.Mathematics;
+namespace Echidna2.Mathematics;
 
 public struct Vector3(double x, double y, double z) : IEquatable<Vector3>, IEnumerable<double>
 {

@@ -2,7 +2,7 @@
 using QuaternionSystem = System.Numerics.Quaternion;
 using QuaternionOpenTK = OpenTK.Mathematics.Quaternion;
 
-namespace Echidna.Mathematics;
+namespace Echidna2.Mathematics;
 
 public struct Quaternion(double x, double y, double z, double w) : IEquatable<Quaternion>
 {

@@ -1,7 +1,7 @@
 ﻿using Matrix4System = System.Numerics.Matrix4x4;
 using Matrix4OpenTK = OpenTK.Mathematics.Matrix4;
 
-namespace Echidna.Mathematics;
+namespace Echidna2.Mathematics;
 
 public struct Matrix4(
 	double m11, double m12, double m13, double m14,
