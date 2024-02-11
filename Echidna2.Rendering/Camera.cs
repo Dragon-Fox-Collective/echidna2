@@ -13,16 +13,16 @@ public class Camera
 	
 	public void RenderPreUpdate()
 	{
-		World?.Notify(new IPreUpdate.Notification());
+		INotificationPropagator.NotifySingle(World, new IPreUpdate.Notification());
 	}
 	
 	public void RenderUpdate(double deltaTime)
 	{
-		World?.Notify(new IUpdate.Notification(deltaTime));
+		INotificationPropagator.NotifySingle(World, new IUpdate.Notification(deltaTime));
 	}
 	
 	public void Render()
 	{
-		World?.Notify(new IDraw.Notification(this));
+		INotificationPropagator.NotifySingle(World, new IDraw.Notification(this));
 	}
 }

@@ -19,9 +19,12 @@ public partial class VerticalLayout(
 		
 		rectTransform.OnPreNotify(notification);
 		
-		MinimumSize = (
-			GetChildren().OfType<IRectTransform>().Max(child => child.MinimumSize.X),
-			GetChildren().OfType<IRectTransform>().Sum(child => child.MinimumSize.Y));
+		if (GetChildren().OfType<IRectTransform>().Any())
+			MinimumSize = (
+				GetChildren().OfType<IRectTransform>().Max(child => child.MinimumSize.X),
+				GetChildren().OfType<IRectTransform>().Sum(child => child.MinimumSize.Y));
+		else
+			MinimumSize = (0, 0);
 		
 		double remainingHeight = Size.Y - MinimumSize.Y;
 		double totalExpand = GetChildren().OfType<IRectTransform>().Where(child => child.VerticalExpand).Sum(child => child.VerticalExpandFactor);

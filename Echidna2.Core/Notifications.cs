@@ -15,6 +15,19 @@ public interface INotificationHook<in T>
 public interface INotificationPropagator
 {
 	public void Notify<T>(T notification);
+	
+	public static void NotifySingle<T>(object? @object, T notification)
+	{
+		INotificationHook<T>? hook = @object as INotificationHook<T>;
+		INotificationListener<T>? listener = @object as INotificationListener<T>;
+		INotificationPropagator? propagator = @object as INotificationPropagator;
+		
+		hook?.OnPreNotify(notification);
+		listener?.OnNotify(notification);
+		hook?.OnPostNotify(notification);
+		propagator?.Notify(notification);
+		hook?.OnPostPropagate(notification);
+	}
 }
 
 public interface IPreUpdate : INotificationListener<IPreUpdate.Notification>

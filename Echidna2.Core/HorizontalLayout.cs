@@ -19,9 +19,12 @@ public partial class HorizontalLayout(
 		
 		rectTransform.OnPreNotify(notification);
 		
-		MinimumSize = (
-			GetChildren().OfType<IRectTransform>().Sum(child => child.MinimumSize.X),
-			GetChildren().OfType<IRectTransform>().Max(child => child.MinimumSize.Y));
+		if (GetChildren().OfType<IRectTransform>().Any())
+			MinimumSize = (
+				GetChildren().OfType<IRectTransform>().Sum(child => child.MinimumSize.X),
+				GetChildren().OfType<IRectTransform>().Max(child => child.MinimumSize.Y));
+		else
+			MinimumSize = (0, 0);
 		
 		double remainingWidth = Size.X - MinimumSize.X;
 		double totalExpand = GetChildren().OfType<IRectTransform>().Where(child => child.HorizontalExpand).Sum(child => child.HorizontalExpandFactor);

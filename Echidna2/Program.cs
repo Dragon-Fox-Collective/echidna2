@@ -10,21 +10,44 @@ using Image = SixLabors.ImageSharp.Image;
 Console.WriteLine("Hello, World!");
 
 
-Hierarchy world = new() { Name = "Root" };
-
-Rect rect1 = new() { Name = "Rect1", IsGlobal = true };
-world.AddChild(rect1);
-HorizontalLayout layout = new() { Name = "Layout", AnchorPreset = AnchorPreset.Full };
-rect1.AddChild(layout);
-Rect rect2 = new() { Name = "Rect2", MinimumSize = (100, 100), VerticalSizing = LayoutSizing.FitCenter };
-layout.AddChild(rect2);
-Rect rect3 = new() { Name = "Rect3", MinimumSize = (200, 150), VerticalSizing = LayoutSizing.FitBottom, HorizontalExpand = true };
-layout.AddChild(rect3);
-Rect rect4 = new() { Name = "Rect4", MinimumSize = (50, 50) };
-layout.AddChild(rect4);
+Rect root = new() { Name = "Root", IsGlobal = true };
 
 
-world.PrintTree();
+VerticalLayout toolbarBox = new() { Name = "ToolbarBox", AnchorPreset = AnchorPreset.Full };
+root.AddChild(toolbarBox);
+
+HorizontalLayout mainPanels = new() { Name = "MainPanels", VerticalExpand = true };
+toolbarBox.AddChild(mainPanels);
+
+VerticalLayout hierarchyBox = new() { Name = "HierarchyBox" };
+mainPanels.AddChild(hierarchyBox);
+
+Rect hierarchy = new() { Name = "Hierarchy", VerticalExpand = true, MinimumSize = (200, 0) };
+hierarchyBox.AddChild(hierarchy);
+
+Rect fileBrowser = new() { Name = "FileBrowser", VerticalExpand = true, MinimumSize = (200, 0) };
+hierarchyBox.AddChild(fileBrowser);
+
+VerticalLayout sceneBox = new() { Name = "SceneBox", HorizontalExpand = true };
+mainPanels.AddChild(sceneBox);
+
+Rect console = new() { Name = "Console", MinimumSize = (100, 200) };
+sceneBox.AddChild(console);
+
+Rect scene = new() { Name = "Scene", VerticalExpand = true };
+sceneBox.AddChild(scene);
+
+VerticalLayout inspectorBox = new() { Name = "InspectorBox" };
+mainPanels.AddChild(inspectorBox);
+
+Rect inspector = new() { Name = "Inspector", VerticalExpand = true, MinimumSize = (200, 0) };
+inspectorBox.AddChild(inspector);
+
+Rect toolbar = new() { Name = "Toolbar", MinimumSize = (0, 50) };
+toolbarBox.AddChild(toolbar);
+
+
+root.PrintTree();
 
 Window window = new(new GameWindow(
 	new GameWindowSettings(),
@@ -36,9 +59,9 @@ Window window = new(new GameWindow(
 	}
 ))
 {
-	Camera = new Camera { World = world }
+	Camera = new Camera { World = root }
 };
-window.Resize += size => rect1.Size = size;
+window.Resize += size => root.Size = size;
 window.Run();
 return;
 
