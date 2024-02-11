@@ -31,7 +31,11 @@ public interface IRectTransform : IHierarchy, INotificationHook<IUpdate.Notifica
 	public double AnchorOffsetTop { get; set; }
 	
 	public LayoutSizing HorizontalSizing { get; set; }
+	public bool HorizontalExpand { get; set; }
+	public double HorizontalExpandFactor { get; set; }
 	public LayoutSizing VerticalSizing { get; set; }
+	public bool VerticalExpand { get; set; }
+	public double VerticalExpandFactor { get; set; }
 	
 	public bool IsGlobal { get; set; }
 }
@@ -79,7 +83,6 @@ public enum LayoutSizing
 	FitEnd,
 	FitTop = FitEnd,
 	FitRight = FitEnd,
-	Expand,
 }
 
 public partial class RectTransform : IRectTransform
@@ -174,7 +177,11 @@ public partial class RectTransform : IRectTransform
 	public double AnchorOffsetTop { get; set; }
 	
 	public LayoutSizing HorizontalSizing { get; set; }
+	public bool HorizontalExpand { get; set; }
+	public double HorizontalExpandFactor { get; set; } = 1;
 	public LayoutSizing VerticalSizing { get; set; }
+	public bool VerticalExpand { get; set; }
+	public double VerticalExpandFactor { get; set; } = 1;
 	
 	public bool IsGlobal { get; set; } = false;
 	

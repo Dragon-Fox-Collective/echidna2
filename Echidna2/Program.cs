@@ -18,7 +18,7 @@ HorizontalLayout layout = new() { Name = "Layout", AnchorPreset = AnchorPreset.F
 rect1.AddChild(layout);
 Rect rect2 = new() { Name = "Rect2", MinimumSize = (100, 100), VerticalSizing = LayoutSizing.FitCenter };
 layout.AddChild(rect2);
-Rect rect3 = new() { Name = "Rect3", MinimumSize = (200, 150), VerticalSizing = LayoutSizing.FitBottom };
+Rect rect3 = new() { Name = "Rect3", MinimumSize = (200, 150), VerticalSizing = LayoutSizing.FitBottom, HorizontalExpand = true };
 layout.AddChild(rect3);
 Rect rect4 = new() { Name = "Rect4", MinimumSize = (50, 50) };
 layout.AddChild(rect4);
