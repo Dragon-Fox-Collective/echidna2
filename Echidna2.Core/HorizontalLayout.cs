@@ -5,7 +5,7 @@ public partial class HorizontalLayout(
 {
 	public void OnPreNotify(IUpdate.Notification notification)
 	{
-		foreach (IRectTransform child in rectTransform.GetChildren().OfType<IRectTransform>())
+		foreach (IRectTransform child in GetChildren().OfType<IRectTransform>())
 		{
 			child.AnchorPreset = child.VerticalSizing switch
 			{
@@ -20,14 +20,14 @@ public partial class HorizontalLayout(
 		rectTransform.OnPreNotify(notification);
 		
 		MinimumSize = (
-			rectTransform.GetChildren().OfType<IRectTransform>().Sum(child => child.MinimumSize.X),
-			rectTransform.GetChildren().OfType<IRectTransform>().Max(child => child.MinimumSize.Y));
+			GetChildren().OfType<IRectTransform>().Sum(child => child.MinimumSize.X),
+			GetChildren().OfType<IRectTransform>().Max(child => child.MinimumSize.Y));
 		
 		double remainingWidth = Size.X - MinimumSize.X;
-		double totalExpand = rectTransform.GetChildren().OfType<IRectTransform>().Where(child => child.HorizontalExpand).Sum(child => child.HorizontalExpandFactor);
+		double totalExpand = GetChildren().OfType<IRectTransform>().Where(child => child.HorizontalExpand).Sum(child => child.HorizontalExpandFactor);
 		
 		double x = -Size.X / 2;
-		foreach (IRectTransform child in rectTransform.GetChildren().OfType<IRectTransform>())
+		foreach (IRectTransform child in GetChildren().OfType<IRectTransform>())
 		{
 			double minimumWidth = child.MinimumSize.X;
 			double extraWidth = 0;
