@@ -1,6 +1,11 @@
 ﻿using Echidna2.Core;
 using Echidna2.Rendering;
+using OpenTK.Windowing.Common.Input;
 using OpenTK.Windowing.Desktop;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats;
+using SixLabors.ImageSharp.PixelFormats;
+using Image = SixLabors.ImageSharp.Image;
 
 Console.WriteLine("Hello, World!");
 
@@ -23,8 +28,23 @@ world.PrintTree();
 
 new Window(new GameWindow(
 	new GameWindowSettings(),
-	new NativeWindowSettings { ClientSize = (1080, 720) }
+	new NativeWindowSettings
+	{
+		ClientSize = (1080, 720),
+		Title = "Echidna Engine",
+		Icon = CreateWindowIcon("Echidna.png"),
+	}
 ))
 {
 	Camera = new Camera { World = world }
 }.Run();
+return;
+
+
+static WindowIcon CreateWindowIcon(string path)
+{
+	Image<Rgba32> image = (Image<Rgba32>)Image.Load(new DecoderOptions(), path);
+	Span<byte> imageBytes = stackalloc byte[32 * 32 * 4];
+	image.Frames.RootFrame.CopyPixelDataTo(imageBytes);
+	return new WindowIcon(new OpenTK.Windowing.Common.Input.Image(image.Width, image.Height, imageBytes.ToArray()));
+}
