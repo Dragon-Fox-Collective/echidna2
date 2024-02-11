@@ -73,6 +73,11 @@ public enum AnchorPreset
 	Full = RightOne | TopOne,
 }
 
+public static class AnchorPresetExtensions
+{
+	public static bool HasFlagFast(this AnchorPreset anchorPreset, AnchorPreset flag) => (anchorPreset & flag) == flag;
+}
+
 public enum LayoutSizing
 {
 	Stretch,
@@ -136,30 +141,30 @@ public partial class RectTransform : IRectTransform
 		{
 			anchorPreset = value;
 			
-			if (anchorPreset.HasFlag(AnchorPreset.LeftHalf))
+			if (anchorPreset.HasFlagFast(AnchorPreset.LeftHalf))
 				AnchorLeft = 0.5;
-			else if (anchorPreset.HasFlag(AnchorPreset.LeftOne))
+			else if (anchorPreset.HasFlagFast(AnchorPreset.LeftOne))
 				AnchorLeft = 1;
 			else
 				AnchorLeft = 0;
 			
-			if (anchorPreset.HasFlag(AnchorPreset.RightHalf))
+			if (anchorPreset.HasFlagFast(AnchorPreset.RightHalf))
 				AnchorRight = 0.5;
-			else if (anchorPreset.HasFlag(AnchorPreset.RightOne))
+			else if (anchorPreset.HasFlagFast(AnchorPreset.RightOne))
 				AnchorRight = 1;
 			else
 				AnchorRight = 0;
 			
-			if (anchorPreset.HasFlag(AnchorPreset.BottomHalf))
+			if (anchorPreset.HasFlagFast(AnchorPreset.BottomHalf))
 				AnchorBottom = 0.5;
-			else if (anchorPreset.HasFlag(AnchorPreset.BottomOne))
+			else if (anchorPreset.HasFlagFast(AnchorPreset.BottomOne))
 				AnchorBottom = 1;
 			else
 				AnchorBottom = 0;
 			
-			if (anchorPreset.HasFlag(AnchorPreset.TopHalf))
+			if (anchorPreset.HasFlagFast(AnchorPreset.TopHalf))
 				AnchorTop = 0.5;
-			else if (anchorPreset.HasFlag(AnchorPreset.TopOne))
+			else if (anchorPreset.HasFlagFast(AnchorPreset.TopOne))
 				AnchorTop = 1;
 			else
 				AnchorTop = 0;

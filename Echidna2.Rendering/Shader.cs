@@ -19,13 +19,6 @@ public class Shader(string vertexSource, string fragmentSource)
 		if (!hasBeenInitialized)
 			Initialize();
 		
-		Console.WriteLine($"source {vertexSource}");
-		
-		Console.WriteLine($"view {viewMatrix}");
-		Console.WriteLine($"projection {projectionMatrix}");
-		
-		Console.WriteLine($"view * projection {viewMatrix * projectionMatrix}");
-		
 		GL.UseProgram(handle);
 		SetMatrix4("view", viewMatrix);
 		SetMatrix4("projection", projectionMatrix);
