@@ -15,18 +15,8 @@ public class Camera
 	public Matrix4 ViewMatrix => Matrix4.Translation(Vector3.Out * (FarClipPlane - 1)).Inverted;
 	public Matrix4 ProjectionMatrix => Matrix4.OrthographicProjection(Size.X, Size.Y, (float)NearClipPlane, (float)FarClipPlane);
 	
-	public void RenderPreUpdate()
+	public void Notify<T>(T notification)
 	{
-		INotificationPropagator.NotifySingle(World, new IPreUpdate.Notification());
-	}
-	
-	public void RenderUpdate(double deltaTime)
-	{
-		INotificationPropagator.NotifySingle(World, new IUpdate.Notification(deltaTime));
-	}
-	
-	public void Render()
-	{
-		INotificationPropagator.NotifySingle(World, new IDraw.Notification(this));
+		INotificationPropagator.NotifySingle(World, notification);
 	}
 }

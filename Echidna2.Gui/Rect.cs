@@ -4,9 +4,7 @@ using Echidna2.Rendering;
 
 namespace Echidna2.Gui;
 
-public partial class Rect(
-	[Component] IRectTransform? rectTransform = null)
-	: INotificationListener<IDraw.Notification>
+public class Rect(RectTransform rectTransform) : INotificationListener<IDraw.Notification>
 {
 	private static Shader shader = new(ShaderNodeUtil.MainVertexShader, File.ReadAllText("uv-coords.frag"));
 	

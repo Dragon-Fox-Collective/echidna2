@@ -2,12 +2,11 @@
 
 namespace Echidna2.Gui;
 
-public partial class VerticalLayout(
-	[Component] IRectTransform? rectTransform = null)
+public class VerticalLayout(RectTransform rectTransform, Hierarchy hierarchy)
 {
 	public void OnPreNotify(IUpdate.Notification notification)
 	{
-		foreach (IRectTransform child in GetChildren().OfType<IRectTransform>())
+		foreach (RectTransform child in hierarchy.GetChildren().OfType<RectTransform>())
 		{
 			child.AnchorPreset = child.HorizontalSizing switch
 			{
@@ -19,20 +18,21 @@ public partial class VerticalLayout(
 			};
 		}
 		
-		rectTransform.OnPreNotify(notification);
+		// FIXME
+		// rectTransform.OnPreNotify(notification);
 		
-		if (GetChildren().OfType<IRectTransform>().Any())
-			MinimumSize = (
-				GetChildren().OfType<IRectTransform>().Max(child => child.MinimumSize.X),
-				GetChildren().OfType<IRectTransform>().Sum(child => child.MinimumSize.Y));
+		if (hierarchy.GetChildren().OfType<RectTransform>().Any())
+			rectTransform.MinimumSize = (
+				hierarchy.GetChildren().OfType<RectTransform>().Max(child => child.MinimumSize.X),
+				hierarchy.GetChildren().OfType<RectTransform>().Sum(child => child.MinimumSize.Y));
 		else
-			MinimumSize = (0, 0);
+			rectTransform.MinimumSize = (0, 0);
 		
-		double remainingHeight = Size.Y - MinimumSize.Y;
-		double totalExpand = GetChildren().OfType<IRectTransform>().Where(child => child.VerticalExpand).Sum(child => child.VerticalExpandFactor);
+		double remainingHeight = rectTransform.Size.Y - rectTransform.MinimumSize.Y;
+		double totalExpand = hierarchy.GetChildren().OfType<RectTransform>().Where(child => child.VerticalExpand).Sum(child => child.VerticalExpandFactor);
 		
-		double y = -Size.Y / 2;
-		foreach (IRectTransform child in GetChildren().OfType<IRectTransform>())
+		double y = -rectTransform.Size.Y / 2;
+		foreach (RectTransform child in hierarchy.GetChildren().OfType<RectTransform>())
 		{
 			double minimumHeight = child.MinimumSize.Y;
 			double extraHeight = 0;
@@ -41,9 +41,9 @@ public partial class VerticalLayout(
 			child.Position = (
 				child.HorizontalSizing switch {
 					LayoutSizing.Stretch => 0,
-					LayoutSizing.FitBegin => -Size.X / 2 + child.MinimumSize.X / 2,
+					LayoutSizing.FitBegin => -rectTransform.Size.X / 2 + child.MinimumSize.X / 2,
 					LayoutSizing.FitCenter => 0,
-					LayoutSizing.FitEnd => +Size.X / 2 - child.MinimumSize.X / 2,
+					LayoutSizing.FitEnd => +rectTransform.Size.X / 2 - child.MinimumSize.X / 2,
 					_ => throw new IndexOutOfRangeException()
 				},
 				child.VerticalSizing switch {

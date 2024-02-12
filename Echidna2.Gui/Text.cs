@@ -7,12 +7,13 @@ using StbSharp.MonoGame.Test;
 
 namespace Echidna2.Gui;
 
-public partial class Text(string text, Color color,
-	[Component] IRectTransform? rectTransform = null)
-	: INotificationListener<IDraw.Notification>
+public class Text(RectTransform rectTransform) : INotificationListener<IDraw.Notification>
 {
 	private static Font font = new("CascadiaCode.ttf");
 	private static Shader shader = new(ShaderNodeUtil.MainVertexShader, File.ReadAllText("font.frag"));
+	
+	public string TextString { get; set; } = "";
+	public Color Color { get; set; } = Color.White;
 	
 	public void OnNotify(IDraw.Notification notification)
 	{
@@ -26,14 +27,14 @@ public partial class Text(string text, Color color,
 		shader.SetInt("texture0", 0);
 		
 		Vector2 size = (
-			text.Select(c => font.FontResult!.Glyphs[c]).Sum(glyph => glyph.XAdvance),
-			text.Select(c => font.FontResult!.Glyphs[c]).Max(glyph => glyph.Height));
+			TextString.Select(c => font.FontResult!.Glyphs[c]).Sum(glyph => glyph.XAdvance),
+			TextString.Select(c => font.FontResult!.Glyphs[c]).Max(glyph => glyph.Height));
 		
 		shader.SetMatrix4(0, rectTransform.GlobalTransform * Matrix4.Translation(new Vector3(-size.X / 2, size.Y / 2, 0)));
-		shader.SetVector4("color", color);
+		shader.SetVector4("color", Color);
 		
 		float xStart = 0;
-		foreach (GlyphInfo glyph in text.Select(c => font.FontResult!.Glyphs[c]))
+		foreach (GlyphInfo glyph in TextString.Select(c => font.FontResult!.Glyphs[c]))
 		{
 			float x = xStart + glyph.XOffset;
 			float y = -glyph.Height - glyph.YOffset;

@@ -12,14 +12,14 @@ public class ComponentSourceGenerator : IIncrementalGenerator
 	{
 		IncrementalValueProvider<Compilation> compilationProvider = initContext.CompilationProvider;
 		IncrementalValuesProvider<ParameterSyntax> syntaxProvider = initContext.SyntaxProvider.CreateSyntaxProvider(
-			(node, _) => NodeIsPrimaryConstructorParameterWithComponentAttribute(node),
+			(node, _) => NodeIsConstructorParameterWithComponentAttribute(node),
 			(syntaxContext, _) => (ParameterSyntax)syntaxContext.Node
 		);
 		IncrementalValueProvider<(Compilation Left, ImmutableArray<ParameterSyntax> Right)> tuple = compilationProvider.Combine(syntaxProvider.Collect());
 		initContext.RegisterImplementationSourceOutput(tuple, (context, provider) => OnExecute(context, provider.Left, provider.Right));
 	}
 	
-	private static bool NodeIsPrimaryConstructorParameterWithComponentAttribute(SyntaxNode node)
+	private static bool NodeIsConstructorParameterWithComponentAttribute(SyntaxNode node)
 	{
 		if (node is not ParameterSyntax parameter) return false;
 		if (parameter.Parent?.Parent is not ClassDeclarationSyntax and not ConstructorDeclarationSyntax) return false;
@@ -29,7 +29,7 @@ public class ComponentSourceGenerator : IIncrementalGenerator
 	
 	private static void OnExecute(SourceProductionContext context, Compilation compilation, ImmutableArray<ParameterSyntax> nodes)
 	{
-		context.AddSource($"debug.g.cs", "// " + string.Join(", ", nodes).Replace("\n", "\n// "));
+		context.AddSource("debug.g.cs", "// " + string.Join(", ", nodes).Replace("\n", "\n// "));
 		foreach (ParameterSyntax node in nodes.Distinct())
 		{
 			if (context.CancellationToken.IsCancellationRequested)
@@ -71,30 +71,33 @@ public class ComponentSourceGenerator : IIncrementalGenerator
 		}
 		
 		foreach (ISymbol member in GetAllUnimplementedInterfaceMembers(classType, interfaceType))
-		{
-			switch (member)
-			{
-				case IMethodSymbol method:
-					source += $"\t{method.DeclaredAccessibility.ToString().ToLower()} {method.ReturnType} {method.Name}{(method.IsGenericMethod ? "<" + string.Join(", ", method.TypeArguments) + ">" : "")}({string.Join(", ", method.Parameters.Select(parameter => $"{(parameter.IsParams ? "params " : "")}{parameter.Type} {parameter.Name}{(parameter.HasExplicitDefaultValue ? $" = {parameter.ExplicitDefaultValue}" : "")}"))}) => {parameterFieldName}.{method.Name}({string.Join(", ", method.Parameters.Select(parameter => parameter.Name))});\n";
-					break;
-				case IPropertySymbol property:
-					if (property is { GetMethod: not null, SetMethod: not null })
-						source += $"\t{property.DeclaredAccessibility.ToString().ToLower()} {property.Type} {property.Name} {{ get => {parameterFieldName}.{property.Name}; set => {parameterFieldName}.{property.Name} = value; }}\n";
-					else if (property is { GetMethod: not null })
-						source += $"\t{property.DeclaredAccessibility.ToString().ToLower()} {property.Type} {property.Name} => {parameterFieldName}.{property.Name};\n";
-					else if (property is { SetMethod: not null })
-						source += $"\t{property.DeclaredAccessibility.ToString().ToLower()} {property.Type} {property.Name} {{ set => {parameterFieldName}.{property.Name} = value; }}\n";
-					break;
-				case IEventSymbol @event:
-					source += $"\t{@event.DeclaredAccessibility.ToString().ToLower()} event {@event.Type} {@event.Name} {{ add => {parameterFieldName}.{@event.Name} += value; remove => {parameterFieldName}.{@event.Name} -= value; }}\n";
-					break;
-			}
-		}
+			source += GetMemberDeclaration(member, parameterFieldName);
 		
 		source += "}";
 		return source;
 	}
 	
+	public static IEnumerable<ISymbol> GetAllUnimplementedMembers(INamedTypeSymbol classType, INamedTypeSymbol interfaceType) =>
+		interfaceType.GetMembers().Where(member => member.DeclaredAccessibility == Accessibility.Public && !member.Name.StartsWith("get_") && !member.Name.StartsWith("set_") && !member.Name.StartsWith("add_") && !member.Name.StartsWith("remove_") && !classType.GetMembers(member.Name).Any());
+	
 	private static IEnumerable<ISymbol> GetAllUnimplementedInterfaceMembers(INamedTypeSymbol classType, INamedTypeSymbol interfaceType) =>
-		interfaceType.AllInterfaces.Append(interfaceType).SelectMany(inter => inter.GetMembers().Where(member => member.IsAbstract && !member.Name.StartsWith("get_") && !member.Name.StartsWith("set_") && !member.Name.StartsWith("add_") && !member.Name.StartsWith("remove_") && !classType.GetMembers(member.Name).Any()));
+		interfaceType.AllInterfaces.Append(interfaceType).SelectMany(inter => GetAllUnimplementedMembers(classType, inter));
+	
+	public static string GetMemberDeclaration(ISymbol member, string propertyName) =>
+		member switch
+		{
+			IMethodSymbol method =>
+				$"\t{method.DeclaredAccessibility.ToString().ToLower()} {method.ReturnType} {method.Name}{(method.IsGenericMethod ? "<" + string.Join(", ", method.TypeArguments) + ">" : "")}({string.Join(", ", method.Parameters.Select(parameter => $"{(parameter.IsParams ? "params " : "")}{parameter.Type} {parameter.Name}{(parameter.HasExplicitDefaultValue ? $" = {parameter.ExplicitDefaultValue}" : "")}"))}) => {propertyName}.{method.Name}({string.Join(", ", method.Parameters.Select(parameter => parameter.Name))});\n",
+			IPropertySymbol { GetMethod: not null, SetMethod: not null } property =>
+				$"\t{property.DeclaredAccessibility.ToString().ToLower()} {property.Type} {property.Name} {{ get => {propertyName}.{property.Name}; set => {propertyName}.{property.Name} = value; }}\n",
+			IPropertySymbol { GetMethod: not null } property =>
+				$"\t{property.DeclaredAccessibility.ToString().ToLower()} {property.Type} {property.Name} => {propertyName}.{property.Name};\n",
+			IPropertySymbol { SetMethod: not null } property =>
+				$"\t{property.DeclaredAccessibility.ToString().ToLower()} {property.Type} {property.Name} {{ set => {propertyName}.{property.Name} = value; }}\n",
+			IEventSymbol @event =>
+				$"\t{@event.DeclaredAccessibility.ToString().ToLower()} event {@event.Type} {@event.Name} {{ add => {propertyName}.{@event.Name} += value; remove => {propertyName}.{@event.Name} -= value; }}\n",
+			IFieldSymbol field =>
+				$"\t{field.DeclaredAccessibility.ToString().ToLower()} {field.Type} {field.Name} {{ get => {propertyName}.{field.Name}; set => {propertyName}.{field.Name} = value; }}\n",
+			_ => ""
+		};
 }
