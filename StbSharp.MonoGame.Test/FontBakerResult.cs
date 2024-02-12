@@ -2,7 +2,7 @@ namespace StbSharp.MonoGame.Test;
 
 public class FontBakerResult
 {
-	public FontBakerResult(Dictionary<int, GlyphInfo> glyphs, byte[] bitmap, int width, int height)
+	public FontBakerResult(Dictionary<int, GlyphInfo>? glyphs, byte[]? bitmap, int width, int height)
 	{
 		if (glyphs == null)
 			throw new ArgumentNullException(nameof(glyphs));
@@ -27,7 +27,7 @@ public class FontBakerResult
 	
 	public Dictionary<int, GlyphInfo> Glyphs { get; }
 	
-	public byte[] Bitmap { get; }
+	public byte[]? Bitmap { get; }
 	
 	public int Width { get; }
 	
