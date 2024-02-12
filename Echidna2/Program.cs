@@ -5,6 +5,7 @@ using OpenTK.Windowing.Desktop;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats;
 using SixLabors.ImageSharp.PixelFormats;
+using Color = System.Drawing.Color;
 using Image = SixLabors.ImageSharp.Image;
 
 Console.WriteLine("Hello, World!");
@@ -45,6 +46,9 @@ inspectorBox.AddChild(inspector);
 
 Rect toolbar = new() { Name = "Toolbar", MinimumSize = (0, 50) };
 toolbarBox.AddChild(toolbar);
+
+Text toolbarText = new("This is a toolbar.", Color.White) { Name = "ToolbarText", AnchorPreset = AnchorPreset.Full };
+toolbar.AddChild(toolbarText);
 
 
 root.PrintTree();
