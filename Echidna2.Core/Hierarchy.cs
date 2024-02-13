@@ -1,6 +1,6 @@
 ﻿namespace Echidna2.Core;
 
-public class Hierarchy(INamed named) : INotificationPropagator
+public class Hierarchy : INotificationPropagator, IHasChildren
 {
 	public delegate void ChildAddedHandler(object child);
 	public event ChildAddedHandler? ChildAdded;
@@ -8,6 +8,7 @@ public class Hierarchy(INamed named) : INotificationPropagator
 	public event ChildRemovedHandler? ChildRemoved;
 	
 	private List<object> children = [];
+	public IEnumerable<object> Children => children;
 	
 	private bool isNotifying = false;
 	
@@ -34,22 +35,24 @@ public class Hierarchy(INamed named) : INotificationPropagator
 		}
 		return false;
 	}
+}
+
+public interface IHasChildren
+{
+	public IEnumerable<object> Children { get; }
 	
-	public IEnumerable<object> GetChildren() => children;
-	
-	public void PrintTree(int depth = 0)
+	public static void PrintTree(IHasChildren hierarchy, int depth = 0)
 	{
-		PrintLayer(depth, named.Name);
-		foreach (object child in children)
+		PrintLayer(depth, hierarchy);
+		foreach (object child in hierarchy.Children)
 		{
-			if (child is Hierarchy childHierarchy)
-				childHierarchy.PrintTree(depth + 1);
-			else if (child is INamed childNamed)
-				PrintLayer(depth + 1, childNamed.Name);
+			if (child is IHasChildren childHierarchy)
+				PrintTree(childHierarchy, depth + 1);
 			else
-				PrintLayer(depth + 1, child.GetType().Name);
+				PrintLayer(depth + 1, child);
 		}
 	}
 	
+	private static void PrintLayer(int depth, object obj) => PrintLayer(depth, obj is INamed named ? named.Name : obj.GetType().Name + " (no name)");
 	private static void PrintLayer(int depth, string name) => Console.WriteLine((depth > 0 ? string.Concat(Enumerable.Repeat("  ", depth - 1)) + "\u2514 " : "") + name);
 }

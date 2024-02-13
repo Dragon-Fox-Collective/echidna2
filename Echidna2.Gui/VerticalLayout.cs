@@ -2,11 +2,13 @@
 
 namespace Echidna2.Gui;
 
-public class VerticalLayout(RectTransform rectTransform, Hierarchy hierarchy)
+public class VerticalLayout(RectTransform rectTransform, Hierarchy hierarchy) : RectLayout(rectTransform, hierarchy)
 {
-	public void OnPreNotify(IUpdate.Notification notification)
+	public override void OnPreNotify(IUpdate.Notification notification)
 	{
-		foreach (RectTransform child in hierarchy.GetChildren().OfType<RectTransform>())
+		List<RectTransform> laidOutChildren = Hierarchy.Children.OfType<ICanBeLaidOut>().Select(child => child.RectTransform).ToList();
+		
+		foreach (RectTransform child in laidOutChildren)
 		{
 			child.AnchorPreset = child.HorizontalSizing switch
 			{
@@ -18,21 +20,22 @@ public class VerticalLayout(RectTransform rectTransform, Hierarchy hierarchy)
 			};
 		}
 		
-		// FIXME
-		// rectTransform.OnPreNotify(notification);
+		base.OnPreNotify(notification);
 		
-		if (hierarchy.GetChildren().OfType<RectTransform>().Any())
-			rectTransform.MinimumSize = (
-				hierarchy.GetChildren().OfType<RectTransform>().Max(child => child.MinimumSize.X),
-				hierarchy.GetChildren().OfType<RectTransform>().Sum(child => child.MinimumSize.Y));
+		if (laidOutChildren.Count != 0)
+			RectTransform.MinimumSize = (
+				laidOutChildren.Max(child => child.MinimumSize.X),
+				laidOutChildren.Sum(child => child.MinimumSize.Y));
 		else
-			rectTransform.MinimumSize = (0, 0);
+			RectTransform.MinimumSize = (0, 0);
 		
-		double remainingHeight = rectTransform.Size.Y - rectTransform.MinimumSize.Y;
-		double totalExpand = hierarchy.GetChildren().OfType<RectTransform>().Where(child => child.VerticalExpand).Sum(child => child.VerticalExpandFactor);
+		double remainingHeight = RectTransform.Size.Y - RectTransform.MinimumSize.Y;
+		double totalExpand = laidOutChildren.Where(child => child.VerticalExpand).Sum(child => child.VerticalExpandFactor);
 		
-		double y = -rectTransform.Size.Y / 2;
-		foreach (RectTransform child in hierarchy.GetChildren().OfType<RectTransform>())
+		Console.WriteLine($"{remainingHeight} {totalExpand}");
+		
+		double y = -RectTransform.Size.Y / 2;
+		foreach (RectTransform child in laidOutChildren)
 		{
 			double minimumHeight = child.MinimumSize.Y;
 			double extraHeight = 0;
@@ -41,9 +44,9 @@ public class VerticalLayout(RectTransform rectTransform, Hierarchy hierarchy)
 			child.Position = (
 				child.HorizontalSizing switch {
 					LayoutSizing.Stretch => 0,
-					LayoutSizing.FitBegin => -rectTransform.Size.X / 2 + child.MinimumSize.X / 2,
+					LayoutSizing.FitBegin => -RectTransform.Size.X / 2 + child.MinimumSize.X / 2,
 					LayoutSizing.FitCenter => 0,
-					LayoutSizing.FitEnd => +rectTransform.Size.X / 2 - child.MinimumSize.X / 2,
+					LayoutSizing.FitEnd => +RectTransform.Size.X / 2 - child.MinimumSize.X / 2,
 					_ => throw new IndexOutOfRangeException()
 				},
 				child.VerticalSizing switch {

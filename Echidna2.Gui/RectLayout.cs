@@ -7,24 +7,25 @@ public class RectLayout : INotificationHook<IUpdate.Notification>
 {
 	private List<(RectTransform child, RectTransform.LocalTransformChangedHandler handler)> localTransformChangedHandlers = [];
 	
-	private RectTransform rectTransform;
-	private Hierarchy hierarchy;
+	protected RectTransform RectTransform;
+	protected Hierarchy Hierarchy;
 	
 	public RectLayout(RectTransform rectTransform, Hierarchy hierarchy)
 	{
-		this.rectTransform = rectTransform;
-		this.hierarchy = hierarchy;
-		hierarchy.ChildAdded += child =>
+		RectTransform = rectTransform;
+		Hierarchy = hierarchy;
+		
+		Hierarchy.ChildAdded += child =>
 		{
 			if (child is ICanBeLaidOut childLaidOut)
 			{
 				RectTransform childRect = childLaidOut.RectTransform;
-				RectTransform.LocalTransformChangedHandler handler = () => childRect.GlobalTransform = rectTransform.GlobalTransform * childRect.LocalTransform;
+				RectTransform.LocalTransformChangedHandler handler = () => childRect.GlobalTransform = RectTransform.GlobalTransform * childRect.LocalTransform;
 				localTransformChangedHandlers.Add((childRect, handler));
 				childRect.LocalTransformChanged += handler;
 			}
 		};
-		hierarchy.ChildRemoved += child =>
+		Hierarchy.ChildRemoved += child =>
 		{
 			if (child is ICanBeLaidOut childLaidOut)
 			{
@@ -36,28 +37,27 @@ public class RectLayout : INotificationHook<IUpdate.Notification>
 		};
 	}
 	
-	public void OnPreNotify(IUpdate.Notification notification)
+	public virtual void OnPreNotify(IUpdate.Notification notification)
 	{
-		Console.WriteLine($"Laying out {string.Join(", ", hierarchy.GetChildren())}");
-		foreach (ICanBeLaidOut child in hierarchy.GetChildren().OfType<ICanBeLaidOut>())
+		foreach (ICanBeLaidOut child in Hierarchy.Children.OfType<ICanBeLaidOut>())
 		{
 			RectTransform childRect = child.RectTransform;
-			double left = rectTransform.Size.X * (childRect.AnchorLeft - 0.5) + childRect.AnchorOffsetLeft;
-			double right = rectTransform.Size.X * (childRect.AnchorRight - 0.5) + childRect.AnchorOffsetRight;
-			double bottom = rectTransform.Size.Y * (childRect.AnchorBottom - 0.5) + childRect.AnchorOffsetBottom;
-			double top = rectTransform.Size.Y * (childRect.AnchorTop - 0.5) + childRect.AnchorOffsetTop;
+			double left = RectTransform.Size.X * (childRect.AnchorLeft - 0.5) + childRect.AnchorOffsetLeft;
+			double right = RectTransform.Size.X * (childRect.AnchorRight - 0.5) + childRect.AnchorOffsetRight;
+			double bottom = RectTransform.Size.Y * (childRect.AnchorBottom - 0.5) + childRect.AnchorOffsetBottom;
+			double top = RectTransform.Size.Y * (childRect.AnchorTop - 0.5) + childRect.AnchorOffsetTop;
 			childRect.Size = new Vector2(Math.Max(right - left, childRect.MinimumSize.X), Math.Max(top - bottom, childRect.MinimumSize.Y));
 			childRect.Position = new Vector2(left + right, bottom + top) / 2;
-			childRect.Depth = rectTransform.Depth + 1;
+			childRect.Depth = RectTransform.Depth + 1;
 			
 			Console.WriteLine($"{childRect.AnchorPreset} {left} {right} {bottom} {top} {childRect.Size} {childRect.Position} {childRect.Depth}");
 		}
 	}
-	public void OnPostNotify(IUpdate.Notification notification)
+	public virtual void OnPostNotify(IUpdate.Notification notification)
 	{
 		
 	}
-	public void OnPostPropagate(IUpdate.Notification notification)
+	public virtual void OnPostPropagate(IUpdate.Notification notification)
 	{
 		
 	}

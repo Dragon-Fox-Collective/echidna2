@@ -15,78 +15,47 @@ Console.WriteLine("Hello, World!");
 
 RectWithHierarchy root = new() { Name = "Root", IsGlobal = true };
 
-RectWithHierarchy someRect = new() { Name = "Some Rect", AnchorPreset = AnchorPreset.Center, MinimumSize = (200, 200) };
-root.PrefabChildren.AddChild(someRect);
+VLayoutWithHierarchy toolbarBox = new() { Name = "Toolbar Box", AnchorPreset = AnchorPreset.Full };
+root.PrefabChildren.AddChild(toolbarBox);
+
+HLayoutWithHierarchy mainPanels = new() { Name = "Main Panels", VerticalExpand = true };
+toolbarBox.PrefabChildren.AddChild(mainPanels);
+
+VLayoutWithHierarchy hierarchyBox = new() { Name = "Hierarchy Box" };
+mainPanels.PrefabChildren.AddChild(hierarchyBox);
+
+RectWithHierarchy hierarchy = new() { Name = "Hierarchy", VerticalExpand = true, MinimumSize = (200, 0) };
+hierarchyBox.PrefabChildren.AddChild(hierarchy);
+
+RectWithHierarchy fileBrowser = new() { Name = "File Browser", VerticalExpand = true, MinimumSize = (200, 0) };
+hierarchyBox.PrefabChildren.AddChild(fileBrowser);
+
+VLayoutWithHierarchy sceneBox = new() { Name = "Scene Box", HorizontalExpand = true };
+mainPanels.PrefabChildren.AddChild(sceneBox);
+
+RectWithHierarchy console = new() { Name = "Console", MinimumSize = (100, 200) };
+sceneBox.PrefabChildren.AddChild(console);
+
+RectWithHierarchy scene = new() { Name = "Scene", VerticalExpand = true };
+sceneBox.PrefabChildren.AddChild(scene);
+
+VLayoutWithHierarchy inspectorBox = new() { Name = "Inspector Box" };
+mainPanels.PrefabChildren.AddChild(inspectorBox);
+
+RectWithHierarchy inspector = new() { Name = "Inspector", VerticalExpand = true, MinimumSize = (200, 0) };
+inspectorBox.PrefabChildren.AddChild(inspector);
+
+RectButton inspectorButton = new() { Name = "Inspector Button", AnchorPreset = AnchorPreset.Center, MinimumSize = (150, 50) };
+inspector.PrefabChildren.AddChild(inspectorButton);
+
+RectWithHierarchy toolbar = new() { Name = "Toolbar", MinimumSize = (0, 50) };
+toolbarBox.PrefabChildren.AddChild(toolbar);
+
+TextRect toolbarText = new() { Name = "Toolbar Text", TextString = "This is a toolbar.", AnchorPreset = AnchorPreset.Full };
+toolbar.PrefabChildren.AddChild(toolbarText);
 
 
-// VerticalLayout toolbarBox = new() { Name = "Toolbar Box", AnchorPreset = AnchorPreset.Full };
-// root.Hierarchy.AddChild(toolbarBox);
-//
-// HorizontalLayout mainPanels = new() { Name = "Main Panels", VerticalExpand = true };
-// toolbarBox.AddChild(mainPanels);
-//
-// VerticalLayout hierarchyBox = new() { Name = "Hierarchy Box" };
-// mainPanels.AddChild(hierarchyBox);
-//
-// Rect hierarchy = new() { Name = "Hierarchy", VerticalExpand = true, MinimumSize = (200, 0) };
-// hierarchyBox.AddChild(hierarchy);
-//
-// Rect fileBrowser = new() { Name = "File Browser", VerticalExpand = true, MinimumSize = (200, 0) };
-// hierarchyBox.AddChild(fileBrowser);
-//
-// VerticalLayout sceneBox = new() { Name = "Scene Box", HorizontalExpand = true };
-// mainPanels.AddChild(sceneBox);
-//
-// Rect console = new() { Name = "Console", MinimumSize = (100, 200) };
-// sceneBox.AddChild(console);
-//
-// Rect scene = new() { Name = "Scene", VerticalExpand = true };
-// sceneBox.AddChild(scene);
-//
-// VerticalLayout inspectorBox = new() { Name = "Inspector Box" };
-// mainPanels.AddChild(inspectorBox);
-//
-// Rect inspector = new() { Name = "Inspector", VerticalExpand = true, MinimumSize = (200, 0) };
-// inspectorBox.AddChild(inspector);
-//
-// Rect inspectorButtonRect = new() { Name = "Inspector Button", AnchorPreset = AnchorPreset.Center, MinimumSize = (150, 50) };
-// Button inspectorButton = new(rectTransform: inspectorButtonRect);
-// inspector.AddChild(inspectorButton);
-//
-// Rect toolbar = new() { Name = "Toolbar", MinimumSize = (0, 50) };
-// toolbarBox.AddChild(toolbar);
-//
-// Text toolbarText = new() { Name = "Toolbar Text", TextString = "This is a toolbar.", AnchorPreset = AnchorPreset.Full };
-// toolbar.AddChild(toolbarText);
-
-
-
-
-// PrefabRoot prefabRoot = new();
-// RectTransform prefabTransform = new();
-// prefabRoot.Hierarchy.AddChild(prefabTransform);
-// Button prefabButton = new(rectTransform: prefabTransform);
-// prefabRoot.Hierarchy.AddChild(prefabButton);
-//
-// Hierarchy prefabProperties = new();
-// Rect prefabBackground = new(rectTransform: prefabTransform);
-// prefabProperties.AddChild(prefabBackground);
-// RectLayout prefabLayout = new(
-// 	rectTransform: prefabTransform,
-// 	hierarchy: prefabRoot.Hierarchy);
-// prefabProperties.AddChild(prefabLayout);
-//
-//
-//
-//
-// Prefab buttonPrefab = prefabRoot.Instantiate();
-// root.AddChild(buttonPrefab);
-// Text buttonText = new() { TextString = "Button" };
-// buttonPrefab.Hierarchy.AddChild(buttonText);
-
-
-
-root.PrefabChildren.PrintTree();
+IHasChildren.PrintTree(root);
 
 Window window = new(new GameWindow(
 	new GameWindowSettings(),
@@ -114,7 +83,7 @@ static WindowIcon CreateWindowIcon(string path)
 }
 
 
-partial class RectWithHierarchy : INotificationPropagator, ICanBeLaidOut
+partial class RectWithHierarchy : INotificationPropagator, ICanBeLaidOut, INamed, IHasChildren
 {
 	[ExposeMembersInClass] public Named Named { get; set; }
 	[ExposeMembersInClass] public RectTransform RectTransform { get; set; }
@@ -122,10 +91,12 @@ partial class RectWithHierarchy : INotificationPropagator, ICanBeLaidOut
 	public Rect Rect { get; set; }
 	public Hierarchy PrefabChildren { get; set; }
 	
+	public IEnumerable<object> Children => PrefabChildren.Children;
+	
 	public RectWithHierarchy()
 	{
 		Named = new Named("Rect With Hierarchy");
-		PrefabChildren = new Hierarchy(Named);
+		PrefabChildren = new Hierarchy();
 		RectTransform = new RectTransform();
 		RectLayout = new RectLayout(RectTransform, PrefabChildren);
 		Rect = new Rect(RectTransform);
@@ -133,7 +104,102 @@ partial class RectWithHierarchy : INotificationPropagator, ICanBeLaidOut
 	
 	public void Notify<T>(T notification)
 	{
-		Console.WriteLine($"{Name}   {notification}");
 		INotificationPropagator.Notify(notification, Rect, RectLayout, PrefabChildren);
+	}
+}
+
+
+partial class RectButton : INotificationPropagator, ICanBeLaidOut, INamed, IHasChildren
+{
+	[ExposeMembersInClass] public Named Named { get; set; }
+	[ExposeMembersInClass] public RectTransform RectTransform { get; set; }
+	public RectLayout RectLayout { get; set; }
+	public Rect Rect { get; set; }
+	public Hierarchy PrefabChildren { get; set; }
+	public Button Button { get; set; }
+	
+	public IEnumerable<object> Children => PrefabChildren.Children;
+	
+	public RectButton()
+	{
+		Named = new Named("Rect With Hierarchy");
+		PrefabChildren = new Hierarchy();
+		RectTransform = new RectTransform();
+		RectLayout = new RectLayout(RectTransform, PrefabChildren);
+		Rect = new Rect(RectTransform);
+		Button = new Button(RectTransform);
+	}
+	
+	public void Notify<T>(T notification)
+	{
+		INotificationPropagator.Notify(notification, Rect, Button, RectLayout, PrefabChildren);
+	}
+}
+
+
+partial class HLayoutWithHierarchy : INotificationPropagator, ICanBeLaidOut, INamed, IHasChildren
+{
+	[ExposeMembersInClass] public Named Named { get; set; }
+	[ExposeMembersInClass] public RectTransform RectTransform { get; set; }
+	public HorizontalLayout Layout { get; set; }
+	public Hierarchy PrefabChildren { get; set; }
+	
+	public IEnumerable<object> Children => PrefabChildren.Children;
+	
+	public HLayoutWithHierarchy()
+	{
+		Named = new Named("Horizontal Layout");
+		PrefabChildren = new Hierarchy();
+		RectTransform = new RectTransform();
+		Layout = new HorizontalLayout(RectTransform, PrefabChildren);
+	}
+	
+	public void Notify<T>(T notification)
+	{
+		INotificationPropagator.Notify(notification, Layout, PrefabChildren);
+	}
+}
+
+
+partial class VLayoutWithHierarchy : INotificationPropagator, ICanBeLaidOut, INamed, IHasChildren
+{
+	[ExposeMembersInClass] public Named Named { get; set; }
+	[ExposeMembersInClass] public RectTransform RectTransform { get; set; }
+	public VerticalLayout Layout { get; set; }
+	public Hierarchy PrefabChildren { get; set; }
+	
+	public IEnumerable<object> Children => PrefabChildren.Children;
+	
+	public VLayoutWithHierarchy()
+	{
+		Named = new Named("Vertical Layout");
+		PrefabChildren = new Hierarchy();
+		RectTransform = new RectTransform();
+		Layout = new VerticalLayout(RectTransform, PrefabChildren);
+	}
+	
+	public void Notify<T>(T notification)
+	{
+		INotificationPropagator.Notify(notification, Layout, PrefabChildren);
+	}
+}
+
+
+partial class TextRect : INotificationPropagator, ICanBeLaidOut, INamed
+{
+	[ExposeMembersInClass] public Named Named { get; set; }
+	[ExposeMembersInClass] public RectTransform RectTransform { get; set; }
+	[ExposeMembersInClass] public Text Text { get; set; }
+	
+	public TextRect()
+	{
+		Named = new Named("Text");
+		RectTransform = new RectTransform();
+		Text = new Text(RectTransform);
+	}
+	
+	public void Notify<T>(T notification)
+	{
+		INotificationPropagator.Notify(notification, Text);
 	}
 }
