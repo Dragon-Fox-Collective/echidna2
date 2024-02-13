@@ -12,7 +12,6 @@ Console.WriteLine("Hello, World!");
 
 
 
-
 RectWithHierarchy root = new() { Name = "Root", IsGlobal = true };
 
 VLayoutWithHierarchy toolbarBox = new() { Name = "Toolbar Box", AnchorPreset = AnchorPreset.Full };
@@ -55,6 +54,7 @@ TextRect toolbarText = new() { Name = "Toolbar Text", TextString = "This is a to
 toolbar.PrefabChildren.AddChild(toolbarText);
 
 
+
 IHasChildren.PrintTree(root);
 
 Window window = new(new GameWindow(
@@ -72,6 +72,7 @@ Window window = new(new GameWindow(
 window.Resize += size => root.Size = size;
 window.Run();
 return;
+
 
 
 static WindowIcon CreateWindowIcon(string path)

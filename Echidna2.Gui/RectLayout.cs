@@ -50,7 +50,7 @@ public class RectLayout : INotificationHook<IUpdate.Notification>
 			childRect.Position = new Vector2(left + right, bottom + top) / 2;
 			childRect.Depth = RectTransform.Depth + 1;
 			
-			Console.WriteLine($"{childRect.AnchorPreset} {left} {right} {bottom} {top} {childRect.Size} {childRect.Position} {childRect.Depth}");
+			// Console.WriteLine($"{childRect.AnchorPreset} {left} {right} {bottom} {top} {childRect.Size} {childRect.Position} {childRect.Depth}");
 		}
 	}
 	public virtual void OnPostNotify(IUpdate.Notification notification)

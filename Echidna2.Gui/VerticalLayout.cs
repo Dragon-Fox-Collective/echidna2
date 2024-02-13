@@ -32,8 +32,6 @@ public class VerticalLayout(RectTransform rectTransform, Hierarchy hierarchy) : 
 		double remainingHeight = RectTransform.Size.Y - RectTransform.MinimumSize.Y;
 		double totalExpand = laidOutChildren.Where(child => child.VerticalExpand).Sum(child => child.VerticalExpandFactor);
 		
-		Console.WriteLine($"{remainingHeight} {totalExpand}");
-		
 		double y = -RectTransform.Size.Y / 2;
 		foreach (RectTransform child in laidOutChildren)
 		{
