@@ -58,6 +58,10 @@ public class PrefabOfSourceGenerator : IIncrementalGenerator
 		source += $"partial class {className}({prefabType} {propertyName})\n";
 		source += "{\n";
 		
+		// if (prefabType.AllInterfaces.Any(@interface => @interface.Name == "IInstantiatable")) // doesn't work
+		if (prefabType.GetMembers("Instantiate").Any())
+			source += $"\tprivate {prefabType} {propertyName} = {propertyName}.Instantiate();\n";
+		
 		foreach (ISymbol member in ExposeMembersInClassPropertySourceGenerator.GetAllUnimplementedMembersExposeRecursive(symbol, prefabType))
 			source += ComponentSourceGenerator.GetMemberDeclaration(member, propertyName);
 		
