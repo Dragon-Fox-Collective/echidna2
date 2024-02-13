@@ -1,6 +1,6 @@
 ﻿namespace Echidna2.Core;
 
-public class Hierarchy(Named named) : INotificationPropagator
+public class Hierarchy(INamed named) : INotificationPropagator
 {
 	public delegate void ChildAddedHandler(object child);
 	public event ChildAddedHandler? ChildAdded;
@@ -15,18 +15,7 @@ public class Hierarchy(Named named) : INotificationPropagator
 	{
 		if (isNotifying) return;
 		isNotifying = true;
-		
-		foreach (INotificationHook<T> child in children.OfType<INotificationHook<T>>())
-			child.OnPreNotify(notification);
-		foreach (INotificationListener<T> child in children.OfType<INotificationListener<T>>())
-			child.OnNotify(notification);
-		foreach (INotificationHook<T> child in children.OfType<INotificationHook<T>>())
-			child.OnPostNotify(notification);
-		foreach (INotificationPropagator child in children.OfType<INotificationPropagator>())
-			child.Notify(notification);
-		foreach (INotificationHook<T> child in children.OfType<INotificationHook<T>>())
-			child.OnPostPropagate(notification);
-		
+		INotificationPropagator.Notify(notification, children.ToArray());
 		isNotifying = false;
 	}
 	

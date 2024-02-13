@@ -12,15 +12,10 @@ Console.WriteLine("Hello, World!");
 
 
 
-RectWithHierarchyPrefab rectPrefab = new();
-rectPrefab.RectTransform = new RectTransform();
-rectPrefab.RectLayout = new RectLayout(rectPrefab.RectTransform, rectPrefab.PrefabChildren);
-rectPrefab.Rect = new Rect(rectPrefab.RectTransform);
 
+RectWithHierarchy root = new() { Name = "Root", IsGlobal = true };
 
-RectWithHierarchy root = new(rectPrefab) { IsGlobal = true };
-
-RectWithHierarchy someRect = new(rectPrefab) { AnchorPreset = AnchorPreset.Center, MinimumSize = (200, 200) };
+RectWithHierarchy someRect = new() { Name = "Some Rect", AnchorPreset = AnchorPreset.Center, MinimumSize = (200, 200) };
 root.PrefabChildren.AddChild(someRect);
 
 
@@ -119,29 +114,26 @@ static WindowIcon CreateWindowIcon(string path)
 }
 
 
-partial class RectWithHierarchyPrefab : Prefab<RectWithHierarchyPrefab>
+partial class RectWithHierarchy : INotificationPropagator, ICanBeLaidOut
 {
+	[ExposeMembersInClass] public Named Named { get; set; }
 	[ExposeMembersInClass] public RectTransform RectTransform { get; set; }
-	public RectLayout RectLayout;
-	public Rect Rect;
+	public RectLayout RectLayout { get; set; }
+	public Rect Rect { get; set; }
+	public Hierarchy PrefabChildren { get; set; }
 	
-	public override RectWithHierarchyPrefab Instantiate()
+	public RectWithHierarchy()
 	{
-		if (IsSharedInstance) return this;
-		
-		RectWithHierarchyPrefab instance = new();
-		instance.RectTransform = new RectTransform().CopyFrom(RectTransform);
-		return instance;
+		Named = new Named("Rect With Hierarchy");
+		PrefabChildren = new Hierarchy(Named);
+		RectTransform = new RectTransform();
+		RectLayout = new RectLayout(RectTransform, PrefabChildren);
+		Rect = new Rect(RectTransform);
 	}
-}
-
-[PrefabOf<RectWithHierarchyPrefab>]
-partial class RectWithHierarchy : PrefabInstance
-{
-	public override void Notify<T>(T notification)
+	
+	public void Notify<T>(T notification)
 	{
-		INotificationPropagator.NotifySingle(Rect, notification);
-		INotificationPropagator.NotifySingle(RectLayout, notification);
-		INotificationPropagator.NotifySingle(PrefabChildren, notification);
+		Console.WriteLine($"{Name}   {notification}");
+		INotificationPropagator.Notify(notification, Rect, RectLayout, PrefabChildren);
 	}
 }

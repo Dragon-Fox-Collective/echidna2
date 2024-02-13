@@ -17,6 +17,6 @@ public class Camera
 	
 	public void Notify<T>(T notification)
 	{
-		INotificationPropagator.NotifySingle(World, notification);
+		INotificationPropagator.Notify(notification, World);
 	}
 }

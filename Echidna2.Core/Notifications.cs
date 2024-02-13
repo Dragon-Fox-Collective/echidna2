@@ -16,17 +16,19 @@ public interface INotificationPropagator
 {
 	public void Notify<T>(T notification);
 	
-	public static void NotifySingle<T>(object? @object, T notification)
+	public static void Notify<T>(T notification, params object?[] objects)
 	{
-		INotificationHook<T>? hook = @object as INotificationHook<T>;
-		INotificationListener<T>? listener = @object as INotificationListener<T>;
-		INotificationPropagator? propagator = @object as INotificationPropagator;
-		
-		hook?.OnPreNotify(notification);
-		listener?.OnNotify(notification);
-		hook?.OnPostNotify(notification);
-		propagator?.Notify(notification);
-		hook?.OnPostPropagate(notification);
+		Console.WriteLine($"Notifying {notification} {string.Join(", ", objects)}");
+		foreach (INotificationHook<T> child in objects.OfType<INotificationHook<T>>())
+			child.OnPreNotify(notification);
+		foreach (INotificationListener<T> child in objects.OfType<INotificationListener<T>>())
+			child.OnNotify(notification);
+		foreach (INotificationHook<T> child in objects.OfType<INotificationHook<T>>())
+			child.OnPostNotify(notification);
+		foreach (INotificationPropagator child in objects.OfType<INotificationPropagator>())
+			child.Notify(notification);
+		foreach (INotificationHook<T> child in objects.OfType<INotificationHook<T>>())
+			child.OnPostPropagate(notification);
 	}
 }
 
