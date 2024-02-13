@@ -54,17 +54,17 @@ public class Window
 	private void OnMouseMoved(Vector2 position, Vector2 delta)
 	{
 		mousePosition = position;
-		Camera?.Notify(new IMouseMoved.Notification(position, delta));
+		Camera?.Notify(new IMouseMoved.Notification(mousePosition, delta, Camera.ScreenToGlobal(mousePosition)));
 	}
 	
 	private void OnMouseDown(MouseButton button)
 	{
-		Camera?.Notify(new IMouseDown.Notification(button, mousePosition));
+		Camera?.Notify(new IMouseDown.Notification(button, mousePosition, Camera.ScreenToGlobal(mousePosition)));
 	}
 	
 	private void OnMouseUp(MouseButton button)
 	{
-		Camera?.Notify(new IMouseUp.Notification(button, mousePosition));
+		Camera?.Notify(new IMouseUp.Notification(button, mousePosition, Camera.ScreenToGlobal(mousePosition)));
 	}
 	
 	private void OnResize(Vector2i size)

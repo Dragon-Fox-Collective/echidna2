@@ -11,6 +11,7 @@ public struct Vector3(double x, double y, double z) : IEquatable<Vector3>, IEnum
 	public double Z = z;
 	
 	public static Vector3 FromXY(Vector2 xy, double z = 0) => new(xy.X, xy.Y, z);
+	public Vector2 XY => new(X, Y);
 	
 	public double Length => Math.Sqrt(LengthSquared);
 	public double LengthSquared => X * X + Y * Y + Z * Z;

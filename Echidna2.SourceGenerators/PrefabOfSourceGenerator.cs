@@ -39,12 +39,12 @@ public class PrefabOfSourceGenerator : IIncrementalGenerator
 			AttributeData? attributeData = symbol.GetAttributes().SingleOrDefault(attribute => attribute.AttributeClass?.Name == "PrefabOfAttribute");
 			if (attributeData is null) continue;
 			
-			string generatedCode = GenerateCode(symbol, node);
+			string generatedCode = GenerateCode(symbol);
 			context.AddSource($"{symbol}.g.cs", generatedCode);
 		}
 	}
 	
-	private static string GenerateCode(INamedTypeSymbol symbol, ClassDeclarationSyntax node)
+	private static string GenerateCode(INamedTypeSymbol symbol)//, ClassDeclarationSyntax node)
 	{
 		string className = symbol.Name;
 		INamedTypeSymbol? prefabType = symbol.GetAttributes().First(attribute => attribute.AttributeClass?.Name == "PrefabOfAttribute").AttributeClass?.TypeArguments[0] as INamedTypeSymbol;

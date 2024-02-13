@@ -19,4 +19,6 @@ public class Camera
 	{
 		INotificationPropagator.Notify(notification, World);
 	}
+	
+	public Vector3 ScreenToGlobal(Vector2 position) => ViewMatrix.Inverted * ProjectionMatrix.Inverted * new Vector3(2 * position.X / Size.X - 1, -(2 * position.Y / Size.Y - 1), 1);
 }

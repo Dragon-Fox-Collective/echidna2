@@ -39,12 +39,12 @@ public class ExposeMembersInClassPropertySourceGenerator : IIncrementalGenerator
 			AttributeData? attributeData = symbol.GetAttributes().SingleOrDefault(attribute => attribute.AttributeClass?.Name == "ExposeMembersInClassAttribute");
 			if (attributeData is null) continue;
 			
-			string generatedCode = GenerateCode(symbol, node);
+			string generatedCode = GenerateCode(symbol);
 			context.AddSource($"{symbol.ContainingType}_{symbol.Name}.g.cs", generatedCode);
 		}
 	}
 	
-	private static string GenerateCode(IPropertySymbol symbol, PropertyDeclarationSyntax node)
+	private static string GenerateCode(IPropertySymbol symbol)//, PropertyDeclarationSyntax node)
 	{
 		INamedTypeSymbol classType = symbol.ContainingType;
 		string propertyName = symbol.Name;

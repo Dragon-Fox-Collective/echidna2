@@ -107,6 +107,9 @@ public class RectTransform
 	{
 		LocalTransform = Matrix4.Translation(Position.WithZ(Depth));
 	}
+	
+	public bool ContainsGlobalPoint(Vector2 point) => ContainsLocalPoint(GlobalTransform.Inverted * point);
+	public bool ContainsLocalPoint(Vector2 point) => point.X >= Position.X - Size.X / 2 && point.X <= Position.X + Size.X / 2 && point.Y >= Position.Y - Size.Y / 2 && point.Y <= Position.Y + Size.Y / 2;
 }
 
 [Flags]

@@ -6,7 +6,7 @@ namespace Echidna2.Rendering;
 public static class ShaderNodeUtil
 {
 	private static readonly InOutVariable<Vector2> TexCoordVariable = new("texCoord");
-	private static readonly InOutVariable<Vector3> WorldPositionVariable = new("worldPosition");
+	private static readonly InOutVariable<Vector3> GlobalPositionVariable = new("globalPosition");
 	private static readonly InOutVariable<Vector3> VertexColorVariable = new("vertexColor");
 	private static readonly InOutVariable<Vector3> CubeMapTexCoordVariable = new("texCoord");
 	
@@ -28,7 +28,7 @@ public static class ShaderNodeUtil
 				).Output),
 		Bindings =
 		[
-			new InOutBinding<Vector3>(WorldPositionVariable, 
+			new InOutBinding<Vector3>(GlobalPositionVariable, 
 				new Vector4XYZ(
 					new Vector4TimesMatrix4(
 						new Vector3ToVector4(

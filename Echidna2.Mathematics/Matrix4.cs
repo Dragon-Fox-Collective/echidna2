@@ -157,6 +157,10 @@ public struct Matrix4(
 			matrix.M11 * vector.X + matrix.M12 * vector.Y + matrix.M13 * vector.Z + matrix.M14,
 			matrix.M21 * vector.X + matrix.M22 * vector.Y + matrix.M23 * vector.Z + matrix.M24,
 			matrix.M31 * vector.X + matrix.M32 * vector.Y + matrix.M33 * vector.Z + matrix.M34);
+	public static Vector2 operator *(Matrix4 matrix, Vector2 vector) =>
+		new(
+			matrix.M11 * vector.X + matrix.M12 * vector.Y + matrix.M14,
+			matrix.M21 * vector.X + matrix.M22 * vector.Y + matrix.M24);
 	public static bool operator ==(Matrix4 a, Matrix4 b) =>
 		Math.Abs(a.M11 - b.M11) < double.Epsilon
 		&& Math.Abs(a.M12 - b.M12) < double.Epsilon
