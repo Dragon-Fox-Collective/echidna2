@@ -13,10 +13,16 @@ Console.WriteLine("Hello, World!");
 
 
 
-RectWithHierarchy root = new() { Name = "Root", IsGlobal = true };
+RectWithHierarchy root = new() { Name = "Root", IsGlobal = true, Color = Color.Magenta };
 
 VLayoutWithHierarchy toolbarBox = new() { Name = "Toolbar Box", AnchorPreset = AnchorPreset.Full };
 root.PrefabChildren.AddChild(toolbarBox);
+
+RectWithHierarchy toolbar = new() { Name = "Toolbar", MinimumSize = (0, 50) };
+toolbarBox.PrefabChildren.AddChild(toolbar);
+
+TextRect toolbarText = new() { Name = "Toolbar Text", TextString = "This is a toolbar.", AnchorPreset = AnchorPreset.Full };
+toolbar.PrefabChildren.AddChild(toolbarText);
 
 HLayoutWithHierarchy mainPanels = new() { Name = "Main Panels", VerticalExpand = true };
 toolbarBox.PrefabChildren.AddChild(mainPanels);
@@ -49,11 +55,14 @@ RectButton inspectorButton = new() { Name = "Inspector Button", AnchorPreset = A
 inspectorButton.Clicked += () => Console.WriteLine("Inspector Button Clicked!");
 inspector.PrefabChildren.AddChild(inspectorButton);
 
-RectWithHierarchy toolbar = new() { Name = "Toolbar", MinimumSize = (0, 50) };
-toolbarBox.PrefabChildren.AddChild(toolbar);
 
-TextRect toolbarText = new() { Name = "Toolbar Text", TextString = "This is a toolbar.", AnchorPreset = AnchorPreset.Full };
-toolbar.PrefabChildren.AddChild(toolbarText);
+
+RectWithHierarchy sceneHierarchy = new() { Name = "Scene Hierarchy", AnchorPreset = AnchorPreset.Full };
+TextRect sceneText = new() { Name = "Some Text", TextString = "This is some text.", AnchorPreset = AnchorPreset.Full };
+sceneHierarchy.PrefabChildren.AddChild(sceneText);
+
+HierarchyDisplay hierarchyDisplay = new(sceneHierarchy) { Name = "Hierarchy Display", AnchorPreset = AnchorPreset.Full };
+hierarchy.PrefabChildren.AddChild(hierarchyDisplay);
 
 
 
@@ -91,7 +100,7 @@ partial class RectWithHierarchy : INotificationPropagator, ICanBeLaidOut, INamed
 	[ExposeMembersInClass] public Named Named { get; set; }
 	[ExposeMembersInClass] public RectTransform RectTransform { get; set; }
 	public RectLayout RectLayout { get; set; }
-	public Rect Rect { get; set; }
+	[ExposeMembersInClass] public Rect Rect { get; set; }
 	public Hierarchy PrefabChildren { get; set; }
 	
 	public IEnumerable<object> Children => PrefabChildren.Children;
@@ -117,7 +126,7 @@ partial class RectButton : INotificationPropagator, ICanBeLaidOut, INamed, IHasC
 	[ExposeMembersInClass] public Named Named { get; set; }
 	[ExposeMembersInClass] public RectTransform RectTransform { get; set; }
 	public RectLayout RectLayout { get; set; }
-	public Rect Rect { get; set; }
+	[ExposeMembersInClass] public Rect Rect { get; set; }
 	public Hierarchy PrefabChildren { get; set; }
 	[ExposeMembersInClass] public Button Button { get; set; }
 	
@@ -208,5 +217,47 @@ partial class TextRect : INotificationPropagator, ICanBeLaidOut, INamed
 	public void Notify<T>(T notification)
 	{
 		INotificationPropagator.Notify(notification, Text);
+	}
+}
+
+
+partial class HierarchyDisplay : INotificationPropagator, ICanBeLaidOut, INamed
+{
+	[ExposeMembersInClass] public Named Named { get; set; }
+	[ExposeMembersInClass] public RectTransform RectTransform { get; set; }
+	public IHasChildren HierarchyToDisplay { get; set; }
+	private Hierarchy DisplayElements { get; set; }
+	public RectLayout DisplayLayout { get; set; }
+	
+	public HierarchyDisplay(IHasChildren hierarchyToDisplay)
+	{
+		Named = new Named("Hierarchy Display");
+		RectTransform = new RectTransform();
+		HierarchyToDisplay = hierarchyToDisplay;
+		DisplayElements = new Hierarchy();
+		DisplayLayout = new RectLayout(RectTransform, DisplayElements);
+		
+		DisplayElements.AddChild(BoxOfHierarchy(HierarchyToDisplay));
+	}
+	
+	private static VLayoutWithHierarchy BoxOfHierarchy(object obj)
+	{
+		VLayoutWithHierarchy box = new() { Name = $"Box for {obj}", AnchorPreset = AnchorPreset.Full, VerticalExpand = true };
+		
+		if (obj is INamed named)
+			box.PrefabChildren.AddChild(new TextRect { TextString = named.Name, AnchorPreset = AnchorPreset.Full, VerticalExpand = true });
+		else
+			box.PrefabChildren.AddChild(new TextRect { TextString = obj.GetType().Name + " (no name)", AnchorPreset = AnchorPreset.Full, VerticalExpand = true });
+		
+		if (obj is IHasChildren hasChildren)
+			foreach (object child in hasChildren.Children)
+				box.PrefabChildren.AddChild(BoxOfHierarchy(child));
+		
+		return box;
+	}
+	
+	public void Notify<T>(T notification)
+	{
+		INotificationPropagator.Notify(notification, DisplayLayout, DisplayElements);
 	}
 }

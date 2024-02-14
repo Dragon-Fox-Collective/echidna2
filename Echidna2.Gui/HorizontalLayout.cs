@@ -4,6 +4,8 @@ namespace Echidna2.Gui;
 
 public class HorizontalLayout(RectTransform rectTransform, Hierarchy hierarchy) : RectLayout(rectTransform, hierarchy)
 {
+	public HorizontalLayoutDirection LayoutDirection = HorizontalLayoutDirection.LeftToRight;
+	
 	public override void OnPreNotify(IUpdate.Notification notification)
 	{
 		List<RectTransform> laidOutChildren = Hierarchy.Children.OfType<ICanBeLaidOut>().Select(child => child.RectTransform).ToList();
@@ -32,7 +34,13 @@ public class HorizontalLayout(RectTransform rectTransform, Hierarchy hierarchy) 
 		double remainingWidth = RectTransform.Size.X - RectTransform.MinimumSize.X;
 		double totalExpand = laidOutChildren.Where(child => child.HorizontalExpand).Sum(child => child.HorizontalExpandFactor);
 		
-		double x = -RectTransform.Size.X / 2;
+		double directionModifier = LayoutDirection switch
+		{
+			HorizontalLayoutDirection.LeftToRight => +1,
+			HorizontalLayoutDirection.RightToLeft => -1,
+			_ => throw new IndexOutOfRangeException()
+		};
+		double x = -directionModifier * RectTransform.Size.X / 2;
 		foreach (RectTransform child in laidOutChildren)
 		{
 			double minimumWidth = child.MinimumSize.X;
@@ -40,11 +48,11 @@ public class HorizontalLayout(RectTransform rectTransform, Hierarchy hierarchy) 
 			if (child.HorizontalExpand && totalExpand > 0)
 				extraWidth += remainingWidth * child.HorizontalExpandFactor / totalExpand;
 			child.Position = (
-				child.HorizontalSizing switch {
-					LayoutSizing.Stretch => x + minimumWidth / 2 + extraWidth / 2,
-					LayoutSizing.FitBegin => x + minimumWidth / 2,
-					LayoutSizing.FitCenter => x + minimumWidth / 2 + extraWidth / 2,
-					LayoutSizing.FitEnd => x + minimumWidth / 2 + extraWidth,
+				x + directionModifier * child.HorizontalSizing switch {
+					LayoutSizing.Stretch => minimumWidth / 2 + extraWidth / 2,
+					LayoutSizing.FitBegin => minimumWidth / 2,
+					LayoutSizing.FitCenter => minimumWidth / 2 + extraWidth / 2,
+					LayoutSizing.FitEnd => minimumWidth / 2 + extraWidth,
 					_ => throw new IndexOutOfRangeException()
 				},
 				child.VerticalSizing switch {
@@ -56,7 +64,13 @@ public class HorizontalLayout(RectTransform rectTransform, Hierarchy hierarchy) 
 				});
 			if (child.HorizontalSizing == LayoutSizing.Stretch)
 				child.Size = (minimumWidth + extraWidth, child.Size.Y);
-			x += minimumWidth + extraWidth;
+			x += directionModifier * (minimumWidth + extraWidth);
 		}
 	}
+}
+
+public enum HorizontalLayoutDirection
+{
+	LeftToRight,
+	RightToLeft
 }

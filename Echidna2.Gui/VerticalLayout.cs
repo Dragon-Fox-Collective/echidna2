@@ -4,6 +4,8 @@ namespace Echidna2.Gui;
 
 public class VerticalLayout(RectTransform rectTransform, Hierarchy hierarchy) : RectLayout(rectTransform, hierarchy)
 {
+	public VerticalLayoutDirection LayoutDirection = VerticalLayoutDirection.TopToBottom;
+	
 	public override void OnPreNotify(IUpdate.Notification notification)
 	{
 		List<RectTransform> laidOutChildren = Hierarchy.Children.OfType<ICanBeLaidOut>().Select(child => child.RectTransform).ToList();
@@ -32,7 +34,13 @@ public class VerticalLayout(RectTransform rectTransform, Hierarchy hierarchy) : 
 		double remainingHeight = RectTransform.Size.Y - RectTransform.MinimumSize.Y;
 		double totalExpand = laidOutChildren.Where(child => child.VerticalExpand).Sum(child => child.VerticalExpandFactor);
 		
-		double y = -RectTransform.Size.Y / 2;
+		double directionModifier = LayoutDirection switch
+		{
+			VerticalLayoutDirection.TopToBottom => -1,
+			VerticalLayoutDirection.BottomToTop => +1,
+			_ => throw new IndexOutOfRangeException()
+		};
+		double y = -directionModifier * RectTransform.Size.Y / 2;
 		foreach (RectTransform child in laidOutChildren)
 		{
 			double minimumHeight = child.MinimumSize.Y;
@@ -47,16 +55,22 @@ public class VerticalLayout(RectTransform rectTransform, Hierarchy hierarchy) : 
 					LayoutSizing.FitEnd => +RectTransform.Size.X / 2 - child.MinimumSize.X / 2,
 					_ => throw new IndexOutOfRangeException()
 				},
-				child.VerticalSizing switch {
-					LayoutSizing.Stretch => y + minimumHeight / 2 + extraHeight / 2,
-					LayoutSizing.FitBegin => y + minimumHeight / 2,
-					LayoutSizing.FitCenter => y + minimumHeight / 2 + extraHeight / 2,
-					LayoutSizing.FitEnd => y + minimumHeight / 2 + extraHeight,
+				y + directionModifier * child.VerticalSizing switch {
+					LayoutSizing.Stretch => minimumHeight / 2 + extraHeight / 2,
+					LayoutSizing.FitBegin => minimumHeight / 2,
+					LayoutSizing.FitCenter => minimumHeight / 2 + extraHeight / 2,
+					LayoutSizing.FitEnd => minimumHeight / 2 + extraHeight,
 					_ => throw new IndexOutOfRangeException()
 				});
 			if (child.VerticalSizing == LayoutSizing.Stretch)
 				child.Size = (child.Size.X, minimumHeight + extraHeight);
-			y += minimumHeight + extraHeight;
+			y += directionModifier * (minimumHeight + extraHeight);
 		}
 	}
+}
+
+public enum VerticalLayoutDirection
+{
+	TopToBottom,
+	BottomToTop
 }
