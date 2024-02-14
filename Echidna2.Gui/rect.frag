@@ -11,7 +11,10 @@ void main()
 {
     vec2 size = localPosition.xy / (texCoord - 0.5);
     float thickness = 5;
-    bool isInBorder = size.x / 2 - abs(localPosition.x) < thickness || size.y / 2 - abs(localPosition.y) < thickness;
+    bool isXDivideByZeroError = abs(texCoord.x - 0.5) < 0.001;
+    bool isYDivideByZeroError = abs(texCoord.y - 0.5) < 0.001;
+    bool isXInBorder = size.x / 2 - abs(localPosition.x) < thickness;
+    bool isYInBorder = size.y / 2 - abs(localPosition.y) < thickness;
+    bool isInBorder = (!isXDivideByZeroError && isXInBorder) || (!isYDivideByZeroError && isYInBorder);
     FragColor = isInBorder ? vec4(0, 0, 0, 1) : color;
-    // FragColor = vec4((localPosition.x - size.x / 2), (localPosition.y - size.y / 2), 0, 1) / 20 * color;
 }
