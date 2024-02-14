@@ -1,5 +1,6 @@
 ﻿using Echidna2.Core;
 using Echidna2.Gui;
+using Echidna2.Mathematics;
 using Echidna2.Rendering;
 using OpenTK.Windowing.Common.Input;
 using OpenTK.Windowing.Desktop;
@@ -242,12 +243,10 @@ partial class HierarchyDisplay : INotificationPropagator, ICanBeLaidOut, INamed
 	
 	private static VLayoutWithHierarchy BoxOfHierarchy(object obj)
 	{
-		VLayoutWithHierarchy box = new() { Name = $"Box for {obj}", AnchorPreset = AnchorPreset.Full, VerticalExpand = true };
+		VLayoutWithHierarchy box = new() { Name = $"Box for {obj}", AnchorPreset = AnchorPreset.Full };
 		
-		if (obj is INamed named)
-			box.PrefabChildren.AddChild(new TextRect { TextString = named.Name, AnchorPreset = AnchorPreset.Full, VerticalExpand = true });
-		else
-			box.PrefabChildren.AddChild(new TextRect { TextString = obj.GetType().Name + " (no name)", AnchorPreset = AnchorPreset.Full, VerticalExpand = true });
+		TextRect text = new() { TextString = obj is INamed named ? named.Name : obj.GetType().Name + " (no name)", AnchorPreset = AnchorPreset.Full, Scale = Vector2.One * 0.5, MinimumSize = (0, 25) };
+		box.PrefabChildren.AddChild(text);
 		
 		if (obj is IHasChildren hasChildren)
 			foreach (object child in hasChildren.Children)

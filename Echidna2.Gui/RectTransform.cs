@@ -19,6 +19,17 @@ public class RectTransform
 	}
 	public Vector2 Size { get; set; }
 	
+	private Vector2 scale = Vector2.One;
+	public Vector2 Scale
+	{
+		get => scale;
+		set
+		{
+			scale = value;
+			RecalculateLocalTransform();
+		}
+	}
+	
 	private Matrix4 localTransform = Matrix4.Identity;
 	public Matrix4 LocalTransform
 	{
@@ -105,7 +116,7 @@ public class RectTransform
 	
 	private void RecalculateLocalTransform()
 	{
-		LocalTransform = Matrix4.Translation(Position.WithZ(Depth));
+		LocalTransform = Matrix4.Translation(Position.WithZ(Depth)) * Matrix4.Scale(Scale.WithZ(1));
 	}
 	
 	public bool ContainsGlobalPoint(Vector2 point) => ContainsLocalPoint(GlobalTransform.Inverted * point);
