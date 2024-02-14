@@ -245,7 +245,14 @@ partial class HierarchyDisplay : INotificationPropagator, ICanBeLaidOut, INamed
 	{
 		VLayoutWithHierarchy box = new() { Name = $"Box for {obj}", AnchorPreset = AnchorPreset.Full };
 		
-		TextRect text = new() { TextString = obj is INamed named ? named.Name : obj.GetType().Name + " (no name)", AnchorPreset = AnchorPreset.Full, Scale = Vector2.One * 0.5, MinimumSize = (0, 25) };
+		TextRect text = new()
+		{
+			TextString = obj is INamed named ? named.Name : obj.GetType().Name + " (no name)",
+			AnchorPreset = AnchorPreset.Full,
+			Scale = Vector2.One * 0.5,
+			MinimumSize = (0, 25),
+			Justification = TextJustification.Left,
+		};
 		box.PrefabChildren.AddChild(text);
 		
 		if (obj is IHasChildren hasChildren)

@@ -18,6 +18,7 @@ public class Button(RectTransform rectTransform) : IMouseDown, IMouseUp, IMouseM
 	
 	public void OnMouseDown(MouseButton button, Vector2 position, Vector3 globalPosition)
 	{
+		Console.WriteLine($"Mouse down at {globalPosition}");
 		if (rectTransform.ContainsGlobalPoint(globalPosition.XY))
 		{
 			wasPressed = true;

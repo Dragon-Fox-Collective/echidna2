@@ -152,15 +152,6 @@ public struct Matrix4(
 			a.M41 * b.M12 + a.M42 * b.M22 + a.M43 * b.M32 + a.M44 * b.M42,
 			a.M41 * b.M13 + a.M42 * b.M23 + a.M43 * b.M33 + a.M44 * b.M43,
 			a.M41 * b.M14 + a.M42 * b.M24 + a.M43 * b.M34 + a.M44 * b.M44);
-	public static Vector3 operator *(Matrix4 matrix, Vector3 vector) =>
-		new(
-			matrix.M11 * vector.X + matrix.M12 * vector.Y + matrix.M13 * vector.Z + matrix.M14,
-			matrix.M21 * vector.X + matrix.M22 * vector.Y + matrix.M23 * vector.Z + matrix.M24,
-			matrix.M31 * vector.X + matrix.M32 * vector.Y + matrix.M33 * vector.Z + matrix.M34);
-	public static Vector2 operator *(Matrix4 matrix, Vector2 vector) =>
-		new(
-			matrix.M11 * vector.X + matrix.M12 * vector.Y + matrix.M14,
-			matrix.M21 * vector.X + matrix.M22 * vector.Y + matrix.M24);
 	public static bool operator ==(Matrix4 a, Matrix4 b) =>
 		Math.Abs(a.M11 - b.M11) < double.Epsilon
 		&& Math.Abs(a.M12 - b.M12) < double.Epsilon
@@ -210,4 +201,26 @@ public struct Matrix4(
 		matrix.M21, matrix.M22, matrix.M23, matrix.M24,
 		matrix.M31, matrix.M32, matrix.M33, matrix.M34,
 		matrix.M41, matrix.M42, matrix.M43, matrix.M44);
+	
+	public Vector3 TransformPoint(Vector3 point) => new(
+		M11 * point.X + M12 * point.Y + M13 * point.Z + M14,
+		M21 * point.X + M22 * point.Y + M23 * point.Z + M24,
+		M31 * point.X + M32 * point.Y + M33 * point.Z + M34);
+	public Vector3 InverseTransformPoint(Vector3 point) => Inverted.TransformPoint(point);
+	
+	public Vector2 TransformPoint(Vector2 point) => new(
+		M11 * point.X + M12 * point.Y + M14,
+		M21 * point.X + M22 * point.Y + M24);
+	public Vector2 InverseTransformPoint(Vector2 point) => Inverted.TransformPoint(point);
+	
+	public Vector3 TransformDirection(Vector3 direction) => new(
+		M11 * direction.X + M12 * direction.Y + M13 * direction.Z,
+		M21 * direction.X + M22 * direction.Y + M23 * direction.Z,
+		M31 * direction.X + M32 * direction.Y + M33 * direction.Z);
+	public Vector3 InverseTransformDirection(Vector3 direction) => Inverted.TransformDirection(direction);
+	
+	public Vector2 TransformDirection(Vector2 direction) => new(
+		M11 * direction.X + M12 * direction.Y,
+		M21 * direction.X + M22 * direction.Y);
+	public Vector2 InverseTransformDirection(Vector2 direction) => Inverted.TransformDirection(direction);
 }

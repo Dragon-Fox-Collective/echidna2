@@ -15,6 +15,9 @@ public class Text(RectTransform rectTransform) : INotificationListener<IDraw.Not
 	public string TextString { get; set; } = "";
 	public Color Color { get; set; } = Color.White;
 	
+	public TextJustification Justification { get; set; } = TextJustification.Center;
+	public TextAlignment Alignment { get; set; } = TextAlignment.Center;
+	
 	public void OnNotify(IDraw.Notification notification)
 	{
 		GL.Disable(EnableCap.CullFace);
@@ -26,11 +29,29 @@ public class Text(RectTransform rectTransform) : INotificationListener<IDraw.Not
 		font.Bind();
 		shader.SetInt("texture0", 0);
 		
+		// FIXME: This will not work once rotations exist
+		Vector2 relativeRectSize = rectTransform.GlobalTransform.InverseTransformDirection(rectTransform.Size);
+		
 		Vector2 size = (
 			TextString.Select(c => font.FontResult!.Glyphs[c]).Sum(glyph => glyph.XAdvance),
 			TextString.Select(c => font.FontResult!.Glyphs[c]).Max(glyph => glyph.Height));
 		
-		shader.SetMatrix4("distortion", Matrix4.Translation(new Vector3(-size.X / 2, size.Y / 2, 0)));
+		shader.SetMatrix4("distortion", Matrix4.Translation(new Vector3(
+			Justification switch
+			{
+				TextJustification.Left => -relativeRectSize.X / 2,
+				TextJustification.Center => -size.X / 2,
+				TextJustification.Right => relativeRectSize.X / 2 - size.X,
+				_ => throw new IndexOutOfRangeException()
+			},
+			-1 * Alignment switch
+			{
+				TextAlignment.Top => relativeRectSize.Y / 2 - size.Y,
+				TextAlignment.Center => -size.Y / 2,
+				TextAlignment.Bottom => -relativeRectSize.Y,
+				_ => throw new IndexOutOfRangeException()
+			},
+			0)));
 		shader.SetMatrix4("transform", rectTransform.GlobalTransform);
 		shader.SetColor("color", Color);
 		
@@ -86,4 +107,18 @@ public class Text(RectTransform rectTransform) : INotificationListener<IDraw.Not
 			xStart += glyph.XAdvance;
 		}
 	}
+}
+
+public enum TextJustification
+{
+	Left,
+	Center,
+	Right,
+}
+
+public enum TextAlignment
+{
+	Top,
+	Center,
+	Bottom,
 }
