@@ -6,6 +6,7 @@ using OpenTK.Windowing.Desktop;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats;
 using SixLabors.ImageSharp.PixelFormats;
+using Color = System.Drawing.Color;
 using Image = SixLabors.ImageSharp.Image;
 
 Console.WriteLine("Hello, World!");
@@ -130,6 +131,9 @@ partial class RectButton : INotificationPropagator, ICanBeLaidOut, INamed, IHasC
 		RectLayout = new RectLayout(RectTransform, PrefabChildren);
 		Rect = new Rect(RectTransform);
 		Button = new Button(RectTransform);
+		Rect.Color = Color.LightGray;
+		Button.MouseDown += () => Rect.Color = Color.DarkGray;
+		Button.MouseUp += () => Rect.Color = Color.LightGray;
 	}
 	
 	public void Notify<T>(T notification)

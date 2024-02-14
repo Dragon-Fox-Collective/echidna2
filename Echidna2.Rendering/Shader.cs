@@ -89,7 +89,7 @@ public class Shader(string vertexSource, string fragmentSource)
 	}
 	public void SetVector3(string name, Vector3 data) => GL.Uniform3(GetUniformLocation(name), data);
 	public void SetVector4(string name, Vector4 data) => GL.Uniform4(GetUniformLocation(name), data);
-	public void SetVector4(string name, Color data) => GL.Uniform4(GetUniformLocation(name), data);
+	public void SetColor(string name, Color data) => GL.Uniform4(GetUniformLocation(name), data);
 	
 	public void Dispose()
 	{

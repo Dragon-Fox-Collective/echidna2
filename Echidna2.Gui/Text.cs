@@ -31,7 +31,7 @@ public class Text(RectTransform rectTransform) : INotificationListener<IDraw.Not
 			TextString.Select(c => font.FontResult!.Glyphs[c]).Max(glyph => glyph.Height));
 		
 		shader.SetMatrix4(0, rectTransform.GlobalTransform * Matrix4.Translation(new Vector3(-size.X / 2, size.Y / 2, 0)));
-		shader.SetVector4("color", Color);
+		shader.SetColor("color", Color);
 		
 		float xStart = 0;
 		foreach (GlyphInfo glyph in TextString.Select(c => font.FontResult!.Glyphs[c]))

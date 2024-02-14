@@ -46,6 +46,6 @@ public interface IMouseUp : INotificationListener<IMouseUp.Notification>
 		public Vector2 Position { get; } = position;
 		public Vector3 GlobalPosition { get; } = globalPosition;
 	}
-	void INotificationListener<Notification>.OnNotify(Notification notification) => OnMouseDown(notification.Button, notification.Position, notification.GlobalPosition);
-	public void OnMouseDown(MouseButton button, Vector2 position, Vector3 globalPosition);
+	void INotificationListener<Notification>.OnNotify(Notification notification) => OnMouseUp(notification.Button, notification.Position, notification.GlobalPosition);
+	public void OnMouseUp(MouseButton button, Vector2 position, Vector3 globalPosition);
 }
