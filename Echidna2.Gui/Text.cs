@@ -30,7 +30,8 @@ public class Text(RectTransform rectTransform) : INotificationListener<IDraw.Not
 			TextString.Select(c => font.FontResult!.Glyphs[c]).Sum(glyph => glyph.XAdvance),
 			TextString.Select(c => font.FontResult!.Glyphs[c]).Max(glyph => glyph.Height));
 		
-		shader.SetMatrix4(0, rectTransform.GlobalTransform * Matrix4.Translation(new Vector3(-size.X / 2, size.Y / 2, 0)));
+		shader.SetMatrix4("distortion", Matrix4.Translation(new Vector3(-size.X / 2, size.Y / 2, 0)));
+		shader.SetMatrix4("transform", rectTransform.GlobalTransform);
 		shader.SetColor("color", Color);
 		
 		float xStart = 0;

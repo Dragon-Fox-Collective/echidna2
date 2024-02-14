@@ -131,6 +131,7 @@ partial class RectButton : INotificationPropagator, ICanBeLaidOut, INamed, IHasC
 		RectLayout = new RectLayout(RectTransform, PrefabChildren);
 		Rect = new Rect(RectTransform);
 		Button = new Button(RectTransform);
+		
 		Rect.Color = Color.LightGray;
 		Button.MouseDown += () => Rect.Color = Color.DarkGray;
 		Button.MouseUp += () => Rect.Color = Color.LightGray;

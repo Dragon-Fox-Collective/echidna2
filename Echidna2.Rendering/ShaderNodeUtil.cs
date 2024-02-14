@@ -6,6 +6,7 @@ namespace Echidna2.Rendering;
 public static class ShaderNodeUtil
 {
 	private static readonly InOutVariable<Vector2> TexCoordVariable = new("texCoord");
+	private static readonly InOutVariable<Vector3> LocalPositionVariable = new("localPosition");
 	private static readonly InOutVariable<Vector3> GlobalPositionVariable = new("globalPosition");
 	private static readonly InOutVariable<Vector3> VertexColorVariable = new("vertexColor");
 	private static readonly InOutVariable<Vector3> CubeMapTexCoordVariable = new("texCoord");
@@ -16,9 +17,12 @@ public static class ShaderNodeUtil
 			new Vector4TimesMatrix4(
 				new Vector4TimesMatrix4(
 					new Vector4TimesMatrix4(
-						new Vector3ToVector4(
-							new PositionInput().Output,
-							new FloatValue(1.0f).Output
+						new Vector4TimesMatrix4(
+							new Vector3ToVector4(
+								new PositionInput().Output,
+								new FloatValue(1.0f).Output
+								).Output,
+							new DistortionInput().Output
 							).Output,
 						new TransformInput().Output
 						).Output,
@@ -28,14 +32,28 @@ public static class ShaderNodeUtil
 				).Output),
 		Bindings =
 		[
-			new InOutBinding<Vector3>(GlobalPositionVariable, 
+			new InOutBinding<Vector3>(GlobalPositionVariable,
+				new Vector4XYZ(
+					new Vector4TimesMatrix4(
+						new Vector4TimesMatrix4(
+							new Vector3ToVector4(
+								new PositionInput().Output,
+								new FloatValue(1.0f).Output
+								).Output,
+							new DistortionInput().Output
+							).Output,
+						new TransformInput().Output
+						).Output
+					).Output
+				),
+			new InOutBinding<Vector3>(LocalPositionVariable,
 				new Vector4XYZ(
 					new Vector4TimesMatrix4(
 						new Vector3ToVector4(
 							new PositionInput().Output,
 							new FloatValue(1.0f).Output
 							).Output,
-						new TransformInput().Output
+						new DistortionInput().Output
 						).Output
 					).Output
 				),
@@ -102,25 +120,28 @@ public class VertexShader
 	
 	public static implicit operator string(VertexShader shader) => shader.ToString();
 	
-	public override string ToString() => $@"
+	public override string ToString() => $$"""
+
 #version 430 core
 
 layout (location = 0) in vec3 aPosition;
 layout (location = 1) in vec2 aTexCoord;
 layout (location = 2) in vec3 aColor;
 
-{string.Join("\n", Bindings.Select(binding => binding.Variable.Out))}
+{{string.Join("\n", Bindings.Select(binding => binding.Variable.Out))}}
 
-layout (location = 0) uniform mat4 transform;
-layout (location = 1) uniform mat4 view;
-layout (location = 2) uniform mat4 projection;
+layout (location = 0) uniform mat4 distortion;
+layout (location = 1) uniform mat4 transform;
+layout (location = 2) uniform mat4 view;
+layout (location = 3) uniform mat4 projection;
 
 void main()
-{{
-    {Position?.ToString() ?? ""}
-    {string.Join("\n    ", Bindings.Select(binding => binding.ToString()))}
-}}
-";
+{
+	{{Position?.ToString() ?? ""}}
+	{{string.Join("\n    ", Bindings.Select(binding => binding.ToString()))}}
+}
+
+""";
 }
 
 public class FragmentShader
@@ -149,6 +170,18 @@ public interface ShaderNode;
 public class ShaderNodeSlot<[UsedImplicitly] T>(Func<string> selector)
 {
 	public override string ToString() => selector();
+}
+
+public class DistortionInput : ShaderNode
+{
+	public readonly ShaderNodeSlot<Matrix4> Output;
+	
+	public DistortionInput()
+	{
+		Output = new ShaderNodeSlot<Matrix4>(ToString);
+	}
+	
+	public override string ToString() => "distortion";
 }
 
 public class TransformInput : ShaderNode
