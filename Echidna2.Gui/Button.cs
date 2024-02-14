@@ -6,9 +6,11 @@ namespace Echidna2.Gui;
 
 public class Button(RectTransform rectTransform) : IMouseDown
 {
+	public event Action? Clicked;
+	
 	public void OnMouseDown(MouseButton button, Vector2 position, Vector3 globalPosition)
 	{
 		if (rectTransform.ContainsGlobalPoint(globalPosition.XY))
-			Console.WriteLine($"Button clicked! {button} {position} {globalPosition.XY}");
+			Clicked?.Invoke();
 	}
 }

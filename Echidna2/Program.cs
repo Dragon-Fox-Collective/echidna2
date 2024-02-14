@@ -45,6 +45,7 @@ RectWithHierarchy inspector = new() { Name = "Inspector", VerticalExpand = true,
 inspectorBox.PrefabChildren.AddChild(inspector);
 
 RectButton inspectorButton = new() { Name = "Inspector Button", AnchorPreset = AnchorPreset.Center, MinimumSize = (150, 50) };
+inspectorButton.Clicked += () => Console.WriteLine("Inspector Button Clicked!");
 inspector.PrefabChildren.AddChild(inspectorButton);
 
 RectWithHierarchy toolbar = new() { Name = "Toolbar", MinimumSize = (0, 50) };
@@ -117,7 +118,7 @@ partial class RectButton : INotificationPropagator, ICanBeLaidOut, INamed, IHasC
 	public RectLayout RectLayout { get; set; }
 	public Rect Rect { get; set; }
 	public Hierarchy PrefabChildren { get; set; }
-	public Button Button { get; set; }
+	[ExposeMembersInClass] public Button Button { get; set; }
 	
 	public IEnumerable<object> Children => PrefabChildren.Children;
 	
