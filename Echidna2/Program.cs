@@ -58,11 +58,15 @@ inspector.PrefabChildren.AddChild(inspectorButton);
 
 
 
-RectWithHierarchy sceneHierarchy = new() { Name = "Scene Hierarchy", AnchorPreset = AnchorPreset.Full };
-TextRect sceneText = new() { Name = "Some Text", TextString = "This is some text.", AnchorPreset = AnchorPreset.Full };
-sceneHierarchy.PrefabChildren.AddChild(sceneText);
+RectWithHierarchy someHierarchy = new() { Name = "Some Hierarchy" };
+RectWithHierarchy someRect = new() { Name = "Some Rect" };
+someHierarchy.PrefabChildren.AddChild(someRect);
+TextRect someText = new() { Name = "Some Text", TextString = "This is some text." };
+someRect.PrefabChildren.AddChild(someText);
+TextRect someOtherText = new() { Name = "Some Other Text", TextString = "This is some other text." };
+someHierarchy.PrefabChildren.AddChild(someOtherText);
 
-HierarchyDisplay hierarchyDisplay = new(sceneHierarchy) { Name = "Hierarchy Display", AnchorPreset = AnchorPreset.Full };
+HierarchyDisplay hierarchyDisplay = new(someHierarchy) { Name = "Hierarchy Display", AnchorPreset = AnchorPreset.Full };
 hierarchy.PrefabChildren.AddChild(hierarchyDisplay);
 
 
@@ -158,7 +162,7 @@ partial class HLayoutWithHierarchy : INotificationPropagator, ICanBeLaidOut, INa
 {
 	[ExposeMembersInClass] public Named Named { get; set; }
 	[ExposeMembersInClass] public RectTransform RectTransform { get; set; }
-	public HorizontalLayout Layout { get; set; }
+	[ExposeMembersInClass] public HorizontalLayout Layout { get; set; }
 	public Hierarchy PrefabChildren { get; set; }
 	
 	public IEnumerable<object> Children => PrefabChildren.Children;
@@ -182,7 +186,7 @@ partial class VLayoutWithHierarchy : INotificationPropagator, ICanBeLaidOut, INa
 {
 	[ExposeMembersInClass] public Named Named { get; set; }
 	[ExposeMembersInClass] public RectTransform RectTransform { get; set; }
-	public VerticalLayout Layout { get; set; }
+	[ExposeMembersInClass] public VerticalLayout Layout { get; set; }
 	public Hierarchy PrefabChildren { get; set; }
 	
 	public IEnumerable<object> Children => PrefabChildren.Children;
@@ -228,7 +232,7 @@ partial class HierarchyDisplay : INotificationPropagator, ICanBeLaidOut, INamed
 	[ExposeMembersInClass] public RectTransform RectTransform { get; set; }
 	public IHasChildren HierarchyToDisplay { get; set; }
 	private Hierarchy DisplayElements { get; set; }
-	public RectLayout DisplayLayout { get; set; }
+	public FullLayout Layout { get; set; }
 	
 	public HierarchyDisplay(IHasChildren hierarchyToDisplay)
 	{
@@ -236,14 +240,16 @@ partial class HierarchyDisplay : INotificationPropagator, ICanBeLaidOut, INamed
 		RectTransform = new RectTransform();
 		HierarchyToDisplay = hierarchyToDisplay;
 		DisplayElements = new Hierarchy();
-		DisplayLayout = new RectLayout(RectTransform, DisplayElements);
+		Layout = new FullLayout(RectTransform, DisplayElements);
 		
 		DisplayElements.AddChild(BoxOfHierarchy(HierarchyToDisplay));
 	}
 	
-	private static VLayoutWithHierarchy BoxOfHierarchy(object obj)
+	private static FullLayoutWithHierarchy BoxOfHierarchy(object obj)
 	{
-		VLayoutWithHierarchy box = new() { Name = $"Box for {obj}", AnchorPreset = AnchorPreset.Full };
+		FullLayoutWithHierarchy box = new() { Name = $"Box for {obj}", AnchorPreset = AnchorPreset.Full, LeftMargin = 10 };
+		VLayoutWithHierarchy layout = new() { Name = $"Layout for box for {obj}", AnchorPreset = AnchorPreset.Full };
+		box.PrefabChildren.AddChild(layout);
 		
 		TextRect text = new()
 		{
@@ -253,17 +259,41 @@ partial class HierarchyDisplay : INotificationPropagator, ICanBeLaidOut, INamed
 			MinimumSize = (0, 25),
 			Justification = TextJustification.Left,
 		};
-		box.PrefabChildren.AddChild(text);
+		layout.PrefabChildren.AddChild(text);
 		
 		if (obj is IHasChildren hasChildren)
 			foreach (object child in hasChildren.Children)
-				box.PrefabChildren.AddChild(BoxOfHierarchy(child));
+				layout.PrefabChildren.AddChild(BoxOfHierarchy(child));
 		
 		return box;
 	}
 	
 	public void Notify<T>(T notification)
 	{
-		INotificationPropagator.Notify(notification, DisplayLayout, DisplayElements);
+		INotificationPropagator.Notify(notification, Layout, DisplayElements);
+	}
+}
+
+
+partial class FullLayoutWithHierarchy : INotificationPropagator, ICanBeLaidOut, INamed, IHasChildren
+{
+	[ExposeMembersInClass] public Named Named { get; set; }
+	[ExposeMembersInClass] public RectTransform RectTransform { get; set; }
+	[ExposeMembersInClass] public FullLayout Layout { get; set; }
+	public Hierarchy PrefabChildren { get; set; }
+	
+	public IEnumerable<object> Children => PrefabChildren.Children;
+	
+	public FullLayoutWithHierarchy()
+	{
+		Named = new Named("Vertical Layout");
+		PrefabChildren = new Hierarchy();
+		RectTransform = new RectTransform();
+		Layout = new FullLayout(RectTransform, PrefabChildren);
+	}
+	
+	public void Notify<T>(T notification)
+	{
+		INotificationPropagator.Notify(notification, Layout, PrefabChildren);
 	}
 }
