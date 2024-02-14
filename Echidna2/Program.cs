@@ -40,11 +40,11 @@ hierarchyBox.PrefabChildren.AddChild(fileBrowser);
 VLayoutWithHierarchy sceneBox = new() { Name = "Scene Box", HorizontalExpand = true };
 mainPanels.PrefabChildren.AddChild(sceneBox);
 
-RectWithHierarchy console = new() { Name = "Console", MinimumSize = (100, 200) };
-sceneBox.PrefabChildren.AddChild(console);
-
 RectWithHierarchy scene = new() { Name = "Scene", VerticalExpand = true };
 sceneBox.PrefabChildren.AddChild(scene);
+
+RectWithHierarchy console = new() { Name = "Console", MinimumSize = (100, 200) };
+sceneBox.PrefabChildren.AddChild(console);
 
 VLayoutWithHierarchy inspectorBox = new() { Name = "Inspector Box" };
 mainPanels.PrefabChildren.AddChild(inspectorBox);
