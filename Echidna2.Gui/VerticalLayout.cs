@@ -31,7 +31,7 @@ public class VerticalLayout(RectTransform rectTransform, Hierarchy hierarchy) : 
 		else
 			RectTransform.MinimumSize = (0, 0);
 		
-		double remainingHeight = RectTransform.Size.Y - RectTransform.MinimumSize.Y;
+		double remainingHeight = RectTransform.LocalSize.Y - RectTransform.MinimumSize.Y;
 		double totalExpand = laidOutChildren.Where(child => child.VerticalExpand).Sum(child => child.VerticalExpandFactor);
 		
 		double directionModifier = LayoutDirection switch
@@ -40,19 +40,19 @@ public class VerticalLayout(RectTransform rectTransform, Hierarchy hierarchy) : 
 			VerticalLayoutDirection.BottomToTop => +1,
 			_ => throw new IndexOutOfRangeException()
 		};
-		double y = -directionModifier * RectTransform.Size.Y / 2;
+		double y = -directionModifier * RectTransform.LocalSize.Y / 2;
 		foreach (RectTransform child in laidOutChildren)
 		{
 			double minimumHeight = child.MinimumSize.Y;
 			double extraHeight = 0;
 			if (child.VerticalExpand && totalExpand > 0)
 				extraHeight += remainingHeight * child.VerticalExpandFactor / totalExpand;
-			child.Position = (
+			child.LocalPosition = (
 				child.HorizontalSizing switch {
 					LayoutSizing.Stretch => 0,
-					LayoutSizing.FitBegin => -RectTransform.Size.X / 2 + child.MinimumSize.X / 2,
+					LayoutSizing.FitBegin => -RectTransform.LocalSize.X / 2 + child.MinimumSize.X / 2,
 					LayoutSizing.FitCenter => 0,
-					LayoutSizing.FitEnd => +RectTransform.Size.X / 2 - child.MinimumSize.X / 2,
+					LayoutSizing.FitEnd => +RectTransform.LocalSize.X / 2 - child.MinimumSize.X / 2,
 					_ => throw new IndexOutOfRangeException()
 				},
 				y + directionModifier * child.VerticalSizing switch {
@@ -63,7 +63,7 @@ public class VerticalLayout(RectTransform rectTransform, Hierarchy hierarchy) : 
 					_ => throw new IndexOutOfRangeException()
 				});
 			if (child.VerticalSizing == LayoutSizing.Stretch)
-				child.Size = (child.Size.X, minimumHeight + extraHeight);
+				child.LocalSize = (child.LocalSize.X, minimumHeight + extraHeight);
 			y += directionModifier * (minimumHeight + extraHeight);
 		}
 	}

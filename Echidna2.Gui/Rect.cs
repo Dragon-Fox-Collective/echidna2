@@ -34,7 +34,7 @@ public class Rect(RectTransform rectTransform) : INotificationListener<IDraw.Not
 	public void OnNotify(IDraw.Notification notification)
 	{
 		shader.Bind(notification.Camera.ViewMatrix, notification.Camera.ProjectionMatrix);
-		shader.SetMatrix4("distortion", Matrix4.Scale(rectTransform.Size.WithZ(1) / 2));
+		shader.SetMatrix4("distortion", Matrix4.Scale(rectTransform.LocalSize.WithZ(1) / 2));
 		shader.SetMatrix4("transform", rectTransform.GlobalTransform);
 		shader.SetColor("color", Color);
 		mesh.Draw();

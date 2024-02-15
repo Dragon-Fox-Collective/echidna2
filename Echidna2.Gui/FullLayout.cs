@@ -32,13 +32,13 @@ public class FullLayout(RectTransform rectTransform, Hierarchy hierarchy) : Rect
 		foreach (RectTransform child in laidOutChildren)
 			child.AnchorPreset = AnchorPreset.Full;
 		
-		Vector2 exteriorSize = RectTransform.Size;
+		Vector2 exteriorSize = RectTransform.LocalSize;
 		Vector2 interiorSize = (Math.Max(exteriorSize.X - LeftMargin - RightMargin, 0), Math.Max(exteriorSize.Y - BottomMargin - TopMargin, 0));
-		RectTransform.Size = exteriorSize;
+		RectTransform.LocalSize = exteriorSize;
 		
 		base.OnPreNotify(notification);
 		
-		RectTransform.Size = exteriorSize;
+		RectTransform.LocalSize = exteriorSize;
 		
 		if (laidOutChildren.Count != 0)
 			RectTransform.MinimumSize = (
@@ -49,8 +49,8 @@ public class FullLayout(RectTransform rectTransform, Hierarchy hierarchy) : Rect
 		
 		foreach (RectTransform child in laidOutChildren)
 		{
-			child.Position = (LeftMargin - RightMargin, BottomMargin - TopMargin);
-			child.Size = interiorSize;
+			child.LocalPosition = (LeftMargin - RightMargin, BottomMargin - TopMargin);
+			child.LocalSize = interiorSize;
 		}
 	}
 }

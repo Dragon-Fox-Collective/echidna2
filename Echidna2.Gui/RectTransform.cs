@@ -7,17 +7,20 @@ public class RectTransform
 	public delegate void LocalTransformChangedHandler();
 	public event LocalTransformChangedHandler? LocalTransformChanged;
 	
-	private Vector2 position;
-	public Vector2 Position
+	private Vector2 localPosition;
+	public Vector2 LocalPosition
 	{
-		get => position;
+		get => localPosition;
 		set
 		{
-			position = value;
+			localPosition = value;
 			RecalculateLocalTransform();
 		}
 	}
-	public Vector2 Size { get; set; }
+	public Vector2 GlobalPosition => GlobalTransform.TransformPoint(localPosition);
+	
+	public Vector2 LocalSize { get; set; }
+	public Vector2 GlobalSize => GlobalTransform.InverseTransformDirection(LocalSize);
 	
 	private Vector2 scale = Vector2.One;
 	public Vector2 Scale
@@ -116,11 +119,11 @@ public class RectTransform
 	
 	private void RecalculateLocalTransform()
 	{
-		LocalTransform = Matrix4.Translation(Position.WithZ(Depth)) * Matrix4.Scale(Scale.WithZ(1));
+		LocalTransform = Matrix4.Translation(LocalPosition.WithZ(Depth)) * Matrix4.Scale(Scale.WithZ(1));
 	}
 	
 	public bool ContainsGlobalPoint(Vector2 point) => ContainsLocalPoint(GlobalTransform.InverseTransformPoint(point));
-	public bool ContainsLocalPoint(Vector2 point) => point.X >= Position.X - Size.X / 2 && point.X <= Position.X + Size.X / 2 && point.Y >= Position.Y - Size.Y / 2 && point.Y <= Position.Y + Size.Y / 2;
+	public bool ContainsLocalPoint(Vector2 point) => point.X >= LocalPosition.X - LocalSize.X / 2 && point.X <= LocalPosition.X + LocalSize.X / 2 && point.Y >= LocalPosition.Y - LocalSize.Y / 2 && point.Y <= LocalPosition.Y + LocalSize.Y / 2;
 }
 
 [Flags]

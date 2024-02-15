@@ -20,5 +20,15 @@ public class Camera
 		INotificationPropagator.Notify(notification, World);
 	}
 	
-	public Vector3 ScreenToGlobal(Vector2 position) => ViewMatrix.InverseTransformPoint(ProjectionMatrix.InverseTransformPoint(new Vector3(2 * position.X / Size.X - 1, -(2 * position.Y / Size.Y - 1), 1)));
+	public Vector3 ScreenToGlobal(Vector2 position)
+	{
+		Vector3 normalized = new (position.X / Size.X * 2 - 1, -(position.Y / Size.Y * 2 - 1), 0);
+		return ViewMatrix.InverseTransformPoint(ProjectionMatrix.InverseTransformPoint(normalized));
+	}
+	// Not sure why the y's are being flipped in one but not the other
+	public Vector2 GlobalToScreen(Vector3 position)
+	{
+		Vector3 normalized = ProjectionMatrix.TransformPoint(ViewMatrix.TransformPoint(position));
+		return new Vector2((normalized.X + 1) * Size.X / 2, (normalized.Y + 1) * Size.Y / 2);
+	}
 }
