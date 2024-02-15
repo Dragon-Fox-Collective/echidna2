@@ -14,6 +14,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Echidna2.Gui", "Echidna2.Gu
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StbSharp.MonoGame.Test", "StbSharp.MonoGame.Test\StbSharp.MonoGame.Test.csproj", "{6D632266-79C2-4FD8-BC18-3F3A7F2E97E5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TooManyExtensions", "TooManyExtensions\TooManyExtensions.csproj", "{E7E57B27-0840-460B-8796-3EFAD75EA190}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -48,6 +50,10 @@ Global
 		{6D632266-79C2-4FD8-BC18-3F3A7F2E97E5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6D632266-79C2-4FD8-BC18-3F3A7F2E97E5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6D632266-79C2-4FD8-BC18-3F3A7F2E97E5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E7E57B27-0840-460B-8796-3EFAD75EA190}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E7E57B27-0840-460B-8796-3EFAD75EA190}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E7E57B27-0840-460B-8796-3EFAD75EA190}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E7E57B27-0840-460B-8796-3EFAD75EA190}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 	EndGlobalSection

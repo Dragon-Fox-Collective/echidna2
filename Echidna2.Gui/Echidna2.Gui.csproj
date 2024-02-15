@@ -14,16 +14,16 @@
     </ItemGroup>
 
     <ItemGroup>
-      <None Update="font.frag">
+      <None Update="Assets\rect.frag">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
-      <None Update="uv-coords.frag">
+      <None Update="Assets\font.frag">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
-      <None Update="CascadiaCode.ttf">
+      <None Update="Assets\CascadiaCode.ttf">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
-      <None Update="rect.frag">
+      <None Update="Assets\uv-coords.frag">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
     </ItemGroup>

@@ -9,8 +9,8 @@ namespace Echidna2.Gui;
 
 public class Text(RectTransform rectTransform) : INotificationListener<IDraw.Notification>
 {
-	private static Font font = new("CascadiaCode.ttf");
-	private static Shader shader = new(ShaderNodeUtil.MainVertexShader, File.ReadAllText("font.frag"));
+	public static readonly Font CascadiaCode = new("Assets/CascadiaCode.ttf");
+	private static readonly Shader Shader = new(ShaderNodeUtil.MainVertexShader, File.ReadAllText("Assets/font.frag"));
 	
 	public string TextString { get; set; } = "";
 	public Color Color { get; set; } = Color.White;
@@ -24,18 +24,18 @@ public class Text(RectTransform rectTransform) : INotificationListener<IDraw.Not
 		GL.Enable(EnableCap.Blend);
 		GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
 		
-		shader.Bind(notification.Camera.ViewMatrix, notification.Camera.ProjectionMatrix);
+		Shader.Bind(notification.Camera.ViewMatrix, notification.Camera.ProjectionMatrix);
 		
-		font.Bind();
-		shader.SetInt("texture0", 0);
+		CascadiaCode.Bind();
+		Shader.SetInt("texture0", 0);
 		
 		Vector2 relativeRectSize = rectTransform.GlobalSize;
 		
 		Vector2 size = (
-			TextString.Select(c => font.FontResult!.Glyphs[c]).Sum(glyph => glyph.XAdvance),
-			TextString.Select(c => font.FontResult!.Glyphs[c]).Max(glyph => glyph.Height));
+			TextString.Select(c => CascadiaCode.FontResult!.Glyphs[c]).Sum(glyph => glyph.XAdvance),
+			TextString.Select(c => CascadiaCode.FontResult!.Glyphs[c]).Max(glyph => glyph.Height));
 		
-		shader.SetMatrix4("distortion", Matrix4.Translation(new Vector3(
+		Shader.SetMatrix4("distortion", Matrix4.Translation(new Vector3(
 			Justification switch
 			{
 				TextJustification.Left => -relativeRectSize.X / 2,
@@ -51,11 +51,11 @@ public class Text(RectTransform rectTransform) : INotificationListener<IDraw.Not
 				_ => throw new IndexOutOfRangeException()
 			} + 5, // TODO: Figure out where the midline is
 			0)));
-		shader.SetMatrix4("transform", rectTransform.GlobalTransform);
-		shader.SetColor("color", Color);
+		Shader.SetMatrix4("transform", rectTransform.GlobalTransform);
+		Shader.SetColor("color", Color);
 		
 		float xStart = 0;
-		foreach (GlyphInfo glyph in TextString.Select(c => font.FontResult!.Glyphs[c]))
+		foreach (GlyphInfo glyph in TextString.Select(c => CascadiaCode.FontResult!.Glyphs[c]))
 		{
 			float x = xStart + glyph.XOffset;
 			float y = -glyph.Height - glyph.YOffset;

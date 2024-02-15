@@ -10,15 +10,23 @@
       <ProjectReference Include="..\Echidna2.Core\Echidna2.Core.csproj" />
         <ProjectReference Include="..\Echidna2.SourceGenerators\Echidna2.SourceGenerators.csproj" OutputItemType="Analyzer" />
         <ProjectReference Include="..\StbSharp.MonoGame.Test\StbSharp.MonoGame.Test.csproj" />
+        <ProjectReference Include="..\TooManyExtensions\TooManyExtensions.csproj" />
     </ItemGroup>
 
     <ItemGroup>
+      <PackageReference Include="CjClutter.ObjLoader.Unofficial" Version="1.1.0" />
       <PackageReference Include="OpenTK" Version="4.8.2" />
       <PackageReference Include="OpenTK.Windowing.Desktop" Version="4.8.2" />
     </ItemGroup>
 
     <ItemGroup>
       <None Update="global-coords.frag">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="Assets\cube.obj">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="Assets\sphere.obj">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
     </ItemGroup>

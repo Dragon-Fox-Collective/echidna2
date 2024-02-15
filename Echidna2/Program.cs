@@ -83,7 +83,7 @@ Window window = new(new GameWindow(
 	{
 		ClientSize = (1280, 720),
 		Title = "Echidna Engine",
-		Icon = CreateWindowIcon("Echidna.png"),
+		Icon = CreateWindowIcon("Assets/Echidna.png"),
 	}
 ))
 {

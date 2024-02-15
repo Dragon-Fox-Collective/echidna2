@@ -78,7 +78,7 @@ public class ComponentSourceGenerator : IIncrementalGenerator
 	}
 	
 	public static IEnumerable<ISymbol> GetAllUnimplementedMembers(INamedTypeSymbol classType, INamedTypeSymbol interfaceType) =>
-		interfaceType.GetMembers().Where(member => member.DeclaredAccessibility == Accessibility.Public && !member.Name.StartsWith("get_") && !member.Name.StartsWith("set_") && !member.Name.StartsWith("add_") && !member.Name.StartsWith("remove_") && !classType.GetMembers(member.Name).Any());
+		interfaceType.GetMembers().Where(member => member.DeclaredAccessibility == Accessibility.Public && !member.IsStatic && !member.Name.StartsWith("get_") && !member.Name.StartsWith("set_") && !member.Name.StartsWith("add_") && !member.Name.StartsWith("remove_") && !classType.GetMembers(member.Name).Any());
 	
 	private static IEnumerable<ISymbol> GetAllUnimplementedInterfaceMembers(INamedTypeSymbol classType, INamedTypeSymbol interfaceType) =>
 		interfaceType.AllInterfaces.Append(interfaceType).SelectMany(inter => GetAllUnimplementedMembers(classType, inter));
