@@ -29,7 +29,6 @@ public class Text(RectTransform rectTransform) : INotificationListener<IDraw.Not
 		font.Bind();
 		shader.SetInt("texture0", 0);
 		
-		// FIXME: This will not work once rotations exist
 		Vector2 relativeRectSize = rectTransform.GlobalTransform.InverseTransformDirection(rectTransform.Size);
 		
 		Vector2 size = (
@@ -50,7 +49,7 @@ public class Text(RectTransform rectTransform) : INotificationListener<IDraw.Not
 				TextAlignment.Center => -size.Y / 2,
 				TextAlignment.Bottom => -relativeRectSize.Y,
 				_ => throw new IndexOutOfRangeException()
-			},
+			} + 5, // TODO: Figure out where the midline is
 			0)));
 		shader.SetMatrix4("transform", rectTransform.GlobalTransform);
 		shader.SetColor("color", Color);

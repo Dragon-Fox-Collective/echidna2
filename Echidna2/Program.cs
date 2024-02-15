@@ -1,6 +1,6 @@
-﻿using Echidna2.Core;
+﻿using Echidna2;
+using Echidna2.Core;
 using Echidna2.Gui;
-using Echidna2.Mathematics;
 using Echidna2.Rendering;
 using OpenTK.Windowing.Common.Input;
 using OpenTK.Windowing.Desktop;
@@ -17,57 +17,61 @@ Console.WriteLine("Hello, World!");
 RectWithHierarchy root = new() { Name = "Root", IsGlobal = true, Color = Color.Magenta };
 
 VLayoutWithHierarchy toolbarBox = new() { Name = "Toolbar Box", AnchorPreset = AnchorPreset.Full };
-root.PrefabChildren.AddChild(toolbarBox);
+root.AddChild(toolbarBox);
 
 RectWithHierarchy toolbar = new() { Name = "Toolbar", MinimumSize = (0, 50) };
-toolbarBox.PrefabChildren.AddChild(toolbar);
+toolbarBox.AddChild(toolbar);
 
 TextRect toolbarText = new() { Name = "Toolbar Text", TextString = "This is a toolbar.", AnchorPreset = AnchorPreset.Full };
-toolbar.PrefabChildren.AddChild(toolbarText);
+toolbar.AddChild(toolbarText);
 
 HLayoutWithHierarchy mainPanels = new() { Name = "Main Panels", VerticalExpand = true };
-toolbarBox.PrefabChildren.AddChild(mainPanels);
+toolbarBox.AddChild(mainPanels);
 
 VLayoutWithHierarchy hierarchyBox = new() { Name = "Hierarchy Box" };
-mainPanels.PrefabChildren.AddChild(hierarchyBox);
+mainPanels.AddChild(hierarchyBox);
 
 RectWithHierarchy hierarchy = new() { Name = "Hierarchy", VerticalExpand = true, MinimumSize = (200, 0) };
-hierarchyBox.PrefabChildren.AddChild(hierarchy);
+hierarchyBox.AddChild(hierarchy);
 
 RectWithHierarchy fileBrowser = new() { Name = "File Browser", VerticalExpand = true, MinimumSize = (200, 0) };
-hierarchyBox.PrefabChildren.AddChild(fileBrowser);
+hierarchyBox.AddChild(fileBrowser);
 
 VLayoutWithHierarchy sceneBox = new() { Name = "Scene Box", HorizontalExpand = true };
-mainPanels.PrefabChildren.AddChild(sceneBox);
+mainPanels.AddChild(sceneBox);
 
-RectWithHierarchy scene = new() { Name = "Scene", VerticalExpand = true };
-sceneBox.PrefabChildren.AddChild(scene);
+DisplayOnlyLayer scene = new() { Name = "Scene", VerticalExpand = true };
+sceneBox.AddChild(scene);
 
 RectWithHierarchy console = new() { Name = "Console", MinimumSize = (100, 200) };
-sceneBox.PrefabChildren.AddChild(console);
+sceneBox.AddChild(console);
 
 VLayoutWithHierarchy inspectorBox = new() { Name = "Inspector Box" };
-mainPanels.PrefabChildren.AddChild(inspectorBox);
+mainPanels.AddChild(inspectorBox);
 
 RectWithHierarchy inspector = new() { Name = "Inspector", VerticalExpand = true, MinimumSize = (200, 0) };
-inspectorBox.PrefabChildren.AddChild(inspector);
+inspectorBox.AddChild(inspector);
 
-RectButton inspectorButton = new() { Name = "Inspector Button", AnchorPreset = AnchorPreset.Center, MinimumSize = (150, 50) };
+ButtonRect inspectorButton = new() { Name = "Inspector Button", AnchorPreset = AnchorPreset.Center, MinimumSize = (150, 50) };
 inspectorButton.Clicked += () => Console.WriteLine("Inspector Button Clicked!");
-inspector.PrefabChildren.AddChild(inspectorButton);
+inspector.AddChild(inspectorButton);
 
 
 
-RectWithHierarchy someHierarchy = new() { Name = "Some Hierarchy" };
-RectWithHierarchy someRect = new() { Name = "Some Rect" };
-someHierarchy.PrefabChildren.AddChild(someRect);
-TextRect someText = new() { Name = "Some Text", TextString = "This is some text." };
-someRect.PrefabChildren.AddChild(someText);
-TextRect someOtherText = new() { Name = "Some Other Text", TextString = "This is some other text." };
-someHierarchy.PrefabChildren.AddChild(someOtherText);
+RectWithHierarchy someHierarchy = new() { Name = "Some Hierarchy", AnchorPreset = AnchorPreset.Full, Color = Color.DarkCyan };
+RectWithHierarchy someRect = new() { Name = "Some Rect", AnchorPreset = AnchorPreset.Center, MinimumSize = (200, 200) };
+someHierarchy.AddChild(someRect);
+TextRect someText = new() { Name = "Some Text", TextString = "This is some text.", AnchorPreset = AnchorPreset.TopCenter };
+someRect.AddChild(someText);
+TextRect someOtherText = new() { Name = "Some Other Text", TextString = "This is some other text.", AnchorPreset = AnchorPreset.BottomCenter };
+someHierarchy.AddChild(someOtherText);
+ButtonRect someButton = new() { Name = "Some Button", AnchorPreset = AnchorPreset.CenterLeft, MinimumSize = (150, 50) };
+someHierarchy.AddChild(someButton);
 
-HierarchyDisplay hierarchyDisplay = new(someHierarchy) { Name = "Hierarchy Display", AnchorPreset = AnchorPreset.Full };
-hierarchy.PrefabChildren.AddChild(hierarchyDisplay);
+scene.AddChild(someHierarchy);
+
+HierarchyDisplay hierarchyDisplay = new(someHierarchy) { Name = "Hierarchy Display", AnchorPreset = AnchorPreset.Full, TopMargin = 10 };
+hierarchy.AddChild(hierarchyDisplay);
 
 
 
@@ -97,203 +101,4 @@ static WindowIcon CreateWindowIcon(string path)
 	Span<byte> imageBytes = stackalloc byte[32 * 32 * 4];
 	image.Frames.RootFrame.CopyPixelDataTo(imageBytes);
 	return new WindowIcon(new OpenTK.Windowing.Common.Input.Image(image.Width, image.Height, imageBytes.ToArray()));
-}
-
-
-partial class RectWithHierarchy : INotificationPropagator, ICanBeLaidOut, INamed, IHasChildren
-{
-	[ExposeMembersInClass] public Named Named { get; set; }
-	[ExposeMembersInClass] public RectTransform RectTransform { get; set; }
-	public RectLayout RectLayout { get; set; }
-	[ExposeMembersInClass] public Rect Rect { get; set; }
-	public Hierarchy PrefabChildren { get; set; }
-	
-	public IEnumerable<object> Children => PrefabChildren.Children;
-	
-	public RectWithHierarchy()
-	{
-		Named = new Named("Rect With Hierarchy");
-		PrefabChildren = new Hierarchy();
-		RectTransform = new RectTransform();
-		RectLayout = new RectLayout(RectTransform, PrefabChildren);
-		Rect = new Rect(RectTransform);
-	}
-	
-	public void Notify<T>(T notification)
-	{
-		INotificationPropagator.Notify(notification, Rect, RectLayout, PrefabChildren);
-	}
-}
-
-
-partial class RectButton : INotificationPropagator, ICanBeLaidOut, INamed, IHasChildren
-{
-	[ExposeMembersInClass] public Named Named { get; set; }
-	[ExposeMembersInClass] public RectTransform RectTransform { get; set; }
-	public RectLayout RectLayout { get; set; }
-	[ExposeMembersInClass] public Rect Rect { get; set; }
-	public Hierarchy PrefabChildren { get; set; }
-	[ExposeMembersInClass] public Button Button { get; set; }
-	
-	public IEnumerable<object> Children => PrefabChildren.Children;
-	
-	public RectButton()
-	{
-		Named = new Named("Rect With Hierarchy");
-		PrefabChildren = new Hierarchy();
-		RectTransform = new RectTransform();
-		RectLayout = new RectLayout(RectTransform, PrefabChildren);
-		Rect = new Rect(RectTransform);
-		Button = new Button(RectTransform);
-		
-		Rect.Color = Color.LightGray;
-		Button.MouseDown += () => Rect.Color = Color.DarkGray;
-		Button.MouseUp += () => Rect.Color = Color.LightGray;
-	}
-	
-	public void Notify<T>(T notification)
-	{
-		INotificationPropagator.Notify(notification, Rect, Button, RectLayout, PrefabChildren);
-	}
-}
-
-
-partial class HLayoutWithHierarchy : INotificationPropagator, ICanBeLaidOut, INamed, IHasChildren
-{
-	[ExposeMembersInClass] public Named Named { get; set; }
-	[ExposeMembersInClass] public RectTransform RectTransform { get; set; }
-	[ExposeMembersInClass] public HorizontalLayout Layout { get; set; }
-	public Hierarchy PrefabChildren { get; set; }
-	
-	public IEnumerable<object> Children => PrefabChildren.Children;
-	
-	public HLayoutWithHierarchy()
-	{
-		Named = new Named("Horizontal Layout");
-		PrefabChildren = new Hierarchy();
-		RectTransform = new RectTransform();
-		Layout = new HorizontalLayout(RectTransform, PrefabChildren);
-	}
-	
-	public void Notify<T>(T notification)
-	{
-		INotificationPropagator.Notify(notification, Layout, PrefabChildren);
-	}
-}
-
-
-partial class VLayoutWithHierarchy : INotificationPropagator, ICanBeLaidOut, INamed, IHasChildren
-{
-	[ExposeMembersInClass] public Named Named { get; set; }
-	[ExposeMembersInClass] public RectTransform RectTransform { get; set; }
-	[ExposeMembersInClass] public VerticalLayout Layout { get; set; }
-	public Hierarchy PrefabChildren { get; set; }
-	
-	public IEnumerable<object> Children => PrefabChildren.Children;
-	
-	public VLayoutWithHierarchy()
-	{
-		Named = new Named("Vertical Layout");
-		PrefabChildren = new Hierarchy();
-		RectTransform = new RectTransform();
-		Layout = new VerticalLayout(RectTransform, PrefabChildren);
-	}
-	
-	public void Notify<T>(T notification)
-	{
-		INotificationPropagator.Notify(notification, Layout, PrefabChildren);
-	}
-}
-
-
-partial class TextRect : INotificationPropagator, ICanBeLaidOut, INamed
-{
-	[ExposeMembersInClass] public Named Named { get; set; }
-	[ExposeMembersInClass] public RectTransform RectTransform { get; set; }
-	[ExposeMembersInClass] public Text Text { get; set; }
-	
-	public TextRect()
-	{
-		Named = new Named("Text");
-		RectTransform = new RectTransform();
-		Text = new Text(RectTransform);
-	}
-	
-	public void Notify<T>(T notification)
-	{
-		INotificationPropagator.Notify(notification, Text);
-	}
-}
-
-
-partial class HierarchyDisplay : INotificationPropagator, ICanBeLaidOut, INamed
-{
-	[ExposeMembersInClass] public Named Named { get; set; }
-	[ExposeMembersInClass] public RectTransform RectTransform { get; set; }
-	public IHasChildren HierarchyToDisplay { get; set; }
-	private Hierarchy DisplayElements { get; set; }
-	public FullLayout Layout { get; set; }
-	
-	public HierarchyDisplay(IHasChildren hierarchyToDisplay)
-	{
-		Named = new Named("Hierarchy Display");
-		RectTransform = new RectTransform();
-		HierarchyToDisplay = hierarchyToDisplay;
-		DisplayElements = new Hierarchy();
-		Layout = new FullLayout(RectTransform, DisplayElements);
-		
-		DisplayElements.AddChild(BoxOfHierarchy(HierarchyToDisplay));
-	}
-	
-	private static FullLayoutWithHierarchy BoxOfHierarchy(object obj)
-	{
-		FullLayoutWithHierarchy box = new() { Name = $"Box for {obj}", AnchorPreset = AnchorPreset.Full, LeftMargin = 10 };
-		VLayoutWithHierarchy layout = new() { Name = $"Layout for box for {obj}", AnchorPreset = AnchorPreset.Full };
-		box.PrefabChildren.AddChild(layout);
-		
-		TextRect text = new()
-		{
-			TextString = obj is INamed named ? named.Name : obj.GetType().Name + " (no name)",
-			AnchorPreset = AnchorPreset.Full,
-			Scale = Vector2.One * 0.5,
-			MinimumSize = (0, 25),
-			Justification = TextJustification.Left,
-		};
-		layout.PrefabChildren.AddChild(text);
-		
-		if (obj is IHasChildren hasChildren)
-			foreach (object child in hasChildren.Children)
-				layout.PrefabChildren.AddChild(BoxOfHierarchy(child));
-		
-		return box;
-	}
-	
-	public void Notify<T>(T notification)
-	{
-		INotificationPropagator.Notify(notification, Layout, DisplayElements);
-	}
-}
-
-
-partial class FullLayoutWithHierarchy : INotificationPropagator, ICanBeLaidOut, INamed, IHasChildren
-{
-	[ExposeMembersInClass] public Named Named { get; set; }
-	[ExposeMembersInClass] public RectTransform RectTransform { get; set; }
-	[ExposeMembersInClass] public FullLayout Layout { get; set; }
-	public Hierarchy PrefabChildren { get; set; }
-	
-	public IEnumerable<object> Children => PrefabChildren.Children;
-	
-	public FullLayoutWithHierarchy()
-	{
-		Named = new Named("Vertical Layout");
-		PrefabChildren = new Hierarchy();
-		RectTransform = new RectTransform();
-		Layout = new FullLayout(RectTransform, PrefabChildren);
-	}
-	
-	public void Notify<T>(T notification)
-	{
-		INotificationPropagator.Notify(notification, Layout, PrefabChildren);
-	}
 }

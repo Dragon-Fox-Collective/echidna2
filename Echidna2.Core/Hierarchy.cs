@@ -1,6 +1,6 @@
 ﻿namespace Echidna2.Core;
 
-public class Hierarchy : INotificationPropagator, IHasChildren
+public class Hierarchy : INotificationPropagator, IHasChildren, ICanAddChildren
 {
 	public delegate void ChildAddedHandler(object child);
 	public event ChildAddedHandler? ChildAdded;
@@ -55,4 +55,10 @@ public interface IHasChildren
 	
 	private static void PrintLayer(int depth, object obj) => PrintLayer(depth, obj is INamed named ? named.Name : obj.GetType().Name + " (no name)");
 	private static void PrintLayer(int depth, string name) => Console.WriteLine((depth > 0 ? string.Concat(Enumerable.Repeat("  ", depth - 1)) + "\u2514 " : "") + name);
+}
+
+public interface ICanAddChildren
+{
+	public void AddChild(object child);
+	public bool RemoveChild(object child);
 }
