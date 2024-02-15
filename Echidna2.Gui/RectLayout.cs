@@ -1,10 +1,14 @@
 ﻿using Echidna2.Core;
 using Echidna2.Mathematics;
+using Echidna2.Rendering;
+using OpenTK.Graphics.OpenGL4;
 
 namespace Echidna2.Gui;
 
-public class RectLayout : INotificationHook<IUpdate.Notification>
+public class RectLayout : INotificationHook<IUpdate.Notification>, INotificationHook<IDraw.Notification>
 {
+	public bool ClipChildren;
+	
 	private List<(RectTransform child, RectTransform.LocalTransformChangedHandler handler)> localTransformChangedHandlers = [];
 	
 	protected RectTransform RectTransform;
@@ -42,12 +46,12 @@ public class RectLayout : INotificationHook<IUpdate.Notification>
 		foreach (ICanBeLaidOut child in Hierarchy.Children.OfType<ICanBeLaidOut>())
 		{
 			RectTransform childRect = child.RectTransform;
-			double left = RectTransform.Size.X * (childRect.AnchorLeft - 0.5) + childRect.AnchorOffsetLeft;
-			double right = RectTransform.Size.X * (childRect.AnchorRight - 0.5) + childRect.AnchorOffsetRight;
-			double bottom = RectTransform.Size.Y * (childRect.AnchorBottom - 0.5) + childRect.AnchorOffsetBottom;
-			double top = RectTransform.Size.Y * (childRect.AnchorTop - 0.5) + childRect.AnchorOffsetTop;
-			childRect.Size = new Vector2(Math.Max(right - left, childRect.MinimumSize.X), Math.Max(top - bottom, childRect.MinimumSize.Y));
-			childRect.Position = new Vector2(left + right, bottom + top) / 2;
+			double left = RectTransform.LocalSize.X * (childRect.AnchorLeft - 0.5) + childRect.AnchorOffsetLeft;
+			double right = RectTransform.LocalSize.X * (childRect.AnchorRight - 0.5) + childRect.AnchorOffsetRight;
+			double bottom = RectTransform.LocalSize.Y * (childRect.AnchorBottom - 0.5) + childRect.AnchorOffsetBottom;
+			double top = RectTransform.LocalSize.Y * (childRect.AnchorTop - 0.5) + childRect.AnchorOffsetTop;
+			childRect.LocalSize = new Vector2(Math.Max(right - left, childRect.MinimumSize.X), Math.Max(top - bottom, childRect.MinimumSize.Y));
+			childRect.LocalPosition = new Vector2(left + right, bottom + top) / 2;
 			childRect.Depth = RectTransform.Depth + 1;
 			
 			// Console.WriteLine($"{childRect.AnchorPreset} {left} {right} {bottom} {top} {childRect.Size} {childRect.Position} {childRect.Depth}");
@@ -60,6 +64,25 @@ public class RectLayout : INotificationHook<IUpdate.Notification>
 	public virtual void OnPostPropagate(IUpdate.Notification notification)
 	{
 		
+	}
+	
+	public void OnPreNotify(IDraw.Notification notification)
+	{
+		if (ClipChildren)
+		{
+			Vector2 screenPosition = notification.Camera.GlobalToScreen(RectTransform.GlobalPosition.WithZ(1));
+			Vector2 screenSize = RectTransform.GlobalSize;
+			ScissorStack.PushScissor(screenPosition.X - screenSize.X / 2, screenPosition.Y - screenSize.Y / 2, screenSize.X, screenSize.Y);
+		}
+	}
+	public void OnPostNotify(IDraw.Notification notification)
+	{
+		
+	}
+	public void OnPostPropagate(IDraw.Notification notification)
+	{
+		if (ClipChildren)
+			ScissorStack.PopScissor();
 	}
 }
 

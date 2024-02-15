@@ -31,7 +31,7 @@ public class HorizontalLayout(RectTransform rectTransform, Hierarchy hierarchy) 
 		else
 			RectTransform.MinimumSize = (0, 0);
 		
-		double remainingWidth = RectTransform.Size.X - RectTransform.MinimumSize.X;
+		double remainingWidth = RectTransform.LocalSize.X - RectTransform.MinimumSize.X;
 		double totalExpand = laidOutChildren.Where(child => child.HorizontalExpand).Sum(child => child.HorizontalExpandFactor);
 		
 		double directionModifier = LayoutDirection switch
@@ -40,14 +40,14 @@ public class HorizontalLayout(RectTransform rectTransform, Hierarchy hierarchy) 
 			HorizontalLayoutDirection.RightToLeft => -1,
 			_ => throw new IndexOutOfRangeException()
 		};
-		double x = -directionModifier * RectTransform.Size.X / 2;
+		double x = -directionModifier * RectTransform.LocalSize.X / 2;
 		foreach (RectTransform child in laidOutChildren)
 		{
 			double minimumWidth = child.MinimumSize.X;
 			double extraWidth = 0;
 			if (child.HorizontalExpand && totalExpand > 0)
 				extraWidth += remainingWidth * child.HorizontalExpandFactor / totalExpand;
-			child.Position = (
+			child.LocalPosition = (
 				x + directionModifier * child.HorizontalSizing switch {
 					LayoutSizing.Stretch => minimumWidth / 2 + extraWidth / 2,
 					LayoutSizing.FitBegin => minimumWidth / 2,
@@ -57,13 +57,13 @@ public class HorizontalLayout(RectTransform rectTransform, Hierarchy hierarchy) 
 				},
 				child.VerticalSizing switch {
 					LayoutSizing.Stretch => 0,
-					LayoutSizing.FitBegin => -RectTransform.Size.Y / 2 + child.MinimumSize.Y / 2,
+					LayoutSizing.FitBegin => -RectTransform.LocalSize.Y / 2 + child.MinimumSize.Y / 2,
 					LayoutSizing.FitCenter => 0,
-					LayoutSizing.FitEnd => +RectTransform.Size.Y / 2 - child.MinimumSize.Y / 2,
+					LayoutSizing.FitEnd => +RectTransform.LocalSize.Y / 2 - child.MinimumSize.Y / 2,
 					_ => throw new IndexOutOfRangeException()
 				});
 			if (child.HorizontalSizing == LayoutSizing.Stretch)
-				child.Size = (minimumWidth + extraWidth, child.Size.Y);
+				child.LocalSize = (minimumWidth + extraWidth, child.LocalSize.Y);
 			x += directionModifier * (minimumWidth + extraWidth);
 		}
 	}

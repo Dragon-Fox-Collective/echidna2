@@ -58,7 +58,7 @@ inspector.AddChild(inspectorButton);
 
 
 
-RectWithHierarchy someHierarchy = new() { Name = "Some Hierarchy", AnchorPreset = AnchorPreset.Full, Color = Color.DarkCyan };
+RectWithHierarchy someHierarchy = new() { Name = "Some Hierarchy", AnchorPreset = AnchorPreset.Full, Color = Color.DarkCyan, ClipChildren = true };
 RectWithHierarchy someRect = new() { Name = "Some Rect", AnchorPreset = AnchorPreset.Center, MinimumSize = (200, 200) };
 someHierarchy.AddChild(someRect);
 TextRect someText = new() { Name = "Some Text", TextString = "This is some text.", AnchorPreset = AnchorPreset.TopCenter };
@@ -89,7 +89,7 @@ Window window = new(new GameWindow(
 {
 	Camera = new Camera { World = root }
 };
-window.Resize += size => root.Size = size;
+window.Resize += size => root.LocalSize = size;
 window.Run();
 return;
 

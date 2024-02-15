@@ -29,7 +29,7 @@ public class Text(RectTransform rectTransform) : INotificationListener<IDraw.Not
 		font.Bind();
 		shader.SetInt("texture0", 0);
 		
-		Vector2 relativeRectSize = rectTransform.GlobalTransform.InverseTransformDirection(rectTransform.Size);
+		Vector2 relativeRectSize = rectTransform.GlobalSize;
 		
 		Vector2 size = (
 			TextString.Select(c => font.FontResult!.Glyphs[c]).Sum(glyph => glyph.XAdvance),
