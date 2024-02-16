@@ -62,57 +62,58 @@ public struct Quaternion(double x, double y, double z, double w) : IEquatable<Qu
 		// https://www.euclideanspace.com/maths/geometry/rotations/conversions/matrixToQuaternion/
 		// maybe https://gamedev.net/forums/topic/648857-how-to-implement-lookrotation/5113120/ ?
 		// https://www.andre-gaschler.com/rotationconverter/
+		// https://stackoverflow.com/questions/52413464/look-at-quaternion-using-up-vector
 		
-		forward = forward.Normalized;
-		Vector3 right = forward.Cross(up).Normalized;
-		up = right.Cross(forward);
+		forward = -forward.Normalized;
+		Vector3 right = up.Cross(forward).Normalized;
+		up = forward.Cross(right);
 		
 		double m00 = right.X;
 		double m01 = right.Y;
 		double m02 = right.Z;
-		double m20 = up.X;
-		double m21 = up.Y;
-		double m22 = up.Z;
-		double m10 = forward.X;
-		double m11 = forward.Y;
-		double m12 = forward.Z;
+		double m10 = up.X;
+		double m11 = up.Y;
+		double m12 = up.Z;
+		double m20 = forward.X;
+		double m21 = forward.Y;
+		double m22 = forward.Z;
 		
 		double trace = m00 + m11 + m22;
 		if (trace > 0)
 		{
 			double s = Math.Sqrt(trace + 1) * 2;
 			return new Quaternion(
-				(m12 - m21) / s,
-				(m20 - m02) / s,
-				(m01 - m10) / s,
-				0.25f * s);
+				(m21 - m12) / s,
+				(m02 - m20) / s,
+				(m10 - m01) / s,
+				0.25 * s);
 		}
 		else if (m00 > m11 && m00 > m22)
 		{
 			double s = Math.Sqrt(1 + m00 - m11 - m22) * 2;
 			return new Quaternion(
-				0.25f * s,
-				(m01 + m10) / s,
+				0.25 * s,
+				(m10 + m01) / s,
 				(m02 + m20) / s,
-				(m12 - m21) / s);
+				(m21 - m12) / s);
 		}
 		else if (m11 > m22)
 		{
 			double s = Math.Sqrt(1 + m11 - m00 - m22) * 2;
 			return new Quaternion(
-				(m01 + m10) / s,
-				0.25f * s,
-				(m12 + m21) / s,
-				(m20 - m02) / s);
+				(m10 + m01) / s,
+				0.25 * s,
+				(m21 + m12) / s,
+				(m02 - m20) / s);
 		}
 		else
 		{
 			double s = Math.Sqrt(1 + m22 - m00 - m11) * 2;
 			return new Quaternion(
 				(m02 + m20) / s,
-				(m12 + m21) / s,
-				0.25f * s,
-				(m01 - m10) / s);
+				(m21 + m12) / s,
+				0.25 * s,
+				(m10 - m01) / s);
 		}
 	}
 	public static Quaternion LookAt(Vector3 position, Vector3 target, Vector3 up) => LookToward(target - position, up);

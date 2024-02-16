@@ -22,13 +22,13 @@ public class RectTransform
 	public Vector2 LocalSize { get; set; }
 	public Vector2 GlobalSize => GlobalTransform.InverseTransformDirection(LocalSize);
 	
-	private Vector2 scale = Vector2.One;
-	public Vector2 Scale
+	private Vector2 localScale = Vector2.One;
+	public Vector2 LocalScale
 	{
-		get => scale;
+		get => localScale;
 		set
 		{
-			scale = value;
+			localScale = value;
 			RecalculateLocalTransform();
 		}
 	}
@@ -119,7 +119,7 @@ public class RectTransform
 	
 	private void RecalculateLocalTransform()
 	{
-		LocalTransform = Matrix4.Translation(LocalPosition.WithZ(Depth)) * Matrix4.Scale(Scale.WithZ(1));
+		LocalTransform = Matrix4.Translation(LocalPosition.WithZ(Depth)) * Matrix4.Scale(LocalScale.WithZ(1));
 	}
 	
 	public bool ContainsGlobalPoint(Vector2 point) => ContainsLocalPoint(GlobalTransform.InverseTransformPoint(point));

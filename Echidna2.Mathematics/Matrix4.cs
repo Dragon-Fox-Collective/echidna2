@@ -94,11 +94,30 @@ public struct Matrix4(
 		0, 0, 1, translation.Z,
 		0, 0, 0, 1);
 	
-	public static Matrix4 Rotation(Quaternion rotation) => new(
-		1 - 2 * rotation.Y * rotation.Y - 2 * rotation.Z * rotation.Z, 2 * rotation.X * rotation.Y - 2 * rotation.Z * rotation.W, 2 * rotation.X * rotation.Z + 2 * rotation.Y * rotation.W, 0,
-		2 * rotation.X * rotation.Y + 2 * rotation.Z * rotation.W, 1 - 2 * rotation.X * rotation.X - 2 * rotation.Z * rotation.Z, 2 * rotation.Y * rotation.Z - 2 * rotation.X * rotation.W, 0,
-		2 * rotation.X * rotation.Z - 2 * rotation.Y * rotation.W, 2 * rotation.Y * rotation.Z + 2 * rotation.X * rotation.W, 1 - 2 * rotation.X * rotation.X - 2 * rotation.Y * rotation.Y, 0,
-		0, 0, 0, 1);
+	public static Matrix4 Rotation(Quaternion rotation)
+	{
+		double x = rotation.X;
+		double y = rotation.Y;
+		double z = rotation.Z;
+		double w = rotation.W;
+		double x2 = x + x;
+		double y2 = y + y;
+		double z2 = z + z;
+		double xx = x * x2;
+		double xy = x * y2;
+		double xz = x * z2;
+		double yy = y * y2;
+		double yz = y * z2;
+		double zz = z * z2;
+		double wx = w * x2;
+		double wy = w * y2;
+		double wz = w * z2;
+		return new Matrix4(
+			1 - (yy + zz), xy + wz, xz - wy, 0,
+			xy - wz, 1 - (xx + zz), yz + wx, 0,
+			xz + wy, yz - wx, 1 - (xx + yy), 0,
+			0, 0, 0, 1);
+	}
 	
 	public static Matrix4 Scale(Vector3 scale) => new(
 		scale.X, 0, 0, 0,
@@ -114,13 +133,15 @@ public struct Matrix4(
 	
 	public static Matrix4 PerspectiveProjection(double fieldOfView, double aspectRatio, double zNear, double zFar)
 	{
-		double yScale = 1 / Math.Tan(fieldOfView / 2);
-		double xScale = yScale / aspectRatio;
+		double yMax = zNear * Math.Tan(fieldOfView * Math.PI / 360);
+		double yMin = -yMax;
+		double xMin = yMin * aspectRatio;
+		double xMax = yMax * aspectRatio;
 		return new Matrix4(
-			xScale, 0, 0, 0,
-			0, yScale, 0, 0,
-			0, 0, zFar / (zNear - zFar), -1,
-			0, 0, zNear * zFar / (zNear - zFar), 0);
+			2 * zNear / (xMax - xMin), 0, (xMax + xMin) / (xMax - xMin), 0,
+			0, 2 * zNear / (yMax - yMin), (yMax + yMin) / (yMax - yMin), 0,
+			0, 0, (zFar + zNear) / (zNear - zFar), 2 * zFar * zNear / (zNear - zFar),
+			0, 0, -1, 0);
 	}
 	
 	public override int GetHashCode() => HashCode.Combine(HashCode.Combine(M11, M12, M13, M14, M21, M22, M23, M24), HashCode.Combine(M31, M32, M33, M34, M41, M42, M43, M44));

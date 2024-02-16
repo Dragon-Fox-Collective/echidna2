@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <Folder Include="Assets\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Echidna2.Core\Echidna2.Core.csproj" />
+      <ProjectReference Include="..\Echidna2.Mathematics\Echidna2.Mathematics.csproj" />
+      <ProjectReference Include="..\Echidna2.Rendering\Echidna2.Rendering.csproj" />
+      <ProjectReference Include="..\Echidna2.SourceGenerators\Echidna2.SourceGenerators.csproj" />
+    </ItemGroup>
+
+</Project>

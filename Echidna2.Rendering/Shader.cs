@@ -7,6 +7,8 @@ namespace Echidna2.Rendering;
 
 public class Shader(string vertexSource, string fragmentSource)
 {
+	public static readonly Shader Solid = new(ShaderNodeUtil.MainVertexShader, File.ReadAllText("Assets/solid.frag"));
+	
 	private int handle;
 	
 	private readonly Dictionary<string, int> uniforms = new();

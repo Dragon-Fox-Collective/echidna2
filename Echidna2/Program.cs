@@ -87,7 +87,7 @@ Window window = new(new GameWindow(
 	}
 ))
 {
-	Camera = new Camera { World = root }
+	Camera = new GuiCamera(root)
 };
 window.Resize += size => root.LocalSize = size;
 window.Run();
