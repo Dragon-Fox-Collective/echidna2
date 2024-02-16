@@ -9,6 +9,7 @@ public class Shader(string vertexSource, string fragmentSource)
 {
 	public static readonly Shader Solid = new(ShaderNodeUtil.MainVertexShader, File.ReadAllText("Assets/solid.frag"));
 	public static readonly Shader PBR = new(ShaderNodeUtil.MainVertexShader, File.ReadAllText("Assets/pbr.frag"));
+	public static readonly Shader Skybox = new(ShaderNodeUtil.SkyboxVertexShader, ShaderNodeUtil.CubeMapFragmentShader);
 	
 	private int handle;
 	
@@ -58,8 +59,6 @@ public class Shader(string vertexSource, string fragmentSource)
 			int location = GL.GetUniformLocation(handle, key);
 			uniforms.Add(key, location);
 		}
-		
-		Console.WriteLine(uniforms.Keys.ToDelimString());
 	}
 	
 	private static int CompileShader(string source, ShaderType type)

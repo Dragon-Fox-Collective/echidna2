@@ -7,6 +7,7 @@ namespace Echidna2.Rendering3D;
 
 public class MeshRenderer(Transform3D transform) : INotificationListener<IDraw.Notification>
 {
+	public Mesh Mesh { get; set; } = Mesh.Cube;
 	public Shader Shader { get; set; } = Shader.Solid;
 	public Color Color { get; set; } = Color.Gray;
 	
@@ -16,6 +17,6 @@ public class MeshRenderer(Transform3D transform) : INotificationListener<IDraw.N
 		Shader.SetMatrix4("distortion", Matrix4.Identity);
 		Shader.SetMatrix4("transform", transform.GlobalTransform);
 		Shader.SetColorRgba("color", Color);
-		Mesh.Cube.Draw();
+		Mesh.Draw();
 	}
 }

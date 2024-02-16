@@ -169,13 +169,6 @@ public class Mesh(float[] positions, float[] normals, float[] texCoords, float[]
 		if (isDirty)
 			Clean();
 		
-		if (cullBackFaces)
-			GL.Enable(EnableCap.CullFace);
-		else
-			GL.Disable(EnableCap.CullFace);
-		
-		GL.Disable(EnableCap.Blend);
-		
 		GL.BindVertexArray(vertexArrayObject);
 		GL.DrawElements(PrimitiveType.Triangles, Indices.Length, DrawElementsType.UnsignedInt, 0);
 	}

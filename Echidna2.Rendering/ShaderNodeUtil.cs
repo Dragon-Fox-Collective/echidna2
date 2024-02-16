@@ -12,6 +12,9 @@ public static class ShaderNodeUtil
 	private static readonly InOutVariable<Vector3> NormalVariable = new("normal");
 	private static readonly InOutVariable<Vector3> CubeMapTexCoordVariable = new("texCoord");
 	
+	private static readonly UniformVariable<CubeSampler> SkyboxVariable = new("skybox");
+	
+	
 	public static readonly VertexShader MainVertexShader = new()
 	{
 		Position = new PositionOutput(
@@ -31,7 +34,7 @@ public static class ShaderNodeUtil
 					).Output,
 				new ProjectionInput().Output
 				).Output),
-		Bindings =
+		InOutBindings =
 		[
 			new InOutBinding<Vector3>(GlobalPositionVariable,
 				new Vector4XYZ(
@@ -83,23 +86,26 @@ public static class ShaderNodeUtil
 					new ProjectionInput().Output
 					).Output
 				).Output),
-		Bindings =
+		InOutBindings =
 		[
-			new InOutBinding<Vector3>(CubeMapTexCoordVariable, new PositionInput().Output)
+			new InOutBinding<Vector3>(CubeMapTexCoordVariable, new PositionInput().Output),
 		],
 	};
 	
 	public static readonly FragmentShader CubeMapFragmentShader = new()
 	{
 		FragColor = new FragColorOutput(
-			new Vector3ToVector4(
-				CubeMapTexCoordVariable.Output,
-				new FloatValue(1.0f).Output
+			new CubeSampler(
+				SkyboxVariable.Output,
+				CubeMapTexCoordVariable.Output
 				).Output
 			),
-		Bindings =
+		InOutVariables =
 		[
-			CubeMapTexCoordVariable
+			CubeMapTexCoordVariable,
+		],
+		UniformVariables = [
+			SkyboxVariable,
 		],
 	};
     
@@ -110,6 +116,7 @@ public static class ShaderNodeUtil
 			not null when type == typeof(Vector2) => "vec2",
 			not null when type == typeof(Vector3) => "vec3",
 			not null when type == typeof(Vector4) => "vec4",
+			not null when type == typeof(CubeSampler) => "samplerCube",
 			_ => throw new ArgumentException($"Invalid type {type}", nameof(type))
 		};
 	}
@@ -118,7 +125,8 @@ public static class ShaderNodeUtil
 public class VertexShader
 {
 	public PositionOutput? Position { get; init; }
-	public InOutBinding[] Bindings { get; init; } = Array.Empty<InOutBinding>();
+	public InOutBinding[] InOutBindings { get; init; } = Array.Empty<InOutBinding>();
+	public UniformBinding[] UniformVariables { get; init; } = Array.Empty<UniformBinding>();
 	
 	public static implicit operator string(VertexShader shader) => shader.ToString();
 	
@@ -131,17 +139,19 @@ layout (location = 1) in vec3 aNormal;
 layout (location = 2) in vec2 aTexCoord;
 layout (location = 3) in vec3 aColor;
 
-{{string.Join("\n", Bindings.Select(binding => binding.Variable.Out))}}
+{{string.Join("\n", InOutBindings.Select(binding => binding.Variable.Out))}}
 
 layout (location = 0) uniform mat4 distortion;
 layout (location = 1) uniform mat4 transform;
 layout (location = 2) uniform mat4 view;
 layout (location = 3) uniform mat4 projection;
 
+{{string.Join("\n", UniformVariables.Select(variable => variable.Variable.Uniform))}}
+
 void main()
 {
 	{{Position?.ToString() ?? ""}}
-	{{string.Join("\n    ", Bindings.Select(binding => binding.ToString()))}}
+	{{string.Join("\n    ", InOutBindings.Select(binding => binding.ToString()))}}
 }
 
 """;
@@ -150,22 +160,27 @@ void main()
 public class FragmentShader
 {
 	public FragColorOutput? FragColor { get; init; }
-	public InOutVariable[] Bindings { get; init; } = Array.Empty<InOutVariable>();
+	public InOutVariable[] InOutVariables { get; init; } = Array.Empty<InOutVariable>();
+	public UniformVariable[] UniformVariables { get; init; } = Array.Empty<UniformVariable>();
 	
 	public static implicit operator string(FragmentShader shader) => shader.ToString();
     
-	public override string ToString() => $@"
+	public override string ToString() => $$"""
+
 #version 430 core
 
-{string.Join("\n", Bindings.Select(variable => variable.In))}
+{{string.Join("\n", InOutVariables.Select(variable => variable.In))}}
 
 out vec4 FragColor;
 
+{{string.Join("\n", UniformVariables.Select(variable => variable.Uniform))}}
+
 void main()
-{{
-    {FragColor?.ToString() ?? ""}
-}}
-";
+{
+    {{FragColor?.ToString() ?? ""}}
+}
+
+""";
 }
 
 public interface ShaderNode;
@@ -404,6 +419,23 @@ public class FloatValue : ShaderNode
 	public override string ToString() => $"{value}";
 }
 
+public class CubeSampler : ShaderNode
+{
+	private readonly ShaderNodeSlot<CubeSampler> texture;
+	private readonly ShaderNodeSlot<Vector3> texCoord;
+	
+	public readonly ShaderNodeSlot<Vector4> Output;
+	
+	public CubeSampler(ShaderNodeSlot<CubeSampler> texture, ShaderNodeSlot<Vector3> texCoord)
+	{
+		this.texture = texture;
+		this.texCoord = texCoord;
+		Output = new ShaderNodeSlot<Vector4>(ToString);
+	}
+	
+	public override string ToString() => $"texture({texture}, {texCoord})";
+}
+
 public abstract class InOutVariable
 {
 	public readonly string Name;
@@ -448,6 +480,56 @@ public class InOutBinding<T> : InOutBinding
 	
 	// ReSharper disable once SuggestBaseTypeForParameterInConstructor
 	public InOutBinding(InOutVariable<T> variable, ShaderNodeSlot<T> input) : base(variable)
+	{
+		this.input = input;
+	}
+    
+	public override string ToString() => $"{Variable.Name} = {input};";
+}
+
+public abstract class UniformVariable
+{
+	public readonly string Name;
+	protected abstract string Type { get; }
+	
+	public string Uniform => $"uniform {Type} {Name};";
+    
+	protected UniformVariable(string name)
+	{
+		Name = name;
+	}
+}
+
+public class UniformVariable<T> : UniformVariable
+{
+	protected override string Type => ShaderNodeUtil.GetShaderTypeName(typeof(T));
+	
+	public readonly ShaderNodeSlot<T> Output;
+    
+	public UniformVariable(string name) : base(name)
+	{
+		Output = new ShaderNodeSlot<T>(ToString);
+	}
+    
+	public override string ToString() => $"{Name}";
+}
+
+public abstract class UniformBinding
+{
+	public readonly UniformVariable Variable;
+	
+	protected UniformBinding(UniformVariable variable)
+	{
+		Variable = variable;
+	}
+}
+
+public class UniformBinding<T> : UniformBinding
+{
+	private readonly ShaderNodeSlot<T> input;
+	
+	// ReSharper disable once SuggestBaseTypeForParameterInConstructor
+	public UniformBinding(UniformVariable<T> variable, ShaderNodeSlot<T> input) : base(variable)
 	{
 		this.input = input;
 	}
