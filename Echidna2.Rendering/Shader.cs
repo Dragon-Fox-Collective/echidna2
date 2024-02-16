@@ -8,6 +8,7 @@ namespace Echidna2.Rendering;
 public class Shader(string vertexSource, string fragmentSource)
 {
 	public static readonly Shader Solid = new(ShaderNodeUtil.MainVertexShader, File.ReadAllText("Assets/solid.frag"));
+	public static readonly Shader PBR = new(ShaderNodeUtil.MainVertexShader, File.ReadAllText("Assets/pbr.frag"));
 	
 	private int handle;
 	
@@ -57,6 +58,8 @@ public class Shader(string vertexSource, string fragmentSource)
 			int location = GL.GetUniformLocation(handle, key);
 			uniforms.Add(key, location);
 		}
+		
+		Console.WriteLine(uniforms.Keys.ToDelimString());
 	}
 	
 	private static int CompileShader(string source, ShaderType type)
@@ -91,7 +94,8 @@ public class Shader(string vertexSource, string fragmentSource)
 	}
 	public void SetVector3(string name, Vector3 data) => GL.Uniform3(GetUniformLocation(name), data);
 	public void SetVector4(string name, Vector4 data) => GL.Uniform4(GetUniformLocation(name), data);
-	public void SetColor(string name, Color data) => GL.Uniform4(GetUniformLocation(name), data);
+	public void SetColorRgba(string name, Color data) => GL.Uniform4(GetUniformLocation(name), data);
+	public void SetColorRgb(string name, Color data) => GL.Uniform3(GetUniformLocation(name), data.R / 255f, data.G / 255f, data.B / 255f);
 	
 	public void Dispose()
 	{

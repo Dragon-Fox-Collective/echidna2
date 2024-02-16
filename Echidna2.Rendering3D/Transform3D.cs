@@ -72,6 +72,6 @@ public class Transform3D
 	
 	private void RecalculateLocalTransform()
 	{
-		LocalTransform = Matrix4.Translation(LocalPosition) * Matrix4.Rotation(LocalRotation) * Matrix4.Scale(LocalScale);
+		LocalTransform = Matrix4.FromTranslation(LocalPosition) * Matrix4.FromRotation(LocalRotation) * Matrix4.FromScale(LocalScale);
 	}
 }

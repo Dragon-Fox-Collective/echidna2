@@ -9,5 +9,5 @@ public class Camera3D(INotificationPropagator world, Transform3D transform) : Ca
 	public double FieldOfView { get; set; } = 80;
 	
 	public override Matrix4 ViewMatrix => transform.GlobalTransform.Inverted;
-	public override Matrix4 ProjectionMatrix => Matrix4.PerspectiveProjection(FieldOfView, (double)Size.X / Size.Y, NearClipPlane, FarClipPlane);
+	public override Matrix4 ProjectionMatrix => Matrix4.FromPerspectiveProjection(FieldOfView, (double)Size.X / Size.Y, NearClipPlane, FarClipPlane);
 }

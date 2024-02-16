@@ -88,13 +88,15 @@ public struct Matrix4(
 		M13, M23, M33, M43,
 		M14, M24, M34, M44);
 	
-	public static Matrix4 Translation(Vector3 translation) => new(
+	public Vector3 Translation => new(M14, M24, M34);
+	
+	public static Matrix4 FromTranslation(Vector3 translation) => new(
 		1, 0, 0, translation.X,
 		0, 1, 0, translation.Y,
 		0, 0, 1, translation.Z,
 		0, 0, 0, 1);
 	
-	public static Matrix4 Rotation(Quaternion rotation)
+	public static Matrix4 FromRotation(Quaternion rotation)
 	{
 		double x = rotation.X;
 		double y = rotation.Y;
@@ -119,19 +121,19 @@ public struct Matrix4(
 			0, 0, 0, 1);
 	}
 	
-	public static Matrix4 Scale(Vector3 scale) => new(
+	public static Matrix4 FromScale(Vector3 scale) => new(
 		scale.X, 0, 0, 0,
 		0, scale.Y, 0, 0,
 		0, 0, scale.Z, 0,
 		0, 0, 0, 1);
 	
-	public static Matrix4 OrthographicProjection(double width, double height, double zNear, double zFar) => new(
+	public static Matrix4 FromOrthographicProjection(double width, double height, double zNear, double zFar) => new(
 		2 / width, 0, 0, 0,
 		0, 2 / height, 0, 0,
 		0, 0, 1 / (zNear - zFar), zNear / (zNear - zFar),
 		0, 0, 0, 1);
 	
-	public static Matrix4 PerspectiveProjection(double fieldOfView, double aspectRatio, double zNear, double zFar)
+	public static Matrix4 FromPerspectiveProjection(double fieldOfView, double aspectRatio, double zNear, double zFar)
 	{
 		double yMax = zNear * Math.Tan(fieldOfView * Math.PI / 360);
 		double yMin = -yMax;

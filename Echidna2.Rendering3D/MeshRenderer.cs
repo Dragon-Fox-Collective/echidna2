@@ -15,7 +15,7 @@ public class MeshRenderer(Transform3D transform) : INotificationListener<IDraw.N
 		Shader.Bind(notification.Camera.ViewMatrix, notification.Camera.ProjectionMatrix);
 		Shader.SetMatrix4("distortion", Matrix4.Identity);
 		Shader.SetMatrix4("transform", transform.GlobalTransform);
-		Shader.SetColor("color", Color);
+		Shader.SetColorRgba("color", Color);
 		Mesh.Cube.Draw();
 	}
 }

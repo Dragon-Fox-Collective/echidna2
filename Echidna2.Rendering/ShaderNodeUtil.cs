@@ -9,6 +9,7 @@ public static class ShaderNodeUtil
 	private static readonly InOutVariable<Vector3> LocalPositionVariable = new("localPosition");
 	private static readonly InOutVariable<Vector3> GlobalPositionVariable = new("globalPosition");
 	private static readonly InOutVariable<Vector3> VertexColorVariable = new("vertexColor");
+	private static readonly InOutVariable<Vector3> NormalVariable = new("normal");
 	private static readonly InOutVariable<Vector3> CubeMapTexCoordVariable = new("texCoord");
 	
 	public static readonly VertexShader MainVertexShader = new()
@@ -58,7 +59,8 @@ public static class ShaderNodeUtil
 					).Output
 				),
 			new InOutBinding<Vector2>(TexCoordVariable, new TexCoordInput().Output),
-			new InOutBinding<Vector3>(VertexColorVariable, new VertexColorInput().Output)
+			new InOutBinding<Vector3>(VertexColorVariable, new VertexColorInput().Output),
+			new InOutBinding<Vector3>(NormalVariable, new NormalInput().Output),
 		],
 	};
 	
@@ -125,8 +127,9 @@ public class VertexShader
 #version 430 core
 
 layout (location = 0) in vec3 aPosition;
-layout (location = 1) in vec2 aTexCoord;
-layout (location = 2) in vec3 aColor;
+layout (location = 1) in vec3 aNormal;
+layout (location = 2) in vec2 aTexCoord;
+layout (location = 3) in vec3 aColor;
 
 {{string.Join("\n", Bindings.Select(binding => binding.Variable.Out))}}
 
@@ -230,6 +233,18 @@ public class PositionInput : ShaderNode
 	}
 	
 	public override string ToString() => "aPosition";
+}
+
+public class NormalInput : ShaderNode
+{
+	public readonly ShaderNodeSlot<Vector3> Output;
+	
+	public NormalInput()
+	{
+		Output = new ShaderNodeSlot<Vector3>(ToString);
+	}
+	
+	public override string ToString() => "aNormal";
 }
 
 public class TexCoordInput : ShaderNode

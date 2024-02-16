@@ -3,48 +3,57 @@ using OpenTK.Graphics.OpenGL4;
 
 namespace Echidna2.Rendering;
 
-public class Mesh(float[] positions, float[] texCoords, float[] colors, uint[] indices, bool cullBackFaces = true)
+public class Mesh(float[] positions, float[] normals, float[] texCoords, float[] colors, uint[] indices, bool cullBackFaces = true)
 {
 	private const int Dims = 3;
 	
 	public static readonly Mesh Triangle = new([
-		+0.5f, +0.0f, -0.5f,
-		-0.5f, +0.0f, -0.5f,
-		+0.0f, +0.0f, +0.5f
+		+0.5f, -0.5f, +0.0f,
+		-0.5f, -0.5f, +0.0f,
+		+0.0f, +0.5f, +0.0f,
+	], [
+		+0.0f, +0.0f, +1.0f,
+		+0.0f, +0.0f, +1.0f,
+		+0.0f, +0.0f, +1.0f,
 	], [
 		1.0f, 0.0f,
 		0.0f, 0.0f,
-		0.5f, 1.0f
+		0.5f, 1.0f,
 	], [
 		1.0f, 0.0f, 0.0f,
 		0.0f, 1.0f, 0.0f,
-		0.0f, 0.0f, 1.0f
+		0.0f, 0.0f, 1.0f,
 	], [
-		0, 1, 2
+		0, 1, 2,
 	], false);
 	public static readonly Mesh Quad = new([
 		-1.0f, -1.0f, +0.0f,
 		+1.0f, -1.0f, +0.0f,
 		-1.0f, +1.0f, +0.0f,
-		+1.0f, +1.0f, +0.0f
+		+1.0f, +1.0f, +0.0f,
+	], [
+		+0.0f, +0.0f, +1.0f,
+		+0.0f, +0.0f, +1.0f,
+		+0.0f, +0.0f, +1.0f,
+		+0.0f, +0.0f, +1.0f,
 	], [
 		0.0f, 0.0f,
 		1.0f, 0.0f,
 		0.0f, 1.0f,
-		1.0f, 1.0f
+		1.0f, 1.0f,
 	], [
 		0.0f, 0.0f, 0.0f,
 		1.0f, 0.0f, 0.0f,
 		0.0f, 1.0f, 0.0f,
-		0.0f, 0.0f, 1.0f
+		0.0f, 0.0f, 1.0f,
 	], [
 		0, 1, 2,
-		2, 1, 3
+		2, 1, 3,
 	], false);
 	public static readonly Mesh Cube = FromObj("Assets/cube.obj");
 	public static readonly Mesh Sphere = FromObj("Assets/sphere.obj");
 	
-	public int NumVertices => positions.Length / Dims;
+	public int NumVertices => Positions.Length / Dims;
 	
 	private bool isDirty = true;
 	private bool hasBeenInitialized;
@@ -56,6 +65,16 @@ public class Mesh(float[] positions, float[] texCoords, float[] colors, uint[] i
 		set
 		{
 			positions = value;
+			isDirty = true;
+		}
+	}
+	
+	public float[] Normals
+	{
+		get => normals;
+		set
+		{
+			normals = value;
 			isDirty = true;
 		}
 	}
@@ -101,6 +120,9 @@ public class Mesh(float[] positions, float[] texCoords, float[] colors, uint[] i
 		public float X;
 		public float Y;
 		public float Z;
+		public float NormalX;
+		public float NormalY;
+		public float NormalZ;
 		public float U;
 		public float V;
 	}
@@ -116,12 +138,16 @@ public class Mesh(float[] positions, float[] texCoords, float[] colors, uint[] i
 					.Select(i =>
 					{
 						ObjLoader.Loader.Data.VertexData.Vertex vertex = result.Vertices[face[i].VertexIndex - 1];
+						ObjLoader.Loader.Data.VertexData.Normal normal = result.Normals[face[i].NormalIndex - 1];
 						ObjLoader.Loader.Data.VertexData.Texture texCoord = result.Textures[face[i].TextureIndex - 1];
 						uniqueVertices.Add(new ObjVertex
 						{
 							X = vertex.X,
 							Y = vertex.Y,
 							Z = vertex.Z,
+							NormalX = normal.X,
+							NormalY = normal.Y,
+							NormalZ = normal.Z,
 							U = texCoord.X,
 							V = texCoord.Y,
 						});
@@ -132,6 +158,7 @@ public class Mesh(float[] positions, float[] texCoords, float[] colors, uint[] i
 			
 		return new Mesh(
 			uniqueVertices.SelectMany(vertex => EnumerableOf.Of(vertex.X, vertex.Y, vertex.Z)).ToArray(),
+			uniqueVertices.SelectMany(vertex => EnumerableOf.Of(vertex.NormalX, vertex.NormalY, vertex.NormalZ)).ToArray(),
 			uniqueVertices.SelectMany(vertex => EnumerableOf.Of(vertex.U, vertex.V)).ToArray(),
 			uniqueVertices.SelectMany(_ => EnumerableOf.Of(1f, 1f, 1f)).ToArray(),
 			faces);
@@ -173,7 +200,7 @@ public class Mesh(float[] positions, float[] texCoords, float[] colors, uint[] i
 		vertexArrayObject = GL.GenVertexArray();
 		GL.BindVertexArray(vertexArrayObject);
 		
-		int[] widths = [3, 2, 3];
+		int[] widths = [3, 3, 2, 3];
 		int stride = widths.Sum();
 		for (int attribute = 0, offset = 0; attribute < widths.Length; offset += widths[attribute], attribute++)
 		{
@@ -187,8 +214,8 @@ public class Mesh(float[] positions, float[] texCoords, float[] colors, uint[] i
 	
 	private void RegenerateData()
 	{
-		float[][] datasets = [Positions, TexCoords, Colors];
-		int[] widths = [3, 2, 3];
+		float[][] datasets = [Positions, Normals, TexCoords, Colors];
+		int[] widths = [3, 3, 2, 3];
 		int stride = widths.Sum();
 		data = new float[datasets.Sum(data => data.Length)];
 		
