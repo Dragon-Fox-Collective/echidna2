@@ -9,7 +9,11 @@ public class PBRMeshRenderer(Transform3D transform) : INotificationListener<IDra
 {
 	public Mesh Mesh { get; set; } = Mesh.Cube;
 	public Shader Shader { get; set; } = Shader.PBR;
+	
 	public Color Albedo { get; set; } = Color.Gray;
+	public double Metallic { get; set; } = 0.0;
+	public double Roughness { get; set; } = 0.25;
+	public double AmbientOcclusion { get; set; } = 1.0;
 	
 	public void OnNotify(IDraw.Notification notification)
 	{
@@ -17,9 +21,9 @@ public class PBRMeshRenderer(Transform3D transform) : INotificationListener<IDra
 		Shader.SetMatrix4("distortion", Matrix4.Identity);
 		Shader.SetMatrix4("transform", transform.GlobalTransform);
 		Shader.SetColorRgb("albedo", Albedo);
-		Shader.SetFloat("metallic", 0.0f);
-		Shader.SetFloat("roughness", 0.25f);
-		Shader.SetFloat("ao", 1.0f);
+		Shader.SetFloat("metallic", (float)Metallic);
+		Shader.SetFloat("roughness", (float)Roughness);
+		Shader.SetFloat("ao", (float)AmbientOcclusion);
 		Shader.SetInt("numLights", 1);
 		Shader.SetVector3("lightPositions[0]", new Vector3(0, 0, 0));
 		Shader.SetVector3("lightColors[0]", new Vector3(1, 1, 1) * 300.0f);
