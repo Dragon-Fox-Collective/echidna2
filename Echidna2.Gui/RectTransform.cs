@@ -119,7 +119,7 @@ public class RectTransform
 	
 	private void RecalculateLocalTransform()
 	{
-		LocalTransform = Matrix4.Translation(LocalPosition.WithZ(Depth)) * Matrix4.Scale(LocalScale.WithZ(1));
+		LocalTransform = Matrix4.FromTranslation(LocalPosition.WithZ(Depth)) * Matrix4.FromScale(LocalScale.WithZ(1));
 	}
 	
 	public bool ContainsGlobalPoint(Vector2 point) => ContainsLocalPoint(GlobalTransform.InverseTransformPoint(point));

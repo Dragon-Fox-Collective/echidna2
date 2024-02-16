@@ -1,7 +1,6 @@
 ﻿using Echidna2.Core;
 using Echidna2.Mathematics;
 using Echidna2.Rendering;
-using OpenTK.Graphics.OpenGL4;
 
 namespace Echidna2.Gui;
 

@@ -7,6 +7,7 @@ namespace Echidna2.Rendering3D;
 
 public class PBRMeshRenderer(Transform3D transform) : INotificationListener<IDraw.Notification>
 {
+	public Mesh Mesh { get; set; } = Mesh.Cube;
 	public Shader Shader { get; set; } = Shader.PBR;
 	public Color Albedo { get; set; } = Color.Gray;
 	
@@ -23,6 +24,6 @@ public class PBRMeshRenderer(Transform3D transform) : INotificationListener<IDra
 		Shader.SetVector3("lightPositions[0]", new Vector3(0, 0, 0));
 		Shader.SetVector3("lightColors[0]", new Vector3(1, 1, 1) * 300.0f);
 		Shader.SetVector3("cameraPosition", notification.Camera.ViewMatrix.Inverted.Translation);
-		Mesh.Cube.Draw();
+		Mesh.Draw();
 	}
 }

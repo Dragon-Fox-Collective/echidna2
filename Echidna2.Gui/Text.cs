@@ -35,7 +35,7 @@ public class Text(RectTransform rectTransform) : INotificationListener<IDraw.Not
 			TextString.Select(c => CascadiaCode.FontResult!.Glyphs[c]).Sum(glyph => glyph.XAdvance),
 			TextString.Select(c => CascadiaCode.FontResult!.Glyphs[c]).Max(glyph => glyph.Height));
 		
-		Shader.SetMatrix4("distortion", Matrix4.Translation(new Vector3(
+		Shader.SetMatrix4("distortion", Matrix4.FromTranslation(new Vector3(
 			Justification switch
 			{
 				TextJustification.Left => -relativeRectSize.X / 2,
@@ -52,7 +52,7 @@ public class Text(RectTransform rectTransform) : INotificationListener<IDraw.Not
 			} + 5, // TODO: Figure out where the midline is
 			0)));
 		Shader.SetMatrix4("transform", rectTransform.GlobalTransform);
-		Shader.SetColor("color", Color);
+		Shader.SetColorRgba("color", Color);
 		
 		float xStart = 0;
 		foreach (GlyphInfo glyph in TextString.Select(c => CascadiaCode.FontResult!.Glyphs[c]))

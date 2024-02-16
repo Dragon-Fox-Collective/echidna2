@@ -153,7 +153,7 @@ public partial class HierarchyDisplay : INotificationPropagator, ICanBeLaidOut, 
 		{
 			TextString = obj is INamed named ? named.Name : obj.GetType().Name + " (no name)",
 			AnchorPreset = AnchorPreset.Full,
-			Scale = Vector2.One * 0.5,
+			LocalScale = Vector2.One * 0.5,
 			MinimumSize = (0, 25),
 			Justification = TextJustification.Left,
 		};
