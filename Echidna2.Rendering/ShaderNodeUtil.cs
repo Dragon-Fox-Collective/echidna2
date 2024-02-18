@@ -63,7 +63,24 @@ public static class ShaderNodeUtil
 				),
 			new InOutBinding<Vector2>(TexCoordVariable, new TexCoordInput().Output),
 			new InOutBinding<Vector3>(VertexColorVariable, new VertexColorInput().Output),
-			new InOutBinding<Vector3>(NormalVariable, new NormalInput().Output),
+			new InOutBinding<Vector3>(NormalVariable,
+				new Vector4XYZ(
+					new Vector4TimesMatrix4(
+						new Vector3ToVector4(
+							new NormalInput().Output,
+							new FloatValue(1.0f).Output
+							).Output,
+						new Matrix3ToMatrix4(
+							new Matrix4ToMatrix3(
+								new Matrix4TimesMatrix4(
+									new DistortionInput().Output,
+									new TransformInput().Output
+									).Output
+								).Output
+							).Output
+						).Output
+					).Output
+				),
 		],
 	};
 	
@@ -322,6 +339,23 @@ public class Vector4TimesMatrix4 : ShaderNode
 		this.left = left;
 		this.right = right;
 		Output = new ShaderNodeSlot<Vector4>(ToString);
+	}
+	
+	public override string ToString() => $"({left} * {right})";
+}
+
+public class Matrix4TimesMatrix4 : ShaderNode
+{
+	private readonly ShaderNodeSlot<Matrix4> left;
+	private readonly ShaderNodeSlot<Matrix4> right;
+	
+	public readonly ShaderNodeSlot<Matrix4> Output;
+	
+	public Matrix4TimesMatrix4(ShaderNodeSlot<Matrix4> left, ShaderNodeSlot<Matrix4> right)
+	{
+		this.left = left;
+		this.right = right;
+		Output = new ShaderNodeSlot<Matrix4>(ToString);
 	}
 	
 	public override string ToString() => $"({left} * {right})";

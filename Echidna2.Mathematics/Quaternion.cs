@@ -147,8 +147,8 @@ public struct Quaternion(double x, double y, double z, double w) : IEquatable<Qu
 	public static bool operator ==(Quaternion a, Quaternion b) => Math.Abs(a.X - b.X) < double.Epsilon && Math.Abs(a.Y - b.Y) < double.Epsilon && Math.Abs(a.Z - b.Z) < double.Epsilon && Math.Abs(a.W - b.W) < double.Epsilon;
 	public static bool operator !=(Quaternion a, Quaternion b) => !(a == b);
 	
-	public static implicit operator QuaternionSystem(Quaternion quaternion) => new((float)quaternion.X, (float)quaternion.Y, (float)quaternion.Z, (float)quaternion.W);
-	public static implicit operator Quaternion(QuaternionSystem quaternion) => new(quaternion.X, quaternion.Y, quaternion.Z, quaternion.W);
+	public static implicit operator QuaternionSystem(Quaternion quaternion) => new((float)-quaternion.X, (float)-quaternion.Y, (float)-quaternion.Z, (float)quaternion.W);
+	public static implicit operator Quaternion(QuaternionSystem quaternion) => new(-quaternion.X, -quaternion.Y, -quaternion.Z, quaternion.W);
 	public static implicit operator QuaternionOpenTK(Quaternion quaternion) => new((float)quaternion.X, (float)quaternion.Y, (float)quaternion.Z, (float)quaternion.W);
 	public static implicit operator Quaternion(QuaternionOpenTK quaternion) => new(quaternion.X, quaternion.Y, quaternion.Z, quaternion.W);
 	public static implicit operator Quaternion((float pitch, float roll, float yaw) eulers) => FromEulerAngles(eulers);

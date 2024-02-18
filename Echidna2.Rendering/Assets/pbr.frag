@@ -70,7 +70,7 @@ void main()
     
     // reflectance equation
     vec3 Lo = vec3(0.0);
-    for(int i = 0; i < numLights; ++i)
+    for(int i = 0; i < numLights; i++)
     {
         // calculate per-light radiance
         vec3 directionToLight = normalize(lightPositions[i] - globalPosition);

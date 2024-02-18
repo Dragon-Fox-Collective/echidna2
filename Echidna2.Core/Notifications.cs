@@ -16,7 +16,21 @@ public interface INotificationPropagator
 {
 	public void Notify<T>(T notification) where T : notnull;
 	
-	public static void Notify<T>(T notification, params object?[] objects) where T : notnull
+	public static void Notify<T>(T notification, params object[] objects) where T : notnull
+	{
+		foreach (INotificationHook<T> child in objects.OfType<INotificationHook<T>>())
+			child.OnPreNotify(notification);
+		foreach (INotificationListener<T> child in objects.OfType<INotificationListener<T>>())
+			child.OnNotify(notification);
+		foreach (INotificationHook<T> child in objects.OfType<INotificationHook<T>>())
+			child.OnPostNotify(notification);
+		foreach (INotificationPropagator child in objects.OfType<INotificationPropagator>())
+			child.Notify(notification);
+		foreach (INotificationHook<T> child in objects.OfType<INotificationHook<T>>())
+			child.OnPostPropagate(notification);
+	}
+	
+	public static void Notify<T>(T notification, IList<object> objects) where T : notnull
 	{
 		foreach (INotificationHook<T> child in objects.OfType<INotificationHook<T>>())
 			child.OnPreNotify(notification);

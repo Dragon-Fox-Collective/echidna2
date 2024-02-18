@@ -15,7 +15,7 @@ public class Hierarchy : INotificationPropagator, IHasChildren, ICanAddChildren
 	public void Notify<T>(T notification) where T : notnull
 	{
 		if (!currentNotifications.Add(notification)) return;
-		INotificationPropagator.Notify(notification, children.ToArray());
+		INotificationPropagator.Notify(notification, children);
 		currentNotifications.Remove(notification);
 	}
 	
