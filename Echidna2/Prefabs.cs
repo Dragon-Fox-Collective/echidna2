@@ -23,7 +23,7 @@ public partial class RectWithHierarchy : INotificationPropagator, ICanBeLaidOut,
 		Rect = new Rect(RectTransform);
 	}
 	
-	public void Notify<T>(T notification)
+	public void Notify<T>(T notification) where T : notnull
 	{
 		INotificationPropagator.Notify(notification, Rect, RectLayout, PrefabChildren);
 	}
@@ -53,7 +53,7 @@ public partial class ButtonRect : INotificationPropagator, ICanBeLaidOut, INamed
 		Button.MouseUp += () => Rect.Color = Color.LightGray;
 	}
 	
-	public void Notify<T>(T notification)
+	public void Notify<T>(T notification) where T : notnull
 	{
 		INotificationPropagator.Notify(notification, Rect, Button, RectLayout, PrefabChildren);
 	}
@@ -75,7 +75,7 @@ public partial class HLayoutWithHierarchy : INotificationPropagator, ICanBeLaidO
 		Layout = new HorizontalLayout(RectTransform, PrefabChildren);
 	}
 	
-	public void Notify<T>(T notification)
+	public void Notify<T>(T notification) where T : notnull
 	{
 		INotificationPropagator.Notify(notification, Layout, PrefabChildren);
 	}
@@ -97,7 +97,7 @@ public partial class VLayoutWithHierarchy : INotificationPropagator, ICanBeLaidO
 		Layout = new VerticalLayout(RectTransform, PrefabChildren);
 	}
 	
-	public void Notify<T>(T notification)
+	public void Notify<T>(T notification) where T : notnull
 	{
 		INotificationPropagator.Notify(notification, Layout, PrefabChildren);
 	}
@@ -117,7 +117,7 @@ public partial class TextRect : INotificationPropagator, ICanBeLaidOut, INamed
 		Text = new Text(RectTransform);
 	}
 	
-	public void Notify<T>(T notification)
+	public void Notify<T>(T notification) where T : notnull
 	{
 		INotificationPropagator.Notify(notification, Text);
 	}
@@ -166,7 +166,7 @@ public partial class HierarchyDisplay : INotificationPropagator, ICanBeLaidOut, 
 		return box;
 	}
 	
-	public void Notify<T>(T notification)
+	public void Notify<T>(T notification) where T : notnull
 	{
 		INotificationPropagator.Notify(notification, Layout, DisplayElements);
 	}
@@ -188,7 +188,7 @@ public partial class FullLayoutWithHierarchy : INotificationPropagator, ICanBeLa
 		Layout = new FullLayout(RectTransform, PrefabChildren);
 	}
 	
-	public void Notify<T>(T notification)
+	public void Notify<T>(T notification) where T : notnull
 	{
 		INotificationPropagator.Notify(notification, Layout, PrefabChildren);
 	}
@@ -210,7 +210,7 @@ public partial class DisplayOnlyLayer : INotificationPropagator, ICanBeLaidOut, 
 		Layout = new RectLayout(RectTransform, PrefabChildren);
 	}
 	
-	public void Notify<T>(T notification)
+	public void Notify<T>(T notification) where T : notnull
 	{
 		if (notification is IPreUpdate.Notification or IUpdate.Notification or IDraw.Notification)
 			INotificationPropagator.Notify(notification, Layout, PrefabChildren);

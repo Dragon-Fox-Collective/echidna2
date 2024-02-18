@@ -10,14 +10,13 @@ public class Hierarchy : INotificationPropagator, IHasChildren, ICanAddChildren
 	private List<object> children = [];
 	public IEnumerable<object> Children => children;
 	
-	private bool isNotifying = false;
+	private HashSet<object> currentNotifications = [];
 	
-	public void Notify<T>(T notification)
+	public void Notify<T>(T notification) where T : notnull
 	{
-		if (isNotifying) return;
-		isNotifying = true;
+		if (!currentNotifications.Add(notification)) return;
 		INotificationPropagator.Notify(notification, children.ToArray());
-		isNotifying = false;
+		currentNotifications.Remove(notification);
 	}
 	
 	public void AddChild(object child)

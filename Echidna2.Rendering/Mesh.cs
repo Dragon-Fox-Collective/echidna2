@@ -3,7 +3,7 @@ using OpenTK.Graphics.OpenGL4;
 
 namespace Echidna2.Rendering;
 
-public class Mesh(float[] positions, float[] normals, float[] texCoords, float[] colors, uint[] indices, bool cullBackFaces = true)
+public class Mesh(float[] positions, float[] normals, float[] texCoords, float[] colors, uint[] indices)
 {
 	private const int Dims = 3;
 	
@@ -25,7 +25,7 @@ public class Mesh(float[] positions, float[] normals, float[] texCoords, float[]
 		0.0f, 0.0f, 1.0f,
 	], [
 		0, 1, 2,
-	], false);
+	]);
 	public static readonly Mesh Quad = new([
 		-1.0f, -1.0f, +0.0f,
 		+1.0f, -1.0f, +0.0f,
@@ -49,7 +49,7 @@ public class Mesh(float[] positions, float[] normals, float[] texCoords, float[]
 	], [
 		0, 1, 2,
 		2, 1, 3,
-	], false);
+	]);
 	public static readonly Mesh Cube = FromObj("Assets/cube.obj");
 	public static readonly Mesh Sphere = FromObj("Assets/sphere.obj");
 	

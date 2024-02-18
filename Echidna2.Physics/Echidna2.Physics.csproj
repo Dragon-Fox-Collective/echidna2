@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="BepuPhysics" Version="2.4.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Echidna2.Core\Echidna2.Core.csproj" />
+      <ProjectReference Include="..\Echidna2.Rendering3D\Echidna2.Rendering3D.csproj" />
+    </ItemGroup>
+
+</Project>

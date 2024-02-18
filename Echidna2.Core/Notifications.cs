@@ -14,9 +14,9 @@ public interface INotificationHook<in T>
 
 public interface INotificationPropagator
 {
-	public void Notify<T>(T notification);
+	public void Notify<T>(T notification) where T : notnull;
 	
-	public static void Notify<T>(T notification, params object?[] objects)
+	public static void Notify<T>(T notification, params object?[] objects) where T : notnull
 	{
 		foreach (INotificationHook<T> child in objects.OfType<INotificationHook<T>>())
 			child.OnPreNotify(notification);

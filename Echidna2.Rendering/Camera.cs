@@ -15,7 +15,7 @@ public abstract class Camera(INotificationPropagator world)
 	public abstract Matrix4 ViewMatrix { get; }
 	public abstract Matrix4 ProjectionMatrix { get; }
 	
-	public void Notify<T>(T notification)
+	public void Notify<T>(T notification) where T : notnull
 	{
 		INotificationPropagator.Notify(notification, World);
 	}
