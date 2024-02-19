@@ -33,8 +33,8 @@ public class Window
 		window.MouseMove += args => OnMouseMoved(args.Position, args.Delta);
 		window.MouseDown += args => OnMouseDown(args.Button);
 		window.MouseUp += args => OnMouseUp(args.Button);
-		// window.KeyDown += args => world.KeyDown(args.Key);
-		// window.KeyUp += args => world.KeyUp(args.Key);
+		window.KeyDown += args => OnKeyDown(args.Key, args.IsRepeat);
+		window.KeyUp += args => OnKeyUp(args.Key);
 		window.Resize += args => OnResize(args.Size);
 	}
 	
@@ -65,6 +65,17 @@ public class Window
 	private void OnMouseUp(MouseButton button)
 	{
 		Camera?.Notify(new IMouseUp.Notification(button, mousePosition, Camera.ScreenToGlobal(mousePosition)));
+	}
+	
+	private void OnKeyDown(Keys key, bool isRepeat)
+	{
+		if (!isRepeat)
+			Camera?.Notify(new IKeyDown.Notification(key));
+	}
+	
+	private void OnKeyUp(Keys key)
+	{
+		Camera?.Notify(new IKeyUp.Notification(key));
 	}
 	
 	private void OnResize(Vector2i size)

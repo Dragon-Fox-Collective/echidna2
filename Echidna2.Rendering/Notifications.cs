@@ -49,3 +49,23 @@ public interface IMouseUp : INotificationListener<IMouseUp.Notification>
 	void INotificationListener<Notification>.OnNotify(Notification notification) => OnMouseUp(notification.Button, notification.Position, notification.GlobalPosition);
 	public void OnMouseUp(MouseButton button, Vector2 position, Vector3 globalPosition);
 }
+
+public interface IKeyDown : INotificationListener<IKeyDown.Notification>
+{
+	public class Notification(Keys key)
+	{
+		public Keys Key { get; } = key;
+	}
+	void INotificationListener<Notification>.OnNotify(Notification notification) => OnKeyDown(notification.Key);
+	public void OnKeyDown(Keys key);
+}
+
+public interface IKeyUp : INotificationListener<IKeyUp.Notification>
+{
+	public class Notification(Keys key)
+	{
+		public Keys Key { get; } = key;
+	}
+	void INotificationListener<Notification>.OnNotify(Notification notification) => OnKeyUp(notification.Key);
+	public void OnKeyUp(Keys key);
+}
