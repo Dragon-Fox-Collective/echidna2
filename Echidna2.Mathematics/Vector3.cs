@@ -16,6 +16,7 @@ public struct Vector3(double x, double y, double z) : IEquatable<Vector3>, IEnum
 	public double Length => Math.Sqrt(LengthSquared);
 	public double LengthSquared => X * X + Y * Y + Z * Z;
 	public Vector3 Normalized => this / Length;
+	public bool IsNaN => double.IsNaN(X) || double.IsNaN(Y) || double.IsNaN(Z);
 	
 	public override int GetHashCode() => HashCode.Combine(X, Y, Z);
 	public override bool Equals(object? obj) => obj is Vector3 other && other == this;

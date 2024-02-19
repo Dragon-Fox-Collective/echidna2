@@ -22,34 +22,34 @@ public struct Quaternion(double x, double y, double z, double w) : IEquatable<Qu
 	
 	public static Quaternion FromAxisAngle(Vector3 axis, float angle)
 	{
-		double halfAngle = DegreesToRadians(angle) * 0.5f;
+		double halfAngle = angle * 0.5f;
 		double sin = Math.Sin(halfAngle);
 		double cos = Math.Cos(halfAngle);
 		return new Quaternion(axis.X * sin, axis.Y * sin, axis.Z * sin, cos);
 	}
 	
 	/// <summary>
-	/// Rotates by roll, then pitch, then yaw.
+	/// Rotates by yaw, then pitch, then roll.
 	/// </summary>
-	public static Quaternion FromEulerAngles(double pitch, double roll, double yaw)
+	public static Quaternion FromEulerAngles(double pitch, double yaw, double roll)
 	{
-		double halfRoll = DegreesToRadians(roll) * 0.5;
+		double halfRoll = roll * 0.5;
 		double sinRoll = Math.Sin(halfRoll);
 		double cosRoll = Math.Cos(halfRoll);
 		
-		double halfPitch = DegreesToRadians(pitch) * 0.5;
+		double halfPitch = pitch * 0.5;
 		double sinPitch = Math.Sin(halfPitch);
 		double cosPitch = Math.Cos(halfPitch);
 		
-		double halfYaw = DegreesToRadians(yaw) * 0.5;
+		double halfYaw = yaw * 0.5;
 		double sinYaw = Math.Sin(halfYaw);
 		double cosYaw = Math.Cos(halfYaw);
 		
 		return new Quaternion(
 			cosYaw * sinPitch * cosRoll + sinYaw * cosPitch * sinRoll,
-			cosYaw * cosPitch * sinRoll + sinYaw * sinPitch * cosRoll,
-			sinYaw * cosPitch * cosRoll - cosYaw * sinPitch * sinRoll,
-			cosYaw * cosPitch * cosRoll + sinYaw * sinPitch * sinRoll);
+			cosYaw * cosPitch * sinRoll - sinYaw * sinPitch * cosRoll,
+			sinYaw * cosPitch * cosRoll + cosYaw * sinPitch * sinRoll,
+			cosYaw * cosPitch * cosRoll - sinYaw * sinPitch * sinRoll);
 	}
 	
 	/// <summary>
@@ -67,6 +67,9 @@ public struct Quaternion(double x, double y, double z, double w) : IEquatable<Qu
 		forward = -forward.Normalized;
 		Vector3 right = up.Cross(forward).Normalized;
 		up = forward.Cross(right);
+		
+		if (forward.IsNaN || right.IsNaN || up.IsNaN)
+			return Identity;
 		
 		double m00 = right.X;
 		double m01 = right.Y;
@@ -138,9 +141,27 @@ public struct Quaternion(double x, double y, double z, double w) : IEquatable<Qu
 		double zz2 = quaternion.Z * z2;
 		
 		return new Vector3(
-			vector.X * (1.0f - yy2 - zz2) + vector.Y * (xy2 - wz2) + vector.Z * (xz2 + wy2),
-			vector.X * (xy2 + wz2) + vector.Y * (1.0f - xx2 - zz2) + vector.Z * (yz2 - wx2),
-			vector.X * (xz2 - wy2) + vector.Y * (yz2 + wx2) + vector.Z * (1.0f - xx2 - yy2)
+			vector.X * (1.0f - yy2 - zz2) + vector.Y * (xy2 + wz2) + vector.Z * (xz2 - wy2),
+			vector.X * (xy2 - wz2) + vector.Y * (1.0f - xx2 - zz2) + vector.Z * (yz2 + wx2),
+			vector.X * (xz2 + wy2) + vector.Y * (yz2 - wx2) + vector.Z * (1.0f - xx2 - yy2)
+		);
+	}
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public static Vector2 operator *(Quaternion quaternion, Vector2 vector)
+	{
+		double x2 = quaternion.X + quaternion.X;
+		double y2 = quaternion.Y + quaternion.Y;
+		double z2 = quaternion.Z + quaternion.Z;
+		
+		double wz2 = quaternion.W * z2;
+		double xx2 = quaternion.X * x2;
+		double xy2 = quaternion.X * y2;
+		double yy2 = quaternion.Y * y2;
+		double zz2 = quaternion.Z * z2;
+		
+		return new Vector2(
+			vector.X * (1.0f - yy2 - zz2) + vector.Y * (xy2 + wz2),
+			vector.X * (xy2 - wz2) + vector.Y * (1.0f - xx2 - zz2)
 		);
 	}
 	public static Quaternion operator *(Quaternion a, Quaternion b) => FromVector(b.W * a.XYZ + a.W * b.XYZ + a.XYZ.Cross(b.XYZ), a.W * b.W - a.XYZ.Dot(b.XYZ));
@@ -153,7 +174,4 @@ public struct Quaternion(double x, double y, double z, double w) : IEquatable<Qu
 	public static implicit operator Quaternion(QuaternionOpenTK quaternion) => new(quaternion.X, quaternion.Y, quaternion.Z, quaternion.W);
 	public static implicit operator Quaternion((float pitch, float roll, float yaw) eulers) => FromEulerAngles(eulers);
 	public static implicit operator Quaternion((float X, float Y, float Z, float W) quaternion) => new(quaternion.X, quaternion.Y, quaternion.Z, quaternion.W);
-	
-	public static double DegreesToRadians(double angle) => angle / 180 * Math.PI;
-	public static double RadiansToDegrees(double angle) => angle * 180 / Math.PI;
 }

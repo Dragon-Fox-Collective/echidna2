@@ -12,30 +12,30 @@ public class Window
 	public delegate void ResizeHandler(Vector2 size);
 	public event ResizeHandler? Resize;
 	
-	private GameWindow window;
+	public GameWindow GameWindow;
 	
 	public Camera? Camera { get; set; }
 	
 	private Vector2 mousePosition;
 	
-	public Window(GameWindow window)
+	public Window(GameWindow gameWindow)
 	{
-		this.window = window;
+		GameWindow = gameWindow;
 		
-		window.Load += () =>
+		gameWindow.Load += () =>
 		{
 			GL.ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 			GL.Enable(EnableCap.DepthTest);
 		};
 		// window.Unload += world.Dispose;
-		window.UpdateFrame += args => OnUpdate(args.Time);
-		window.RenderFrame += _ => OnDraw();
-		window.MouseMove += args => OnMouseMoved(args.Position, args.Delta);
-		window.MouseDown += args => OnMouseDown(args.Button);
-		window.MouseUp += args => OnMouseUp(args.Button);
-		window.KeyDown += args => OnKeyDown(args.Key, args.IsRepeat);
-		window.KeyUp += args => OnKeyUp(args.Key);
-		window.Resize += args => OnResize(args.Size);
+		gameWindow.UpdateFrame += args => OnUpdate(args.Time);
+		gameWindow.RenderFrame += _ => OnDraw();
+		gameWindow.MouseMove += args => OnMouseMoved(args.Position, new Vector2(args.DeltaX, -args.DeltaY));
+		gameWindow.MouseDown += args => OnMouseDown(args.Button);
+		gameWindow.MouseUp += args => OnMouseUp(args.Button);
+		gameWindow.KeyDown += args => OnKeyDown(args.Key, args.IsRepeat);
+		gameWindow.KeyUp += args => OnKeyUp(args.Key);
+		gameWindow.Resize += args => OnResize(args.Size);
 	}
 	
 	private void OnUpdate(double deltaTime)
@@ -48,7 +48,7 @@ public class Window
 	{
 		GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit | ClearBufferMask.StencilBufferBit);
 		Camera?.Notify(new IDraw.Notification(Camera));
-		window.SwapBuffers();
+		GameWindow.SwapBuffers();
 	}
 	
 	private void OnMouseMoved(Vector2 position, Vector2 delta)
@@ -85,5 +85,5 @@ public class Window
 		Resize?.Invoke(size.ToVector2());
 	}
 	
-	public void Run() => window.Run();
+	public void Run() => GameWindow.Run();
 }

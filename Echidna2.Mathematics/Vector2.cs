@@ -40,6 +40,7 @@ public struct Vector2(double x, double y) : IEquatable<Vector2>, IEnumerable<dou
 	
 	public double Cross(Vector2 other) => Cross(this, other);
 	public double Dot(Vector2 other) => Dot(this, other);
+	public Vector2 RotatedBy(double angle) => new(X * Math.Cos(angle) - Y * Math.Sin(angle), X * Math.Sin(angle) + Y * Math.Cos(angle));
 	
 	public static Vector2 operator +(Vector2 a) => a;
 	public static Vector2 operator +(Vector2 a, Vector2 b) => new(a.X + b.X, a.Y + b.Y);
