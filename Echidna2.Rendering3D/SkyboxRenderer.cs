@@ -12,13 +12,15 @@ public class SkyboxRenderer : INotificationListener<IDraw.Notification>
 	
 	public void OnNotify(IDraw.Notification notification)
 	{
-		GL.Disable(EnableCap.CullFace);
 		GL.DepthFunc(DepthFunction.Lequal);
+		bool cullBackFaces = Mesh.CullBackFaces;
+		Mesh.CullBackFaces = false;
 		
 		Shader.Bind(notification.Camera.ViewMatrix, notification.Camera.ProjectionMatrix);
 		CubeMap.Bind();
 		Mesh.Draw();
 		
+		Mesh.CullBackFaces = cullBackFaces;
 		GL.DepthFunc(DepthFunction.Less);
 	}
 }

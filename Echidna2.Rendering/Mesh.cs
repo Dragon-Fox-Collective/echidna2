@@ -25,7 +25,7 @@ public class Mesh(float[] positions, float[] normals, float[] texCoords, float[]
 		0.0f, 0.0f, 1.0f,
 	], [
 		0, 1, 2,
-	]);
+	]) { CullBackFaces = false };
 	public static readonly Mesh Quad = new([
 		-1.0f, -1.0f, +0.0f,
 		+1.0f, -1.0f, +0.0f,
@@ -49,7 +49,7 @@ public class Mesh(float[] positions, float[] normals, float[] texCoords, float[]
 	], [
 		0, 1, 2,
 		2, 1, 3,
-	]);
+	]) { CullBackFaces = false };
 	public static readonly Mesh Cube = FromObj("Assets/cube.obj");
 	public static readonly Mesh Sphere = FromObj("Assets/sphere.obj");
 	
@@ -108,6 +108,8 @@ public class Mesh(float[] positions, float[] normals, float[] texCoords, float[]
 			isDirty = true;
 		}
 	}
+	
+	public bool CullBackFaces { get; set; } = true;
 	
 	private float[] data = Array.Empty<float>();
 	
@@ -168,6 +170,11 @@ public class Mesh(float[] positions, float[] normals, float[] texCoords, float[]
 	{
 		if (isDirty)
 			Clean();
+		
+		if (CullBackFaces)
+			GL.Enable(EnableCap.CullFace);
+		else
+			GL.Disable(EnableCap.CullFace);
 		
 		GL.BindVertexArray(vertexArrayObject);
 		GL.DrawElements(PrimitiveType.Triangles, Indices.Length, DrawElementsType.UnsignedInt, 0);
