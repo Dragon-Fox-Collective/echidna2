@@ -7,18 +7,21 @@ using BepuPhysics.Constraints;
 using BepuUtilities;
 using BepuUtilities.Memory;
 using Echidna2.Core;
+using Echidna2.Rendering3D;
 
 namespace Echidna2.Physics;
 
 public class WorldSimulation : IUpdate
 {
-	public double PhysicsDeltaTime { get; set; } = 1f / 60f;
+	public double PhysicsDeltaTime { get; set; } = 1 / 60.0;
 	private double accumulatedTime = 0;
 	
 	private INotificationPropagator world;
 	private BufferPool bufferPool;
 	private ThreadDispatcher threadDispatcher;
-	public Simulation Simulation { get; }
+	private Simulation simulation;
+	
+	private CollidableProperty<PhysicsMaterial> physicsMaterials;
 	
 	private bool hasBeenDisposed;
 	
@@ -26,7 +29,8 @@ public class WorldSimulation : IUpdate
 	{
 		this.world = world;
 		bufferPool = new BufferPool();
-		Simulation = Simulation.Create(bufferPool, new NarrowPhaseCallbacks(), new PoseIntegratorCallbacks(), new SolveDescription(8, 1));
+		physicsMaterials = new CollidableProperty<PhysicsMaterial>();
+		simulation = Simulation.Create(bufferPool, new NarrowPhaseCallbacks { PhysicsMaterials = physicsMaterials }, new PoseIntegratorCallbacks(), new SolveDescription(8, 1));
 		threadDispatcher = new ThreadDispatcher(Environment.ProcessorCount);
 	}
 	
@@ -39,14 +43,33 @@ public class WorldSimulation : IUpdate
 			double physicsDeltaTime = PhysicsDeltaTime;
 			accumulatedTime -= physicsDeltaTime;
 			world.Notify(new IPhysicsUpdate.Notification(physicsDeltaTime));
-			Simulation.Timestep((float)physicsDeltaTime, threadDispatcher);
+			simulation.Timestep((float)physicsDeltaTime, threadDispatcher);
 		}
 	}
+	
+	public BodyHandle AddDynamicBody(Transform3D transform, BodyShape shape, BodyInertia inertia, ref PhysicsMaterial material)
+	{
+		BodyHandle handle = simulation.Bodies.Add(BodyDescription.CreateDynamic(new RigidPose(transform.LocalPosition, transform.LocalRotation), inertia, AddShape(shape), 0.01f));
+		physicsMaterials.Allocate(handle) = material;
+		return handle;
+	}
+	
+	public StaticHandle AddStaticBody(Transform3D transform, BodyShape shape, ref PhysicsMaterial material)
+	{
+		StaticHandle handle = simulation.Statics.Add(new StaticDescription(new RigidPose(transform.LocalPosition, transform.LocalRotation), AddShape(shape)));
+		physicsMaterials.Allocate(handle) = material;
+		return handle;
+	}
+	
+	public TypedIndex AddShape(BodyShape shape) => shape.AddToShapes(simulation.Shapes);
+	
+	public BodyReference this[BodyHandle handle] => simulation.Bodies[handle];
+	public StaticReference this[StaticHandle handle] => simulation.Statics[handle];
 	
 	public void Dispose()
 	{
 		hasBeenDisposed = true;
-		Simulation.Dispose();
+		simulation.Dispose();
 		threadDispatcher.Dispose();
 		bufferPool.Clear();
 	}
@@ -59,8 +82,11 @@ public class WorldSimulation : IUpdate
 	
 	private struct NarrowPhaseCallbacks : INarrowPhaseCallbacks
 	{
+		public CollidableProperty<PhysicsMaterial> PhysicsMaterials;
+		
 		public void Initialize(Simulation simulation)
 		{
+			PhysicsMaterials.Initialize(simulation);
 		}
 		
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -78,7 +104,7 @@ public class WorldSimulation : IUpdate
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public bool ConfigureContactManifold<TManifold>(int workerIndex, CollidablePair pair, ref TManifold manifold, out PairMaterialProperties pairMaterial) where TManifold : unmanaged, IContactManifold<TManifold>
 		{
-			pairMaterial.FrictionCoefficient = 1f;
+			pairMaterial.FrictionCoefficient = (float)Math.Min(PhysicsMaterials[pair.A].Friction, PhysicsMaterials[pair.B].Friction);
 			pairMaterial.MaximumRecoveryVelocity = 2f;
 			pairMaterial.SpringSettings = new SpringSettings(30, 1);
 			return true;
