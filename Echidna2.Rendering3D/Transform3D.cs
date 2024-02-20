@@ -66,8 +66,6 @@ public class Transform3D
 		}
 	}
 	
-	public Vector2 MinimumSize { get; set; }
-	
 	public bool IsGlobal { get; set; } = false;
 	
 	private void RecalculateLocalTransform()

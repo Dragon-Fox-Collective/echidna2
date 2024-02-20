@@ -48,6 +48,8 @@ public struct Vector3(double x, double y, double z) : IEquatable<Vector3>, IEnum
 	
 	public Vector3 Cross(Vector3 other) => Cross(this, other);
 	public double Dot(Vector3 other) => Dot(this, other);
+	public double DistanceTo(Vector3 other) => (other - this).Length;
+	public double DistanceToSquared(Vector3 other) => (other - this).LengthSquared;
 	
 	public static Vector3 operator +(Vector3 a) => a;
 	public static Vector3 operator +(Vector3 a, Vector3 b) => new(a.X + b.X, a.Y + b.Y, a.Z + b.Z);
@@ -65,9 +67,6 @@ public struct Vector3(double x, double y, double z) : IEquatable<Vector3>, IEnum
 	public static implicit operator Vector3(Vector3OpenTK vector) => new(vector.X, vector.Y, vector.Z);
 	public static implicit operator Vector3((double X, double Y, double Z) vector) => new(vector.X, vector.Y, vector.Z);
 	
-	public static double DistanceTo(Vector3 a, Vector3 b) => (a - b).Length;
-	public static double DistanceSquared(Vector3 a, Vector3 b) => (a - b).LengthSquared;
-	public static Vector3 UnitFromTo(Vector3 a, Vector3 b) => (b - a).Normalized;
 	public static Vector3 Cross(Vector3 a, Vector3 b) => new(a.Y * b.Z - a.Z * b.Y, a.Z * b.X - a.X * b.Z, a.X * b.Y - a.Y * b.X);
 	public static double Dot(Vector3 a, Vector3 b) => a.X * b.X + a.Y * b.Y + a.Z * b.Z;
 	

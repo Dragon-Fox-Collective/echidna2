@@ -41,6 +41,8 @@ public struct Vector2(double x, double y) : IEquatable<Vector2>, IEnumerable<dou
 	public double Cross(Vector2 other) => Cross(this, other);
 	public double Dot(Vector2 other) => Dot(this, other);
 	public Vector2 RotatedBy(double angle) => new(X * Math.Cos(angle) - Y * Math.Sin(angle), X * Math.Sin(angle) + Y * Math.Cos(angle));
+	public double DistanceTo(Vector2 other) => (other - this).Length;
+	public double DistanceToSquared(Vector2 other) => (other - this).LengthSquared;
 	
 	public static Vector2 operator +(Vector2 a) => a;
 	public static Vector2 operator +(Vector2 a, Vector2 b) => new(a.X + b.X, a.Y + b.Y);
@@ -58,9 +60,6 @@ public struct Vector2(double x, double y) : IEquatable<Vector2>, IEnumerable<dou
 	public static implicit operator Vector2(Vector2OpenTK vector) => new(vector.X, vector.Y);
 	public static implicit operator Vector2((double X, double Y) vector) => new(vector.X, vector.Y);
 	
-	public static double DistanceTo(Vector2 a, Vector2 b) => (a - b).Length;
-	public static double DistanceSquared(Vector2 a, Vector2 b) => (a - b).LengthSquared;
-	public static Vector2 UnitFromTo(Vector2 a, Vector2 b) => (b - a).Normalized;
 	public static double Cross(Vector2 a, Vector2 b) => a.X * b.Y - a.Y * b.X;
 	public static double Dot(Vector2 a, Vector2 b) => a.X * b.X + a.Y * b.Y;
 	
