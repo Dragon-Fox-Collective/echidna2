@@ -18,14 +18,12 @@ public class Shader(string vertexSource, string fragmentSource)
 	private bool hasBeenInitialized;
 	private bool hasBeenDisposed;
 	
-	public void Bind(Matrix4 viewMatrix, Matrix4 projectionMatrix)
+	public void Bind()
 	{
 		if (!hasBeenInitialized)
 			Initialize();
 		
 		GL.UseProgram(handle);
-		SetMatrix4("view", viewMatrix);
-		SetMatrix4("projection", projectionMatrix);
 	}
 	
 	private void Initialize()

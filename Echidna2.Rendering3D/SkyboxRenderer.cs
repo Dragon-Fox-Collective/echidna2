@@ -16,7 +16,9 @@ public class SkyboxRenderer : INotificationListener<IDraw.Notification>
 		bool cullBackFaces = Mesh.CullBackFaces;
 		Mesh.CullBackFaces = false;
 		
-		Shader.Bind(notification.Camera.ViewMatrix, notification.Camera.ProjectionMatrix);
+		Shader.Bind();
+		Shader.SetMatrix4("view", notification.Camera.ViewMatrix);
+		Shader.SetMatrix4("projection", notification.Camera.ProjectionMatrix);
 		CubeMap.Bind();
 		Mesh.Draw();
 		

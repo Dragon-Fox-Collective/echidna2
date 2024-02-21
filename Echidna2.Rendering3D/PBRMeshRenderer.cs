@@ -17,7 +17,9 @@ public class PBRMeshRenderer(Transform3D transform) : INotificationListener<IDra
 	
 	public void OnNotify(IDraw.Notification notification)
 	{
-		Shader.Bind(notification.Camera.ViewMatrix, notification.Camera.ProjectionMatrix);
+		Shader.Bind();
+		Shader.SetMatrix4("view", notification.Camera.ViewMatrix);
+		Shader.SetMatrix4("projection", notification.Camera.ProjectionMatrix);
 		Shader.SetMatrix4("distortion", Matrix4.Identity);
 		Shader.SetMatrix4("transform", transform.GlobalTransform);
 		Shader.SetColorRgb("albedo", Albedo);

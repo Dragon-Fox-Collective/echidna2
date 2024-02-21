@@ -15,6 +15,7 @@ public class Window
 	public GameWindow GameWindow;
 	
 	public Camera? Camera { get; set; }
+	public PostProcessing? PostProcessing { get; set; }
 	
 	private Vector2 mousePosition;
 	
@@ -46,8 +47,13 @@ public class Window
 	
 	private void OnDraw()
 	{
+		if (Camera is null) return;
+		GL.Viewport(0, 0, Camera.Size.X, Camera.Size.Y);
 		GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit | ClearBufferMask.StencilBufferBit);
-		Camera?.Notify(new IDraw.Notification(Camera));
+		PostProcessing?.BeginRender();
+		Camera.Notify(new IDraw.Notification(Camera));
+		PostProcessing?.EndRender();
+		PostProcessing?.Render();
 		GameWindow.SwapBuffers();
 	}
 	
