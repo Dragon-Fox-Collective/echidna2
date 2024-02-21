@@ -14,6 +14,7 @@ public struct Vector2(double x, double y) : IEquatable<Vector2>, IEnumerable<dou
 	public double Length => Math.Sqrt(LengthSquared);
 	public double LengthSquared => X * X + Y * Y;
 	public Vector2 Normalized => this / Length;
+	public bool IsNaN => double.IsNaN(X) || double.IsNaN(Y);
 	
 	public override int GetHashCode() => HashCode.Combine(X, Y);
 	public override bool Equals(object? obj) => obj is Vector2 other && other == this;
@@ -33,8 +34,10 @@ public struct Vector2(double x, double y) : IEquatable<Vector2>, IEnumerable<dou
 	public static readonly Vector2 West = new(-1, 0);
 	public static readonly Vector2 Up = new(0, 1);
 	public static readonly Vector2 North = new(0, 1);
+	public static readonly Vector2 Forward = new(0, 1);
 	public static readonly Vector2 Down = new(0, -1);
 	public static readonly Vector2 South = new(0, -1);
+	public static readonly Vector2 Backward = new(0, -1);
 	public static readonly Vector2 One = new(1, 1);
 	public static readonly Vector2 Zero = new(0, 0);
 	
@@ -62,6 +65,7 @@ public struct Vector2(double x, double y) : IEquatable<Vector2>, IEnumerable<dou
 	
 	public static double Cross(Vector2 a, Vector2 b) => a.X * b.Y - a.Y * b.X;
 	public static double Dot(Vector2 a, Vector2 b) => a.X * b.X + a.Y * b.Y;
+	public static double AngleBetween(Vector2 a, Vector2 b) => Math.Acos(Dot(a, b) / (a.Length * b.Length));
 	
 	public static Vector2 Sum<T>(IEnumerable<T> source, Func<T, Vector2> selector) => source.Aggregate(Zero, (current, item) => current + selector(item));
 }

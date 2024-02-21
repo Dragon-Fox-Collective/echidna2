@@ -17,7 +17,7 @@ public class Transform3D
 			RecalculateLocalTransform();
 		}
 	}
-	public Vector3 GlobalPosition => GlobalTransform.TransformPoint(localPosition);
+	public Vector3 GlobalPosition => GlobalTransform.Translation;
 	
 	private Quaternion localRotation = Quaternion.Identity;
 	public Quaternion LocalRotation
@@ -29,6 +29,7 @@ public class Transform3D
 			RecalculateLocalTransform();
 		}
 	}
+	public Quaternion GlobalRotation => GlobalTransform.Rotation;
 	
 	private Vector3 localScale = Vector3.One;
 	public Vector3 LocalScale

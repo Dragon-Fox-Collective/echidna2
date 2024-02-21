@@ -1,5 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-using QuaternionSystem = System.Numerics.Quaternion;
+﻿using QuaternionSystem = System.Numerics.Quaternion;
 using QuaternionOpenTK = OpenTK.Mathematics.Quaternion;
 
 namespace Echidna2.Mathematics;
@@ -71,99 +70,19 @@ public struct Quaternion(double x, double y, double z, double w) : IEquatable<Qu
 		if (forward.IsNaN || right.IsNaN || up.IsNaN)
 			return Identity;
 		
-		double m00 = right.X;
-		double m01 = right.Y;
-		double m02 = right.Z;
-		double m10 = up.X;
-		double m11 = up.Y;
-		double m12 = up.Z;
-		double m20 = forward.X;
-		double m21 = forward.Y;
-		double m22 = forward.Z;
-		
-		double trace = m00 + m11 + m22;
-		if (trace > 0)
-		{
-			double s = Math.Sqrt(trace + 1) * 2;
-			return new Quaternion(
-				(m21 - m12) / s,
-				(m02 - m20) / s,
-				(m10 - m01) / s,
-				0.25 * s);
-		}
-		else if (m00 > m11 && m00 > m22)
-		{
-			double s = Math.Sqrt(1 + m00 - m11 - m22) * 2;
-			return new Quaternion(
-				0.25 * s,
-				(m10 + m01) / s,
-				(m02 + m20) / s,
-				(m21 - m12) / s);
-		}
-		else if (m11 > m22)
-		{
-			double s = Math.Sqrt(1 + m11 - m00 - m22) * 2;
-			return new Quaternion(
-				(m10 + m01) / s,
-				0.25 * s,
-				(m21 + m12) / s,
-				(m02 - m20) / s);
-		}
-		else
-		{
-			double s = Math.Sqrt(1 + m22 - m00 - m11) * 2;
-			return new Quaternion(
-				(m02 + m20) / s,
-				(m21 + m12) / s,
-				0.25 * s,
-				(m10 - m01) / s);
-		}
+		// FIXME: I had to re-reverse the matrix arguments to get the correct rotation, so it's no longer fixed for OpenGL
+		return new Matrix4(
+			right.X,   right.Y,   right.Z,   0,
+			up.X,      up.Y,      up.Z,      0,
+			forward.X, forward.Y, forward.Z, 0,
+			0, 0, 0, 1).Rotation;
 	}
 	public static Quaternion LookAt(Vector3 position, Vector3 target, Vector3 up) => LookToward(target - position, up);
 	
 	public static readonly Quaternion Identity = new(0, 0, 0, 1);
 	
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public static Vector3 operator *(Quaternion quaternion, Vector3 vector)
-	{
-		double x2 = quaternion.X + quaternion.X;
-		double y2 = quaternion.Y + quaternion.Y;
-		double z2 = quaternion.Z + quaternion.Z;
-		
-		double wx2 = quaternion.W * x2;
-		double wy2 = quaternion.W * y2;
-		double wz2 = quaternion.W * z2;
-		double xx2 = quaternion.X * x2;
-		double xy2 = quaternion.X * y2;
-		double xz2 = quaternion.X * z2;
-		double yy2 = quaternion.Y * y2;
-		double yz2 = quaternion.Y * z2;
-		double zz2 = quaternion.Z * z2;
-		
-		return new Vector3(
-			vector.X * (1.0f - yy2 - zz2) + vector.Y * (xy2 + wz2) + vector.Z * (xz2 - wy2),
-			vector.X * (xy2 - wz2) + vector.Y * (1.0f - xx2 - zz2) + vector.Z * (yz2 + wx2),
-			vector.X * (xz2 + wy2) + vector.Y * (yz2 - wx2) + vector.Z * (1.0f - xx2 - yy2)
-		);
-	}
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public static Vector2 operator *(Quaternion quaternion, Vector2 vector)
-	{
-		double x2 = quaternion.X + quaternion.X;
-		double y2 = quaternion.Y + quaternion.Y;
-		double z2 = quaternion.Z + quaternion.Z;
-		
-		double wz2 = quaternion.W * z2;
-		double xx2 = quaternion.X * x2;
-		double xy2 = quaternion.X * y2;
-		double yy2 = quaternion.Y * y2;
-		double zz2 = quaternion.Z * z2;
-		
-		return new Vector2(
-			vector.X * (1.0f - yy2 - zz2) + vector.Y * (xy2 + wz2),
-			vector.X * (xy2 - wz2) + vector.Y * (1.0f - xx2 - zz2)
-		);
-	}
+	public static Vector3 operator *(Quaternion quaternion, Vector3 vector) => Matrix4.FromRotation(quaternion) * vector;
+	public static Vector2 operator *(Quaternion quaternion, Vector2 vector) => Matrix4.FromRotation(quaternion) * vector;
 	public static Quaternion operator *(Quaternion a, Quaternion b) => FromVector(b.W * a.XYZ + a.W * b.XYZ + a.XYZ.Cross(b.XYZ), a.W * b.W - a.XYZ.Dot(b.XYZ));
 	public static bool operator ==(Quaternion a, Quaternion b) => Math.Abs(a.X - b.X) < double.Epsilon && Math.Abs(a.Y - b.Y) < double.Epsilon && Math.Abs(a.Z - b.Z) < double.Epsilon && Math.Abs(a.W - b.W) < double.Epsilon;
 	public static bool operator !=(Quaternion a, Quaternion b) => !(a == b);

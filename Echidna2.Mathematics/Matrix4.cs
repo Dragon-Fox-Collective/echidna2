@@ -26,7 +26,7 @@ public struct Matrix4(
 	public double M42 = m42;
 	public double M43 = m43;
 	public double M44 = m44;
-	
+
 	public Matrix4 Inverted
 	{
 		get
@@ -89,6 +89,58 @@ public struct Matrix4(
 		M14, M24, M34, M44);
 	
 	public Vector3 Translation => new(M14, M24, M34);
+	public Quaternion Rotation
+	{
+		get
+		{
+			double trace = M11 + M22 + M33;
+			if (trace > 0)
+			{
+				double s = Math.Sqrt(trace + 1) * 2;
+				return new Quaternion(
+					(M23 - M32) / s,
+					(M31 - M13) / s,
+					(M12 - M21) / s,
+					0.25 * s);
+			}
+			else if (M11 > M22 && M11 > M33)
+			{
+				double s = Math.Sqrt(1 + M11 - M22 - M33) * 2;
+				return new Quaternion(
+					0.25 * s,
+					(M12 + M21) / s,
+					(M31 + M13) / s,
+					(M23 - M32) / s);
+			}
+			else if (M22 > M33)
+			{
+				double s = Math.Sqrt(1 + M22 - M11 - M33) * 2;
+				return new Quaternion(
+					(M12 + M21) / s,
+					0.25 * s,
+					(M23 + M32) / s,
+					(M31 - M13) / s);
+			}
+			else
+			{
+				double s = Math.Sqrt(1 + M33 - M11 - M22) * 2;
+				return new Quaternion(
+					(M31 + M13) / s,
+					(M23 + M32) / s,
+					0.25 * s,
+					(M12 - M21) / s);
+			}
+		}
+	}
+	
+	public Vector3 Right => new(M11, M21, M31);
+	public Vector3 Left => new(-M11, -M21, -M31);
+	public Vector3 Forward => new(M12, M22, M32);
+	public Vector3 Back => new(-M12, -M22, -M32);
+	public Vector3 Up => new(M13, M23, M33);
+	public Vector3 In => new(M13, M23, M33);
+	public Vector3 Down => new(-M13, -M23, -M33);
+	public Vector3 Out => new(-M13, -M23, -M33);
 	
 	public static Matrix4 FromTranslation(Vector3 translation) => new(
 		1, 0, 0, translation.X,
@@ -102,22 +154,25 @@ public struct Matrix4(
 		double y = rotation.Y;
 		double z = rotation.Z;
 		double w = rotation.W;
+		
 		double x2 = x + x;
 		double y2 = y + y;
 		double z2 = z + z;
-		double xx = x * x2;
-		double xy = x * y2;
-		double xz = x * z2;
-		double yy = y * y2;
-		double yz = y * z2;
-		double zz = z * z2;
-		double wx = w * x2;
-		double wy = w * y2;
-		double wz = w * z2;
+		
+		double xx2 = x * x2;
+		double xy2 = x * y2;
+		double xz2 = x * z2;
+		double yy2 = y * y2;
+		double yz2 = y * z2;
+		double zz2 = z * z2;
+		double wx2 = w * x2;
+		double wy2 = w * y2;
+		double wz2 = w * z2;
+		
 		return new Matrix4(
-			1 - (yy + zz), xy + wz, xz - wy, 0,
-			xy - wz, 1 - (xx + zz), yz + wx, 0,
-			xz + wy, yz - wx, 1 - (xx + yy), 0,
+			1 - yy2 - zz2, xy2 + wz2, xz2 - wy2, 0,
+			xy2 - wz2, 1 - xx2 - zz2, yz2 + wx2, 0,
+			xz2 + wy2, yz2 - wx2, 1 - xx2 - yy2, 0,
 			0, 0, 0, 1);
 	}
 	
@@ -193,6 +248,8 @@ public struct Matrix4(
 		&& Math.Abs(a.M43 - b.M43) < double.Epsilon
 		&& Math.Abs(a.M44 - b.M44) < double.Epsilon;
 	public static bool operator !=(Matrix4 a, Matrix4 b) => !(a == b);
+	public static Vector3 operator *(Matrix4 matrix, Vector3 vector) => matrix.TransformDirection(vector);
+	public static Vector2 operator *(Matrix4 matrix, Vector2 vector) => matrix.TransformDirection(vector);
 	
 	public static implicit operator Matrix4System(Matrix4 matrix) => new(
 		(float)matrix.M11, (float)matrix.M12, (float)matrix.M13, (float)matrix.M14,
