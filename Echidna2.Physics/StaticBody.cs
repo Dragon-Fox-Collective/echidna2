@@ -6,16 +6,17 @@ namespace Echidna2.Physics;
 public class StaticBody(Transform3D transform, BodyShape shape)
 {
 	public PhysicsMaterial PhysicsMaterial = new();
+	public CollisionFilter CollisionFilter = new();
 	
-	private StaticHandle handle;
+	public StaticHandle Handle { get; private init; }
 	public StaticReference Reference { get; private init; }
 	
 	public WorldSimulation Simulation
 	{
 		init
 		{
-			handle = value.AddStaticBody(transform, shape, ref PhysicsMaterial);
-			Reference = value[handle];
+			Handle = value.AddStaticBody(transform, shape, ref PhysicsMaterial, ref CollisionFilter);
+			Reference = value[Handle];
 		}
 	}
 }

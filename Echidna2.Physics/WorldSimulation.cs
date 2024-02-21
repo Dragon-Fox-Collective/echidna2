@@ -22,6 +22,7 @@ public class WorldSimulation : IUpdate
 	private Simulation simulation;
 	
 	private CollidableProperty<PhysicsMaterial> physicsMaterials;
+	private CollidableProperty<CollisionFilter> collisionFilters;
 	
 	private bool hasBeenDisposed;
 	
@@ -30,7 +31,16 @@ public class WorldSimulation : IUpdate
 		this.world = world;
 		bufferPool = new BufferPool();
 		physicsMaterials = new CollidableProperty<PhysicsMaterial>();
-		simulation = Simulation.Create(bufferPool, new NarrowPhaseCallbacks { PhysicsMaterials = physicsMaterials }, new PoseIntegratorCallbacks(), new SolveDescription(8, 1));
+		collisionFilters = new CollidableProperty<CollisionFilter>();
+		simulation = Simulation.Create(
+			bufferPool,
+			new NarrowPhaseCallbacks
+			{
+				PhysicsMaterials = physicsMaterials,
+				CollisionFilters = collisionFilters,
+			},
+			new PoseIntegratorCallbacks(),
+			new SolveDescription(8, 1));
 		threadDispatcher = new ThreadDispatcher(Environment.ProcessorCount);
 	}
 	
@@ -47,21 +57,28 @@ public class WorldSimulation : IUpdate
 		}
 	}
 	
-	public BodyHandle AddDynamicBody(Transform3D transform, BodyShape shape, BodyInertia inertia, ref PhysicsMaterial material)
+	public BodyHandle AddDynamicBody(Transform3D transform, BodyShape shape, BodyInertia inertia, ref PhysicsMaterial material, ref CollisionFilter collisionFilter)
 	{
 		BodyHandle handle = simulation.Bodies.Add(BodyDescription.CreateDynamic(new RigidPose(transform.LocalPosition, transform.LocalRotation), inertia, AddShape(shape), 0.01f));
 		physicsMaterials.Allocate(handle) = material;
+		collisionFilters.Allocate(handle) = collisionFilter;
 		return handle;
 	}
 	
-	public StaticHandle AddStaticBody(Transform3D transform, BodyShape shape, ref PhysicsMaterial material)
+	public StaticHandle AddStaticBody(Transform3D transform, BodyShape shape, ref PhysicsMaterial material, ref CollisionFilter collisionFilter)
 	{
 		StaticHandle handle = simulation.Statics.Add(new StaticDescription(new RigidPose(transform.LocalPosition, transform.LocalRotation), AddShape(shape)));
 		physicsMaterials.Allocate(handle) = material;
+		collisionFilters.Allocate(handle) = collisionFilter;
 		return handle;
 	}
 	
 	public TypedIndex AddShape(BodyShape shape) => shape.AddToShapes(simulation.Shapes);
+	
+	public void AddJoint<TDescription>(DynamicBody a, DynamicBody b, TDescription joint) where TDescription : unmanaged, ITwoBodyConstraintDescription<TDescription>
+	{
+		simulation.Solver.Add(a.Handle, b.Handle, joint);
+	}
 	
 	public BodyReference this[BodyHandle handle] => simulation.Bodies[handle];
 	public StaticReference this[StaticHandle handle] => simulation.Statics[handle];
@@ -83,16 +100,18 @@ public class WorldSimulation : IUpdate
 	private struct NarrowPhaseCallbacks : INarrowPhaseCallbacks
 	{
 		public CollidableProperty<PhysicsMaterial> PhysicsMaterials;
+		public CollidableProperty<CollisionFilter> CollisionFilters;
 		
 		public void Initialize(Simulation simulation)
 		{
 			PhysicsMaterials.Initialize(simulation);
+			CollisionFilters.Initialize(simulation);
 		}
 		
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public bool AllowContactGeneration(int workerIndex, CollidableReference a, CollidableReference b, ref float speculativeMargin)
 		{
-			return a.Mobility == CollidableMobility.Dynamic || b.Mobility == CollidableMobility.Dynamic;
+			return (a.Mobility == CollidableMobility.Dynamic || b.Mobility == CollidableMobility.Dynamic) && (CollisionFilters[a].Collision & CollisionFilters[b].Membership) != 0 && (CollisionFilters[b].Collision & CollisionFilters[a].Membership) != 0;
 		}
 		
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -141,4 +160,10 @@ public class WorldSimulation : IUpdate
 		{
 		}
 	}
+}
+
+public struct CollisionFilter()
+{
+	public long Membership = long.MinValue;
+	public long Collision = long.MaxValue;
 }

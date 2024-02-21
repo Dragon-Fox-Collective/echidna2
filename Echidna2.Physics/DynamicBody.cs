@@ -7,16 +7,17 @@ namespace Echidna2.Physics;
 public class DynamicBody(Transform3D transform, BodyShape shape, BodyInertia inertia) : IUpdate
 {
 	public PhysicsMaterial PhysicsMaterial = new();
+	public CollisionFilter CollisionFilter = new();
 	
-	private BodyHandle handle;
+	public BodyHandle Handle { get; private init; }
 	public BodyReference Reference { get; private init; }
 	
 	public WorldSimulation Simulation
 	{
 		init
 		{
-			handle = value.AddDynamicBody(transform, shape, inertia, ref PhysicsMaterial);
-			Reference = value[handle];
+			Handle = value.AddDynamicBody(transform, shape, inertia, ref PhysicsMaterial, ref CollisionFilter);
+			Reference = value[Handle];
 		}
 	}
 	
