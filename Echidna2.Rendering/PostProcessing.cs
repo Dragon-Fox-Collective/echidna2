@@ -3,10 +3,11 @@ using OpenTK.Mathematics;
 
 namespace Echidna2.Rendering;
 
-public class PostProcessing(Shader shader, Vector2i size)
+public class PostProcessing(Shader shader, Vector2i size, Camera camera)
 {
 	public Shader Shader { get; set; } = shader;
 	public Vector2i Size { get; set; } = size;
+	public Camera Camera { get; set; } = camera;
 	
 	private int colorTexture;
 	private int depthTexture;
@@ -69,10 +70,12 @@ public class PostProcessing(Shader shader, Vector2i size)
 		Shader.Bind();
 		GL.ActiveTexture(TextureUnit.Texture0);
 		GL.BindTexture(TextureTarget.Texture2D, colorTexture);
-		GL.Uniform1(0, 0);
+		Shader.SetInt("colorTexture", 0);
 		GL.ActiveTexture(TextureUnit.Texture1);
 		GL.BindTexture(TextureTarget.Texture2D, depthTexture);
-		GL.Uniform1(1, 1);
+		Shader.SetInt("depthTexture", 1);
+		Shader.SetFloat("nearClipPlane", (float)Camera.NearClipPlane);
+		Shader.SetFloat("farClipPlane", (float)Camera.FarClipPlane);
 		Mesh.Quad.Draw();
 		GL.Enable(EnableCap.DepthTest);
 	}
