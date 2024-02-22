@@ -1,8 +1,13 @@
 ﻿using Echidna2.Core;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
+using OpenTK.Windowing.Common.Input;
 using OpenTK.Windowing.Desktop;
 using OpenTK.Windowing.GraphicsLibraryFramework;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats;
+using SixLabors.ImageSharp.PixelFormats;
+using Image = SixLabors.ImageSharp.Image;
 using Vector2 = Echidna2.Mathematics.Vector2;
 
 namespace Echidna2.Rendering;
@@ -90,4 +95,12 @@ public class Window
 	}
 	
 	public void Run() => GameWindow.Run();
+	
+	public static WindowIcon CreateWindowIcon(string path)
+	{
+		Image<Rgba32> image = (Image<Rgba32>)Image.Load(new DecoderOptions(), path);
+		Span<byte> imageBytes = stackalloc byte[32 * 32 * 4];
+		image.Frames.RootFrame.CopyPixelDataTo(imageBytes);
+		return new WindowIcon(new OpenTK.Windowing.Common.Input.Image(image.Width, image.Height, imageBytes.ToArray()));
+	}
 }

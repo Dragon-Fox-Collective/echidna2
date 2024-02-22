@@ -83,7 +83,7 @@ Window window = new(new GameWindow(
 	{
 		ClientSize = (1280, 720),
 		Title = "Echidna Engine",
-		Icon = CreateWindowIcon("Assets/Echidna.png"),
+		Icon = Window.CreateWindowIcon("Assets/Echidna.png"),
 	}
 ))
 {
@@ -92,13 +92,3 @@ Window window = new(new GameWindow(
 window.Resize += size => root.LocalSize = size;
 window.Run();
 return;
-
-
-
-static WindowIcon CreateWindowIcon(string path)
-{
-	Image<Rgba32> image = (Image<Rgba32>)Image.Load(new DecoderOptions(), path);
-	Span<byte> imageBytes = stackalloc byte[32 * 32 * 4];
-	image.Frames.RootFrame.CopyPixelDataTo(imageBytes);
-	return new WindowIcon(new OpenTK.Windowing.Common.Input.Image(image.Width, image.Height, imageBytes.ToArray()));
-}
