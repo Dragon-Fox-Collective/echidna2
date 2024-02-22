@@ -9,7 +9,7 @@ public class Shader(string vertexSource, string fragmentSource)
 {
 	public static readonly Shader Solid = new(ShaderNodeUtil.MainVertexShader, File.ReadAllText("Assets/solid.frag"));
 	public static readonly Shader PBR = new(ShaderNodeUtil.MainVertexShader, File.ReadAllText("Assets/pbr.frag"));
-	public static readonly Shader Skybox = new(ShaderNodeUtil.SkyboxVertexShader, ShaderNodeUtil.CubeMapFragmentShader);
+	public static readonly Shader Skybox = new(ShaderNodeUtil.SkyboxVertexShader, File.ReadAllText("Assets/cubemap.frag"));
 	
 	private int handle;
 	
