@@ -48,7 +48,7 @@ public class Window
 	private void OnDraw()
 	{
 		if (Camera is null) return;
-		GL.Viewport(0, 0, Camera.Size.X, Camera.Size.Y);
+		GL.Viewport(0, 0, (int)Camera.Size.X, (int)Camera.Size.Y);
 		GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit | ClearBufferMask.StencilBufferBit);
 		PostProcessing?.BeginRender();
 		Camera.Notify(new IDraw.Notification(Camera));
@@ -86,8 +86,6 @@ public class Window
 	
 	private void OnResize(Vector2i size)
 	{
-		GL.Viewport(0, 0, size.X, size.Y);
-		if (Camera is not null) Camera.Size = size;
 		Resize?.Invoke(size.ToVector2());
 	}
 	

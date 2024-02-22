@@ -1,12 +1,11 @@
 ﻿using Echidna2.Core;
 using Echidna2.Mathematics;
-using Vector2i = OpenTK.Mathematics.Vector2i;
 
 namespace Echidna2.Rendering;
 
 public abstract class Camera(INotificationPropagator world)
 {
-	public Vector2i Size { get; set; }
+	public Vector2 Size { get; set; }
 	public double FarClipPlane { get; set; } = 1000;
 	public double NearClipPlane { get; set; } = 0.1;
 	

@@ -76,7 +76,7 @@ public class Shader(string vertexSource, string fragmentSource)
 	}
 	
 	public int GetAttribLocation(string attribName) => GL.GetAttribLocation(handle, attribName);
-	public int GetUniformLocation(string uniformName) => uniforms[uniformName];
+	public int GetUniformLocation(string uniformName) => uniforms.GetValueOrDefault(uniformName, -1);
 	public void SetInt(string name, int data) => GL.Uniform1(GetUniformLocation(name), data);
 	public void SetFloat(string name, float data) => GL.Uniform1(GetUniformLocation(name), data);
 	public void SetMatrix4(string name, Matrix4 data)
