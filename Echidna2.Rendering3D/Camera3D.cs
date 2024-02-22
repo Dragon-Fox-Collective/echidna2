@@ -11,5 +11,5 @@ public class Camera3D(INotificationPropagator world, Transform3D transform) : Ca
 	public Transform3D Transform => transform;
 	
 	public override Matrix4 ViewMatrix => Transform.GlobalTransform.Inverted;
-	public override Matrix4 ProjectionMatrix => Matrix4.FromPerspectiveProjection(FieldOfView, (double)Size.X / Size.Y, NearClipPlane, FarClipPlane);
+	public override Matrix4 ProjectionMatrix => Matrix4.FromPerspectiveProjection(FieldOfView, Size.X / Size.Y, NearClipPlane, FarClipPlane);
 }
