@@ -2,10 +2,12 @@
 
 // https://learnopengl.com/PBR/Lighting
 
-out vec4 FragColor;
-in vec2 texCoord;
-in vec3 globalPosition;
-in vec3 normal;
+layout (location = 0) out vec4 FragColor;
+layout (location = 1) out vec4 BrightColor;
+
+in vec2 TexCoords;
+in vec3 GlobalPosition;
+in vec3 Normal;
 
 uniform vec3 albedo;
 uniform float roughness;
@@ -60,10 +62,15 @@ vec3 fresnelSchlick(float cosTheta, vec3 F0)
     return F0 + (1.0 - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
 }
 
+float luminance(vec3 color)
+{
+    return dot(color, vec3(0.299, 0.587, 0.114));
+}
+
 void main()
 {
-    vec3 normal = normalize(normal);
-    vec3 directionToCamera = normalize(cameraPosition - globalPosition);
+    vec3 normal = normalize(Normal);
+    vec3 directionToCamera = normalize(cameraPosition - GlobalPosition);
     
     vec3 F0 = vec3(0.04);
     F0 = mix(F0, albedo, metallic);
@@ -73,9 +80,9 @@ void main()
     for(int i = 0; i < numLights; i++)
     {
         // calculate per-light radiance
-        vec3 directionToLight = normalize(lightPositions[i] - globalPosition);
+        vec3 directionToLight = normalize(lightPositions[i] - GlobalPosition);
         vec3 cameraLightNormal = normalize(directionToCamera + directionToLight);
-        float distanceToLight = length(lightPositions[i] - globalPosition);
+        float distanceToLight = length(lightPositions[i] - GlobalPosition);
         float attenuation = 1.0 / (distanceToLight * distanceToLight);
         vec3 radiance = lightColors[i] * attenuation;
         
@@ -100,8 +107,6 @@ void main()
     vec3 ambient = vec3(0.03) * albedo * ao;
     vec3 color = ambient + Lo;
     
-    color = color / (color + vec3(1.0));
-    color = pow(color, vec3(1.0/2.2));
-    
     FragColor = vec4(color, 1.0);
+    BrightColor = vec4(luminance(color) > 1.0 ? color : vec3(0.0), 1.0);
 }

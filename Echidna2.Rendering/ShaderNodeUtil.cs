@@ -5,12 +5,12 @@ namespace Echidna2.Rendering;
 
 public static class ShaderNodeUtil
 {
-	private static readonly InOutVariable<Vector2> TexCoordVariable = new("texCoord");
-	private static readonly InOutVariable<Vector3> LocalPositionVariable = new("localPosition");
-	private static readonly InOutVariable<Vector3> GlobalPositionVariable = new("globalPosition");
-	private static readonly InOutVariable<Vector3> VertexColorVariable = new("vertexColor");
-	private static readonly InOutVariable<Vector3> NormalVariable = new("normal");
-	private static readonly InOutVariable<Vector3> CubeMapTexCoordVariable = new("texCoord");
+	private static readonly InOutVariable<Vector2> TexCoordVariable = new("TexCoords");
+	private static readonly InOutVariable<Vector3> LocalPositionVariable = new("LocalPosition");
+	private static readonly InOutVariable<Vector3> GlobalPositionVariable = new("GlobalPosition");
+	private static readonly InOutVariable<Vector3> VertexColorVariable = new("VertexColor");
+	private static readonly InOutVariable<Vector3> NormalVariable = new("Normal");
+	private static readonly InOutVariable<Vector3> CubeMapTexCoordVariable = new("TexCoords");
 	
 	private static readonly UniformVariable<CubeSampler> SkyboxVariable = new("skybox");
 	
@@ -117,6 +117,7 @@ public static class ShaderNodeUtil
 				CubeMapTexCoordVariable.Output
 				).Output
 			),
+		BrightColor = new BrightColorOutput(new ShaderNodeSlot<Vector4>("vec4(0, 0, 0, 1)")),
 		InOutVariables =
 		[
 			CubeMapTexCoordVariable,
@@ -153,7 +154,7 @@ public class VertexShader
 
 layout (location = 0) in vec3 aPosition;
 layout (location = 1) in vec3 aNormal;
-layout (location = 2) in vec2 aTexCoord;
+layout (location = 2) in vec2 aTexCoords;
 layout (location = 3) in vec3 aColor;
 
 {{string.Join("\n", InOutBindings.Select(binding => binding.Variable.Out))}}
@@ -167,8 +168,8 @@ layout (location = 3) uniform mat4 projection;
 
 void main()
 {
-	{{Position?.ToString() ?? ""}}
-	{{string.Join("\n    ", InOutBindings.Select(binding => binding.ToString()))}}
+    {{Position?.Output.ToString() ?? ""}}
+    {{string.Join("\n    ", InOutBindings.Select(binding => binding.Code))}}
 }
 
 """;
@@ -177,6 +178,7 @@ void main()
 public class FragmentShader
 {
 	public FragColorOutput? FragColor { get; init; }
+	public BrightColorOutput? BrightColor { get; init; }
 	public InOutVariable[] InOutVariables { get; init; } = Array.Empty<InOutVariable>();
 	public UniformVariable[] UniformVariables { get; init; } = Array.Empty<UniformVariable>();
 	
@@ -188,13 +190,15 @@ public class FragmentShader
 
 {{string.Join("\n", InOutVariables.Select(variable => variable.In))}}
 
-out vec4 FragColor;
+layout (location = 0) out vec4 FragColor;
+layout (location = 1) out vec4 BrightColor;
 
 {{string.Join("\n", UniformVariables.Select(variable => variable.Uniform))}}
 
 void main()
 {
-    {{FragColor?.ToString() ?? ""}}
+    {{FragColor?.Output.ToString() ?? ""}}
+    {{BrightColor?.Output.ToString() ?? ""}}
 }
 
 """;
@@ -202,371 +206,158 @@ void main()
 
 public interface ShaderNode;
 
-public class ShaderNodeSlot<[UsedImplicitly] T>(Func<string> selector)
+public class ShaderNodeSlot<[UsedImplicitly] T>(string code)
 {
-	public override string ToString() => selector();
+	public override string ToString() => code;
 }
 
 public class DistortionInput : ShaderNode
 {
-	public readonly ShaderNodeSlot<Matrix4> Output;
-	
-	public DistortionInput()
-	{
-		Output = new ShaderNodeSlot<Matrix4>(ToString);
-	}
-	
-	public override string ToString() => "distortion";
+	public readonly ShaderNodeSlot<Matrix4> Output = new("distortion");
 }
 
 public class TransformInput : ShaderNode
 {
-	public readonly ShaderNodeSlot<Matrix4> Output;
-	
-	public TransformInput()
-	{
-		Output = new ShaderNodeSlot<Matrix4>(ToString);
-	}
-	
-	public override string ToString() => "transform";
+	public readonly ShaderNodeSlot<Matrix4> Output = new("transform");
 }
 
 public class ViewInput : ShaderNode
 {
-	public readonly ShaderNodeSlot<Matrix4> Output;
-	
-	public ViewInput()
-	{
-		Output = new ShaderNodeSlot<Matrix4>(ToString);
-	}
-	
-	public override string ToString() => "view";
+	public readonly ShaderNodeSlot<Matrix4> Output = new("view");
 }
 
 public class ProjectionInput : ShaderNode
 {
-	public readonly ShaderNodeSlot<Matrix4> Output;
-	
-	public ProjectionInput()
-	{
-		Output = new ShaderNodeSlot<Matrix4>(ToString);
-	}
-	
-	public override string ToString() => "projection";
+	public readonly ShaderNodeSlot<Matrix4> Output = new("projection");
 }
 
 public class PositionInput : ShaderNode
 {
-	public readonly ShaderNodeSlot<Vector3> Output;
-	
-	public PositionInput()
-	{
-		Output = new ShaderNodeSlot<Vector3>(ToString);
-	}
-	
-	public override string ToString() => "aPosition";
+	public readonly ShaderNodeSlot<Vector3> Output = new("aPosition");
 }
 
 public class NormalInput : ShaderNode
 {
-	public readonly ShaderNodeSlot<Vector3> Output;
-	
-	public NormalInput()
-	{
-		Output = new ShaderNodeSlot<Vector3>(ToString);
-	}
-	
-	public override string ToString() => "aNormal";
+	public readonly ShaderNodeSlot<Vector3> Output = new("aNormal");
 }
 
 public class TexCoordInput : ShaderNode
 {
-	public readonly ShaderNodeSlot<Vector2> Output;
-	
-	public TexCoordInput()
-	{
-		Output = new ShaderNodeSlot<Vector2>(ToString);
-	}
-	
-	public override string ToString() => "aTexCoord";
+	public readonly ShaderNodeSlot<Vector2> Output = new("aTexCoords");
 }
 
 public class VertexColorInput : ShaderNode
 {
-	public readonly ShaderNodeSlot<Vector3> Output;
-	
-	public VertexColorInput()
-	{
-		Output = new ShaderNodeSlot<Vector3>(ToString);
-	}
-	
-	public override string ToString() => "aColor";
+	public readonly ShaderNodeSlot<Vector3> Output = new("aColor");
 }
 
-public class PositionOutput : ShaderNode
+public class PositionOutput(ShaderNodeSlot<Vector4> position) : ShaderNode
 {
-	private readonly ShaderNodeSlot<Vector4> position;
-	
-	public PositionOutput(ShaderNodeSlot<Vector4> position)
-	{
-		this.position = position;
-	}
-    
-	public override string ToString() => $"gl_Position = {position};";
+	public readonly ShaderNodeSlot<Vector4> Output = new($"gl_Position = {position};");
 }
 
-public class FragColorOutput : ShaderNode
+public class FragColorOutput(ShaderNodeSlot<Vector4> fragColor) : ShaderNode
 {
-	private readonly ShaderNodeSlot<Vector4> fragColor;
-	
-	public FragColorOutput(ShaderNodeSlot<Vector4> fragColor)
-	{
-		this.fragColor = fragColor;
-	}
-    
-	public override string ToString() => $"FragColor = {fragColor};";
+	public readonly ShaderNodeSlot<Vector4> Output = new($"FragColor = {fragColor};");
 }
 
-public class Vector4TimesMatrix4 : ShaderNode
+public class BrightColorOutput(ShaderNodeSlot<Vector4> brightColor) : ShaderNode
 {
-	private readonly ShaderNodeSlot<Vector4> left;
-	private readonly ShaderNodeSlot<Matrix4> right;
-	
-	public readonly ShaderNodeSlot<Vector4> Output;
-	
-	public Vector4TimesMatrix4(ShaderNodeSlot<Vector4> left, ShaderNodeSlot<Matrix4> right)
-	{
-		this.left = left;
-		this.right = right;
-		Output = new ShaderNodeSlot<Vector4>(ToString);
-	}
-	
-	public override string ToString() => $"({left} * {right})";
+	public readonly ShaderNodeSlot<Vector4> Output = new($"BrightColor = {brightColor};");
 }
 
-public class Matrix4TimesMatrix4 : ShaderNode
+public class Vector4TimesMatrix4(ShaderNodeSlot<Vector4> left, ShaderNodeSlot<Matrix4> right) : ShaderNode
 {
-	private readonly ShaderNodeSlot<Matrix4> left;
-	private readonly ShaderNodeSlot<Matrix4> right;
-	
-	public readonly ShaderNodeSlot<Matrix4> Output;
-	
-	public Matrix4TimesMatrix4(ShaderNodeSlot<Matrix4> left, ShaderNodeSlot<Matrix4> right)
-	{
-		this.left = left;
-		this.right = right;
-		Output = new ShaderNodeSlot<Matrix4>(ToString);
-	}
-	
-	public override string ToString() => $"({left} * {right})";
+	public readonly ShaderNodeSlot<Vector4> Output = new($"({left} * {right})");
 }
 
-public class Vector3ToVector4 : ShaderNode
+public class Matrix4TimesMatrix4(ShaderNodeSlot<Matrix4> left, ShaderNodeSlot<Matrix4> right) : ShaderNode
 {
-	private readonly ShaderNodeSlot<Vector3> xyz;
-	private readonly ShaderNodeSlot<float> w;
-	
-	public readonly ShaderNodeSlot<Vector4> Output;
-	
-	public Vector3ToVector4(ShaderNodeSlot<Vector3> xyz, ShaderNodeSlot<float> w)
-	{
-		this.xyz = xyz;
-		this.w = w;
-		Output = new ShaderNodeSlot<Vector4>(ToString);
-	}
-	
-	public override string ToString() => $"vec4({xyz}, {w})";
+	public readonly ShaderNodeSlot<Matrix4> Output = new($"({left} * {right})");
 }
 
-public class Matrix3ToMatrix4 : ShaderNode
+public class Vector3ToVector4(ShaderNodeSlot<Vector3> xyz, ShaderNodeSlot<float> w) : ShaderNode
 {
-	private readonly ShaderNodeSlot<Matrix3> mat3;
-	
-	public readonly ShaderNodeSlot<Matrix4> Output;
-	
-	public Matrix3ToMatrix4(ShaderNodeSlot<Matrix3> mat3)
-	{
-		this.mat3 = mat3;
-		Output = new ShaderNodeSlot<Matrix4>(ToString);
-	}
-	
-	public override string ToString() => $"mat4({mat3})";
+	public readonly ShaderNodeSlot<Vector4> Output = new($"vec4({xyz}, {w})");
 }
 
-public class Matrix4ToMatrix3 : ShaderNode
+public class Matrix3ToMatrix4(ShaderNodeSlot<Matrix3> mat3) : ShaderNode
 {
-	private readonly ShaderNodeSlot<Matrix4> mat4;
-	
-	public readonly ShaderNodeSlot<Matrix3> Output;
-	
-	public Matrix4ToMatrix3(ShaderNodeSlot<Matrix4> mat4)
-	{
-		this.mat4 = mat4;
-		Output = new ShaderNodeSlot<Matrix3>(ToString);
-	}
-	
-	public override string ToString() => $"mat3({mat4})";
+	public readonly ShaderNodeSlot<Matrix4> Output = new($"mat4({mat3})");
 }
 
-public class Vector4XYZ : ShaderNode
+public class Matrix4ToMatrix3(ShaderNodeSlot<Matrix4> mat4) : ShaderNode
 {
-	private readonly ShaderNodeSlot<Vector4> xyzw;
-	
-	public readonly ShaderNodeSlot<Vector3> Output;
-	
-	public Vector4XYZ(ShaderNodeSlot<Vector4> xyzw)
-	{
-		this.xyzw = xyzw;
-		Output = new ShaderNodeSlot<Vector3>(ToString);
-	}
-	
-	public override string ToString() => $"{xyzw}.xyz";
+	public readonly ShaderNodeSlot<Matrix3> Output = new($"mat3({mat4})");
 }
 
-public class Vector4XYWW : ShaderNode
+public class Vector4XYZ(ShaderNodeSlot<Vector4> xyzw) : ShaderNode
 {
-	private readonly ShaderNodeSlot<Vector4> xyzw;
-	
-	public readonly ShaderNodeSlot<Vector4> Output;
-	
-	public Vector4XYWW(ShaderNodeSlot<Vector4> xyzw)
-	{
-		this.xyzw = xyzw;
-		Output = new ShaderNodeSlot<Vector4>(ToString);
-	}
-	
-	public override string ToString() => $"{xyzw}.xyww";
+	public readonly ShaderNodeSlot<Vector3> Output = new($"{xyzw}.xyz");
 }
 
-public class FloatValue : ShaderNode
+public class Vector4XYWW(ShaderNodeSlot<Vector4> xyzw) : ShaderNode
 {
-	private float value;
-	
-	public readonly ShaderNodeSlot<float> Output;
-	
-	public FloatValue(float value)
-	{
-		this.value = value;
-		Output = new ShaderNodeSlot<float>(ToString);
-	}
-	
-	public override string ToString() => $"{value}";
+	public readonly ShaderNodeSlot<Vector4> Output = new($"{xyzw}.xyww");
 }
 
-public class CubeSampler : ShaderNode
+public class FloatValue(float value) : ShaderNode
 {
-	private readonly ShaderNodeSlot<CubeSampler> texture;
-	private readonly ShaderNodeSlot<Vector3> texCoord;
-	
-	public readonly ShaderNodeSlot<Vector4> Output;
-	
-	public CubeSampler(ShaderNodeSlot<CubeSampler> texture, ShaderNodeSlot<Vector3> texCoord)
-	{
-		this.texture = texture;
-		this.texCoord = texCoord;
-		Output = new ShaderNodeSlot<Vector4>(ToString);
-	}
-	
-	public override string ToString() => $"texture({texture}, {texCoord})";
+	public readonly ShaderNodeSlot<float> Output = new($"{value}");
 }
 
-public abstract class InOutVariable
+public class CubeSampler(ShaderNodeSlot<CubeSampler> texture, ShaderNodeSlot<Vector3> texCoord) : ShaderNode
 {
-	public readonly string Name;
+	public readonly ShaderNodeSlot<Vector4> Output = new($"texture({texture}, {texCoord})");
+}
+
+public abstract class InOutVariable(string name)
+{
+	public readonly string Name = name;
 	protected abstract string Type { get; }
 	
 	public string In => $"in {Type} {Name};";
 	public string Out => $"out {Type} {Name};";
-    
-	protected InOutVariable(string name)
-	{
-		Name = name;
-	}
 }
 
-public class InOutVariable<T> : InOutVariable
+public class InOutVariable<T>(string name) : InOutVariable(name)
 {
 	protected override string Type => ShaderNodeUtil.GetShaderTypeName(typeof(T));
-	
-	public readonly ShaderNodeSlot<T> Output;
-    
-	public InOutVariable(string name) : base(name)
-	{
-		Output = new ShaderNodeSlot<T>(ToString);
-	}
-    
-	public override string ToString() => $"{Name}";
+	public readonly ShaderNodeSlot<T> Output = new($"{name}");
 }
 
-public abstract class InOutBinding
+public abstract class InOutBinding(InOutVariable variable)
 {
-	public readonly InOutVariable Variable;
-	
-	protected InOutBinding(InOutVariable variable)
-	{
-		Variable = variable;
-	}
+	public readonly InOutVariable Variable = variable;
+	public abstract string Code { get; }
 }
 
-public class InOutBinding<T> : InOutBinding
+public class InOutBinding<T>(InOutVariable<T> variable, ShaderNodeSlot<T> input) : InOutBinding(variable)
 {
-	private readonly ShaderNodeSlot<T> input;
-	
-	// ReSharper disable once SuggestBaseTypeForParameterInConstructor
-	public InOutBinding(InOutVariable<T> variable, ShaderNodeSlot<T> input) : base(variable)
-	{
-		this.input = input;
-	}
-    
-	public override string ToString() => $"{Variable.Name} = {input};";
+	public override string Code => $"{Variable.Name} = {input};";
 }
 
-public abstract class UniformVariable
+public abstract class UniformVariable(string name)
 {
-	public readonly string Name;
+	public readonly string Name = name;
 	protected abstract string Type { get; }
 	
 	public string Uniform => $"uniform {Type} {Name};";
-    
-	protected UniformVariable(string name)
-	{
-		Name = name;
-	}
 }
 
-public class UniformVariable<T> : UniformVariable
+public class UniformVariable<T>(string name) : UniformVariable(name)
 {
 	protected override string Type => ShaderNodeUtil.GetShaderTypeName(typeof(T));
-	
-	public readonly ShaderNodeSlot<T> Output;
-    
-	public UniformVariable(string name) : base(name)
-	{
-		Output = new ShaderNodeSlot<T>(ToString);
-	}
-    
-	public override string ToString() => $"{Name}";
+	public readonly ShaderNodeSlot<T> Output = new($"{name}");
 }
 
-public abstract class UniformBinding
+public abstract class UniformBinding(UniformVariable variable)
 {
-	public readonly UniformVariable Variable;
-	
-	protected UniformBinding(UniformVariable variable)
-	{
-		Variable = variable;
-	}
+	public readonly UniformVariable Variable = variable;
+	public abstract string Code { get; }
 }
 
-public class UniformBinding<T> : UniformBinding
+public class UniformBinding<T>(UniformVariable<T> variable, ShaderNodeSlot<T> input) : UniformBinding(variable)
 {
-	private readonly ShaderNodeSlot<T> input;
-	
-	// ReSharper disable once SuggestBaseTypeForParameterInConstructor
-	public UniformBinding(UniformVariable<T> variable, ShaderNodeSlot<T> input) : base(variable)
-	{
-		this.input = input;
-	}
-    
-	public override string ToString() => $"{Variable.Name} = {input};";
+	public override string Code => $"{Variable.Name} = {input};";
 }
