@@ -6,6 +6,11 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <PropertyGroup Condition="'$(Configuration)'=='Release'">
+        <DebugSymbols>False</DebugSymbols>
+        <DebugType>None</DebugType>
+    </PropertyGroup>
+
     <ItemGroup>
       <ProjectReference Include="..\Echidna2.Core\Echidna2.Core.csproj" />
         <ProjectReference Include="..\Echidna2.SourceGenerators\Echidna2.SourceGenerators.csproj" OutputItemType="Analyzer" />
