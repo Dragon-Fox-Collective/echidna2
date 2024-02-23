@@ -21,8 +21,8 @@ public class WorldSimulation : IUpdate
 	private ThreadDispatcher threadDispatcher;
 	private Simulation simulation;
 	
-	private CollidableProperty<PhysicsMaterial> physicsMaterials;
-	private CollidableProperty<CollisionFilter> collisionFilters;
+	public readonly CollidableProperty<PhysicsMaterial> PhysicsMaterials;
+	public readonly CollidableProperty<CollisionFilter> CollisionFilters;
 	
 	private bool hasBeenDisposed;
 	
@@ -30,14 +30,14 @@ public class WorldSimulation : IUpdate
 	{
 		this.world = world;
 		bufferPool = new BufferPool();
-		physicsMaterials = new CollidableProperty<PhysicsMaterial>();
-		collisionFilters = new CollidableProperty<CollisionFilter>();
+		PhysicsMaterials = new CollidableProperty<PhysicsMaterial>();
+		CollisionFilters = new CollidableProperty<CollisionFilter>();
 		simulation = Simulation.Create(
 			bufferPool,
 			new NarrowPhaseCallbacks
 			{
-				PhysicsMaterials = physicsMaterials,
-				CollisionFilters = collisionFilters,
+				PhysicsMaterials = PhysicsMaterials,
+				CollisionFilters = CollisionFilters,
 			},
 			new PoseIntegratorCallbacks(),
 			new SolveDescription(8, 1));
@@ -57,19 +57,19 @@ public class WorldSimulation : IUpdate
 		}
 	}
 	
-	public BodyHandle AddDynamicBody(Transform3D transform, BodyShape shape, BodyInertia inertia, ref PhysicsMaterial material, ref CollisionFilter collisionFilter)
+	public BodyHandle AddDynamicBody(Transform3D transform, BodyShape shape, BodyInertia inertia)
 	{
 		BodyHandle handle = simulation.Bodies.Add(BodyDescription.CreateDynamic(new RigidPose(transform.LocalPosition, transform.LocalRotation), inertia, AddShape(shape), 0.01f));
-		physicsMaterials.Allocate(handle) = material;
-		collisionFilters.Allocate(handle) = collisionFilter;
+		PhysicsMaterials.Allocate(handle) = new PhysicsMaterial();
+		CollisionFilters.Allocate(handle) = new CollisionFilter();
 		return handle;
 	}
 	
-	public StaticHandle AddStaticBody(Transform3D transform, BodyShape shape, ref PhysicsMaterial material, ref CollisionFilter collisionFilter)
+	public StaticHandle AddStaticBody(Transform3D transform, BodyShape shape)
 	{
 		StaticHandle handle = simulation.Statics.Add(new StaticDescription(new RigidPose(transform.LocalPosition, transform.LocalRotation), AddShape(shape)));
-		physicsMaterials.Allocate(handle) = material;
-		collisionFilters.Allocate(handle) = collisionFilter;
+		PhysicsMaterials.Allocate(handle) = new PhysicsMaterial();
+		CollisionFilters.Allocate(handle) = new CollisionFilter();
 		return handle;
 	}
 	

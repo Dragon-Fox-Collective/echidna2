@@ -303,4 +303,7 @@ public struct Matrix4(
 		M11 * direction.X + M12 * direction.Y,
 		M21 * direction.X + M22 * direction.Y);
 	public Vector2 InverseTransformDirection(Vector2 direction) => Inverted.TransformDirection(direction);
+	
+	public Quaternion TransformRotation(Quaternion rotation) => Rotation * rotation;
+	public Quaternion InverseTransformRotation(Quaternion rotation) => Inverted.Rotation * rotation;
 }
