@@ -7,11 +7,7 @@
         <RootNamespace>Echidna2.SourceGenerators</RootNamespace>
         <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
         <LangVersion>12</LangVersion>
-    </PropertyGroup>
-
-    <PropertyGroup Condition="'$(Configuration)'=='Release'">
-        <DebugSymbols>False</DebugSymbols>
-        <DebugType>None</DebugType>
+        <DebugType>embedded</DebugType>
     </PropertyGroup>
 
     <ItemGroup>

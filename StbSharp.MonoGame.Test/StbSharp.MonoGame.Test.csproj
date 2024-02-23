@@ -6,11 +6,7 @@
         <Nullable>enable</Nullable>
         <RootNamespace>StbSharp.MonoGame.Test</RootNamespace>
         <AssemblyName>StbSharp.MonoGame.Test</AssemblyName>
-    </PropertyGroup>
-
-    <PropertyGroup Condition="'$(Configuration)'=='Release'">
-        <DebugSymbols>False</DebugSymbols>
-        <DebugType>None</DebugType>
+        <DebugType>embedded</DebugType>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">

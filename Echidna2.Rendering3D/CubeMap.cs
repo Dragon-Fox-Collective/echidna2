@@ -5,13 +5,14 @@ namespace Echidna2.Rendering3D;
 
 public class CubeMap(string rightPath, string leftPath, string forwardPath, string backPath, string upPath, string downPath)
 {
+	private static readonly string BaseDirectory = $"{AppContext.BaseDirectory}/Assets/Skybox";
 	public static readonly CubeMap Skybox = new(
-		"Assets/Skybox/right.png",
-		"Assets/Skybox/left.png",
-		"Assets/Skybox/front.png",
-		"Assets/Skybox/back.png",
-		"Assets/Skybox/top.png",
-		"Assets/Skybox/bottom.png"
+		$"{BaseDirectory}/right.png",
+		$"{BaseDirectory}/left.png",
+		$"{BaseDirectory}/front.png",
+		$"{BaseDirectory}/back.png",
+		$"{BaseDirectory}/top.png",
+		$"{BaseDirectory}/bottom.png"
 	);
 	
 	private int handle;

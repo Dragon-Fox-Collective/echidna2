@@ -50,8 +50,8 @@ public class Mesh(float[] positions, float[] normals, float[] texCoords, float[]
 		0, 1, 2,
 		2, 1, 3,
 	]) { CullBackFaces = false };
-	public static readonly Mesh Cube = FromObj("Assets/cube.obj");
-	public static readonly Mesh Sphere = FromObj("Assets/sphere.obj");
+	public static readonly Mesh Cube = FromObj($"{AppContext.BaseDirectory}/Assets/cube.obj");
+	public static readonly Mesh Sphere = FromObj($"{AppContext.BaseDirectory}/Assets/sphere.obj");
 	
 	public int NumVertices => Positions.Length / Dims;
 	
