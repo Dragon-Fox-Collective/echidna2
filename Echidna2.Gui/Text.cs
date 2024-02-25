@@ -69,37 +69,43 @@ public class Text(RectTransform rectTransform) : INotificationListener<IDraw.Not
 			float uw = (float)glyph.Width / Font.TextureSize;
 			float vh = (float)glyph.Height / Font.TextureSize;
 			
+			const int stride = Mesh.DataStride;
+			const int xPos = 0;
+			const int yPos = 1;
+			const int uPos = 6;
+			const int vPos = 7;
+			
 			float[] vertices = Font.Vertices;
 			
-			vertices[00] = x;
-			vertices[01] = y + h;
-			vertices[03] = u;
-			vertices[04] = v;
+			vertices[0 * stride + xPos] = x;
+			vertices[0 * stride + yPos] = y + h;
+			vertices[0 * stride + uPos] = u;
+			vertices[0 * stride + vPos] = v;
 			
-			vertices[08] = x;
-			vertices[09] = y;
-			vertices[11] = u;
-			vertices[12] = v + vh;
+			vertices[1 * stride + xPos] = x;
+			vertices[1 * stride + yPos] = y;
+			vertices[1 * stride + uPos] = u;
+			vertices[1 * stride + vPos] = v + vh;
 			
-			vertices[16] = x + w;
-			vertices[17] = y;
-			vertices[19] = u + uw;
-			vertices[20] = v + vh;
+			vertices[2 * stride + xPos] = x + w;
+			vertices[2 * stride + yPos] = y;
+			vertices[2 * stride + uPos] = u + uw;
+			vertices[2 * stride + vPos] = v + vh;
 			
-			vertices[24] = x;
-			vertices[25] = y + h;
-			vertices[27] = u;
-			vertices[28] = v;
+			vertices[3 * stride + xPos] = x;
+			vertices[3 * stride + yPos] = y + h;
+			vertices[3 * stride + uPos] = u;
+			vertices[3 * stride + vPos] = v;
 			
-			vertices[32] = x + w;
-			vertices[33] = y;
-			vertices[35] = u + uw;
-			vertices[36] = v + vh;
+			vertices[4 * stride + xPos] = x + w;
+			vertices[4 * stride + yPos] = y;
+			vertices[4 * stride + uPos] = u + uw;
+			vertices[4 * stride + vPos] = v + vh;
 			
-			vertices[40] = x + w;
-			vertices[41] = y + h;
-			vertices[43] = u + uw;
-			vertices[44] = v;
+			vertices[5 * stride + xPos] = x + w;
+			vertices[5 * stride + yPos] = y + h;
+			vertices[5 * stride + uPos] = u + uw;
+			vertices[5 * stride + vPos] = v;
 			
 			GL.BufferSubData(BufferTarget.ArrayBuffer, IntPtr.Zero, vertices.Length * sizeof(float), vertices);
 			

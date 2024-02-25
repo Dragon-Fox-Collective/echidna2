@@ -53,6 +53,9 @@ public class Mesh(float[] positions, float[] normals, float[] texCoords, float[]
 	public static readonly Mesh Cube = FromObj($"{AppContext.BaseDirectory}/Assets/cube.obj");
 	public static readonly Mesh Sphere = FromObj($"{AppContext.BaseDirectory}/Assets/sphere.obj");
 	
+	public static readonly int[] DataWidths = [3, 3, 2, 3];
+	public const int DataStride = 3 + 3 + 2 + 3;
+	
 	public int NumVertices => Positions.Length / Dims;
 	
 	private bool isDirty = true;
@@ -200,12 +203,11 @@ public class Mesh(float[] positions, float[] normals, float[] texCoords, float[]
 		vertexArrayObject = GL.GenVertexArray();
 		GL.BindVertexArray(vertexArrayObject);
 		
-		int[] widths = [3, 3, 2, 3];
-		int stride = widths.Sum();
-		for (int attribute = 0, offset = 0; attribute < widths.Length; offset += widths[attribute], attribute++)
+		int stride = DataWidths.Sum();
+		for (int attribute = 0, offset = 0; attribute < DataWidths.Length; offset += DataWidths[attribute], attribute++)
 		{
 			GL.EnableVertexAttribArray(attribute);
-			GL.VertexAttribPointer(attribute, widths[attribute], VertexAttribPointerType.Float, false, stride * sizeof(float), offset * sizeof(float));
+			GL.VertexAttribPointer(attribute, DataWidths[attribute], VertexAttribPointerType.Float, false, stride * sizeof(float), offset * sizeof(float));
 		}
 		
 		elementBufferObject = GL.GenBuffer();
@@ -215,14 +217,12 @@ public class Mesh(float[] positions, float[] normals, float[] texCoords, float[]
 	private void RegenerateData()
 	{
 		float[][] datasets = [Positions, Normals, TexCoords, Colors];
-		int[] widths = [3, 3, 2, 3];
-		int stride = widths.Sum();
 		data = new float[datasets.Sum(data => data.Length)];
 		
 		for (int i = 0; i < NumVertices; i++)
-		for (int dataset = 0, offset = 0; dataset < datasets.Length; offset += widths[dataset], dataset++)
-		for (int x = 0; x < widths[dataset]; x++)
-			data[i * stride + offset + x] = datasets[dataset][i * widths[dataset] + x];
+		for (int dataset = 0, offset = 0; dataset < datasets.Length; offset += DataWidths[dataset], dataset++)
+		for (int x = 0; x < DataWidths[dataset]; x++)
+			data[i * DataStride + offset + x] = datasets[dataset][i * DataWidths[dataset] + x];
 	}
 	
 	private static void BindData(int vertexBufferObject, float[] data)

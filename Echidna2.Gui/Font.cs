@@ -1,4 +1,5 @@
-﻿using OpenTK.Graphics.OpenGL4;
+﻿using Echidna2.Rendering;
+using OpenTK.Graphics.OpenGL4;
 using StbSharp.MonoGame.Test;
 
 namespace Echidna2.Gui;
@@ -12,13 +13,13 @@ public class Font(string path)
 	private int vertexArrayObject;
 	public static readonly float[] Vertices =
 	[
-		0.0f, 1.0f, 0.0f,   0.0f, 0.0f,   0.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, 0.0f,   0.0f, 1.0f,   1.0f, 0.0f, 0.0f,
-		1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   0.0f, 0.0f, 1.0f,
+		0.0f, 1.0f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   0.0f, 0.0f, 0.0f,
+		0.0f, 0.0f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 1.0f,   1.0f, 0.0f, 0.0f,
+		1.0f, 0.0f, 0.0f,   0.0f, 0.0f, 1.0f,   1.0f, 1.0f,   0.0f, 0.0f, 1.0f,
 		
-		0.0f, 1.0f, 0.0f,   0.0f, 0.0f,   0.0f, 0.0f, 0.0f,
-		1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   0.0f, 0.0f, 1.0f,
-		1.0f, 1.0f, 0.0f,   1.0f, 0.0f,   0.0f, 1.0f, 0.0f
+		0.0f, 1.0f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   0.0f, 0.0f, 0.0f,
+		1.0f, 0.0f, 0.0f,   0.0f, 0.0f, 1.0f,   1.0f, 1.0f,   0.0f, 0.0f, 1.0f,
+		1.0f, 1.0f, 0.0f,   0.0f, 0.0f, 1.0f,   1.0f, 0.0f,   0.0f, 1.0f, 0.0f
 	];
 	
 	public FontBakerResult? FontResult { get; private set; }
@@ -85,12 +86,11 @@ public class Font(string path)
 		vertexArrayObject = GL.GenVertexArray();
 		GL.BindVertexArray(vertexArrayObject);
 		
-		int[] widths = [3, 2, 3];
-		int stride = widths.Sum();
-		for (int attribute = 0, offset = 0; attribute < widths.Length; offset += widths[attribute], attribute++)
+		int stride = Mesh.DataWidths.Sum();
+		for (int attribute = 0, offset = 0; attribute < Mesh.DataWidths.Length; offset += Mesh.DataWidths[attribute], attribute++)
 		{
 			GL.EnableVertexAttribArray(attribute);
-			GL.VertexAttribPointer(attribute, widths[attribute], VertexAttribPointerType.Float, false, stride * sizeof(float), offset * sizeof(float));
+			GL.VertexAttribPointer(attribute, Mesh.DataWidths[attribute], VertexAttribPointerType.Float, false, stride * sizeof(float), offset * sizeof(float));
 		}
 		
 		GL.BufferData(BufferTarget.ArrayBuffer, sizeof(float) * 6 * stride, IntPtr.Zero, BufferUsageHint.DynamicDraw);
