@@ -2,13 +2,8 @@
 using Echidna2.Core;
 using Echidna2.Gui;
 using Echidna2.Rendering;
-using OpenTK.Windowing.Common.Input;
 using OpenTK.Windowing.Desktop;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Formats;
-using SixLabors.ImageSharp.PixelFormats;
 using Color = System.Drawing.Color;
-using Image = SixLabors.ImageSharp.Image;
 
 Console.WriteLine("Hello, World!");
 
@@ -91,4 +86,3 @@ Window window = new(new GameWindow(
 };
 window.Resize += size => root.LocalSize = size;
 window.Run();
-return;

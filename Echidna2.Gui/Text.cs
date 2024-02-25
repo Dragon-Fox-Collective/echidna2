@@ -24,7 +24,9 @@ public class Text(RectTransform rectTransform) : INotificationListener<IDraw.Not
 		GL.Enable(EnableCap.Blend);
 		GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
 		
-		Shader.Bind(notification.Camera.ViewMatrix, notification.Camera.ProjectionMatrix);
+		Shader.Bind();
+		Shader.SetMatrix4("view", notification.Camera.ViewMatrix);
+		Shader.SetMatrix4("projection", notification.Camera.ProjectionMatrix);
 		
 		CascadiaCode.Bind();
 		Shader.SetInt("texture0", 0);
