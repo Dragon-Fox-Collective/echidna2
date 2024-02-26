@@ -11,5 +11,6 @@ public abstract class BodyShape
 public class BodyShape<TShape>(TShape shape) : BodyShape
 	where TShape : unmanaged, IShape
 {
+	public TShape Shape => shape;
 	public override TypedIndex AddToShapes(Shapes shapes) => shapes.Add(shape);
 }

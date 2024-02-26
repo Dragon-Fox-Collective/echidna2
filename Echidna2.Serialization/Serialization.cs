@@ -21,23 +21,19 @@ public static class TomlSerializer
 		T? returnValue = null;
 		TomlTable table = Toml.ToModel(File.ReadAllText(path));
 		
-		foreach ((string key, object value) in table)
+		foreach ((string id, object value) in table)
 		{
 			TomlTable componentTable = (TomlTable)value;
+
+			object component;
+			if (componentTable.TryGetValue("Component", out object? typeName))
+				component = DeserializeComponent(id, componentTable, (string)typeName);
+			else if (componentTable.TryGetValue("Prefab", out object? prefabPath))
+				component = DeserializePrefab(componentTable, $"{Path.GetDirectoryName(path)}/{prefabPath}");
+			else
+				throw new InvalidOperationException("Component table does not contain a Component or Prefab key");
 			
-			Type? type = Type.GetType((string)componentTable["Type"]);
-			if (type == null)
-				throw new InvalidOperationException($"Type {componentTable["type"]} of id {key} does not exist");
-			
-			ConstructorInfo? constructor = type.GetConstructor([]);
-			if (constructor == null)
-				throw new InvalidOperationException($"Type {type} of id {key} does not have a parameterless constructor");
-			
-			object component = constructor.Invoke([]);
-			
-			component = DeserializeValue(component, componentTable);
-			
-			references.Add(key, component);
+			references.Add(id, component);
 			
 			if (!doneFirstObject)
 				returnValue = (T)component;
@@ -51,6 +47,29 @@ public static class TomlSerializer
 			throw new InvalidOperationException("No objects were deserialized");
 		
 		return returnValue;
+	}
+	
+	private static object DeserializeComponent(string id, TomlTable componentTable, string typeName)
+	{
+		Type? type = Type.GetType(typeName);
+		if (type == null)
+			throw new InvalidOperationException($"Type {componentTable["type"]} of id {id} does not exist");
+		
+		ConstructorInfo? constructor = type.GetConstructor([]);
+		if (constructor == null)
+			throw new InvalidOperationException($"Type {type} of id {id} does not have a parameterless constructor");
+		
+		object component = constructor.Invoke([]);
+		
+		component = DeserializeValue(component, componentTable);
+		
+		return component;
+	}
+	
+	private static object DeserializePrefab(TomlTable componentTable, string prefabPath)
+	{
+		object prefab = Deserialize<object>(prefabPath);
+		return DeserializeValue(prefab, componentTable);
 	}
 	
 	private static T DeserializeValue<T>(T component, TomlTable componentTable) where T : notnull
@@ -108,16 +127,32 @@ public static class TomlSerializer
 			{
 				if (member is FieldInfo field)
 				{
-					string newValueId = (string)componentTable[member.Name];
-					object newValue = references[newValueId];
-					field.SetValue(component, newValue);
+					if (componentTable[member.Name] is TomlTable valueTable)
+					{
+						object newValue = DeserializeValue(field.GetValue(component)!, valueTable);
+						field.SetValue(component, newValue);
+					}
+					else
+					{
+						string newValueId = (string)componentTable[member.Name];
+						object newValue = references[newValueId];
+						field.SetValue(component, newValue);
+					}
 				}
 				
 				else if (member is PropertyInfo property)
 				{
-					string newValueId = (string)componentTable[member.Name];
-					object newValue = references[newValueId];
-					property.SetValue(component, newValue);
+					if (componentTable[member.Name] is TomlTable valueTable)
+					{
+						object newValue = DeserializeValue(property.GetValue(component)!, valueTable);
+						property.SetValue(component, newValue);
+					}
+					else
+					{
+						string newValueId = (string)componentTable[member.Name];
+						object newValue = references[newValueId];
+						property.SetValue(component, newValue);
+					}
 				}
 				
 				else

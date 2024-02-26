@@ -18,6 +18,8 @@ public interface INotificationPropagator
 	
 	public static void Notify<T>(T notification, params object[] objects) where T : notnull
 	{
+		if (objects.Any<object?>(child => child is null))
+			throw new NullReferenceException($"Null child in Notify with objects {objects.ToDelimString()}");
 		foreach (INotificationHook<T> child in objects.OfType<INotificationHook<T>>())
 			child.OnPreNotify(notification);
 		foreach (INotificationListener<T> child in objects.OfType<INotificationListener<T>>())

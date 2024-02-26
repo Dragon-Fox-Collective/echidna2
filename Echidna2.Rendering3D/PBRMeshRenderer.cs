@@ -14,7 +14,7 @@ public class PBRMeshRenderer : INotificationListener<IDraw.Notification>, ITomlS
 	public Mesh Mesh { get; set; } = Mesh.Cube;
 	public Shader Shader { get; set; } = Shader.PBR;
 	
-	[SerializedValue] public Color Albedo { get; set; } = Color.Gray;
+	public Color Albedo { get; set; } = Color.Gray;
 	[SerializedValue] public double Metallic { get; set; } = 0.0;
 	[SerializedValue] public double Roughness { get; set; } = 0.25;
 	[SerializedValue] public double AmbientOcclusion { get; set; } = 1.0;
@@ -44,9 +44,15 @@ public class PBRMeshRenderer : INotificationListener<IDraw.Notification>, ITomlS
 	
 	public void DeserializeValues(TomlTable table)
 	{
-		if (table.TryGetValue("Mesh", out object? value))
+		if (table.TryGetValue("Albedo", out object? albedoValue))
 		{
-			string type = (string)value;
+			TomlTable albedoTable = (TomlTable)albedoValue;
+			Albedo = Color.FromArgb((int)((double)albedoTable["A"] * 255), (int)((double)albedoTable["R"] * 255), (int)((double)albedoTable["G"] * 255), (int)((double)albedoTable["B"] * 255));
+		}
+		
+		if (table.TryGetValue("Mesh", out object? meshValue))
+		{
+			string type = (string)meshValue;
 			if (type == "Sphere")
 				Mesh = Mesh.Sphere;
 			else if (type == "Cube")
