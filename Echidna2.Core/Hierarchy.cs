@@ -1,6 +1,9 @@
-﻿namespace Echidna2.Core;
+﻿using Echidna2.Serialization;
+using Tomlyn.Model;
 
-public class Hierarchy : INotificationPropagator, IHasChildren, ICanAddChildren
+namespace Echidna2.Core;
+
+public class Hierarchy : INotificationPropagator, IHasChildren, ICanAddChildren, ITomlSerializable
 {
 	public delegate void ChildAddedHandler(object child);
 	public event ChildAddedHandler? ChildAdded;
@@ -33,6 +36,25 @@ public class Hierarchy : INotificationPropagator, IHasChildren, ICanAddChildren
 			return true;
 		}
 		return false;
+	}
+
+	public void Serialize(TomlTable table)
+	{
+		
+	}
+
+	public void DeserializeValues(TomlTable table)
+	{
+		
+	}
+
+	public void DeserializeReferences(TomlTable table, Dictionary<string, object> references)
+	{
+		if (table.TryGetValue("Children", out object? childrenValue))
+		{
+			TomlArray childrenArray = (TomlArray)childrenValue;
+			childrenArray.Select(childId => references[(string)childId!]).ForEach(AddChild);
+		}
 	}
 }
 

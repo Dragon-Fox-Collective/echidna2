@@ -130,6 +130,7 @@ public static class TomlSerializer
 					if (componentTable[member.Name] is TomlTable valueTable)
 					{
 						object newValue = DeserializeValue(field.GetValue(component)!, valueTable);
+						DeserializeReference(newValue, valueTable, references);
 						field.SetValue(component, newValue);
 					}
 					else
@@ -145,6 +146,7 @@ public static class TomlSerializer
 					if (componentTable[member.Name] is TomlTable valueTable)
 					{
 						object newValue = DeserializeValue(property.GetValue(component)!, valueTable);
+						DeserializeReference(newValue, valueTable, references);
 						property.SetValue(component, newValue);
 					}
 					else

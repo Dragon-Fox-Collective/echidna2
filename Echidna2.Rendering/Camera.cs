@@ -1,21 +1,24 @@
 ﻿using Echidna2.Core;
 using Echidna2.Mathematics;
+using Echidna2.Serialization;
 
 namespace Echidna2.Rendering;
 
-public abstract class Camera(INotificationPropagator world)
+public abstract class Camera
 {
-	public Vector2 Size { get; set; }
-	public double FarClipPlane { get; set; } = 1000;
-	public double NearClipPlane { get; set; } = 0.1;
+	[SerializedValue] public Vector2 Size { get; set; }
+	[SerializedValue] public double FarClipPlane { get; set; } = 1000;
+	[SerializedValue] public double NearClipPlane { get; set; } = 0.1;
 	
-	public INotificationPropagator World { get; set; } = world;
+	[SerializedReference] public INotificationPropagator? World { get; set; }
 	
 	public abstract Matrix4 ViewMatrix { get; }
 	public abstract Matrix4 ProjectionMatrix { get; }
 	
 	public void Notify<T>(T notification) where T : notnull
 	{
+		if (World is null)
+			throw new InvalidOperationException("Camera has no world to notify.");
 		INotificationPropagator.Notify(notification, World);
 	}
 	

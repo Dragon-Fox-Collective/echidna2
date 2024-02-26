@@ -28,12 +28,8 @@ public class Window
 	{
 		GameWindow = gameWindow;
 		
-		gameWindow.Load += () =>
-		{
-			GL.ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-			GL.Enable(EnableCap.DepthTest);
-		};
-		// window.Unload += world.Dispose;
+		gameWindow.Load += OnInitialize;
+		gameWindow.Unload += OnDispose;
 		gameWindow.UpdateFrame += args => OnUpdate(args.Time);
 		gameWindow.RenderFrame += _ => OnDraw();
 		gameWindow.MouseMove += args => OnMouseMoved(args.Position, new Vector2(args.DeltaX, -args.DeltaY));
@@ -42,6 +38,18 @@ public class Window
 		gameWindow.KeyDown += args => OnKeyDown(args.Key, args.IsRepeat);
 		gameWindow.KeyUp += args => OnKeyUp(args.Key);
 		gameWindow.Resize += args => OnResize(args.Size);
+	}
+	
+	private void OnInitialize()
+	{
+		GL.ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+		GL.Enable(EnableCap.DepthTest);
+		Camera?.Notify(new IInitialize.Notification());
+	}
+	
+	private void OnDispose()
+	{
+		Camera?.Notify(new IDispose.Notification());
 	}
 	
 	private void OnUpdate(double deltaTime)

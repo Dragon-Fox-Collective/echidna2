@@ -36,28 +36,28 @@ public class DynamicBody : IUpdate, IInitializeIntoSimulation, ITomlSerializable
 	}
 	
 	public WorldSimulation? Simulation { get; private set; }
-	[SerializedReference] public Transform3D? Transform;
-	public BodyShape? Shape;
+	[SerializedReference] public Transform3D Transform = null!;
+	public BodyShape Shape = null!;
 	public BodyInertia Inertia;
 	public BodyHandle Handle { get; private set; }
 	public BodyReference Reference { get; private set; }
 	
 	public Vector3 GlobalPosition
 	{
-		get => Transform!.GlobalPosition;
+		get => Transform.GlobalPosition;
 		set
 		{
-			Transform!.GlobalPosition = value;
+			Transform.GlobalPosition = value;
 			if (Simulation is not null)
 				Reference.Pose.Position = value;
 		}
 	}
 	public Quaternion GlobalRotation
 	{
-		get => Transform!.GlobalRotation;
+		get => Transform.GlobalRotation;
 		set
 		{
-			Transform!.GlobalRotation = value;
+			Transform.GlobalRotation = value;
 			if (Simulation is not null)
 				Reference.Pose.Orientation = value;
 		}
@@ -66,7 +66,7 @@ public class DynamicBody : IUpdate, IInitializeIntoSimulation, ITomlSerializable
 	public void OnIntializeIntoWorld(WorldSimulation simulation)
 	{
 		Simulation = simulation;
-		Handle = simulation.AddDynamicBody(Transform!, Shape!, Inertia, PhysicsMaterial, CollisionFilter);
+		Handle = simulation.AddDynamicBody(Transform, Shape, Inertia, PhysicsMaterial, CollisionFilter);
 		Reference = simulation[Handle];
 	}
 	

@@ -69,3 +69,17 @@ public interface IKeyUp : INotificationListener<IKeyUp.Notification>
 	void INotificationListener<Notification>.OnNotify(Notification notification) => OnKeyUp(notification.Key);
 	public void OnKeyUp(Keys key);
 }
+
+public interface IInitialize : INotificationListener<IInitialize.Notification>
+{
+	public class Notification;
+	void INotificationListener<Notification>.OnNotify(Notification notification) => OnInitialize();
+	public void OnInitialize();
+}
+
+public interface IDispose : INotificationListener<IDispose.Notification>
+{
+	public class Notification;
+	void INotificationListener<Notification>.OnNotify(Notification notification) => OnDispose();
+	public void OnDispose();
+}
