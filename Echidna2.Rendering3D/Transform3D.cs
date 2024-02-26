@@ -1,4 +1,5 @@
 ﻿using Echidna2.Mathematics;
+using Echidna2.Serialization;
 
 namespace Echidna2.Rendering3D;
 
@@ -8,7 +9,7 @@ public class Transform3D
 	public event TransformChangedHandler? TransformChanged;
 	
 	private Vector3 localPosition = Vector3.Zero;
-	public Vector3 LocalPosition
+	[SerializedValue] public Vector3 LocalPosition
 	{
 		get => localPosition;
 		set
@@ -24,7 +25,7 @@ public class Transform3D
 	}
 	
 	private Quaternion localRotation = Quaternion.Identity;
-	public Quaternion LocalRotation
+	[SerializedValue] public Quaternion LocalRotation
 	{
 		get => localRotation;
 		set
@@ -40,7 +41,7 @@ public class Transform3D
 	}
 	
 	private Vector3 localScale = Vector3.One;
-	public Vector3 LocalScale
+	[SerializedValue] public Vector3 LocalScale
 	{
 		get => localScale;
 		set
@@ -53,19 +54,8 @@ public class Transform3D
 	public Matrix4 LocalTransform { get; private set; } = Matrix4.Identity;
 	public Matrix4 GlobalTransform { get; private set; } = Matrix4.Identity;
 	
-	private int depth;
-	public int Depth
-	{
-		get => depth;
-		set
-		{
-			depth = value;
-			RecalculateLocalTransform();
-		}
-	}
-	
 	private Transform3D? parent;
-	public Transform3D? Parent
+	[SerializedReference] public Transform3D? Parent
 	{
 		get => parent;
 		set

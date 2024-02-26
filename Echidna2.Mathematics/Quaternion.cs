@@ -1,14 +1,15 @@
-﻿using QuaternionSystem = System.Numerics.Quaternion;
+﻿using Echidna2.Serialization;
+using QuaternionSystem = System.Numerics.Quaternion;
 using QuaternionOpenTK = OpenTK.Mathematics.Quaternion;
 
 namespace Echidna2.Mathematics;
 
 public struct Quaternion(double x, double y, double z, double w) : IEquatable<Quaternion>
 {
-	public double X = x;
-	public double Y = y;
-	public double Z = z;
-	public double W = w;
+	[SerializedValue] public double X = x;
+	[SerializedValue] public double Y = y;
+	[SerializedValue] public double Z = z;
+	[SerializedValue] public double W = w;
 	
 	public Vector3 XYZ => new(X, Y, Z);
 	

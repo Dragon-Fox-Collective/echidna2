@@ -10,6 +10,7 @@
     <ItemGroup>
       <ProjectReference Include="..\Echidna2.Mathematics\Echidna2.Mathematics.csproj" />
       <ProjectReference Include="..\Echidna2.SourceGenerators\Echidna2.SourceGenerators.csproj" OutputItemType="Analyzer" />
+      <ProjectReference Include="..\TooManyExtensions\TooManyExtensions.csproj" />
     </ItemGroup>
 
     <ItemGroup>

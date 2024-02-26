@@ -8,11 +8,11 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="OpenTK.Mathematics" Version="4.8.2" />
+        <PackageReference Include="Tomlyn" Version="0.17.0" />
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Echidna2.Serialization\Echidna2.Serialization.csproj" />
+      <ProjectReference Include="..\TooManyExtensions\TooManyExtensions.csproj" />
     </ItemGroup>
 
 </Project>

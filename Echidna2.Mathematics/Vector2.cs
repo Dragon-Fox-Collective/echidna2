@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using Echidna2.Serialization;
 using Vector2System = System.Numerics.Vector2;
 using Vector2OpenTK = OpenTK.Mathematics.Vector2;
 
@@ -6,8 +7,8 @@ namespace Echidna2.Mathematics;
 
 public struct Vector2(double x, double y) : IEquatable<Vector2>, IEnumerable<double>
 {
-	public double X = x;
-	public double Y = y;
+	[SerializedValue] public double X = x;
+	[SerializedValue] public double Y = y;
 	
 	public Vector3 WithZ(double z) => new(X, Y, z);
 	

@@ -1,31 +1,45 @@
 ﻿using BepuPhysics;
 using Echidna2.Rendering3D;
+using Echidna2.Serialization;
 
 namespace Echidna2.Physics;
 
-public class StaticBody
+public class StaticBody : IInitializeIntoSimulation
 {
-	public PhysicsMaterial PhysicsMaterial
+	private PhysicsMaterial physicsMaterial;
+	[SerializedValue] public PhysicsMaterial PhysicsMaterial
 	{
-		get => Simulation.PhysicsMaterials[Handle];
-		set => Simulation.PhysicsMaterials[Handle] = value;
-	}
-	public CollisionFilter CollisionFilter
-	{
-		get => Simulation.CollisionFilters[Handle];
-		set => Simulation.CollisionFilters[Handle] = value;
+		get => physicsMaterial;
+		set
+		{
+			physicsMaterial = value;
+			if (Simulation is not null)
+				Simulation.PhysicsMaterials[Handle] = value;
+		}
 	}
 	
-	public readonly WorldSimulation Simulation;
-	public readonly Transform3D Transform;
-	public readonly StaticHandle Handle;
-	public readonly StaticReference Reference;
+	private CollisionFilter collisionFilter;
+	[SerializedValue] public CollisionFilter CollisionFilter
+	{
+		get => collisionFilter;
+		set
+		{
+			collisionFilter = value;
+			if (Simulation is not null)
+				Simulation.CollisionFilters[Handle] = value;
+		}
+	}
 	
-	public StaticBody(WorldSimulation simulation, Transform3D transform, BodyShape shape)
+	public WorldSimulation? Simulation { get; private set; }
+	[SerializedReference] public Transform3D? Transform;
+	[SerializedReference] public BodyShape? Shape;
+	public StaticHandle Handle { get; private set; }
+	public StaticReference Reference { get; private set; }
+	
+	public void OnIntializeIntoWorld(WorldSimulation simulation)
 	{
 		Simulation = simulation;
-		Transform = transform;
-		Handle = simulation.AddStaticBody(transform, shape);
+		Handle = simulation.AddStaticBody(Transform!, Shape!, PhysicsMaterial, CollisionFilter);
 		Reference = simulation[Handle];
 	}
 }

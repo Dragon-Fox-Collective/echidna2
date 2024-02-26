@@ -8,6 +8,7 @@ using BepuUtilities;
 using BepuUtilities.Memory;
 using Echidna2.Core;
 using Echidna2.Rendering3D;
+using Echidna2.Serialization;
 
 namespace Echidna2.Physics;
 
@@ -57,19 +58,19 @@ public class WorldSimulation : IUpdate
 		}
 	}
 	
-	public BodyHandle AddDynamicBody(Transform3D transform, BodyShape shape, BodyInertia inertia)
+	public BodyHandle AddDynamicBody(Transform3D transform, BodyShape shape, BodyInertia inertia, PhysicsMaterial material, CollisionFilter collisionFilter)
 	{
 		BodyHandle handle = simulation.Bodies.Add(BodyDescription.CreateDynamic(new RigidPose(transform.LocalPosition, transform.LocalRotation), inertia, AddShape(shape), 0.01f));
-		PhysicsMaterials.Allocate(handle) = new PhysicsMaterial();
-		CollisionFilters.Allocate(handle) = new CollisionFilter();
+		PhysicsMaterials.Allocate(handle) = material;
+		CollisionFilters.Allocate(handle) = collisionFilter;
 		return handle;
 	}
 	
-	public StaticHandle AddStaticBody(Transform3D transform, BodyShape shape)
+	public StaticHandle AddStaticBody(Transform3D transform, BodyShape shape, PhysicsMaterial material, CollisionFilter collisionFilter)
 	{
 		StaticHandle handle = simulation.Statics.Add(new StaticDescription(new RigidPose(transform.LocalPosition, transform.LocalRotation), AddShape(shape)));
-		PhysicsMaterials.Allocate(handle) = new PhysicsMaterial();
-		CollisionFilters.Allocate(handle) = new CollisionFilter();
+		PhysicsMaterials.Allocate(handle) = material;
+		CollisionFilters.Allocate(handle) = collisionFilter;
 		return handle;
 	}
 	
@@ -111,7 +112,7 @@ public class WorldSimulation : IUpdate
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public bool AllowContactGeneration(int workerIndex, CollidableReference a, CollidableReference b, ref float speculativeMargin)
 		{
-			return (a.Mobility == CollidableMobility.Dynamic || b.Mobility == CollidableMobility.Dynamic) && (CollisionFilters[a].Collision & CollisionFilters[b].Membership) != 0 && (CollisionFilters[b].Collision & CollisionFilters[a].Membership) != 0;
+			return (a.Mobility == CollidableMobility.Dynamic || b.Mobility == CollidableMobility.Dynamic) && (CollisionFilters[a].Collision & CollisionFilters[b].Membership) != 0 || (CollisionFilters[b].Collision & CollisionFilters[a].Membership) != 0;
 		}
 		
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -162,8 +163,13 @@ public class WorldSimulation : IUpdate
 	}
 }
 
+public struct PhysicsMaterial()
+{
+	[SerializedValue] public double Friction = 1;
+}
+
 public struct CollisionFilter()
 {
-	public long Membership = long.MinValue;
-	public long Collision = long.MaxValue;
+	[SerializedValue] public long Membership = long.MinValue;
+	[SerializedValue] public long Collision = long.MaxValue;
 }
