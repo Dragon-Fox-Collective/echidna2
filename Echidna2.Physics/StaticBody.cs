@@ -41,7 +41,7 @@ public class StaticBody : IInitializeIntoSimulation, ITomlSerializable
 	public void OnIntializeIntoWorld(WorldSimulation simulation)
 	{
 		Simulation = simulation;
-		Handle = simulation.AddStaticBody(Transform!, Shape!, PhysicsMaterial, CollisionFilter);
+		Handle = simulation.AddStaticBody(Transform, Shape, PhysicsMaterial, CollisionFilter);
 		Reference = simulation[Handle];
 	}
 	
