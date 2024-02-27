@@ -7,32 +7,29 @@ using BepuPhysics.Constraints;
 using BepuUtilities;
 using BepuUtilities.Memory;
 using Echidna2.Core;
+using Echidna2.Rendering;
 using Echidna2.Rendering3D;
 using Echidna2.Serialization;
 
 namespace Echidna2.Physics;
 
-public class WorldSimulation : IUpdate
+public class WorldSimulation : IUpdate, IInitialize
 {
 	public double PhysicsDeltaTime { get; set; } = 1 / 60.0;
 	private double accumulatedTime = 0;
 	
-	private INotificationPropagator world;
-	private BufferPool bufferPool;
-	private ThreadDispatcher threadDispatcher;
-	private Simulation simulation;
+	[SerializedReference] public INotificationPropagator World = null!;
+	private BufferPool bufferPool = new();
+	private ThreadDispatcher threadDispatcher = new(Environment.ProcessorCount);
+	private Simulation simulation = null!;
 	
-	public readonly CollidableProperty<PhysicsMaterial> PhysicsMaterials;
-	public readonly CollidableProperty<CollisionFilter> CollisionFilters;
+	public readonly CollidableProperty<PhysicsMaterial> PhysicsMaterials = new();
+	public readonly CollidableProperty<CollisionFilter> CollisionFilters = new();
 	
 	private bool hasBeenDisposed;
 	
-	public WorldSimulation(INotificationPropagator world)
+	public void OnInitialize()
 	{
-		this.world = world;
-		bufferPool = new BufferPool();
-		PhysicsMaterials = new CollidableProperty<PhysicsMaterial>();
-		CollisionFilters = new CollidableProperty<CollisionFilter>();
 		simulation = Simulation.Create(
 			bufferPool,
 			new NarrowPhaseCallbacks
@@ -42,7 +39,7 @@ public class WorldSimulation : IUpdate
 			},
 			new PoseIntegratorCallbacks(),
 			new SolveDescription(8, 1));
-		threadDispatcher = new ThreadDispatcher(Environment.ProcessorCount);
+		INotificationPropagator.Notify(new IInitializeIntoSimulation.Notification(this), World);
 	}
 	
 	public void OnUpdate(double deltaTime)
@@ -53,7 +50,7 @@ public class WorldSimulation : IUpdate
 		{
 			double physicsDeltaTime = PhysicsDeltaTime;
 			accumulatedTime -= physicsDeltaTime;
-			world.Notify(new IPhysicsUpdate.Notification(physicsDeltaTime));
+			World.Notify(new IPhysicsUpdate.Notification(physicsDeltaTime));
 			simulation.Timestep((float)physicsDeltaTime, threadDispatcher);
 		}
 	}
