@@ -53,6 +53,7 @@ inspector.AddChild(inspectorButton);
 
 
 
+// Scene sceneInstance = TomlSerializer.Deserialize<Scene>($"{AppContext.BaseDirectory}/Prefabs/Scene.toml");
 RectWithHierarchy someHierarchy = new() { Name = "Some Hierarchy", AnchorPreset = AnchorPreset.Full, Color = Color.DarkCyan, ClipChildren = true };
 RectWithHierarchy someRect = new() { Name = "Some Rect", AnchorPreset = AnchorPreset.Center, MinimumSize = (200, 200) };
 someHierarchy.AddChild(someRect);
@@ -78,7 +79,7 @@ Window window = new(new GameWindow(
 	{
 		ClientSize = (1280, 720),
 		Title = "Echidna Engine",
-		Icon = Window.CreateWindowIcon("Assets/Echidna.png"),
+		Icon = Window.CreateWindowIcon($"{AppContext.BaseDirectory}/Assets/Echidna.png"),
 	}
 ))
 {

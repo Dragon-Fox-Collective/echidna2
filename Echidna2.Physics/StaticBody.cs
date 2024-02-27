@@ -1,5 +1,4 @@
 ﻿using BepuPhysics;
-using BepuPhysics.Collidables;
 using Echidna2.Rendering3D;
 using Echidna2.Serialization;
 using Tomlyn.Model;
@@ -50,24 +49,20 @@ public class StaticBody : IInitializeIntoSimulation, ITomlSerializable
 		
 	}
     
-	public void DeserializeValues(TomlTable table)
+	public bool DeserializeValue(string id, object value)
 	{
-		// TODO: merge this and dynamicbody. actually make a big registry for deserialization classes
-		if (table.TryGetValue("Shape", out object? shapeValue))
+		switch (id)
 		{
-			TomlTable shapeTable = (TomlTable)shapeValue;
-			string type = (string)shapeTable["Type"];
-			if (type == "Sphere")
-				Shape = BodyShape.Of(new Sphere((float)(double)shapeTable["Radius"]));
-			else if (type == "Box")
-				Shape = BodyShape.Of(new Box((float)(double)shapeTable["Width"], (float)(double)shapeTable["Length"], (float)(double)shapeTable["Height"]));
-			else
-				throw new InvalidOperationException($"Shape type {type} does not exist");
+			case "Shape":
+				Shape = BepuPhysicsSerialization.DeserializeBodyShape((TomlTable)value);
+				return true;
+			default:
+				return false;
 		}
 	}
 	
-	public void DeserializeReferences(TomlTable table, Dictionary<string, object> references)
+	public bool DeserializeReference(string id, object value, Dictionary<string, object> references)
 	{
-		
+		return false;
 	}
 }

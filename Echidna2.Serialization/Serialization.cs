@@ -7,12 +7,14 @@ namespace Echidna2.Serialization;
 public interface ITomlSerializable
 {
 	public void Serialize(TomlTable table);
-	public void DeserializeValues(TomlTable table);
-	public void DeserializeReferences(TomlTable table, Dictionary<string, object> references);
+	public bool DeserializeValue(string id, object value);
+	public bool DeserializeReference(string id, object value, Dictionary<string, object> references);
 }
 
 public static class TomlSerializer
 {
+	// TODO: Make this not a horrible maze
+	// TODO: Make the serialization for external classes automatic instead of calling static methods manually
 	public static T Deserialize<T>(string path) where T : class
 	{
 		Dictionary<string, object> references = new();
@@ -24,12 +26,12 @@ public static class TomlSerializer
 		foreach ((string id, object value) in table)
 		{
 			TomlTable componentTable = (TomlTable)value;
-
+			
 			object component;
-			if (componentTable.TryGetValue("Component", out object? typeName))
+			if (componentTable.Remove("Component", out object? typeName))
 				component = DeserializeComponent(id, componentTable, (string)typeName);
-			else if (componentTable.TryGetValue("Prefab", out object? prefabPath))
-				component = DeserializePrefab(componentTable, $"{Path.GetDirectoryName(path)}/{prefabPath}");
+			else if (componentTable.Remove("Prefab", out object? prefabPath))
+				component = DeserializePrefab(id, componentTable, $"{Path.GetDirectoryName(path)}/{(string)prefabPath}");
 			else
 				throw new InvalidOperationException("Component table does not contain a Component or Prefab key");
 			
@@ -61,30 +63,25 @@ public static class TomlSerializer
 		
 		object component = constructor.Invoke([]);
 		
-		component = DeserializeValue(component, componentTable);
+		component = DeserializeValue(id, component, componentTable);
 		
 		return component;
 	}
 	
-	private static object DeserializePrefab(TomlTable componentTable, string prefabPath)
+	private static object DeserializePrefab(string id, TomlTable componentTable, string prefabPath)
 	{
 		object prefab = Deserialize<object>(prefabPath);
-		return DeserializeValue(prefab, componentTable);
+		return DeserializeValue(id, prefab, componentTable);
 	}
 	
-	private static T DeserializeValue<T>(T component, TomlTable componentTable) where T : notnull
+	private static T DeserializeValue<T>(string id, T component, TomlTable componentTable) where T : notnull
 	{
+		List<string> usedValues = [];
+		
 		MemberInfo[] members = component.GetType().GetMembers(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
 			.Where(member => member.GetCustomAttribute<SerializedValueAttribute>() != null)
 			.Where(member => componentTable.ContainsKey(member.Name))
 			.ToArray();
-		
-		// string unusedValues = componentTable.Keys
-		// 	.Where(key => key != "Type")
-		// 	.Where(key => members.All(member => member.Name != key))
-		// 	.ToDelimString();
-		// if (unusedValues != "[]")
-		// 	Console.WriteLine("INFO: Unused values: " + unusedValues);
 		
 		foreach (MemberInfo member in members)
 		{
@@ -92,20 +89,30 @@ public static class TomlSerializer
 			{
 				object? newValue;
 				if (componentTable[member.Name] is TomlTable valueTable)
-					newValue = DeserializeValue(field.GetValue(component)!, valueTable);
+				{
+					newValue = DeserializeValue(member.Name, field.GetValue(component)!, valueTable);
+					if (valueTable.Count != 0)
+						Console.WriteLine($"WARN: Unused table {member.Name} {valueTable.ToDelimString()} leftover");
+				}
 				else
 					newValue = componentTable[member.Name];
 				field.SetValue(component, newValue);
+				usedValues.Add(member.Name);
 			}
 			
 			else if (member is PropertyInfo property)
 			{
 				object? newValue;
 				if (componentTable[member.Name] is TomlTable valueTable)
-					newValue = DeserializeValue(property.GetValue(component)!, valueTable);
+				{
+					newValue = DeserializeValue(member.Name, property.GetValue(component)!, valueTable);
+					if (valueTable.Count != 0)
+						Console.WriteLine($"WARN: Unused table {member.Name} {valueTable.ToDelimString()} leftover");
+				}
 				else
 					newValue = componentTable[member.Name];
 				property.SetValue(component, newValue);
+				usedValues.Add(member.Name);
 			}
 			
 			else
@@ -113,56 +120,86 @@ public static class TomlSerializer
 		}
 		
 		if (component is ITomlSerializable serializable)
-			serializable.DeserializeValues(componentTable);
+			foreach ((string key, object value) in componentTable)
+				if (serializable.DeserializeValue(key, value))
+					usedValues.Add(key);
+		
+		foreach (string usedValue in usedValues)
+		{
+			if (componentTable[usedValue] is TomlTable usedTable && usedTable.Count != 0)
+				Console.WriteLine($"WARN: Unused table {usedValue} {usedTable.ToDelimString()} leftover");
+			componentTable.Remove(usedValue);
+		}
 		
 		return component;
 	}
 	
 	private static void DeserializeReference<T>(T component, TomlTable componentTable, Dictionary<string, object> references) where T : notnull
 	{
-		component.GetType().GetMembers(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
+		List<string> usedValues = [];
+		
+		MemberInfo[] members = component.GetType().GetMembers(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
 			.Where(member => member.GetCustomAttribute<SerializedReferenceAttribute>() != null)
 			.Where(member => componentTable.ContainsKey(member.Name))
-			.ForEach(member =>
+			.ToArray();
+		
+		foreach (MemberInfo member in members)
+		{
+			if (member is FieldInfo field)
 			{
-				if (member is FieldInfo field)
+				if (componentTable[member.Name] is TomlTable valueTable)
 				{
-					if (componentTable[member.Name] is TomlTable valueTable)
-					{
-						object newValue = DeserializeValue(field.GetValue(component)!, valueTable);
-						DeserializeReference(newValue, valueTable, references);
-						field.SetValue(component, newValue);
-					}
-					else
-					{
-						string newValueId = (string)componentTable[member.Name];
-						object newValue = references[newValueId];
-						field.SetValue(component, newValue);
-					}
+					object newValue = DeserializeValue(member.Name, field.GetValue(component)!, valueTable);
+					DeserializeReference(newValue, valueTable, references);
+					field.SetValue(component, newValue);
+					if (valueTable.Count != 0)
+						Console.WriteLine($"WARN: Unused table {member.Name} {valueTable.ToDelimString()} leftover");
+					usedValues.Add(member.Name);
 				}
-				
-				else if (member is PropertyInfo property)
-				{
-					if (componentTable[member.Name] is TomlTable valueTable)
-					{
-						object newValue = DeserializeValue(property.GetValue(component)!, valueTable);
-						DeserializeReference(newValue, valueTable, references);
-						property.SetValue(component, newValue);
-					}
-					else
-					{
-						string newValueId = (string)componentTable[member.Name];
-						object newValue = references[newValueId];
-						property.SetValue(component, newValue);
-					}
-				}
-				
 				else
-					throw new InvalidOperationException($"Member {member} is not a field or property");
-			});
+				{
+					string newValueId = (string)componentTable[member.Name];
+					object newValue = references[newValueId];
+					field.SetValue(component, newValue);
+					usedValues.Add(member.Name);
+				}
+			}
+			
+			else if (member is PropertyInfo property)
+			{
+				if (componentTable[member.Name] is TomlTable valueTable)
+				{
+					object newValue = DeserializeValue(member.Name, property.GetValue(component)!, valueTable);
+					DeserializeReference(newValue, valueTable, references);
+					property.SetValue(component, newValue);
+					if (valueTable.Count != 0)
+						Console.WriteLine($"WARN: Unused table {member.Name} {valueTable.ToDelimString()} leftover");
+					usedValues.Add(member.Name);
+				}
+				else
+				{
+					string newValueId = (string)componentTable[member.Name];
+					object newValue = references[newValueId];
+					property.SetValue(component, newValue);
+					usedValues.Add(member.Name);
+				}
+			}
+			
+			else
+				throw new InvalidOperationException($"Member {member} is not a field or property");
+		}
 		
 		if (component is ITomlSerializable serializable)
-			serializable.DeserializeReferences(componentTable, references);
+			foreach ((string key, object value) in componentTable)
+				if (serializable.DeserializeReference(key, value, references))
+					usedValues.Add(key);
+		
+		foreach (string usedValue in usedValues)
+		{
+			if (componentTable[usedValue] is TomlTable usedTable && usedTable.Count != 0)
+				Console.WriteLine($"WARN: Unused table {usedValue} {usedTable.ToDelimString()} leftover");
+			componentTable.Remove(usedValue);
+		}
 	}
 }
 

@@ -1,6 +1,4 @@
 ﻿using BepuPhysics;
-using BepuPhysics.Collidables;
-using BepuUtilities;
 using Echidna2.Core;
 using Echidna2.Mathematics;
 using Echidna2.Rendering3D;
@@ -81,42 +79,23 @@ public class DynamicBody : IUpdate, IInitializeIntoSimulation, ITomlSerializable
 		
 	}
 	
-	public void DeserializeValues(TomlTable table)
+	public bool DeserializeValue(string id, object value)
 	{
-		if (table.TryGetValue("Inertia", out object? inertiaValue))
+		switch (id)
 		{
-			TomlTable inertiaTable = (TomlTable)inertiaValue;
-			TomlTable inertiaTensorTable = (TomlTable)inertiaTable["InverseInertiaTensor"];
-			Inertia = new BodyInertia
-			{
-				InverseMass = (float)(double)inertiaTable["InverseMass"],
-				InverseInertiaTensor = new Symmetric3x3
-				{
-					XX = (float)(double)inertiaTensorTable["XX"],
-					YX = (float)(double)inertiaTensorTable["YX"],
-					YY = (float)(double)inertiaTensorTable["YY"],
-					ZX = (float)(double)inertiaTensorTable["ZX"],
-					ZY = (float)(double)inertiaTensorTable["ZY"],
-					ZZ = (float)(double)inertiaTensorTable["ZZ"],
-				}
-			};
-		}
-		
-		if (table.TryGetValue("Shape", out object? shapeValue))
-		{
-			TomlTable shapeTable = (TomlTable)shapeValue;
-			string type = (string)shapeTable["Type"];
-			if (type == "Sphere")
-				Shape = BodyShape.Of(new Sphere((float)(double)shapeTable["Radius"]));
-			else if (type == "Box")
-				Shape = BodyShape.Of(new Box((float)(double)shapeTable["Width"], (float)(double)shapeTable["Height"], (float)(double)shapeTable["Depth"]));
-			else
-				throw new InvalidOperationException($"Shape type {type} does not exist");
+			case "Inertia":
+				Inertia = BepuPhysicsSerialization.DeserializeBodyInertia((TomlTable)value);
+				return true;
+			case "Shape":
+				Shape = BepuPhysicsSerialization.DeserializeBodyShape((TomlTable)value);
+				return true;
+			default:
+				return false;
 		}
 	}
 	
-	public void DeserializeReferences(TomlTable table, Dictionary<string, object> references)
+	public bool DeserializeReference(string id, object value, Dictionary<string, object> references)
 	{
-		
+		return false;
 	}
 }

@@ -42,28 +42,23 @@ public class PBRMeshRenderer : INotificationListener<IDraw.Notification>, ITomlS
 		
 	}
 	
-	public void DeserializeValues(TomlTable table)
+	public bool DeserializeValue(string id, object value)
 	{
-		if (table.TryGetValue("Albedo", out object? albedoValue))
+		switch (id)
 		{
-			TomlTable albedoTable = (TomlTable)albedoValue;
-			Albedo = Color.FromArgb((int)((double)albedoTable["A"] * 255), (int)((double)albedoTable["R"] * 255), (int)((double)albedoTable["G"] * 255), (int)((double)albedoTable["B"] * 255));
-		}
-		
-		if (table.TryGetValue("Mesh", out object? meshValue))
-		{
-			string type = (string)meshValue;
-			if (type == "Sphere")
-				Mesh = Mesh.Sphere;
-			else if (type == "Cube")
-				Mesh = Mesh.Cube;
-			else
-				throw new InvalidOperationException($"Mesh type {type} does not exist");
+			case "Albedo":
+				Albedo = SystemSerialization.DeserializeColor((TomlTable)value);
+				return true;
+			case "Mesh":
+				Mesh = RenderingSerialization.DeserializeMesh((string)value);
+				return true;
+			default:
+				return false;
 		}
 	}
 	
-	public void DeserializeReferences(TomlTable table, Dictionary<string, object> references)
+	public bool DeserializeReference(string id, object value, Dictionary<string, object> references)
 	{
-		
+		return false;
 	}
 }

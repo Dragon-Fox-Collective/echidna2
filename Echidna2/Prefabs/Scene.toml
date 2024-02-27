@@ -1,0 +1,6 @@
+﻿[1]
+Component = "Echidna2.Rendering.Scene, Echidna2.Rendering"
+Hierarchy = [ "2" ]
+
+[2]
+Prefab = "RectWithHierarchy.toml"

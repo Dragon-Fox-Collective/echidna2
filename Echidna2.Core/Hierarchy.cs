@@ -37,23 +37,27 @@ public class Hierarchy : INotificationPropagator, IHasChildren, ICanAddChildren,
 		}
 		return false;
 	}
-
+	
 	public void Serialize(TomlTable table)
 	{
 		
 	}
-
-	public void DeserializeValues(TomlTable table)
+	
+	public bool DeserializeValue(string id, object value)
 	{
-		
+		return false;
 	}
-
-	public void DeserializeReferences(TomlTable table, Dictionary<string, object> references)
+	
+	public bool DeserializeReference(string id, object value, Dictionary<string, object> references)
 	{
-		if (table.TryGetValue("Children", out object? childrenValue))
+		switch (id)
 		{
-			TomlArray childrenArray = (TomlArray)childrenValue;
-			childrenArray.Select(childId => references[(string)childId!]).ForEach(AddChild);
+			case "Children":
+				TomlArray childrenArray = (TomlArray)value;
+				childrenArray.Select(childId => references[(string)childId!]).ForEach(AddChild);
+				return true;
+			default:
+				return false;
 		}
 	}
 }
