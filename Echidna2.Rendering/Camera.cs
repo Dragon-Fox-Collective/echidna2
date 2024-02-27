@@ -4,7 +4,7 @@ using Echidna2.Serialization;
 
 namespace Echidna2.Rendering;
 
-public abstract class Camera
+public abstract class Camera : IHasCamera
 {
 	[SerializedValue] public Vector2 Size { get; set; }
 	[SerializedValue] public double FarClipPlane { get; set; } = 1000;
@@ -14,6 +14,8 @@ public abstract class Camera
 	
 	public abstract Matrix4 ViewMatrix { get; }
 	public abstract Matrix4 ProjectionMatrix { get; }
+	
+	public Camera HavedCamera => this;
 	
 	public void Notify<T>(T notification) where T : notnull
 	{
@@ -33,4 +35,9 @@ public abstract class Camera
 		Vector3 normalized = ProjectionMatrix.TransformPoint(ViewMatrix.TransformPoint(position));
 		return new Vector2((normalized.X + 1) * Size.X / 2, (normalized.Y + 1) * Size.Y / 2);
 	}
+}
+
+public interface IHasCamera
+{
+	public Camera HavedCamera { get; }
 }
