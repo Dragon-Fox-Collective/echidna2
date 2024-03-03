@@ -1,4 +1,5 @@
 ﻿using Echidna2.Mathematics;
+using Echidna2.Serialization;
 
 namespace Echidna2.Gui;
 
@@ -8,7 +9,7 @@ public class RectTransform
 	public event LocalTransformChangedHandler? LocalTransformChanged;
 	
 	private Vector2 localPosition;
-	public Vector2 LocalPosition
+	[SerializedValue] public Vector2 LocalPosition
 	{
 		get => localPosition;
 		set
@@ -19,11 +20,11 @@ public class RectTransform
 	}
 	public Vector2 GlobalPosition => GlobalTransform.TransformPoint(localPosition);
 	
-	public Vector2 LocalSize { get; set; }
+	[SerializedValue] public Vector2 LocalSize { get; set; }
 	public Vector2 GlobalSize => GlobalTransform.InverseTransformDirection(LocalSize);
 	
 	private Vector2 localScale = Vector2.One;
-	public Vector2 LocalScale
+	[SerializedValue] public Vector2 LocalScale
 	{
 		get => localScale;
 		set
@@ -34,7 +35,7 @@ public class RectTransform
 	}
 	
 	private Matrix4 localTransform = Matrix4.Identity;
-	public Matrix4 LocalTransform
+	[SerializedValue] public Matrix4 LocalTransform
 	{
 		get => localTransform;
 		set
@@ -48,7 +49,7 @@ public class RectTransform
 	public Matrix4 GlobalTransform { get; set; } = Matrix4.Identity;
 	
 	private int depth;
-	public int Depth
+	[SerializedValue] public int Depth
 	{
 		get => depth;
 		set
@@ -58,10 +59,10 @@ public class RectTransform
 		}
 	}
 	
-	public Vector2 MinimumSize { get; set; }
+	[SerializedValue] public Vector2 MinimumSize { get; set; }
 	
 	private AnchorPreset anchorPreset;
-	public AnchorPreset AnchorPreset
+	[SerializedValue] public AnchorPreset AnchorPreset
 	{
 		get => anchorPreset;
 		set
@@ -98,24 +99,24 @@ public class RectTransform
 		}
 	}
 	
-	public double AnchorLeft { get; set; }
-	public double AnchorRight { get; set; }
-	public double AnchorBottom { get; set; }
-	public double AnchorTop { get; set; }
+	[SerializedValue] public double AnchorLeft { get; set; }
+	[SerializedValue] public double AnchorRight { get; set; }
+	[SerializedValue] public double AnchorBottom { get; set; }
+	[SerializedValue] public double AnchorTop { get; set; }
 	
-	public double AnchorOffsetLeft { get; set; }
-	public double AnchorOffsetRight { get; set; }
-	public double AnchorOffsetBottom { get; set; }
-	public double AnchorOffsetTop { get; set; }
+	[SerializedValue] public double AnchorOffsetLeft { get; set; }
+	[SerializedValue] public double AnchorOffsetRight { get; set; }
+	[SerializedValue] public double AnchorOffsetBottom { get; set; }
+	[SerializedValue] public double AnchorOffsetTop { get; set; }
 	
-	public LayoutSizing HorizontalSizing { get; set; }
-	public bool HorizontalExpand { get; set; }
-	public double HorizontalExpandFactor { get; set; } = 1;
-	public LayoutSizing VerticalSizing { get; set; }
-	public bool VerticalExpand { get; set; }
-	public double VerticalExpandFactor { get; set; } = 1;
+	[SerializedValue] public LayoutSizing HorizontalSizing { get; set; }
+	[SerializedValue] public bool HorizontalExpand { get; set; }
+	[SerializedValue] public double HorizontalExpandFactor { get; set; } = 1;
+	[SerializedValue] public LayoutSizing VerticalSizing { get; set; }
+	[SerializedValue] public bool VerticalExpand { get; set; }
+	[SerializedValue] public double VerticalExpandFactor { get; set; } = 1;
 	
-	public bool IsGlobal { get; set; } = false;
+	[SerializedValue] public bool IsGlobal { get; set; } = false;
 	
 	private void RecalculateLocalTransform()
 	{

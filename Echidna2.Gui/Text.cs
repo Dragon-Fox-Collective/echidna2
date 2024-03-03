@@ -2,21 +2,24 @@
 using Echidna2.Core;
 using Echidna2.Mathematics;
 using Echidna2.Rendering;
+using Echidna2.Serialization;
 using OpenTK.Graphics.OpenGL4;
 using StbSharp.MonoGame.Test;
 
 namespace Echidna2.Gui;
 
-public class Text(RectTransform rectTransform) : INotificationListener<IDraw.Notification>
+public class Text : INotificationListener<IDraw.Notification>
 {
 	public static readonly Font CascadiaCode = new("Assets/CascadiaCode.ttf");
 	private static readonly Shader Shader = new(ShaderNodeUtil.MainVertexShader, File.ReadAllText("Assets/font.frag"));
 	
-	public string TextString { get; set; } = "";
-	public Color Color { get; set; } = Color.White;
+	[SerializedReference] public RectTransform RectTransform { get; set; } = null!;
 	
-	public TextJustification Justification { get; set; } = TextJustification.Center;
-	public TextAlignment Alignment { get; set; } = TextAlignment.Center;
+	[SerializedValue] public string TextString { get; set; } = "";
+	[SerializedValue] public Color Color { get; set; } = Color.White;
+	
+	[SerializedValue] public TextJustification Justification { get; set; } = TextJustification.Center;
+	[SerializedValue] public TextAlignment Alignment { get; set; } = TextAlignment.Center;
 	
 	public void OnNotify(IDraw.Notification notification)
 	{
@@ -31,7 +34,7 @@ public class Text(RectTransform rectTransform) : INotificationListener<IDraw.Not
 		CascadiaCode.Bind();
 		Shader.SetInt("texture0", 0);
 		
-		Vector2 relativeRectSize = rectTransform.GlobalSize;
+		Vector2 relativeRectSize = RectTransform.GlobalSize;
 		
 		Vector2 size = (
 			TextString.Select(c => CascadiaCode.FontResult!.Glyphs[c]).Sum(glyph => glyph.XAdvance),
@@ -53,7 +56,7 @@ public class Text(RectTransform rectTransform) : INotificationListener<IDraw.Not
 				_ => throw new IndexOutOfRangeException()
 			} + 5, // TODO: Figure out where the midline is
 			0)));
-		Shader.SetMatrix4("transform", rectTransform.GlobalTransform);
+		Shader.SetMatrix4("transform", RectTransform.GlobalTransform);
 		Shader.SetColorRgba("color", Color);
 		
 		float xStart = 0;

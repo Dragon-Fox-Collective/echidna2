@@ -1,14 +1,15 @@
 ﻿using Echidna2.Core;
 using Echidna2.Mathematics;
+using Echidna2.Serialization;
 
 namespace Echidna2.Gui;
 
-public class FullLayout(RectTransform rectTransform, Hierarchy hierarchy) : RectLayout(rectTransform, hierarchy)
+public class FullLayout : RectLayout
 {
-	public double LeftMargin = 0;
-	public double RightMargin = 0;
-	public double BottomMargin = 0;
-	public double TopMargin = 0;
+	[SerializedValue] public double LeftMargin = 0;
+	[SerializedValue] public double RightMargin = 0;
+	[SerializedValue] public double BottomMargin = 0;
+	[SerializedValue] public double TopMargin = 0;
 	
 	public double Margin
 	{

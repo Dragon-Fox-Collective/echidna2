@@ -1,0 +1,81 @@
+﻿[1]
+Prefab = "RectWithHierarchy.toml"
+Name = "Root"
+IsGlobal = true
+Color = { R = 1.0, G = 0.0, B = 1.0, A = 1.0 }
+Children = [ "2" ]
+
+[2]
+Prefab = "VLayoutWithHierarchy.toml"
+Name = "Toolbar Box"
+AnchorPreset = "Full"
+Children = [ "3", "5" ]
+
+[3]
+Prefab = "RectWithHierarchy.toml"
+Name = "Toolbar"
+MinimumSize = { X = 0.0, Y = 50.0 }
+Children = [ "4" ]
+
+[4]
+Prefab = "TextRect.toml"
+Name = "Toolbar Text"
+TextString = "This is a toolbar."
+AnchorPreset = "Full"
+
+[5]
+Prefab = "HLayoutWithHierarchy.toml"
+Name = "Main Panels"
+VerticalExpand = true
+Children = [ "6", "9", "12" ]
+
+[6]
+Prefab = "VLayoutWithHierarchy.toml"
+Name = "Hierarchy Box"
+Children = [ "7", "8" ]
+
+[7]
+Prefab = "RectWithHierarchy.toml"
+Name = "Hierarchy"
+VerticalExpand = true
+MinimumSize = { X = 200.0, Y = 0.0 }
+
+[8]
+Prefab = "RectWithHierarchy.toml"
+Name = "File Browser"
+VerticalExpand = true
+MinimumSize = { X = 200.0, Y = 0.0 }
+
+[9]
+Prefab = "VLayoutWithHierarchy.toml"
+Name = "Scene Box"
+HorizontalExpand = true
+Children = [ "10", "11" ]
+
+[10]
+Prefab = "DisplayOnlyLayer.toml"
+Name = "Scene"
+VerticalExpand = true
+
+[11]
+Prefab = "RectWithHierarchy.toml"
+Name = "Console"
+MinimumSize = { X = 100.0, Y = 200.0 }
+
+[12]
+Prefab = "VLayoutWithHierarchy.toml"
+Name = "Inspector Box"
+Children = [ "13" ]
+
+[13]
+Prefab = "RectWithHierarchy.toml"
+Name = "Inspector"
+VerticalExpand = true
+MinimumSize = { X = 200.0, Y = 0.0 }
+Children = [ "14" ]
+
+[14]
+Prefab = "ButtonRect.toml"
+Name = "Inspector Button"
+AnchorPreset = "Center"
+MinimumSize = { X = 150.0, Y = 50.0 }

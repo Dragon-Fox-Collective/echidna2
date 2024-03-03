@@ -1,11 +1,13 @@
-﻿namespace Echidna2.Core;
+﻿using Echidna2.Serialization;
+
+namespace Echidna2.Core;
 
 public interface INamed
 {
 	public string Name { get; set; }
 }
 
-public class Named(string name) : INamed
+public class Named : INamed
 {
-	public string Name { get; set; } = name;
+	[SerializedValue] public string Name { get; set; } = "Named";
 }

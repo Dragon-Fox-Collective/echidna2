@@ -1,6 +1,7 @@
 ﻿using Echidna2.Core;
 using Echidna2.Mathematics;
 using Echidna2.Rendering;
+using Echidna2.Serialization;
 
 namespace Echidna2.Gui;
 
@@ -10,34 +11,49 @@ public class RectLayout : INotificationHook<IUpdate.Notification>, INotification
 	
 	private List<(RectTransform child, RectTransform.LocalTransformChangedHandler handler)> localTransformChangedHandlers = [];
 	
-	protected RectTransform RectTransform;
-	protected Hierarchy Hierarchy;
-	
-	public RectLayout(RectTransform rectTransform, Hierarchy hierarchy)
+	[SerializedReference] public RectTransform RectTransform { get; set; } = null!;
+	private Hierarchy? hierarchy;
+	[SerializedReference] public Hierarchy Hierarchy
 	{
-		RectTransform = rectTransform;
-		Hierarchy = hierarchy;
-		
-		Hierarchy.ChildAdded += child =>
+		get => hierarchy!;
+		set
 		{
-			if (child is ICanBeLaidOut childLaidOut)
+			if (hierarchy is not null)
 			{
-				RectTransform childRect = childLaidOut.RectTransform;
-				RectTransform.LocalTransformChangedHandler handler = () => childRect.GlobalTransform = RectTransform.GlobalTransform * childRect.LocalTransform;
-				localTransformChangedHandlers.Add((childRect, handler));
-				childRect.LocalTransformChanged += handler;
+				Hierarchy.ChildAdded -= AddLayoutChild;
+				Hierarchy.ChildRemoved -= RemoveLayoutChild;
 			}
-		};
-		Hierarchy.ChildRemoved += child =>
+			
+			hierarchy = value;
+			
+			if (hierarchy is not null)
+			{
+				Hierarchy.ChildAdded += AddLayoutChild;
+				Hierarchy.ChildRemoved += RemoveLayoutChild;
+			}
+		}
+	}
+	
+	public void AddLayoutChild(object child)
+	{
+		if (child is ICanBeLaidOut childLaidOut)
 		{
-			if (child is ICanBeLaidOut childLaidOut)
-			{
-				RectTransform childRect = childLaidOut.RectTransform;
-				(RectTransform child, RectTransform.LocalTransformChangedHandler handler) tuple = localTransformChangedHandlers.First(tuple => tuple.child == childRect);
-				childRect.LocalTransformChanged -= tuple.handler;
-				localTransformChangedHandlers.Remove(tuple);
-			}
-		};
+			RectTransform childRect = childLaidOut.RectTransform;
+			RectTransform.LocalTransformChangedHandler handler = () => childRect.GlobalTransform = RectTransform.GlobalTransform * childRect.LocalTransform;
+			localTransformChangedHandlers.Add((childRect, handler));
+			childRect.LocalTransformChanged += handler;
+		}
+	}
+	
+	public void RemoveLayoutChild(object child)
+	{
+		if (child is ICanBeLaidOut childLaidOut)
+		{
+			RectTransform childRect = childLaidOut.RectTransform;
+			(RectTransform child, RectTransform.LocalTransformChangedHandler handler) tuple = localTransformChangedHandlers.First(tuple => tuple.child == childRect);
+			childRect.LocalTransformChanged -= tuple.handler;
+			localTransformChangedHandlers.Remove(tuple);
+		}
 	}
 	
 	public virtual void OnPreNotify(IUpdate.Notification notification)

@@ -78,26 +78,31 @@ public class ComponentSourceGenerator : IIncrementalGenerator
 	}
 	
 	public static IEnumerable<ISymbol> GetAllUnimplementedMembers(INamedTypeSymbol classType, INamedTypeSymbol interfaceType) =>
-		interfaceType.GetMembers().Where(member => member.DeclaredAccessibility == Accessibility.Public && !member.IsStatic && !member.Name.StartsWith("get_") && !member.Name.StartsWith("set_") && !member.Name.StartsWith("add_") && !member.Name.StartsWith("remove_") && !classType.GetMembers(member.Name).Any());
+		interfaceType.GetMembers().Where(member => member.DeclaredAccessibility == Accessibility.Public && !member.IsStatic && !member.Name.StartsWith("get_") && !member.Name.StartsWith("set_") && !member.Name.StartsWith("add_") && !member.Name.StartsWith("remove_") && member.Name != "Serialize" && member.Name != "DeserializeValue" && member.Name != "DeserializeReference" && !classType.GetMembers(member.Name).Any());
 	
 	private static IEnumerable<ISymbol> GetAllUnimplementedInterfaceMembers(INamedTypeSymbol classType, INamedTypeSymbol interfaceType) =>
 		interfaceType.AllInterfaces.Append(interfaceType).SelectMany(inter => GetAllUnimplementedMembers(classType, inter));
 	
-	public static string GetMemberDeclaration(ISymbol member, string propertyName) =>
-		member switch
+	public static string GetMemberDeclaration(ISymbol member, string propertyName)
+	{
+		AttributeData[] inheritedAttributes = member.GetAttributes().Where(attr => attr.AttributeClass?.GetAttributes().Any(subattr => subattr.AttributeClass?.Name == "AttributeUsageAttribute" && (bool)(subattr.NamedArguments.FirstOrDefault(pair => pair.Key == "Inherited").Value.Value ?? true)) ?? false).ToArray();
+		string attributes = inheritedAttributes.Any() ? "[" + string.Join(",", inheritedAttributes.Select(attr => $"{attr.AttributeClass}({string.Join(", ", attr.ConstructorArguments.Select(arg => arg.Value?.ToString() ?? "null").Concat(attr.NamedArguments.Select(arg => $"{arg.Key} = {arg.Value}")))})")) + "] " : "";
+		string accessibility = member.DeclaredAccessibility.ToString().ToLower();
+		return member switch
 		{
 			IMethodSymbol method =>
-				$"\t{method.DeclaredAccessibility.ToString().ToLower()} {method.ReturnType} {method.Name}{(method.IsGenericMethod ? "<" + string.Join(", ", method.TypeArguments) + ">" : "")}({string.Join(", ", method.Parameters.Select(parameter => $"{(parameter.IsParams ? "params " : "")}{parameter.Type} {parameter.Name}{(parameter.HasExplicitDefaultValue ? $" = {parameter.ExplicitDefaultValue}" : "")}"))}) => {propertyName}.{method.Name}({string.Join(", ", method.Parameters.Select(parameter => parameter.Name))});\n",
+				$"\t{attributes}{accessibility} {method.ReturnType} {method.Name}{(method.IsGenericMethod ? "<" + string.Join(", ", method.TypeArguments) + ">" : "")}({string.Join(", ", method.Parameters.Select(parameter => $"{(parameter.IsParams ? "params " : "")}{parameter.Type} {parameter.Name}{(parameter.HasExplicitDefaultValue ? $" = {parameter.ExplicitDefaultValue}" : "")}"))}) => {propertyName}.{method.Name}({string.Join(", ", method.Parameters.Select(parameter => parameter.Name))});\n",
 			IPropertySymbol { GetMethod: not null, SetMethod: not null } property =>
-				$"\t{property.DeclaredAccessibility.ToString().ToLower()} {property.Type} {property.Name} {{ get => {propertyName}.{property.Name}; set => {propertyName}.{property.Name} = value; }}\n",
+				$"\t{attributes}{accessibility} {property.Type} {property.Name} {{ get => {propertyName}.{property.Name}; set => {propertyName}.{property.Name} = value; }}\n",
 			IPropertySymbol { GetMethod: not null } property =>
-				$"\t{property.DeclaredAccessibility.ToString().ToLower()} {property.Type} {property.Name} => {propertyName}.{property.Name};\n",
+				$"\t{attributes}{accessibility} {property.Type} {property.Name} => {propertyName}.{property.Name};\n",
 			IPropertySymbol { SetMethod: not null } property =>
-				$"\t{property.DeclaredAccessibility.ToString().ToLower()} {property.Type} {property.Name} {{ set => {propertyName}.{property.Name} = value; }}\n",
+				$"\t{attributes}{accessibility} {property.Type} {property.Name} {{ set => {propertyName}.{property.Name} = value; }}\n",
 			IEventSymbol @event =>
-				$"\t{@event.DeclaredAccessibility.ToString().ToLower()} event {@event.Type} {@event.Name} {{ add => {propertyName}.{@event.Name} += value; remove => {propertyName}.{@event.Name} -= value; }}\n",
+				$"\t{attributes}{accessibility} event {@event.Type} {@event.Name} {{ add => {propertyName}.{@event.Name} += value; remove => {propertyName}.{@event.Name} -= value; }}\n",
 			IFieldSymbol field =>
-				$"\t{field.DeclaredAccessibility.ToString().ToLower()} {field.Type} {field.Name} {{ get => {propertyName}.{field.Name}; set => {propertyName}.{field.Name} = value; }}\n",
+				$"\t{attributes}{accessibility} {field.Type} {field.Name} {{ get => {propertyName}.{field.Name}; set => {propertyName}.{field.Name} = value; }}\n",
 			_ => ""
 		};
+	}
 }

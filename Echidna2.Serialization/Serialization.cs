@@ -43,7 +43,7 @@ public static class TomlSerializer
 		}
 		
 		foreach ((string key, object component) in references)
-			DeserializeReference(component, (TomlTable)table[key], references);
+			DeserializeReference(key, component, (TomlTable)table[key], references);
 		
 		if (returnValue == null)
 			throw new InvalidOperationException("No objects were deserialized");
@@ -95,7 +95,11 @@ public static class TomlSerializer
 						Console.WriteLine($"WARN: Unused table {member.Name} {valueTable.ToDelimString()} leftover");
 				}
 				else
+				{
 					newValue = componentTable[member.Name];
+					if (field.FieldType.IsEnum)
+						newValue = Enum.Parse(field.FieldType, (string)newValue);
+				}
 				field.SetValue(component, newValue);
 				usedValues.Add(member.Name);
 			}
@@ -110,7 +114,11 @@ public static class TomlSerializer
 						Console.WriteLine($"WARN: Unused table {member.Name} {valueTable.ToDelimString()} leftover");
 				}
 				else
+				{
 					newValue = componentTable[member.Name];
+					if (property.PropertyType.IsEnum)
+						newValue = Enum.Parse(property.PropertyType, (string)newValue);
+				}
 				property.SetValue(component, newValue);
 				usedValues.Add(member.Name);
 			}
@@ -134,7 +142,7 @@ public static class TomlSerializer
 		return component;
 	}
 	
-	private static void DeserializeReference<T>(T component, TomlTable componentTable, Dictionary<string, object> references) where T : notnull
+	private static void DeserializeReference<T>(string id, T component, TomlTable componentTable, Dictionary<string, object> references) where T : notnull
 	{
 		List<string> usedValues = [];
 		
@@ -150,10 +158,8 @@ public static class TomlSerializer
 				if (componentTable[member.Name] is TomlTable valueTable)
 				{
 					object newValue = DeserializeValue(member.Name, field.GetValue(component)!, valueTable);
-					DeserializeReference(newValue, valueTable, references);
+					DeserializeReference(member.Name, newValue, valueTable, references);
 					field.SetValue(component, newValue);
-					if (valueTable.Count != 0)
-						Console.WriteLine($"WARN: Unused table {member.Name} {valueTable.ToDelimString()} leftover");
 					usedValues.Add(member.Name);
 				}
 				else
@@ -170,7 +176,7 @@ public static class TomlSerializer
 				if (componentTable[member.Name] is TomlTable valueTable)
 				{
 					object newValue = DeserializeValue(member.Name, property.GetValue(component)!, valueTable);
-					DeserializeReference(newValue, valueTable, references);
+					DeserializeReference(member.Name, newValue, valueTable, references);
 					property.SetValue(component, newValue);
 					if (valueTable.Count != 0)
 						Console.WriteLine($"WARN: Unused table {member.Name} {valueTable.ToDelimString()} leftover");
@@ -200,6 +206,9 @@ public static class TomlSerializer
 				Console.WriteLine($"WARN: Unused table {usedValue} {usedTable.ToDelimString()} leftover");
 			componentTable.Remove(usedValue);
 		}
+		
+		if (componentTable.Count != 0)
+			Console.WriteLine($"WARN: Unused table {id} {componentTable.ToDelimString()} leftover");
 	}
 }
 

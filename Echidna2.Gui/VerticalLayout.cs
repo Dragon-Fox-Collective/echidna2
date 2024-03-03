@@ -1,10 +1,11 @@
 ﻿using Echidna2.Core;
+using Echidna2.Serialization;
 
 namespace Echidna2.Gui;
 
-public class VerticalLayout(RectTransform rectTransform, Hierarchy hierarchy) : RectLayout(rectTransform, hierarchy)
+public class VerticalLayout : RectLayout
 {
-	public VerticalLayoutDirection LayoutDirection = VerticalLayoutDirection.TopToBottom;
+	[SerializedValue] public VerticalLayoutDirection LayoutDirection = VerticalLayoutDirection.TopToBottom;
 	
 	public override void OnPreNotify(IUpdate.Notification notification)
 	{

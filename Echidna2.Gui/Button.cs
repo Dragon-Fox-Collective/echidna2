@@ -1,10 +1,11 @@
 ﻿using Echidna2.Mathematics;
 using Echidna2.Rendering;
+using Echidna2.Serialization;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 
 namespace Echidna2.Gui;
 
-public class Button(RectTransform rectTransform) : IMouseDown, IMouseUp, IMouseMoved
+public class Button : IMouseDown, IMouseUp, IMouseMoved
 {
 	public event Action? Clicked;
 	public event Action? Dragged;
@@ -13,12 +14,14 @@ public class Button(RectTransform rectTransform) : IMouseDown, IMouseUp, IMouseM
 	public event Action? MouseEnter;
 	public event Action? MouseExit;
 	
+	[SerializedReference] public RectTransform RectTransform { get; set; } = null!;
+	
 	private bool wasPressed;
 	private bool wasInside;
 	
 	public void OnMouseDown(MouseButton button, Vector2 position, Vector3 globalPosition)
 	{
-		if (rectTransform.ContainsGlobalPoint(globalPosition.XY))
+		if (RectTransform.ContainsGlobalPoint(globalPosition.XY))
 		{
 			wasPressed = true;
 			MouseDown?.Invoke();
@@ -32,7 +35,7 @@ public class Button(RectTransform rectTransform) : IMouseDown, IMouseUp, IMouseM
 			wasPressed = false;
 			MouseUp?.Invoke();
 			
-			if (rectTransform.ContainsGlobalPoint(globalPosition.XY))
+			if (RectTransform.ContainsGlobalPoint(globalPosition.XY))
 				Clicked?.Invoke();
 		}
 	}
@@ -42,7 +45,7 @@ public class Button(RectTransform rectTransform) : IMouseDown, IMouseUp, IMouseM
 		if (wasPressed)
 			Dragged?.Invoke();
 		
-		if (rectTransform.ContainsGlobalPoint(globalPosition.XY))
+		if (RectTransform.ContainsGlobalPoint(globalPosition.XY))
 		{
 			if (!wasInside)
 			{
