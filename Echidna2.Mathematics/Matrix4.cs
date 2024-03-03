@@ -132,6 +132,7 @@ public struct Matrix4(
 			}
 		}
 	}
+	public Vector3 Scale => new(M11, M22, M33);
 	
 	public Vector3 Right => new(M11, M21, M31);
 	public Vector3 Left => new(-M11, -M21, -M31);

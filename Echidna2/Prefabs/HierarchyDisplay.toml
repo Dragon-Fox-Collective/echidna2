@@ -1,5 +1,5 @@
 ﻿[1]
-Component = "Echidna2.Hierarchy, Echidna2"
+Component = "Echidna2.HierarchyDisplay, Echidna2"
 Named = "2"
 RectTransform = "4"
 Layout = "5"

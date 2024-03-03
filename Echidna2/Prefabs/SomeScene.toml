@@ -1,6 +1,31 @@
-﻿[1]
-Component = "Echidna2.Rendering.Scene, Echidna2.Rendering"
-Hierarchy = [ "2" ]
-
-[2]
+﻿[2]
 Prefab = "RectWithHierarchy.toml"
+Name = "Some Hierarchy"
+AnchorPreset = "Full"
+Color = { R = 0.0, G = 0.5, B = 0.5, A = 1.0 }
+Children = [ "3", "5", "6" ]
+
+[3]
+Prefab = "RectWithHierarchy.toml"
+Name = "Some Rect"
+AnchorPreset = "Center"
+MinimumSize = { X = 200.0, Y = 200.0 }
+Children = [ "4" ]
+
+[4]
+Prefab = "TextRect.toml"
+Name = "Some Text"
+TextString = "This is some text."
+AnchorPreset = "TopCenter"
+
+[5]
+Prefab = "TextRect.toml"
+Name = "Some Other Text"
+TextString = "This is some other text."
+AnchorPreset = "BottomCenter"
+
+[6]
+Prefab = "ButtonRect.toml"
+Name = "Some Button"
+AnchorPreset = "CenterLeft"
+MinimumSize = { X = 150.0, Y = 50.0 }

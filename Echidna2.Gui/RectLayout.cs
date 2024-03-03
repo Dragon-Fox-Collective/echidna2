@@ -7,7 +7,7 @@ namespace Echidna2.Gui;
 
 public class RectLayout : INotificationHook<IUpdate.Notification>, INotificationHook<IDraw.Notification>
 {
-	public bool ClipChildren;
+	[SerializedValue] public bool ClipChildren;
 	
 	private List<(RectTransform child, RectTransform.LocalTransformChangedHandler handler)> localTransformChangedHandlers = [];
 	

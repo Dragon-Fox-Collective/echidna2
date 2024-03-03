@@ -8,7 +8,7 @@ using Color = System.Drawing.Color;
 namespace Echidna2;
 
 
-[SerializeExposedMembers]
+[SerializeExposedMembers, Prefab("Prefabs/RectWithHierarchy.toml")]
 public partial class RectWithHierarchy : INotificationPropagator, ICanBeLaidOut, INamed, IHasChildren, ICanAddChildren
 {
 	[SerializedReference, ExposeMembersInClass] public Named Named { get; set; } = null!;
@@ -24,7 +24,7 @@ public partial class RectWithHierarchy : INotificationPropagator, ICanBeLaidOut,
 }
 
 
-[SerializeExposedMembers]
+[SerializeExposedMembers, Prefab("Prefabs/ButtonRect.toml")]
 public partial class ButtonRect : INotificationPropagator, ICanBeLaidOut, INamed, IHasChildren, ICanAddChildren, IInitialize
 {
 	[SerializedReference, ExposeMembersInClass] public Named Named { get; set; } = null!;
@@ -47,7 +47,7 @@ public partial class ButtonRect : INotificationPropagator, ICanBeLaidOut, INamed
 }
 
 
-[SerializeExposedMembers]
+[SerializeExposedMembers, Prefab("Prefabs/Named.toml")]
 public partial class HLayoutWithHierarchy : INotificationPropagator, ICanBeLaidOut, INamed, IHasChildren, ICanAddChildren
 {
 	[SerializedReference, ExposeMembersInClass] public Named Named { get; set; } = null!;
@@ -77,7 +77,7 @@ public partial class VLayoutWithHierarchy : INotificationPropagator, ICanBeLaidO
 }
 
 
-[SerializeExposedMembers]
+[SerializeExposedMembers, Prefab("Prefabs/TextRect.toml")]
 public partial class TextRect : INotificationPropagator, ICanBeLaidOut, INamed
 {
 	[SerializedReference, ExposeMembersInClass] public Named Named { get; set; } = null!;
@@ -91,7 +91,7 @@ public partial class TextRect : INotificationPropagator, ICanBeLaidOut, INamed
 }
 
 
-[SerializeExposedMembers]
+[SerializeExposedMembers, Prefab("Prefabs/HierarchyDisplay.toml")]
 public partial class HierarchyDisplay : INotificationPropagator, ICanBeLaidOut, INamed, IInitialize
 {
 	[SerializedReference, ExposeMembersInClass] public Named Named { get; set; } = null!;
@@ -116,14 +116,12 @@ public partial class HierarchyDisplay : INotificationPropagator, ICanBeLaidOut, 
 		layout.AnchorPreset = AnchorPreset.Full;
 		box.AddChild(layout);
 		
-		TextRect text = new()
-		{
-			TextString = obj is INamed named ? named.Name : obj.GetType().Name + " (no name)",
-			AnchorPreset = AnchorPreset.Full,
-			LocalScale = Vector2.One * 0.5,
-			MinimumSize = (0, 25),
-			Justification = TextJustification.Left,
-		};
+		TextRect text = TextRect.Instantiate();
+		text.TextString = obj is INamed named ? named.Name : obj.GetType().Name + " (no name)";
+		text.AnchorPreset = AnchorPreset.Full;
+		text.LocalScale = Vector2.One * 0.5;
+		text.MinimumSize = (0, 25);
+		text.Justification = TextJustification.Left;
 		layout.AddChild(text);
 		
 		if (obj is IHasChildren hasChildren)
@@ -155,7 +153,7 @@ public partial class FullLayoutWithHierarchy : INotificationPropagator, ICanBeLa
 }
 
 
-[SerializeExposedMembers]
+[SerializeExposedMembers, Prefab("Prefabs/DisplayOnlyLayer.toml")]
 public partial class DisplayOnlyLayer : INotificationPropagator, ICanBeLaidOut, INamed, IHasChildren, ICanAddChildren
 {
 	[SerializedReference, ExposeMembersInClass] public Named Named { get; set; } = null!;
@@ -165,7 +163,7 @@ public partial class DisplayOnlyLayer : INotificationPropagator, ICanBeLaidOut, 
 	
 	public void Notify<T>(T notification) where T : notnull
 	{
-		if (notification is IPreUpdate.Notification or IUpdate.Notification or IDraw.Notification)
+		if (notification is IInitialize.Notification or IPreUpdate.Notification or IUpdate.Notification or IDraw.Notification)
 			INotificationPropagator.Notify(notification, Layout, PrefabChildren);
 	}
 }

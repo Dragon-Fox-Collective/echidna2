@@ -55,7 +55,7 @@ public static class TomlSerializer
 	{
 		Type? type = Type.GetType(typeName);
 		if (type == null)
-			throw new InvalidOperationException($"Type {componentTable["type"]} of id {id} does not exist");
+			throw new InvalidOperationException($"Type {typeName} of id {id} does not exist");
 		
 		ConstructorInfo? constructor = type.GetConstructor([]);
 		if (constructor == null)

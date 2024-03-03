@@ -18,7 +18,7 @@ public class RectTransform
 			RecalculateLocalTransform();
 		}
 	}
-	public Vector2 GlobalPosition => GlobalTransform.TransformPoint(localPosition);
+	public Vector2 GlobalPosition => GlobalTransform.Translation.XY;
 	
 	[SerializedValue] public Vector2 LocalSize { get; set; }
 	public Vector2 GlobalSize => GlobalTransform.InverseTransformDirection(LocalSize);

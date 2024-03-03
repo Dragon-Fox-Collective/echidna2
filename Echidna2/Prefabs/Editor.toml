@@ -39,6 +39,7 @@ Prefab = "RectWithHierarchy.toml"
 Name = "Hierarchy"
 VerticalExpand = true
 MinimumSize = { X = 200.0, Y = 0.0 }
+Children = [ "15" ]
 
 [8]
 Prefab = "RectWithHierarchy.toml"
@@ -56,6 +57,8 @@ Children = [ "10", "11" ]
 Prefab = "DisplayOnlyLayer.toml"
 Name = "Scene"
 VerticalExpand = true
+ClipChildren = true
+Children = [ "16" ]
 
 [11]
 Prefab = "RectWithHierarchy.toml"
@@ -79,3 +82,13 @@ Prefab = "ButtonRect.toml"
 Name = "Inspector Button"
 AnchorPreset = "Center"
 MinimumSize = { X = 150.0, Y = 50.0 }
+
+[15]
+Prefab = "HierarchyDisplay.toml"
+Name = "Hierarchy Display"
+AnchorPreset = "Full"
+TopMargin = 10.0
+HierarchyToDisplay = "16"
+
+[16]
+Prefab = "SomeScene.toml"
