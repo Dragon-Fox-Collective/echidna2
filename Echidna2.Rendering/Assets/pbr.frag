@@ -70,7 +70,7 @@ float luminance(vec3 color)
 void main()
 {
     vec3 normal = normalize(Normal);
-    vec3 directionToCamera = normalize(cameraPosition - GlobalPosition);
+    vec3 view = normalize(cameraPosition - GlobalPosition);
     
     vec3 F0 = vec3(0.04);
     F0 = mix(F0, albedo, metallic);
@@ -80,27 +80,27 @@ void main()
     for(int i = 0; i < numLights; i++)
     {
         // calculate per-light radiance
-        vec3 directionToLight = normalize(lightPositions[i] - GlobalPosition);
-        vec3 cameraLightNormal = normalize(directionToCamera + directionToLight);
+        vec3 lightView = normalize(lightPositions[i] - GlobalPosition);
+        vec3 cameraLightNormal = normalize(view + lightView);
         float distanceToLight = length(lightPositions[i] - GlobalPosition);
         float attenuation = 1.0 / (distanceToLight * distanceToLight);
         vec3 radiance = lightColors[i] * attenuation;
         
         // cook-torrance brdf
         float NDF = DistributionGGX(normal, cameraLightNormal, roughness);
-        float G = GeometrySmith(normal, directionToCamera, directionToLight, roughness);
-        vec3 F = fresnelSchlick(max(dot(cameraLightNormal, directionToCamera), 0.0), F0);
+        float G = GeometrySmith(normal, view, lightView, roughness);
+        vec3 F = fresnelSchlick(max(dot(cameraLightNormal, view), 0.0), F0);
         
         vec3 kS = F;
         vec3 kD = vec3(1.0) - kS;
         kD *= 1.0 - metallic;
         
         vec3 numerator = NDF * G * F;
-        float denominator = 4.0 * max(dot(normal, directionToCamera), 0.0) * max(dot(normal, directionToLight), 0.0) + 0.0001;
+        float denominator = 4.0 * max(dot(normal, view), 0.0) * max(dot(normal, lightView), 0.0) + 0.0001;
         vec3 specular = numerator / denominator;
         
         // add to outgoing radiance Lo
-        float NdotL = max(dot(normal, directionToLight), 0.0);
+        float NdotL = max(dot(normal, lightView), 0.0);
         Lo += (kD * albedo / PI + specular) * radiance * NdotL;
     }
     
