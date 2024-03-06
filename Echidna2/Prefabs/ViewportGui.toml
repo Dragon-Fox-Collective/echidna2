@@ -5,7 +5,8 @@ RectTransform = "3"
 RenderTarget = "5"
 Hierarchy = "6"
 CameraHaver = "7"
-RectLayout = "8"
+GuiRectLayout = "8"
+GuiRectTransform = "9"
 
 [2]
 Component = "Echidna2.Core.Named, Echidna2.Core"
@@ -33,4 +34,3 @@ RectTransform = "9"
 
 [9]
 Component = "Echidna2.Gui.RectTransform, Echidna2.Gui"
-LocalSize = { X = 800.0, Y = 600.0 }

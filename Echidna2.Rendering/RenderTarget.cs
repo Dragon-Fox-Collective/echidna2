@@ -1,4 +1,5 @@
 ﻿using Echidna2.Core;
+using Echidna2.Mathematics;
 using Echidna2.Serialization;
 using OpenTK.Graphics.OpenGL4;
 
@@ -9,6 +10,8 @@ public class RenderTarget : IInitialize, INotificationHook<IDrawPass.Notificatio
 	private int colorTexture;
 	private int depthTexture;
 	private int frameBufferObject;
+	
+	private Vector2 currentSize;
 	
 	public int ColorTexture => colorTexture;
 	
@@ -65,6 +68,12 @@ public class RenderTarget : IInitialize, INotificationHook<IDrawPass.Notificatio
 	}
 	public void OnPostPropagate(IDrawPass.Notification notification)
 	{
+		if (currentSize != Camera.Size)
+		{
+			currentSize = Camera.Size;
+			GenerateTextures();
+		}
+		
 		GL.BindFramebuffer(FramebufferTarget.Framebuffer, frameBufferObject);
 		GL.Viewport(0, 0, (int)Camera.Size.X, (int)Camera.Size.Y);
 		GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit | ClearBufferMask.StencilBufferBit);
