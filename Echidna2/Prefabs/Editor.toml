@@ -54,7 +54,7 @@ HorizontalExpand = true
 Children = [ "10", "11" ]
 
 [10]
-Prefab = "ViewportGui.toml"
+Prefab = "Viewport3D.toml"
 Name = "Scene"
 VerticalExpand = true
 Children = [ "16" ]
@@ -90,4 +90,4 @@ TopMargin = 10.0
 HierarchyToDisplay = "16"
 
 [16]
-Prefab = "SomeScene.toml"
+Prefab = "Some3dScene.toml"

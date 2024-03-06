@@ -1,0 +1,21 @@
+﻿[1]
+Component = "Echidna2.Cube, Echidna2"
+Transform = "2"
+MeshRenderer = "3"
+Named = "4"
+PrefabChildren = "5"
+
+[2]
+Component = "Echidna2.Rendering3D.Transform3D, Echidna2.Rendering3D"
+
+[3]
+Component = "Echidna2.Rendering3D.PBRMeshRenderer, Echidna2.Rendering3D"
+Transform = "2"
+Mesh = "Cube"
+
+[4]
+Component = "Echidna2.Core.Named, Echidna2.Core"
+Name = "Cube"
+
+[5]
+Component = "Echidna2.Core.Hierarchy, Echidna2.Core"

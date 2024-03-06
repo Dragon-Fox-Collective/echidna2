@@ -2,6 +2,7 @@
 using Echidna2.Gui;
 using Echidna2.Mathematics;
 using Echidna2.Rendering;
+using Echidna2.Rendering3D;
 using Echidna2.Serialization;
 using OpenTK.Graphics.OpenGL4;
 using Color = System.Drawing.Color;
@@ -161,7 +162,7 @@ public partial class ViewportGui : INotificationPropagator, ICanBeLaidOut, IName
 	[SerializedReference, ExposeMembersInClass] public RectTransform RectTransform { get; set; } = null!;
 	[SerializedReference] public RenderTarget RenderTarget { get; set; } = null!;
 	[SerializedReference, ExposeMembersInClass] public Hierarchy Hierarchy { get; set; } = null!;
-	[SerializedReference] public IHasCamera CameraHaver { get; set; } = null!;
+	[SerializedReference] public GuiCamera Camera { get; set; } = null!;
 	[SerializedReference] public RectLayout GuiRectLayout { get; set; } = null!;
 	[SerializedReference] public RectTransform GuiRectTransform { get; set; } = null!;
 	
@@ -187,7 +188,58 @@ public partial class ViewportGui : INotificationPropagator, ICanBeLaidOut, IName
 	
 	public void OnUpdate(double deltaTime)
 	{
-		CameraHaver.HavedCamera.Size = RectTransform.LocalSize;
+		Camera.Size = RectTransform.LocalSize;
 		GuiRectTransform.LocalSize = RectTransform.LocalSize;
+	}
+}
+
+
+[SerializeExposedMembers, Prefab("Prefabs/Viewport3D.toml")]
+public partial class Viewport3D : INotificationPropagator, ICanBeLaidOut, INamed, IHasChildren, ICanAddChildren, INotificationListener<IDraw.Notification>, IUpdate
+{
+	[SerializedReference, ExposeMembersInClass] public Named Named { get; set; } = null!;
+	[SerializedReference, ExposeMembersInClass] public RectTransform RectTransform { get; set; } = null!;
+	[SerializedReference] public RenderTarget RenderTarget { get; set; } = null!;
+	[SerializedReference, ExposeMembersInClass] public Hierarchy Hierarchy { get; set; } = null!;
+	[SerializedReference] public Camera3D Camera { get; set; } = null!;
+	
+	private static readonly Shader Shader = new(ShaderNodeUtil.MainVertexShader, File.ReadAllText("Assets/solid_texture.frag"));
+	
+	public void Notify<T>(T notification) where T : notnull
+	{
+		if (notification is IInitialize.Notification or IDispose.Notification or IPreUpdate.Notification or IUpdate.Notification or IDrawPass.Notification)
+			INotificationPropagator.Notify(notification, Hierarchy, RenderTarget);
+	}
+	
+	public void OnNotify(IDraw.Notification notification)
+	{
+		Shader.Bind();
+		Shader.SetMatrix4("view", notification.Camera.ViewMatrix);
+		Shader.SetMatrix4("projection", notification.Camera.ProjectionMatrix);
+		Shader.SetMatrix4("distortion", Matrix4.FromScale(RectTransform.LocalSize.WithZ(1) / 2));
+		Shader.SetMatrix4("transform", RectTransform.GlobalTransform);
+		GL.BindTexture(TextureTarget.Texture2D, RenderTarget.ColorTexture);
+		Shader.SetInt("colorTexture", 0);
+		Mesh.Quad.Draw();
+	}
+	
+	public void OnUpdate(double deltaTime)
+	{
+		Camera.Size = RectTransform.LocalSize;
+	}
+}
+
+
+[SerializeExposedMembers, Prefab("Prefabs/Cube.toml")]
+public partial class Cube : INotificationPropagator, INamed, IHasChildren, ICanAddChildren
+{
+	[SerializedReference, ExposeMembersInClass] public Named Named { get; set; } = null!;
+	[SerializedReference, ExposeMembersInClass] public Transform3D Transform { get; set; } = null!;
+	[SerializedReference, ExposeMembersInClass] public PBRMeshRenderer MeshRenderer { get; set; } = null!;
+	[SerializedReference, ExposeMembersInClass] public Hierarchy PrefabChildren { get; set; } = null!;
+	
+	public void Notify<T>(T notification) where T : notnull
+	{
+		INotificationPropagator.Notify(notification, MeshRenderer);
 	}
 }
