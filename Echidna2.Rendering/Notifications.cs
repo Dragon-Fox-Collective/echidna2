@@ -83,3 +83,10 @@ public interface IDispose : INotificationListener<IDispose.Notification>
 	void INotificationListener<Notification>.OnNotify(Notification notification) => OnDispose();
 	public void OnDispose();
 }
+
+public interface IDrawPass : INotificationListener<IDrawPass.Notification>
+{
+	public class Notification;
+	void INotificationListener<Notification>.OnNotify(Notification notification) => OnDrawPass();
+	public void OnDrawPass();
+}

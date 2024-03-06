@@ -44,6 +44,7 @@ public class Window
 	{
 		GL.ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		GL.Enable(EnableCap.DepthTest);
+		GL.Enable(EnableCap.DepthClamp);
 		Camera?.Notify(new IInitialize.Notification());
 	}
 	
@@ -61,6 +62,8 @@ public class Window
 	private void OnDraw()
 	{
 		if (Camera is null) return;
+		Camera.Notify(new IDrawPass.Notification());
+		GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
 		GL.Viewport(0, 0, (int)Camera.Size.X, (int)Camera.Size.Y);
 		GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit | ClearBufferMask.StencilBufferBit);
 		PostProcessing?.BeginRender();

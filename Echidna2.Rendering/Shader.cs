@@ -10,6 +10,7 @@ public class Shader(string vertexSource, string fragmentSource)
 	public static readonly Shader Solid = new(ShaderNodeUtil.MainVertexShader, File.ReadAllText($"{AppContext.BaseDirectory}/Assets/solid.frag"));
 	public static readonly Shader PBR = new(ShaderNodeUtil.MainVertexShader, File.ReadAllText($"{AppContext.BaseDirectory}/Assets/pbr.frag"));
 	public static readonly Shader Skybox = new(ShaderNodeUtil.SkyboxVertexShader, File.ReadAllText($"{AppContext.BaseDirectory}/Assets/cubemap.frag"));
+	public static readonly Shader Quad = new(File.ReadAllText($"{AppContext.BaseDirectory}/Assets/quad.vert"), File.ReadAllText($"{AppContext.BaseDirectory}/Assets/solid_texture.frag"));
 	
 	private int handle;
 	

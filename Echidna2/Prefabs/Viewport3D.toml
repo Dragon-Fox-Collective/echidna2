@@ -1,0 +1,26 @@
+﻿[1]
+Component = "Echidna2.Viewport3D, Echidna2"
+Named = "2"
+RectTransform = "3"
+RenderTarget = "5"
+Hierarchy = "6"
+CameraHaver = "7"
+
+[2]
+Component = "Echidna2.Core.Named, Echidna2.Core"
+Name = "Viewport"
+
+[3]
+Component = "Echidna2.Gui.RectTransform, Echidna2.Gui"
+
+[5]
+Component = "Echidna2.Rendering.RenderTarget, Echidna2.Rendering"
+CameraHaver = "7"
+
+[6]
+Component = "Echidna2.Core.Hierarchy, Echidna2.Core"
+
+[7]
+Component = "Echidna2.Gui.GuiCamera, Echidna2.Gui"
+Size = { X = 800.0, Y = 600.0 }
+World = "6"

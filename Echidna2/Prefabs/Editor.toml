@@ -54,10 +54,9 @@ HorizontalExpand = true
 Children = [ "10", "11" ]
 
 [10]
-Prefab = "DisplayOnlyLayer.toml"
+Prefab = "Viewport3D.toml"
 Name = "Scene"
 VerticalExpand = true
-ClipChildren = true
 Children = [ "16" ]
 
 [11]

@@ -7,7 +7,7 @@ namespace Echidna2.Rendering;
 public abstract class Camera : IHasCamera
 {
 	[SerializedValue] public Vector2 Size { get; set; }
-	[SerializedValue] public double FarClipPlane { get; set; } = 1000;
+	[SerializedValue] public double FarClipPlane { get; set; } = 100;
 	[SerializedValue] public double NearClipPlane { get; set; } = 0.1;
 	
 	[SerializedReference] public INotificationPropagator? World { get; set; }

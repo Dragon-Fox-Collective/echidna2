@@ -3,6 +3,7 @@ using Echidna2.Gui;
 using Echidna2.Mathematics;
 using Echidna2.Rendering;
 using Echidna2.Serialization;
+using OpenTK.Graphics.OpenGL4;
 using Color = System.Drawing.Color;
 
 namespace Echidna2;
@@ -153,17 +154,34 @@ public partial class FullLayoutWithHierarchy : INotificationPropagator, ICanBeLa
 }
 
 
-[SerializeExposedMembers, Prefab("Prefabs/DisplayOnlyLayer.toml")]
-public partial class DisplayOnlyLayer : INotificationPropagator, ICanBeLaidOut, INamed, IHasChildren, ICanAddChildren
+[SerializeExposedMembers, Prefab("Prefabs/Viewport3D.toml")]
+public partial class Viewport3D : INotificationPropagator, ICanBeLaidOut, INamed, IHasChildren, ICanAddChildren, INotificationListener<IDraw.Notification>
 {
 	[SerializedReference, ExposeMembersInClass] public Named Named { get; set; } = null!;
 	[SerializedReference, ExposeMembersInClass] public RectTransform RectTransform { get; set; } = null!;
-	[SerializedReference, ExposeMembersInClass] public RectLayout Layout { get; set; } = null!;
-	[SerializedReference, ExposeMembersInClass] public Hierarchy PrefabChildren { get; set; } = null!;
+	[SerializedReference] public RenderTarget RenderTarget { get; set; } = null!;
+	[SerializedReference, ExposeMembersInClass] public Hierarchy Hierarchy { get; set; } = null!;
+	[SerializedReference] public IHasCamera CameraHaver { get; set; } = null!;
+	
+	private static readonly Shader Shader = new(ShaderNodeUtil.MainVertexShader, File.ReadAllText("Assets/solid_texture.frag"));
 	
 	public void Notify<T>(T notification) where T : notnull
 	{
-		if (notification is IInitialize.Notification or IPreUpdate.Notification or IUpdate.Notification or IDraw.Notification)
-			INotificationPropagator.Notify(notification, Layout, PrefabChildren);
+		if (notification is IInitialize.Notification or IDispose.Notification or IPreUpdate.Notification or IUpdate.Notification or IDrawPass.Notification)
+			INotificationPropagator.Notify(notification, Hierarchy, RenderTarget);
+		else if (notification is IDraw.Notification)
+			INotificationPropagator.Notify(notification, RenderTarget);
+	}
+	
+	public void OnNotify(IDraw.Notification notification)
+	{
+		Shader.Bind();
+		Shader.SetMatrix4("view", notification.Camera.ViewMatrix);
+		Shader.SetMatrix4("projection", notification.Camera.ProjectionMatrix);
+		Shader.SetMatrix4("distortion", Matrix4.FromScale(RectTransform.LocalSize.WithZ(1) / 2));
+		Shader.SetMatrix4("transform", RectTransform.GlobalTransform);
+		GL.BindTexture(TextureTarget.Texture2D, RenderTarget.ColorTexture);
+		Shader.SetInt("colorTexture", 0);
+		Mesh.Quad.Draw();
 	}
 }

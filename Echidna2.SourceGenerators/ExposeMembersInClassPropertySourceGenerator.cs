@@ -69,8 +69,11 @@ public class ExposeMembersInClassPropertySourceGenerator : IIncrementalGenerator
 		{
 			yield return member;
 			
-			if (member is IPropertySymbol property && property.GetAttributes().Any(attribute => attribute.AttributeClass?.Name == "ExposeMembersInClassAttribute"))
+			if (member is IPropertySymbol property && classType.ContainingAssembly.Equals(property.Type.ContainingAssembly, SymbolEqualityComparer.Default) && property.GetAttributes().Any(attribute => attribute.AttributeClass?.Name == "ExposeMembersInClassAttribute"))
 				foreach (ISymbol member2 in GetAllUnimplementedMembersExposeRecursive(classType, (INamedTypeSymbol)property.Type))
+					yield return member2;
+			else if (member is IFieldSymbol field && classType.ContainingAssembly.Equals(field.Type.ContainingAssembly, SymbolEqualityComparer.Default) && field.GetAttributes().Any(attribute => attribute.AttributeClass?.Name == "ExposeMembersInClassAttribute"))
+				foreach (ISymbol member2 in GetAllUnimplementedMembersExposeRecursive(classType, (INamedTypeSymbol)field.Type))
 					yield return member2;
 		}
 	}

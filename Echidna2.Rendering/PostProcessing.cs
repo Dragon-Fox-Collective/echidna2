@@ -26,7 +26,6 @@ public class PostProcessing(Shader shader, Shader blurShader, Vector2 size, Came
 	private int depthTexture;
 	
 	private int frameBufferObject;
-	private int renderBufferObject;
 	
 	private int[] pingPongFrameBufferObjects = [-1, -1];
 	private int[] pingPongTextures = [-1, -1];
@@ -44,7 +43,6 @@ public class PostProcessing(Shader shader, Shader blurShader, Vector2 size, Came
 		depthTexture = GL.GenTexture();
 		
 		frameBufferObject = GL.GenFramebuffer();
-		renderBufferObject = GL.GenRenderbuffer();
 		
 		GL.GenFramebuffers(2, pingPongFrameBufferObjects);
 		GL.GenTextures(2, pingPongTextures);
@@ -185,7 +183,6 @@ public class PostProcessing(Shader shader, Shader blurShader, Vector2 size, Came
 		GL.DeleteTexture(colorTexture);
 		GL.DeleteTexture(depthTexture);
 		GL.DeleteFramebuffer(frameBufferObject);
-		GL.DeleteRenderbuffer(renderBufferObject);
 	}
 	
 	~PostProcessing()
