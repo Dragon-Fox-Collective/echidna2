@@ -9,8 +9,11 @@ Console.WriteLine("Hello, World!");
 
 
 
-RectWithHierarchy root = TomlSerializer.Deserialize<RectWithHierarchy>($"{AppContext.BaseDirectory}/Prefabs/Editor.toml");
+Editor root = TomlSerializer.Deserialize<Editor>($"{AppContext.BaseDirectory}/Prefabs/Editor.toml");
 
+IHasChildren prefab = TomlSerializer.Deserialize<IHasChildren>($"{AppContext.BaseDirectory}/{root.PrefabPath}");
+root.HierarchyDisplay.HierarchyToDisplay = prefab;
+root.Viewport.AddChild(prefab);
 
 
 IHasChildren.PrintTree(root);

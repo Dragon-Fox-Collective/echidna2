@@ -1,8 +1,29 @@
 ﻿[1]
-Prefab = "RectWithHierarchy.toml"
-Name = "Root"
+Component = "Echidna2.Editor, Echidna2"
+Named = "01"
+RectTransform = "02"
+RectLayout = "03"
+PrefabChildren = "04"
+Viewport = "10"
+HierarchyDisplay = "15"
+PrefabPath = "Prefabs/Editor.toml"
+
+[01]
+Component = "Echidna2.Core.Named, Echidna2.Core"
+Name = "Editor"
+
+[02]
+Component = "Echidna2.Gui.RectTransform, Echidna2.Gui"
 IsGlobal = true
-Color = { R = 1.0, G = 0.0, B = 1.0, A = 1.0 }
+AnchorPreset = "Full"
+
+[03]
+Component = "Echidna2.Gui.RectLayout, Echidna2.Gui"
+RectTransform = "02"
+Hierarchy = "04"
+
+[04]
+Component = "Echidna2.Core.Hierarchy, Echidna2.Core"
 Children = [ "2" ]
 
 [2]
@@ -54,10 +75,9 @@ HorizontalExpand = true
 Children = [ "10", "11" ]
 
 [10]
-Prefab = "Viewport3D.toml"
+Prefab = "ViewportGui.toml"
 Name = "Scene"
 VerticalExpand = true
-Children = [ "16" ]
 
 [11]
 Prefab = "RectWithHierarchy.toml"
@@ -87,7 +107,3 @@ Prefab = "HierarchyDisplay.toml"
 Name = "Hierarchy Display"
 AnchorPreset = "Full"
 TopMargin = 10.0
-HierarchyToDisplay = "16"
-
-[16]
-Prefab = "Some3dScene.toml"

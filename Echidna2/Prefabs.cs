@@ -98,7 +98,7 @@ public partial class HierarchyDisplay : INotificationPropagator, ICanBeLaidOut, 
 {
 	[SerializedReference, ExposeMembersInClass] public Named Named { get; set; } = null!;
 	[SerializedReference, ExposeMembersInClass] public RectTransform RectTransform { get; set; } = null!;
-	[SerializedReference] public IHasChildren HierarchyToDisplay { get; set; } = null!;
+	[SerializedReference] public IHasChildren? HierarchyToDisplay { get; set; } = null!;
 	[SerializedReference] private Hierarchy DisplayElements { get; set; } = null!;
 	[SerializedReference, ExposeMembersInClass] public FullLayout Layout { get; set; } = null!;
 	
@@ -107,7 +107,7 @@ public partial class HierarchyDisplay : INotificationPropagator, ICanBeLaidOut, 
 		DisplayElements.AddChild(BoxOfHierarchy(HierarchyToDisplay));
 	}
 	
-	private static FullLayoutWithHierarchy BoxOfHierarchy(object obj)
+	private static FullLayoutWithHierarchy BoxOfHierarchy(object? obj)
 	{
 		FullLayoutWithHierarchy box = FullLayoutWithHierarchy.Instantiate();
 		box.Name = $"Box for {obj}";
@@ -119,7 +119,12 @@ public partial class HierarchyDisplay : INotificationPropagator, ICanBeLaidOut, 
 		box.AddChild(layout);
 		
 		TextRect text = TextRect.Instantiate();
-		text.TextString = obj is INamed named ? named.Name : obj.GetType().Name + " (no name)";
+		text.TextString = obj switch
+		{
+			INamed named => named.Name,
+			not null => obj.GetType().Name + " (no name)",
+			_ => "(no prefab loaded)"
+		};
 		text.AnchorPreset = AnchorPreset.Full;
 		text.LocalScale = Vector2.One * 0.5;
 		text.MinimumSize = (0, 25);
@@ -155,8 +160,14 @@ public partial class FullLayoutWithHierarchy : INotificationPropagator, ICanBeLa
 }
 
 
+public interface Viewport
+{
+	public void AddChild(object child);
+}
+
+
 [SerializeExposedMembers, Prefab("Prefabs/ViewportGui.toml")]
-public partial class ViewportGui : INotificationPropagator, ICanBeLaidOut, INamed, IHasChildren, ICanAddChildren, INotificationListener<IDraw.Notification>, IUpdate
+public partial class ViewportGui : Viewport, INotificationPropagator, ICanBeLaidOut, INamed, IHasChildren, ICanAddChildren, INotificationListener<IDraw.Notification>, IUpdate
 {
 	[SerializedReference, ExposeMembersInClass] public Named Named { get; set; } = null!;
 	[SerializedReference, ExposeMembersInClass] public RectTransform RectTransform { get; set; } = null!;
@@ -195,7 +206,7 @@ public partial class ViewportGui : INotificationPropagator, ICanBeLaidOut, IName
 
 
 [SerializeExposedMembers, Prefab("Prefabs/Viewport3D.toml")]
-public partial class Viewport3D : INotificationPropagator, ICanBeLaidOut, INamed, IHasChildren, ICanAddChildren, INotificationListener<IDraw.Notification>, IUpdate
+public partial class Viewport3D : Viewport, INotificationPropagator, ICanBeLaidOut, INamed, IHasChildren, ICanAddChildren, INotificationListener<IDraw.Notification>, IUpdate
 {
 	[SerializedReference, ExposeMembersInClass] public Named Named { get; set; } = null!;
 	[SerializedReference, ExposeMembersInClass] public RectTransform RectTransform { get; set; } = null!;
@@ -241,5 +252,23 @@ public partial class Cube : INotificationPropagator, INamed, IHasChildren, ICanA
 	public void Notify<T>(T notification) where T : notnull
 	{
 		INotificationPropagator.Notify(notification, MeshRenderer);
+	}
+}
+
+
+[SerializeExposedMembers, Prefab("Prefabs/Editor.toml")]
+public partial class Editor : INotificationPropagator, ICanBeLaidOut, INamed, IHasChildren, ICanAddChildren
+{
+	[SerializedReference, ExposeMembersInClass] public Named Named { get; set; } = null!;
+	[SerializedReference, ExposeMembersInClass] public RectTransform RectTransform { get; set; } = null!;
+	[SerializedReference, ExposeMembersInClass] public RectLayout RectLayout { get; set; } = null!;
+	[SerializedReference, ExposeMembersInClass] public Hierarchy PrefabChildren { get; set; } = null!;
+	[SerializedReference] public Viewport Viewport { get; set; } = null!;
+	[SerializedReference] public HierarchyDisplay HierarchyDisplay { get; set; } = null!;
+	[SerializedValue] public string PrefabPath { get; set; } = "";
+	
+	public void Notify<T>(T notification) where T : notnull
+	{
+		INotificationPropagator.Notify(notification, RectLayout, PrefabChildren);
 	}
 }
