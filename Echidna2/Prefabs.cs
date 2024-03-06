@@ -154,21 +154,22 @@ public partial class FullLayoutWithHierarchy : INotificationPropagator, ICanBeLa
 }
 
 
-[SerializeExposedMembers, Prefab("Prefabs/Viewport3D.toml")]
-public partial class Viewport3D : INotificationPropagator, ICanBeLaidOut, INamed, IHasChildren, ICanAddChildren, INotificationListener<IDraw.Notification>
+[SerializeExposedMembers, Prefab("Prefabs/ViewportGui.toml")]
+public partial class ViewportGui : INotificationPropagator, ICanBeLaidOut, INamed, IHasChildren, ICanAddChildren, INotificationListener<IDraw.Notification>
 {
 	[SerializedReference, ExposeMembersInClass] public Named Named { get; set; } = null!;
 	[SerializedReference, ExposeMembersInClass] public RectTransform RectTransform { get; set; } = null!;
 	[SerializedReference] public RenderTarget RenderTarget { get; set; } = null!;
 	[SerializedReference, ExposeMembersInClass] public Hierarchy Hierarchy { get; set; } = null!;
 	[SerializedReference] public IHasCamera CameraHaver { get; set; } = null!;
+	[SerializedReference] public RectLayout RectLayout { get; set; } = null!;
 	
 	private static readonly Shader Shader = new(ShaderNodeUtil.MainVertexShader, File.ReadAllText("Assets/solid_texture.frag"));
 	
 	public void Notify<T>(T notification) where T : notnull
 	{
 		if (notification is IInitialize.Notification or IDispose.Notification or IPreUpdate.Notification or IUpdate.Notification or IDrawPass.Notification)
-			INotificationPropagator.Notify(notification, Hierarchy, RenderTarget);
+			INotificationPropagator.Notify(notification, Hierarchy, RenderTarget, RectLayout);
 		else if (notification is IDraw.Notification)
 			INotificationPropagator.Notify(notification, RenderTarget);
 	}
