@@ -1,4 +1,14 @@
-﻿[1]
+﻿[0]
+Component = "Echidna2.Core.Hierarchy, Echidna2.Core"
+Children = [ "1", "2" ]
+
+[1]
 Prefab = "Cube.toml"
-Name = "Some Cube"
+Name = "Some Middle Cube"
 Albedo = { R = 0.0, G = 1.0, B = 0.5, A = 1.0 }
+
+[2]
+Prefab = "Cube.toml"
+Name = "Some Upper Cube"
+Albedo = { R = 0.5, G = 1.0, B = 0.0, A = 1.0 }
+LocalPosition = { X = 0.0, Y = 0.0, Z = 2.5 }

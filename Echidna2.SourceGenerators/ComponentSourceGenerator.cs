@@ -91,7 +91,7 @@ public class ComponentSourceGenerator : IIncrementalGenerator
 		return member switch
 		{
 			IMethodSymbol method =>
-				$"\t{attributes}{accessibility} {method.ReturnType} {method.Name}{(method.IsGenericMethod ? "<" + string.Join(", ", method.TypeArguments) + ">" : "")}({string.Join(", ", method.Parameters.Select(parameter => $"{(parameter.IsParams ? "params " : "")}{parameter.Type} {parameter.Name}{(parameter.HasExplicitDefaultValue ? $" = {parameter.ExplicitDefaultValue}" : "")}"))}) => {propertyName}.{method.Name}({string.Join(", ", method.Parameters.Select(parameter => parameter.Name))});\n",
+				$"\t{attributes}{accessibility} {method.ReturnType} {method.Name}{(method.IsGenericMethod ? "<" + string.Join(", ", method.TypeArguments) + ">" : "")}({string.Join(", ", method.Parameters.Select(parameter => $"{(parameter.IsParams ? "params " : "")}{parameter.Type} {parameter.Name}{(parameter.HasExplicitDefaultValue ? $" = {parameter.ExplicitDefaultValue ?? "default"}" : "")}"))}) => {propertyName}.{method.Name}({string.Join(", ", method.Parameters.Select(parameter => parameter.Name))});\n",
 			IPropertySymbol { GetMethod: not null, SetMethod: not null } property =>
 				$"\t{attributes}{accessibility} {property.Type} {property.Name} {{ get => {propertyName}.{property.Name}; set => {propertyName}.{property.Name} = value; }}\n",
 			IPropertySymbol { GetMethod: not null } property =>

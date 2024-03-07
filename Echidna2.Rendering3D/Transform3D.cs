@@ -68,6 +68,10 @@ public class Transform3D
 		}
 	}
 	
+	public void LookAt(Transform3D target, Vector3 up, Vector3 fallbackUp = default) => GlobalRotation = Quaternion.LookAt(GlobalPosition, target.GlobalPosition, up, fallbackUp);
+	public void LookAt(Vector3 target, Vector3 up, Vector3 fallbackUp = default) => GlobalRotation = Quaternion.LookAt(GlobalPosition, target, up, fallbackUp);
+	public void LookToward(Vector3 direction, Vector3 up, Vector3 fallbackUp = default) => GlobalRotation = Quaternion.LookToward(direction, up, fallbackUp);
+	
 	private void RecalculateLocalTransform()
 	{
 		LocalTransform = Matrix4.FromTranslation(LocalPosition) * Matrix4.FromRotation(LocalRotation) * Matrix4.FromScale(LocalScale);

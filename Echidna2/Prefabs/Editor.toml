@@ -6,7 +6,7 @@ RectLayout = "03"
 PrefabChildren = "04"
 Viewport = "10"
 HierarchyDisplay = "15"
-PrefabPath = "Prefabs/Editor.toml"
+PrefabPath = "Prefabs/Some3dScene.toml"
 
 [01]
 Component = "Echidna2.Core.Named, Echidna2.Core"
@@ -75,7 +75,7 @@ HorizontalExpand = true
 Children = [ "10", "11" ]
 
 [10]
-Prefab = "EditorViewportGui.toml"
+Prefab = "EditorViewport3D.toml"
 Name = "Scene"
 VerticalExpand = true
 

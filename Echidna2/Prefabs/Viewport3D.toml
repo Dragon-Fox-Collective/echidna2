@@ -28,4 +28,3 @@ Transform = "8"
 
 [8]
 Component = "Echidna2.Rendering3D.Transform3D, Echidna2.Rendering3D"
-LocalPosition = { X = -2.0, Y = -1.5, Z = 5.0 }

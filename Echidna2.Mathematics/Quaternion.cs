@@ -57,12 +57,15 @@ public struct Quaternion(double x, double y, double z, double w) : IEquatable<Qu
 	/// </summary>
 	public static Quaternion FromEulerAngles(Vector3 angles) => FromEulerAngles(angles.X, angles.Y, angles.Z);
 	
-	public static Quaternion LookToward(Vector3 forward, Vector3 up)
+	public static Quaternion LookToward(Vector3 forward, Vector3 up, Vector3 fallbackUp = default)
 	{
 		// https://www.euclideanspace.com/maths/geometry/rotations/conversions/matrixToQuaternion/
 		// maybe https://gamedev.net/forums/topic/648857-how-to-implement-lookrotation/5113120/ ?
 		// https://www.andre-gaschler.com/rotationconverter/
 		// https://stackoverflow.com/questions/52413464/look-at-quaternion-using-up-vector
+		
+		if (up.Cross(forward).IsNaN)
+			up = fallbackUp;
 		
 		forward = -forward.Normalized;
 		Vector3 right = up.Cross(forward).Normalized;
@@ -71,14 +74,13 @@ public struct Quaternion(double x, double y, double z, double w) : IEquatable<Qu
 		if (forward.IsNaN || right.IsNaN || up.IsNaN)
 			return Identity;
 		
-		// FIXME: I had to re-reverse the matrix arguments to get the correct rotation, so it's no longer fixed for OpenGL
 		return new Matrix4(
-			right.X,   right.Y,   right.Z,   0,
-			up.X,      up.Y,      up.Z,      0,
-			forward.X, forward.Y, forward.Z, 0,
+			right.X, up.X, forward.X, 0,
+			right.Y, up.Y, forward.Y, 0,
+			right.Z, up.Z, forward.Z, 0,
 			0, 0, 0, 1).Rotation;
 	}
-	public static Quaternion LookAt(Vector3 position, Vector3 target, Vector3 up) => LookToward(target - position, up);
+	public static Quaternion LookAt(Vector3 position, Vector3 target, Vector3 up, Vector3 fallbackUp = default) => LookToward(target - position, up);
 	
 	public static readonly Quaternion Identity = new(0, 0, 0, 1);
 	
