@@ -124,7 +124,7 @@ public class RectTransform
 	}
 	
 	public bool ContainsGlobalPoint(Vector2 point) => ContainsLocalPoint(GlobalTransform.InverseTransformPoint(point));
-	public bool ContainsLocalPoint(Vector2 point) => point.X >= LocalPosition.X - LocalSize.X / 2 && point.X <= LocalPosition.X + LocalSize.X / 2 && point.Y >= LocalPosition.Y - LocalSize.Y / 2 && point.Y <= LocalPosition.Y + LocalSize.Y / 2;
+	public bool ContainsLocalPoint(Vector2 point) => point.X >= -LocalSize.X / 2 && point.X <= +LocalSize.X / 2 && point.Y >= -LocalSize.Y / 2 && point.Y <= +LocalSize.Y / 2;
 }
 
 [Flags]

@@ -75,7 +75,7 @@ HorizontalExpand = true
 Children = [ "10", "11" ]
 
 [10]
-Prefab = "ViewportGui.toml"
+Prefab = "EditorViewportGui.toml"
 Name = "Scene"
 VerticalExpand = true
 

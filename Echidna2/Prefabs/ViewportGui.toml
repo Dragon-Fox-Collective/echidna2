@@ -34,3 +34,5 @@ RectTransform = "9"
 
 [9]
 Component = "Echidna2.Gui.RectTransform, Echidna2.Gui"
+LocalSize = { X = 800.0, Y = 600.0 }
+IsGlobal = true

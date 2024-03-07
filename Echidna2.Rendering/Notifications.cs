@@ -50,6 +50,18 @@ public interface IMouseUp : INotificationListener<IMouseUp.Notification>
 	public void OnMouseUp(MouseButton button, Vector2 position, Vector3 globalPosition);
 }
 
+public interface IMouseWheelScrolled : INotificationListener<IMouseWheelScrolled.Notification>
+{
+	public class Notification(Vector2 offset, Vector2 position, Vector3 globalPosition)
+	{
+		public Vector2 Offset { get; } = offset;
+		public Vector2 Position { get; } = position;
+		public Vector3 GlobalPosition { get; } = globalPosition;
+	}
+	void INotificationListener<Notification>.OnNotify(Notification notification) => OnMouseWheelScrolled(notification.Offset, notification.Position, notification.GlobalPosition);
+	public void OnMouseWheelScrolled(Vector2 offset, Vector2 position, Vector3 globalPosition);
+}
+
 public interface IKeyDown : INotificationListener<IKeyDown.Notification>
 {
 	public class Notification(Keys key)
