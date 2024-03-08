@@ -12,13 +12,44 @@ public partial class RectWithHierarchy : INotificationPropagator, ICanBeLaidOut,
 {
 	[SerializedReference, ExposeMembersInClass] public Named Named { get; set; } = null!;
 	[SerializedReference, ExposeMembersInClass] public RectTransform RectTransform { get; set; } = null!;
-	[SerializedReference, ExposeMembersInClass] public RectLayout RectLayout { get; set; } = null!;
+	[SerializedReference, ExposeMembersInClass] public RectLayout Layout { get; set; } = null!;
 	[SerializedReference, ExposeMembersInClass] public Rect Rect { get; set; } = null!;
 	[SerializedReference, ExposeMembersInClass] public Hierarchy PrefabChildren { get; set; } = null!;
 	
 	public void Notify<T>(T notification) where T : notnull
 	{
-		INotificationPropagator.Notify(notification, Rect, RectLayout, PrefabChildren);
+		INotificationPropagator.Notify(notification, Rect, Layout, PrefabChildren);
+	}
+}
+
+
+[SerializeExposedMembers, Prefab("Prefabs/FullRectWithHierarchy.toml")]
+public partial class FullRectWithHierarchy : INotificationPropagator, ICanBeLaidOut, INamed, IHasChildren, ICanAddChildren
+{
+	[SerializedReference, ExposeMembersInClass] public Named Named { get; set; } = null!;
+	[SerializedReference, ExposeMembersInClass] public RectTransform RectTransform { get; set; } = null!;
+	[SerializedReference, ExposeMembersInClass] public FullLayout Layout { get; set; } = null!;
+	[SerializedReference, ExposeMembersInClass] public Rect Rect { get; set; } = null!;
+	[SerializedReference, ExposeMembersInClass] public Hierarchy PrefabChildren { get; set; } = null!;
+	
+	public void Notify<T>(T notification) where T : notnull
+	{
+		INotificationPropagator.Notify(notification, Rect, Layout, PrefabChildren);
+	}
+}
+
+
+[SerializeExposedMembers, Prefab("Prefabs/RectLayoutWithHierarchy.toml")]
+public partial class RectLayoutWithHierarchy : INotificationPropagator, ICanBeLaidOut, INamed, IHasChildren, ICanAddChildren
+{
+	[SerializedReference, ExposeMembersInClass] public Named Named { get; set; } = null!;
+	[SerializedReference, ExposeMembersInClass] public RectTransform RectTransform { get; set; } = null!;
+	[SerializedReference, ExposeMembersInClass] public RectLayout Layout { get; set; } = null!;
+	[SerializedReference, ExposeMembersInClass] public Hierarchy PrefabChildren { get; set; } = null!;
+	
+	public void Notify<T>(T notification) where T : notnull
+	{
+		INotificationPropagator.Notify(notification, Layout, PrefabChildren);
 	}
 }
 
@@ -28,7 +59,7 @@ public partial class ButtonRect : INotificationPropagator, ICanBeLaidOut, INamed
 {
 	[SerializedReference, ExposeMembersInClass] public Named Named { get; set; } = null!;
 	[SerializedReference, ExposeMembersInClass] public RectTransform RectTransform { get; set; } = null!;
-	[SerializedReference, ExposeMembersInClass] public RectLayout RectLayout { get; set; } = null!;
+	[SerializedReference, ExposeMembersInClass] public RectLayout Layout { get; set; } = null!;
 	[SerializedReference, ExposeMembersInClass] public Rect Rect { get; set; } = null!;
 	[SerializedReference, ExposeMembersInClass] public Hierarchy PrefabChildren { get; set; } = null!;
 	[SerializedReference, ExposeMembersInClass] public Button Button { get; set; } = null!;
@@ -41,7 +72,7 @@ public partial class ButtonRect : INotificationPropagator, ICanBeLaidOut, INamed
 	
 	public void Notify<T>(T notification) where T : notnull
 	{
-		INotificationPropagator.Notify(notification, Rect, Button, RectLayout, PrefabChildren);
+		INotificationPropagator.Notify(notification, Rect, Button, Layout, PrefabChildren);
 	}
 }
 

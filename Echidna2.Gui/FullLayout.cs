@@ -11,17 +11,17 @@ public class FullLayout : RectLayout
 	[SerializedValue] public double BottomMargin = 0;
 	[SerializedValue] public double TopMargin = 0;
 	
-	public double Margin
+	[SerializedValue] public double Margin
 	{
 		set => LeftMargin = RightMargin = BottomMargin = TopMargin = value;
 	}
 	
-	public double HorizontalMargin
+	[SerializedValue] public double HorizontalMargin
 	{
 		set => LeftMargin = RightMargin = value;
 	}
 	
-	public double VerticalMargin
+	[SerializedValue] public double VerticalMargin
 	{
 		set => BottomMargin = TopMargin = value;
 	}
@@ -35,7 +35,7 @@ public class FullLayout : RectLayout
 		
 		Vector2 exteriorSize = RectTransform.LocalSize;
 		Vector2 interiorSize = (Math.Max(exteriorSize.X - LeftMargin - RightMargin, 0), Math.Max(exteriorSize.Y - BottomMargin - TopMargin, 0));
-		RectTransform.LocalSize = exteriorSize;
+		RectTransform.LocalSize = interiorSize;
 		
 		base.OnPreNotify(notification);
 		
@@ -46,7 +46,7 @@ public class FullLayout : RectLayout
 				laidOutChildren.Max(child => child.MinimumSize.X) + LeftMargin + RightMargin,
 				laidOutChildren.Max(child => child.MinimumSize.Y) + BottomMargin + TopMargin);
 		else
-			RectTransform.MinimumSize = (0, 0);
+			RectTransform.MinimumSize = (LeftMargin + RightMargin, BottomMargin + TopMargin);
 		
 		foreach (RectTransform child in laidOutChildren)
 		{

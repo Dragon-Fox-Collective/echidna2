@@ -12,7 +12,6 @@ Console.WriteLine("Hello, World!");
 Editor root = TomlSerializer.Deserialize<Editor>($"{AppContext.BaseDirectory}/Prefabs/Editor.toml");
 
 IHasChildren prefab = TomlSerializer.Deserialize<IHasChildren>($"{AppContext.BaseDirectory}/{root.PrefabPath}");
-root.HierarchyDisplay.HierarchyToDisplay = prefab;
 root.Viewport.AddChild(prefab);
 
 

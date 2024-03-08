@@ -2,7 +2,7 @@
 Component = "Echidna2.RectWithHierarchy, Echidna2"
 Named = "2"
 RectTransform = "4"
-RectLayout = "5"
+Layout = "5"
 Rect = "6"
 PrefabChildren = "3"
 

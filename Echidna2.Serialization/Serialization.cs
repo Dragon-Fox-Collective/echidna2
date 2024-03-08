@@ -210,7 +210,7 @@ public static class TomlSerializer
 		}
 		
 		if (componentTable.Count != 0)
-			Console.WriteLine($"WARN: Unused table {id} {componentTable.ToDelimString()} leftover");
+			Console.WriteLine($"WARN: Unused table {id} {componentTable.ToDelimString()} of prefab leftover");
 	}
 }
 

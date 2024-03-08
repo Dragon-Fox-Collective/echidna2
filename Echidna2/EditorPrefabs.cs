@@ -81,7 +81,6 @@ public partial class Editor : INotificationPropagator, ICanBeLaidOut, INamed, IH
 	[SerializedReference, ExposeMembersInClass] public RectLayout RectLayout { get; set; } = null!;
 	[SerializedReference, ExposeMembersInClass] public Hierarchy PrefabChildren { get; set; } = null!;
 	[SerializedReference] public Viewport Viewport { get; set; } = null!;
-	[SerializedReference] public HierarchyDisplay HierarchyDisplay { get; set; } = null!;
 	[SerializedValue] public string PrefabPath { get; set; } = "";
 	
 	public void Notify<T>(T notification) where T : notnull
