@@ -6,6 +6,7 @@ using Echidna2.Serialization;
 using OpenTK.Windowing.Desktop;
 
 Console.WriteLine("Hello, World!");
+Compilation.CompileCSProj("Prefabs/Editor.toml");
 
 
 

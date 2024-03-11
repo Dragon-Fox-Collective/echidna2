@@ -129,6 +129,11 @@ Prefab = "ButtonRect.toml"
 Name = "Object Panel Button"
 MinimumSize = { X = 26.0, Y = 26.0 }
 Color = { R = 1.0, G = 0.0, B = 0.0, A = 1.0 }
+ScriptContent = """
+[SerializedReference] public IVisible? ObjectPanel;
+"""
+ObjectPanel = "20"
+OnClicked = "ObjectPanel?.ToggleVisibility()"
 
 [17]
 Prefab = "ButtonRect.toml"

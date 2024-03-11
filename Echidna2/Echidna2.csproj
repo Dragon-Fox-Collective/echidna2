@@ -9,15 +9,6 @@
         <DebugType>embedded</DebugType>
     </PropertyGroup>
     
-    <PropertyGroup Condition="'$(Configuration)'=='Release'">
-        <SelfContained>true</SelfContained>
-        <PublishSingleFile>true</PublishSingleFile>
-        <PublishReadyToRun>true</PublishReadyToRun>
-        <IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
-        <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
-        <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
-    </PropertyGroup>
-
     <ItemGroup>
       <ProjectReference Include="..\Echidna2.Core\Echidna2.Core.csproj" />
       <ProjectReference Include="..\Echidna2.Gui\Echidna2.Gui.csproj" />
