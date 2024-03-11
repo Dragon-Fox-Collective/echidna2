@@ -63,13 +63,13 @@ Spacing = 10.0
 Children = [ "7", "8" ]
 
 [7]
-Prefab = "RectWithHierarchy.toml"
+Prefab = "ButtonRect.toml"
 Name = "Play Button"
 MinimumSize = { X = 26.0, Y = 26.0 }
 Color = { R = 0.0, G = 1.0, B = 0.0, A = 1.0 }
 
 [8]
-Prefab = "RectWithHierarchy.toml"
+Prefab = "ButtonRect.toml"
 Name = "Stop Button"
 MinimumSize = { X = 26.0, Y = 26.0 }
 Color = { R = 1.0, G = 0.0, B = 0.0, A = 1.0 }
@@ -90,19 +90,19 @@ Spacing = 10.0
 Children = [ "11", "12", "13" ]
 
 [11]
-Prefab = "RectWithHierarchy.toml"
+Prefab = "ButtonRect.toml"
 Name = "3D View Button"
 MinimumSize = { X = 26.0, Y = 26.0 }
 Color = { R = 1.0, G = 0.0, B = 0.0, A = 1.0 }
 
 [12]
-Prefab = "RectWithHierarchy.toml"
+Prefab = "ButtonRect.toml"
 Name = "2D View Button"
 MinimumSize = { X = 26.0, Y = 26.0 }
 Color = { R = 0.0, G = 0.0, B = 1.0, A = 1.0 }
 
 [13]
-Prefab = "RectWithHierarchy.toml"
+Prefab = "ButtonRect.toml"
 Name = "Gui View Button"
 MinimumSize = { X = 26.0, Y = 26.0 }
 Color = { R = 0.0, G = 1.0, B = 0.0, A = 1.0 }
@@ -125,25 +125,25 @@ Spacing = 10.0
 Children = [ "16", "17", "18", "19" ]
 
 [16]
-Prefab = "RectWithHierarchy.toml"
+Prefab = "ButtonRect.toml"
 Name = "Object Panel Button"
 MinimumSize = { X = 26.0, Y = 26.0 }
 Color = { R = 1.0, G = 0.0, B = 0.0, A = 1.0 }
 
 [17]
-Prefab = "RectWithHierarchy.toml"
+Prefab = "ButtonRect.toml"
 Name = "Component Panel Button"
 MinimumSize = { X = 26.0, Y = 26.0 }
 Color = { R = 0.0, G = 0.0, B = 1.0, A = 1.0 }
 
 [18]
-Prefab = "RectWithHierarchy.toml"
+Prefab = "ButtonRect.toml"
 Name = "Material Panel Button"
 MinimumSize = { X = 26.0, Y = 26.0 }
 Color = { R = 0.0, G = 1.0, B = 0.0, A = 1.0 }
 
 [19]
-Prefab = "RectWithHierarchy.toml"
+Prefab = "ButtonRect.toml"
 Name = "State Machine Panel Button"
 MinimumSize = { X = 26.0, Y = 26.0 }
 Color = { R = 1.0, G = 0.0, B = 1.0, A = 1.0 }

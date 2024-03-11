@@ -66,8 +66,10 @@ public partial class ButtonRect : INotificationPropagator, ICanBeLaidOut, INamed
 	
 	public void OnInitialize()
 	{
-		Button.MouseDown += () => Rect.Color = Color.DarkGray;
-		Button.MouseUp += () => Rect.Color = Color.LightGray;
+		Color color = Rect.Color;
+		Color darkColor = Color.FromArgb(color.A / 2, color.R / 2, color.G / 2, color.B / 2);
+		Button.MouseDown += () => Rect.Color = darkColor;
+		Button.MouseUp += () => Rect.Color = color;
 	}
 	
 	public void Notify<T>(T notification) where T : notnull
