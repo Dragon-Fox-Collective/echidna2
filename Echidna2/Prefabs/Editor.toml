@@ -41,12 +41,18 @@ Prefab = "RectWithHierarchy.toml"
 Name = "Console"
 AnchorPreset = "WideBottom"
 AnchorOffsetTop = 50.0
+Children = [ "5-1" ]
+
+[5-1]
+Prefab = "RectLayoutWithHierarchy.toml"
+Name = "Play Buttons Position Resetter"
+AnchorPreset = "TopCenter"
 Children = [ "5" ]
 
 [5]
 Prefab = "FullRectWithHierarchy.toml"
 Name = "Play Buttons"
-AnchorPreset = "TopCenter"
+AnchorPreset = "Center"
 Margin = 10.0
 Children = [ "6" ]
 
@@ -72,8 +78,8 @@ Color = { R = 1.0, G = 0.0, B = 0.0, A = 1.0 }
 Prefab = "FullRectWithHierarchy.toml"
 Name = "Scene Context Buttons"
 AnchorPreset = "TopCenter"
-AnchorOffsetTop = -20.0
-AnchorOffsetBottom = -20.0
+AnchorOffsetTop = -10.0
+AnchorOffsetBottom = -10.0
 Margin = 10.0
 Children = [ "10" ]
 

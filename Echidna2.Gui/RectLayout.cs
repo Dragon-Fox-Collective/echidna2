@@ -61,15 +61,15 @@ public class RectLayout : INotificationHook<IUpdate.Notification>, INotification
 		foreach (ICanBeLaidOut child in Hierarchy.Children.OfType<ICanBeLaidOut>())
 		{
 			RectTransform childRect = child.RectTransform;
-			double left = RectTransform.LocalSize.X * (childRect.AnchorLeft - 0.5) + childRect.AnchorOffsetLeft;
-			double right = RectTransform.LocalSize.X * (childRect.AnchorRight - 0.5) + childRect.AnchorOffsetRight;
-			double bottom = RectTransform.LocalSize.Y * (childRect.AnchorBottom - 0.5) + childRect.AnchorOffsetBottom;
-			double top = RectTransform.LocalSize.Y * (childRect.AnchorTop - 0.5) + childRect.AnchorOffsetTop;
-			childRect.LocalSize = new Vector2(Math.Max(right - left, childRect.MinimumSize.X), Math.Max(top - bottom, childRect.MinimumSize.Y));
-			childRect.LocalPosition = new Vector2(left + right, bottom + top) / 2;
+			double left = RectTransform.LocalSize.X * (childRect.AnchorLeft - 0.5) + Math.Min(childRect.AnchorOffsetLeft, childRect.AnchorLeft.Map(0, 1, childRect.AnchorOffsetLeft, childRect.AnchorOffsetRight) - childRect.AnchorLeft * childRect.MinimumSize.X);
+			double right = RectTransform.LocalSize.X * (childRect.AnchorRight - 0.5) + Math.Max(childRect.AnchorOffsetRight, childRect.AnchorRight.Map(0, 1, childRect.AnchorOffsetLeft, childRect.AnchorOffsetRight) + (1 - childRect.AnchorRight) * childRect.MinimumSize.X);
+			double bottom = RectTransform.LocalSize.Y * (childRect.AnchorBottom - 0.5) + Math.Min(childRect.AnchorOffsetBottom, childRect.AnchorBottom.Map(0, 1, childRect.AnchorOffsetBottom, childRect.AnchorOffsetTop) - childRect.AnchorBottom * childRect.MinimumSize.Y);
+			double top = RectTransform.LocalSize.Y * (childRect.AnchorTop - 0.5) + Math.Max(childRect.AnchorOffsetTop, childRect.AnchorTop.Map(0, 1, childRect.AnchorOffsetBottom, childRect.AnchorOffsetTop) + (1 - childRect.AnchorTop) * childRect.MinimumSize.Y);
+			childRect.LocalSize = new Vector2(right - left, top - bottom);
+			childRect.LocalPosition = new Vector2(right + left, top + bottom) / 2;
 			childRect.Depth = RectTransform.Depth + 1;
 			
-			// Console.WriteLine($"{childRect.AnchorPreset} {left} {right} {bottom} {top} {childRect.Size} {childRect.Position} {childRect.Depth}");
+			// Console.WriteLine($"{(child as INamed)?.Name ?? "No name"} {childRect.AnchorPreset} {left} {right} {bottom} {top} {childRect.MinimumSize} {childRect.LocalSize} {childRect.LocalPosition} {childRect.Depth}");
 		}
 	}
 	public virtual void OnPostNotify(IUpdate.Notification notification)
