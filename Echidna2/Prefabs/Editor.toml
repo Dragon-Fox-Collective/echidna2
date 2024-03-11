@@ -34,7 +34,7 @@ AnchorPreset = "Full"
 Prefab = "RectLayoutWithHierarchy.toml"
 Name = "Overlay"
 AnchorPreset = "Full"
-Children = [ "4", "9" ]
+Children = [ "4", "9", "14" ]
 
 [4]
 Prefab = "RectWithHierarchy.toml"
@@ -106,3 +106,44 @@ Prefab = "RectWithHierarchy.toml"
 Name = "Gui View Button"
 MinimumSize = { X = 26.0, Y = 26.0 }
 Color = { R = 0.0, G = 1.0, B = 0.0, A = 1.0 }
+
+[14]
+Prefab = "FullRectWithHierarchy.toml"
+Name = "Side Panel Buttons"
+AnchorPreset = "TopRight"
+AnchorOffsetTop = -10.0
+AnchorOffsetBottom = -10.0
+AnchorOffsetRight = -10.0
+AnchorOffsetLeft = -10.0
+Margin = 10.0
+Children = [ "15" ]
+
+[15]
+Prefab = "VLayoutWithHierarchy.toml"
+Name = "Side Panel Buttons Layout"
+Spacing = 10.0
+Children = [ "16", "17", "18", "19" ]
+
+[16]
+Prefab = "RectWithHierarchy.toml"
+Name = "Object Panel Button"
+MinimumSize = { X = 26.0, Y = 26.0 }
+Color = { R = 1.0, G = 0.0, B = 0.0, A = 1.0 }
+
+[17]
+Prefab = "RectWithHierarchy.toml"
+Name = "Component Panel Button"
+MinimumSize = { X = 26.0, Y = 26.0 }
+Color = { R = 0.0, G = 0.0, B = 1.0, A = 1.0 }
+
+[18]
+Prefab = "RectWithHierarchy.toml"
+Name = "Material Panel Button"
+MinimumSize = { X = 26.0, Y = 26.0 }
+Color = { R = 0.0, G = 1.0, B = 0.0, A = 1.0 }
+
+[19]
+Prefab = "RectWithHierarchy.toml"
+Name = "State Machine Panel Button"
+MinimumSize = { X = 26.0, Y = 26.0 }
+Color = { R = 1.0, G = 0.0, B = 1.0, A = 1.0 }
