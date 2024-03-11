@@ -61,10 +61,10 @@ public class RectLayout : INotificationHook<IUpdate.Notification>, INotification
 		foreach (ICanBeLaidOut child in Hierarchy.Children.OfType<ICanBeLaidOut>())
 		{
 			RectTransform childRect = child.RectTransform;
-			double left = RectTransform.LocalSize.X * (childRect.AnchorLeft - 0.5) + Math.Min(childRect.AnchorOffsetLeft, childRect.AnchorLeft.Map(0, 1, childRect.AnchorOffsetLeft, childRect.AnchorOffsetRight) - childRect.AnchorLeft * childRect.MinimumSize.X);
-			double right = RectTransform.LocalSize.X * (childRect.AnchorRight - 0.5) + Math.Max(childRect.AnchorOffsetRight, childRect.AnchorRight.Map(0, 1, childRect.AnchorOffsetLeft, childRect.AnchorOffsetRight) + (1 - childRect.AnchorRight) * childRect.MinimumSize.X);
-			double bottom = RectTransform.LocalSize.Y * (childRect.AnchorBottom - 0.5) + Math.Min(childRect.AnchorOffsetBottom, childRect.AnchorBottom.Map(0, 1, childRect.AnchorOffsetBottom, childRect.AnchorOffsetTop) - childRect.AnchorBottom * childRect.MinimumSize.Y);
-			double top = RectTransform.LocalSize.Y * (childRect.AnchorTop - 0.5) + Math.Max(childRect.AnchorOffsetTop, childRect.AnchorTop.Map(0, 1, childRect.AnchorOffsetBottom, childRect.AnchorOffsetTop) + (1 - childRect.AnchorTop) * childRect.MinimumSize.Y);
+			double left = RectTransform.LocalSize.X * (childRect.AnchorLeft - 0.5) + Math.Min(childRect.AnchorOffsetLeft, childRect.AnchorLeft.Lerp(childRect.AnchorOffsetLeft, childRect.AnchorOffsetRight) - childRect.AnchorLeft * childRect.MinimumSize.X);
+			double right = RectTransform.LocalSize.X * (childRect.AnchorRight - 0.5) + Math.Max(childRect.AnchorOffsetRight, childRect.AnchorRight.Lerp(childRect.AnchorOffsetLeft, childRect.AnchorOffsetRight) + (1 - childRect.AnchorRight) * childRect.MinimumSize.X);
+			double bottom = RectTransform.LocalSize.Y * (childRect.AnchorBottom - 0.5) + Math.Min(childRect.AnchorOffsetBottom, childRect.AnchorBottom.Lerp(childRect.AnchorOffsetBottom, childRect.AnchorOffsetTop) - childRect.AnchorBottom * childRect.MinimumSize.Y);
+			double top = RectTransform.LocalSize.Y * (childRect.AnchorTop - 0.5) + Math.Max(childRect.AnchorOffsetTop, childRect.AnchorTop.Lerp(childRect.AnchorOffsetBottom, childRect.AnchorOffsetTop) + (1 - childRect.AnchorTop) * childRect.MinimumSize.Y);
 			childRect.LocalSize = new Vector2(right - left, top - bottom);
 			childRect.LocalPosition = new Vector2(right + left, top + bottom) / 2;
 			childRect.Depth = RectTransform.Depth + 1;
