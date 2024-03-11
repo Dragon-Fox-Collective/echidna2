@@ -133,7 +133,7 @@ ScriptContent = """
 [SerializedReference] public IVisible? ObjectPanel;
 """
 ObjectPanel = "20"
-OnClicked = "ObjectPanel?.ToggleVisibility()"
+Clicked = "ObjectPanel?.ToggleVisibility()"
 
 [17]
 Prefab = "ButtonRect.toml"

@@ -219,3 +219,6 @@ public class SerializedValueAttribute : Attribute;
 
 [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
 public class SerializedReferenceAttribute : Attribute;
+
+[AttributeUsage(AttributeTargets.Event)]
+public class SerializedEventAttribute : Attribute;

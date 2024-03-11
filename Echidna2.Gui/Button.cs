@@ -7,7 +7,7 @@ namespace Echidna2.Gui;
 
 public class Button : IMouseDown, IMouseUp, IMouseMoved
 {
-	public event Action? Clicked;
+	[SerializedEvent] public event Action? Clicked;
 	public event Action? Dragged;
 	public event Action? MouseDown;
 	public event Action? MouseUp;

@@ -6,6 +6,12 @@ namespace Echidna2.Serialization;
 
 public class Compilation
 {
+	public static void RecreateDirectory()
+	{
+		Directory.Delete($"{AppContext.BaseDirectory}/.echidna", true);
+		Directory.CreateDirectory($"{AppContext.BaseDirectory}/.echidna");
+	}
+	
 	public static void CreateCSProj()
 	{
 		string csprojString = @"
@@ -19,6 +25,7 @@ public class Compilation
     </PropertyGroup>
 
     <ItemGroup>
+	    <Reference Include=""Echidna2""><HintPath>..\Echidna2.dll</HintPath></Reference>
 	    <Reference Include=""Echidna2.Rendering""><HintPath>..\Echidna2.Rendering.dll</HintPath></Reference>
 	    <Reference Include=""Echidna2.Serialization""><HintPath>..\Echidna2.Serialization.dll</HintPath></Reference>
     </ItemGroup>
@@ -37,13 +44,16 @@ public class Compilation
 			if (!valueTable.TryGetValue("ScriptContent", out object scriptContent))
 				continue;
 			
+			string baseType = GetComponentBaseType(prefabPath, id, valueTable);
+			
 			string className = $"{Path.GetFileNameWithoutExtension(prefabPath)}_{id}";
 			
 			string scriptString = "";
+			scriptString += "using Echidna2;\n";
 			scriptString += "using Echidna2.Rendering;\n";
 			scriptString += "using Echidna2.Serialization;\n";
 			scriptString += "\n";
-			scriptString += $"public class {className}\n";
+			scriptString += $"public class {className} : {baseType}\n";
 			scriptString += "{\n";
 			scriptString += scriptContent;
 			scriptString += "}\n";
@@ -82,11 +92,31 @@ public class Compilation
 		Console.WriteLine(process.StandardError.ReadToEnd());
 	}
 	
+	public static string GetComponentBaseType(string prefabPath, string id, TomlTable componentTable)
+	{
+		string className = $"{Path.GetFileNameWithoutExtension(prefabPath)}_{id}";
+		if (File.Exists(className))
+			return className;
+		
+		if (componentTable.TryGetValue("Prefab", out object basePrefab))
+		{
+			string basePrefabPath = $"{Path.GetDirectoryName(prefabPath)}/{(string)basePrefab}";
+			(string baseId, object baseComponentTable) = Toml.ToModel(File.ReadAllText(prefabPath)).First();
+			return GetComponentBaseType(basePrefabPath, baseId, (TomlTable)baseComponentTable);
+		}
+		
+		if (!componentTable.TryGetValue("Component", out object typeName))
+			throw new InvalidOperationException($"Component table {id} of {prefabPath} does not contain a Component key or Prefab key");
+		
+		return ((string)typeName).Split(",")[0];
+	}
+	
 	public static void CompileCSProj(string prefabPath)
 	{
-		Directory.CreateDirectory($"{AppContext.BaseDirectory}/.echidna");
+		RecreateDirectory();
 		CreateCSProj();
 		CreateCSFiles(prefabPath);
 		CompileCSProj();
+		// https://stackoverflow.com/questions/6258160/unloading-the-assembly-loaded-with-assembly-loadfrom
 	}
 }
