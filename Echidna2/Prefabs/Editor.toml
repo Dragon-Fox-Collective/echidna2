@@ -34,7 +34,7 @@ AnchorPreset = "Full"
 Prefab = "RectLayoutWithHierarchy.toml"
 Name = "Overlay"
 AnchorPreset = "Full"
-Children = [ "4" ]
+Children = [ "4", "9" ]
 
 [4]
 Prefab = "RectWithHierarchy.toml"
@@ -48,3 +48,55 @@ Prefab = "FullRectWithHierarchy.toml"
 Name = "Play Buttons"
 AnchorPreset = "TopCenter"
 Margin = 10.0
+Children = [ "6" ]
+
+[6]
+Prefab = "HLayoutWithHierarchy.toml"
+Name = "Play Buttons Layout"
+Spacing = 10.0
+Children = [ "7", "8" ]
+
+[7]
+Prefab = "RectWithHierarchy.toml"
+Name = "Play Button"
+MinimumSize = { X = 26.0, Y = 26.0 }
+Color = { R = 0.0, G = 1.0, B = 0.0, A = 1.0 }
+
+[8]
+Prefab = "RectWithHierarchy.toml"
+Name = "Stop Button"
+MinimumSize = { X = 26.0, Y = 26.0 }
+Color = { R = 1.0, G = 0.0, B = 0.0, A = 1.0 }
+
+[9]
+Prefab = "FullRectWithHierarchy.toml"
+Name = "Scene Context Buttons"
+AnchorPreset = "TopCenter"
+AnchorOffsetTop = -20.0
+AnchorOffsetBottom = -20.0
+Margin = 10.0
+Children = [ "10" ]
+
+[10]
+Prefab = "HLayoutWithHierarchy.toml"
+Name = "Scene Context Buttons Layout"
+Spacing = 10.0
+Children = [ "11", "12", "13" ]
+
+[11]
+Prefab = "RectWithHierarchy.toml"
+Name = "3D View Button"
+MinimumSize = { X = 26.0, Y = 26.0 }
+Color = { R = 1.0, G = 0.0, B = 0.0, A = 1.0 }
+
+[12]
+Prefab = "RectWithHierarchy.toml"
+Name = "2D View Button"
+MinimumSize = { X = 26.0, Y = 26.0 }
+Color = { R = 0.0, G = 0.0, B = 1.0, A = 1.0 }
+
+[13]
+Prefab = "RectWithHierarchy.toml"
+Name = "Gui View Button"
+MinimumSize = { X = 26.0, Y = 26.0 }
+Color = { R = 0.0, G = 1.0, B = 0.0, A = 1.0 }

@@ -111,10 +111,10 @@ public class RectTransform
 	
 	[SerializedValue] public LayoutSizing HorizontalSizing { get; set; }
 	[SerializedValue] public bool HorizontalExpand { get; set; }
-	[SerializedValue] public double HorizontalExpandFactor { get; set; } = 1;
+	[SerializedValue] public double HorizontalExpandWeight { get; set; } = 1;
 	[SerializedValue] public LayoutSizing VerticalSizing { get; set; }
 	[SerializedValue] public bool VerticalExpand { get; set; }
-	[SerializedValue] public double VerticalExpandFactor { get; set; } = 1;
+	[SerializedValue] public double VerticalExpandWeight { get; set; } = 1;
 	
 	[SerializedValue] public bool IsGlobal { get; set; } = false;
 	

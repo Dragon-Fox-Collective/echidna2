@@ -5,6 +5,8 @@ namespace Echidna2.Gui;
 
 public class HorizontalLayout : RectLayout
 {
+	[SerializedValue] public double Spacing = 0;
+	
 	[SerializedValue] public HorizontalLayoutDirection LayoutDirection = HorizontalLayoutDirection.LeftToRight;
 	
 	public override void OnPreNotify(IUpdate.Notification notification)
@@ -27,13 +29,13 @@ public class HorizontalLayout : RectLayout
 		
 		if (laidOutChildren.Count != 0)
 			RectTransform.MinimumSize = (
-				laidOutChildren.Sum(child => child.MinimumSize.X),
+				laidOutChildren.Sum(child => child.MinimumSize.X) + Spacing * (laidOutChildren.Count - 1),
 				laidOutChildren.Max(child => child.MinimumSize.Y));
 		else
 			RectTransform.MinimumSize = (0, 0);
 		
-		double remainingWidth = RectTransform.LocalSize.X - RectTransform.MinimumSize.X;
-		double totalExpand = laidOutChildren.Where(child => child.HorizontalExpand).Sum(child => child.HorizontalExpandFactor);
+		double totalExpandWidth = RectTransform.LocalSize.X - RectTransform.MinimumSize.X;
+		double totalExpandWeight = laidOutChildren.Where(child => child.HorizontalExpand).Sum(child => child.HorizontalExpandWeight);
 		
 		double directionModifier = LayoutDirection switch
 		{
@@ -45,15 +47,15 @@ public class HorizontalLayout : RectLayout
 		foreach (RectTransform child in laidOutChildren)
 		{
 			double minimumWidth = child.MinimumSize.X;
-			double extraWidth = 0;
-			if (child.HorizontalExpand && totalExpand > 0)
-				extraWidth += remainingWidth * child.HorizontalExpandFactor / totalExpand;
+			double expandWidth = 0;
+			if (child.HorizontalExpand && totalExpandWeight > 0)
+				expandWidth += totalExpandWidth * child.HorizontalExpandWeight / totalExpandWeight;
 			child.LocalPosition = (
 				x + directionModifier * child.HorizontalSizing switch {
-					LayoutSizing.Stretch => minimumWidth / 2 + extraWidth / 2,
+					LayoutSizing.Stretch => minimumWidth / 2 + expandWidth / 2,
 					LayoutSizing.FitBegin => minimumWidth / 2,
-					LayoutSizing.FitCenter => minimumWidth / 2 + extraWidth / 2,
-					LayoutSizing.FitEnd => minimumWidth / 2 + extraWidth,
+					LayoutSizing.FitCenter => minimumWidth / 2 + expandWidth / 2,
+					LayoutSizing.FitEnd => minimumWidth / 2 + expandWidth,
 					_ => throw new IndexOutOfRangeException()
 				},
 				child.VerticalSizing switch {
@@ -64,8 +66,8 @@ public class HorizontalLayout : RectLayout
 					_ => throw new IndexOutOfRangeException()
 				});
 			if (child.HorizontalSizing == LayoutSizing.Stretch)
-				child.LocalSize = (minimumWidth + extraWidth, child.LocalSize.Y);
-			x += directionModifier * (minimumWidth + extraWidth);
+				child.LocalSize = (minimumWidth + expandWidth, child.LocalSize.Y);
+			x += directionModifier * (minimumWidth + expandWidth + Spacing);
 		}
 	}
 }
