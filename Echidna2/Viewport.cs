@@ -14,7 +14,7 @@ public interface Viewport
 }
 
 [SerializeExposedMembers, Prefab("Prefabs/ViewportGui.toml")]
-public partial class ViewportGui : Viewport, INotificationPropagator, ICanBeLaidOut, INamed, IHasChildren, ICanAddChildren, INotificationListener<IDraw.Notification>, IUpdate
+public partial class ViewportGui : Viewport, ICanBeLaidOut, INotificationListener<IDraw.Notification>, IUpdate
 {
 	[SerializedReference, ExposeMembersInClass] public Named Named { get; set; } = null!;
 	[SerializedReference, ExposeMembersInClass] public RectTransform RectTransform { get; set; } = null!;
@@ -51,7 +51,7 @@ public partial class ViewportGui : Viewport, INotificationPropagator, ICanBeLaid
 }
 
 [SerializeExposedMembers, Prefab("Prefabs/Viewport3D.toml")]
-public partial class Viewport3D : Viewport, INotificationPropagator, ICanBeLaidOut, INamed, IHasChildren, ICanAddChildren, INotificationListener<IDraw.Notification>, IUpdate
+public partial class Viewport3D : Viewport, ICanBeLaidOut, INotificationListener<IDraw.Notification>, IUpdate
 {
 	[SerializedReference, ExposeMembersInClass] public Named Named { get; set; } = null!;
 	[SerializedReference, ExposeMembersInClass] public RectTransform RectTransform { get; set; } = null!;

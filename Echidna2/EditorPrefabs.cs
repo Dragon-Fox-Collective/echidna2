@@ -9,7 +9,7 @@ using OpenTK.Windowing.GraphicsLibraryFramework;
 namespace Echidna2;
 
 [SerializeExposedMembers, Prefab("Prefabs/HierarchyDisplay.toml")]
-public partial class HierarchyDisplay : INotificationPropagator, ICanBeLaidOut, INamed, IInitialize
+public partial class HierarchyDisplay : INotificationPropagator, ICanBeLaidOut, IInitialize
 {
 	[SerializedReference, ExposeMembersInClass] public Named Named { get; set; } = null!;
 	[SerializedReference, ExposeMembersInClass] public RectTransform RectTransform { get; set; } = null!;
@@ -60,7 +60,7 @@ public partial class HierarchyDisplay : INotificationPropagator, ICanBeLaidOut, 
 }
 
 [SerializeExposedMembers, Prefab("Prefabs/Cube.toml")]
-public partial class Cube : INotificationPropagator, INamed, IHasChildren, ICanAddChildren
+public partial class Cube
 {
 	[SerializedReference, ExposeMembersInClass] public Named Named { get; set; } = null!;
 	[SerializedReference, ExposeMembersInClass] public Transform3D Transform { get; set; } = null!;
@@ -74,7 +74,7 @@ public partial class Cube : INotificationPropagator, INamed, IHasChildren, ICanA
 }
 
 [SerializeExposedMembers, Prefab("Prefabs/Editor.toml")]
-public partial class Editor : INotificationPropagator, ICanBeLaidOut, INamed, IHasChildren, ICanAddChildren
+public partial class Editor : ICanBeLaidOut
 {
 	[SerializedReference, ExposeMembersInClass] public Named Named { get; set; } = null!;
 	[SerializedReference, ExposeMembersInClass] public RectTransform RectTransform { get; set; } = null!;
@@ -90,7 +90,7 @@ public partial class Editor : INotificationPropagator, ICanBeLaidOut, INamed, IH
 }
 
 [SerializeExposedMembers, Prefab("Prefabs/EditorViewportGui.toml")]
-public partial class EditorViewportGui : Viewport, INotificationPropagator, ICanBeLaidOut, INamed, IMouseDown, IMouseMoved, IMouseUp, IMouseWheelScrolled
+public partial class EditorViewportGui : INotificationPropagator, INamed, IMouseDown, IMouseMoved, IMouseUp, IMouseWheelScrolled
 {
 	[SerializedReference, ExposeMembersInClass] public ViewportGui Viewport { get; set; } = null!;
 	
@@ -137,7 +137,7 @@ public partial class EditorViewportGui : Viewport, INotificationPropagator, ICan
 }
 
 [SerializeExposedMembers, Prefab("Prefabs/EditorViewport3D.toml")]
-public partial class EditorViewport3D : Viewport, INotificationPropagator, ICanBeLaidOut, INamed, IUpdate, IMouseDown, IMouseMoved, IMouseUp, IMouseWheelScrolled, IKeyDown, IKeyUp
+public partial class EditorViewport3D : INotificationPropagator, INamed, IMouseDown, IMouseMoved, IMouseUp, IMouseWheelScrolled, IKeyDown, IKeyUp
 {
 	[SerializedReference, ExposeMembersInClass] public Viewport3D Viewport { get; set; } = null!;
 	[SerializedReference] public Transform3D CameraPivot { get; set; } = null!;
