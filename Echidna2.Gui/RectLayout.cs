@@ -33,6 +33,7 @@ public class RectLayout : INotificationHook<IUpdate.Notification>, INotification
 			}
 		}
 	}
+	public IEnumerable<ICanBeLaidOut> ChildrenThatCanBeLaidOut => Hierarchy.Children.OfType<ICanBeLaidOut>().Where(child => child is not IVisible visible || visible.IsVisible);
 	
 	public void AddLayoutChild(object child)
 	{
@@ -58,7 +59,7 @@ public class RectLayout : INotificationHook<IUpdate.Notification>, INotification
 	
 	public virtual void OnPreNotify(IUpdate.Notification notification)
 	{
-		foreach (ICanBeLaidOut child in Hierarchy.Children.OfType<ICanBeLaidOut>())
+		foreach (ICanBeLaidOut child in ChildrenThatCanBeLaidOut)
 		{
 			RectTransform childRect = child.RectTransform;
 			double left = RectTransform.LocalSize.X * (childRect.AnchorLeft - 0.5) + Math.Min(childRect.AnchorOffsetLeft, childRect.AnchorLeft.Lerp(childRect.AnchorOffsetLeft, childRect.AnchorOffsetRight) - childRect.AnchorLeft * childRect.MinimumSize.X);

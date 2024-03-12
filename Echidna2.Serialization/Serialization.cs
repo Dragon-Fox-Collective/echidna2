@@ -13,9 +13,11 @@ public interface ITomlSerializable
 
 public static class TomlSerializer
 {
+	public static Assembly ProjectAssembly = null!;
+	
 	// TODO: Make this not a horrible maze
 	// TODO: Make the serialization for external classes automatic instead of calling static methods manually
-	public static T Deserialize<T>(string path) where T : class
+	public static T Deserialize<T>(string path, string? overridenTypeName = null) where T : class
 	{
 		Dictionary<string, object> references = new();
 		
@@ -27,13 +29,19 @@ public static class TomlSerializer
 		{
 			TomlTable componentTable = (TomlTable)value;
 			
+			string? scriptName = doneFirstObject ? null : overridenTypeName;
+			if (componentTable.Remove("ScriptContent", out object? _) && overridenTypeName == null)
+				scriptName = $"{Path.GetFileNameWithoutExtension(path)}_{id}";
+			
 			object component;
 			if (componentTable.Remove("Component", out object? typeName))
-				component = DeserializeComponent(id, componentTable, (string)typeName);
+				component = DeserializeComponent(id, componentTable, scriptName ?? (string)typeName, scriptName != null);
 			else if (componentTable.Remove("Prefab", out object? prefabPath))
-				component = DeserializePrefab(id, componentTable, $"{Path.GetDirectoryName(path)}/{(string)prefabPath}");
+				component = DeserializePrefab(id, componentTable, $"{Path.GetDirectoryName(path)}/{(string)prefabPath}", scriptName);
 			else
 				throw new InvalidOperationException("Component table does not contain a Component or Prefab key");
+			
+			RemoveEvents(component, componentTable);
 			
 			references.Add(id, component);
 			
@@ -51,9 +59,9 @@ public static class TomlSerializer
 		return returnValue;
 	}
 	
-	private static object DeserializeComponent(string id, TomlTable componentTable, string typeName)
+	private static object DeserializeComponent(string id, TomlTable componentTable, string typeName, bool useProjectAssembly)
 	{
-		Type? type = Type.GetType(typeName);
+		Type? type = useProjectAssembly ? ProjectAssembly.GetType(typeName) : Type.GetType(typeName);
 		if (type == null)
 			throw new InvalidOperationException($"Type {typeName} of id {id} does not exist");
 		
@@ -68,9 +76,9 @@ public static class TomlSerializer
 		return component;
 	}
 	
-	private static object DeserializePrefab(string id, TomlTable componentTable, string prefabPath)
+	private static object DeserializePrefab(string id, TomlTable componentTable, string prefabPath, string? overridenTypeName = null)
 	{
-		object prefab = Deserialize<object>(prefabPath);
+		object prefab = Deserialize<object>(prefabPath, overridenTypeName);
 		return DeserializeValue(id, prefab, componentTable);
 	}
 	
@@ -211,6 +219,21 @@ public static class TomlSerializer
 		
 		if (componentTable.Count != 0)
 			Console.WriteLine($"WARN: Unused table {id} {componentTable.ToDelimString()} of prefab leftover");
+	}
+	
+	public static void RemoveEvents<T>(T component, TomlTable componentTable) where T : notnull
+	{
+		List<string> usedValues = [];
+		
+		EventInfo[] members = component.GetType().GetEvents(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
+			.Where(member => member.GetCustomAttribute<SerializedEventAttribute>() != null)
+			.Where(member => componentTable.ContainsKey(member.Name))
+			.ToArray();
+		
+		usedValues.AddRange(members.Select(member => member.Name));
+		
+		foreach (string usedValue in usedValues)
+			componentTable.Remove(usedValue);
 	}
 }
 

@@ -11,7 +11,7 @@ public class VerticalLayout : RectLayout
 	
 	public override void OnPreNotify(IUpdate.Notification notification)
 	{
-		List<RectTransform> laidOutChildren = Hierarchy.Children.OfType<ICanBeLaidOut>().Select(child => child.RectTransform).ToList();
+		List<RectTransform> laidOutChildren = ChildrenThatCanBeLaidOut.Select(child => child.RectTransform).ToList();
 		
 		foreach (RectTransform child in laidOutChildren)
 		{

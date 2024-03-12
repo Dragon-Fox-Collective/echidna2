@@ -47,16 +47,18 @@ public class ExposeMembersInClassPropertySourceGenerator : IIncrementalGenerator
 	private static string GenerateCode(IPropertySymbol symbol)//, PropertyDeclarationSyntax node)
 	{
 		INamedTypeSymbol classType = symbol.ContainingType;
+		INamedTypeSymbol prefabType = (INamedTypeSymbol)symbol.Type;
 		string propertyName = symbol.Name;
+		INamedTypeSymbol[] interfaces = prefabType.AllInterfaces.ToArray();//.Where(@interface => @interface.GetMembers().All(member => member is IFieldSymbol or IPropertySymbol)).ToArray();
 		
 		string source = "#nullable enable\n";
 		if (!classType.ContainingNamespace.IsGlobalNamespace)
 			source += $"namespace {symbol.ContainingNamespace};\n";
 		source += "\n";
-		source += $"partial class {classType.Name}\n";
+		source += $"partial class {classType.Name}{(interfaces.Length != 0 ? " : " + string.Join<INamedTypeSymbol>(", ", interfaces) : "")}\n";
 		source += "{\n";
 		
-		foreach (ISymbol member in GetAllUnimplementedMembersExposeRecursive(classType, (INamedTypeSymbol)symbol.Type))
+		foreach (ISymbol member in GetAllUnimplementedMembersExposeRecursive(classType, prefabType))
 			source += ComponentSourceGenerator.GetMemberDeclaration(member, propertyName);
 		
 		source += "}";

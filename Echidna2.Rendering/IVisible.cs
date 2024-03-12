@@ -2,8 +2,12 @@
 
 public interface IVisible
 {
-	public void ToggleVisibility();
 	public bool IsVisible { get; set; }
-	public void Show();
-	public void Hide();
+}
+
+public static class IVisibleExtensions
+{
+	public static void ToggleVisibility(this IVisible visible) => visible.IsVisible = !visible.IsVisible;
+	public static void Show(this IVisible visible) => visible.IsVisible = true;
+	public static void Hide(this IVisible visible) => visible.IsVisible = false;
 }

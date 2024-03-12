@@ -8,9 +8,9 @@ namespace Echidna2.Serialization;
 
 public class Compilation
 {
-	private static string CompilationFolder => $"{AppContext.BaseDirectory}/.echidna";
-	private static string CompilationBinFolder => $"{CompilationFolder}/bin/Debug/net8.0";
-	private static string CompilationDllPath => $"{CompilationBinFolder}/EchidnaProject.dll";
+	public static string CompilationFolder => $"{AppContext.BaseDirectory}/.echidna";
+	public static string CompilationBinFolder => $"{CompilationFolder}/bin/Debug/net8.0";
+	public static string CompilationDllPath => $"{CompilationBinFolder}/EchidnaProject.dll";
 	
 	public static void CompileCSProj(string prefabPath)
 	{
@@ -18,7 +18,7 @@ public class Compilation
 		CreateCSProj();
 		CreateCSFiles(prefabPath);
 		CompileCSProj();
-		Dictionary<string, Dictionary<string, string>> serializedEvents = GetSerializedEvents(prefabPath);
+		Dictionary<string, (bool, Dictionary<string, string>)> serializedEvents = GetSerializedEvents(prefabPath);
 		CreateCSFiles(prefabPath, serializedEvents);
 		CompileCSProj();
 	}
@@ -49,6 +49,8 @@ public class Compilation
 
     <ItemGroup>
 	    <Reference Include=""Echidna2""><HintPath>..\Echidna2.dll</HintPath></Reference>
+	    <Reference Include=""Echidna2.Core""><HintPath>..\Echidna2.Core.dll</HintPath></Reference>
+	    <Reference Include=""Echidna2.Gui""><HintPath>..\Echidna2.Gui.dll</HintPath></Reference>
 	    <Reference Include=""Echidna2.Rendering""><HintPath>..\Echidna2.Rendering.dll</HintPath></Reference>
 	    <Reference Include=""Echidna2.Serialization""><HintPath>..\Echidna2.Serialization.dll</HintPath></Reference>
     </ItemGroup>
@@ -58,7 +60,7 @@ public class Compilation
 		File.WriteAllText($"{CompilationFolder}/EchidnaProject.csproj", csprojString);
 	}
 	
-	public static void CreateCSFiles(string prefabPath, Dictionary<string, Dictionary<string, string>>? serializedEvents = null)
+	public static void CreateCSFiles(string prefabPath, Dictionary<string, (bool, Dictionary<string, string>)>? serializedEvents = null)
 	{
 		TomlTable table = Toml.ToModel(File.ReadAllText(prefabPath));
 		foreach ((string id, object value) in table)
@@ -68,24 +70,29 @@ public class Compilation
 				continue;
 			
 			string baseType = GetComponentBaseTypeName(prefabPath, id, valueTable);
-			
 			string className = $"{Path.GetFileNameWithoutExtension(prefabPath)}_{id}";
+			(bool baseTypeIsIInitialize, Dictionary<string, string>? events) = serializedEvents?.GetValueOrDefault(id) ?? (false, null)!;
+			bool shouldAddInitialize = events != null!;
 			
 			string scriptString = "";
 			scriptString += "using Echidna2;\n";
+			scriptString += "using Echidna2.Core;\n";
+			scriptString += "using Echidna2.Gui;\n";
 			scriptString += "using Echidna2.Rendering;\n";
 			scriptString += "using Echidna2.Serialization;\n";
 			scriptString += "\n";
-			scriptString += $"public class {className} : {baseType}\n";
+			scriptString += $"public class {className} : {baseType}{(shouldAddInitialize && !baseTypeIsIInitialize ? ", IInitialize" : "")}\n";
 			scriptString += "{\n";
 			
 			scriptString += "\t" + ((string)scriptContent).Split("\n").Join("\n\t").Trim() + "\n";
 			
-			if (serializedEvents != null && serializedEvents.TryGetValue(id, out Dictionary<string, string>? events))
+			if (shouldAddInitialize)
 			{
 				scriptString += "\n";
-				scriptString += $"\tpublic {className}() : base() {{\n";
-				foreach ((string eventName, string eventContent) in events)
+				scriptString += $"\tpublic {(baseTypeIsIInitialize ? "override " : "")}void OnInitialize() {{\n";
+				if (baseTypeIsIInitialize)
+					scriptString += "\t\tbase.OnInitialize();\n";
+				foreach ((string eventName, string eventContent) in events!)
 					scriptString += $"\t\t{eventName} += () => {{ {eventContent} }};\n";
 				scriptString += "\t}\n";
 			}
@@ -164,7 +171,7 @@ public class Compilation
 		return Type.GetType((string)typeName) ?? throw new NullReferenceException($"Type {(string)typeName} does not exist");
 	}
 	
-	public static Dictionary<string, Dictionary<string, string>> GetSerializedEvents(string prefabPath)
+	public static Dictionary<string, (bool baseTypeIsIInitialize, Dictionary<string, string> events)> GetSerializedEvents(string prefabPath)
 	{
 		AssemblyLoadContext assemblyLoadContext = new("EchidnaProject", true);
 		// AssemblyName assemblyName = new("EchidnaProject");
@@ -173,17 +180,18 @@ public class Compilation
 		Assembly assembly = assemblyLoadContext.LoadFromStream(fileStream);
 		
 		TomlTable table = Toml.ToModel(File.ReadAllText(prefabPath));
-		Dictionary<string, Dictionary<string, string>> serializedEvents = new();
+		Dictionary<string, (bool baseTypeIsIInitialize, Dictionary<string, string> events)> serializedEvents = new();
 		foreach ((string id, object value) in table)
 		{
 			TomlTable valueTable = (TomlTable)value;
-			Dictionary<string, string> events = GetComponentBaseType(prefabPath, id, valueTable, assembly)
+			Type baseType = GetComponentBaseType(prefabPath, id, valueTable, assembly);
+			Dictionary<string, string> events = baseType
 				.GetEvents()
 				.Where(@event => @event.GetCustomAttributes<SerializedEventAttribute>().Any())
 				.Where(@event => valueTable.ContainsKey(@event.Name))
 				.ToDictionary(@event => @event.Name, @event => (string)valueTable[@event.Name]);
 			if (events.Count != 0)
-				serializedEvents.Add(id, events);
+				serializedEvents.Add(id, (baseType.GetInterface("IInitialize") != null, events));
 		}
 		
 		assemblyLoadContext.Unload();

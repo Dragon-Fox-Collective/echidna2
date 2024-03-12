@@ -1,4 +1,5 @@
-﻿using Echidna2;
+﻿using System.Runtime.Loader;
+using Echidna2;
 using Echidna2.Core;
 using Echidna2.Gui;
 using Echidna2.Rendering;
@@ -8,6 +9,9 @@ using OpenTK.Windowing.Desktop;
 Console.WriteLine("Hello, World!");
 Compilation.CompileCSProj("Prefabs/Editor.toml");
 
+AssemblyLoadContext projectAssemblyLoadContext = new("EchidnaProject");
+using FileStream proejctAssemblyFileStream = new(Compilation.CompilationDllPath, FileMode.Open, FileAccess.Read);
+TomlSerializer.ProjectAssembly = projectAssemblyLoadContext.LoadFromStream(proejctAssemblyFileStream);
 
 
 Editor root = TomlSerializer.Deserialize<Editor>($"{AppContext.BaseDirectory}/Prefabs/Editor.toml");

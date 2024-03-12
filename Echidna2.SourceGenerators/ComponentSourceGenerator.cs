@@ -77,8 +77,18 @@ public class ComponentSourceGenerator : IIncrementalGenerator
 		return source;
 	}
 	
+	public static IEnumerable<ISymbol> GetAllPublicInstanceMembers(INamedTypeSymbol type)
+	{
+		foreach (ISymbol member in type.GetMembers().Where(member => member is { IsOverride: false, IsStatic: false, DeclaredAccessibility: Accessibility.Public }))
+			yield return member;
+		
+		if (type.BaseType is not null && type.BaseType.SpecialType != SpecialType.System_Object)
+			foreach (ISymbol member in GetAllPublicInstanceMembers(type.BaseType))
+				yield return member;
+	}
+	
 	public static IEnumerable<ISymbol> GetAllUnimplementedMembers(INamedTypeSymbol classType, INamedTypeSymbol interfaceType) =>
-		interfaceType.GetMembers().Where(member => member.DeclaredAccessibility == Accessibility.Public && !member.IsStatic && !member.Name.StartsWith("get_") && !member.Name.StartsWith("set_") && !member.Name.StartsWith("add_") && !member.Name.StartsWith("remove_") && member.Name != "Serialize" && member.Name != "DeserializeValue" && member.Name != "DeserializeReference" && !classType.GetMembers(member.Name).Any());
+		GetAllPublicInstanceMembers(interfaceType).Where(member => !member.Name.StartsWith("get_") && !member.Name.StartsWith("set_") && !member.Name.StartsWith("add_") && !member.Name.StartsWith("remove_") && member.Name != "Serialize" && member.Name != "DeserializeValue" && member.Name != "DeserializeReference" && !classType.GetMembers(member.Name).Any());
 	
 	private static IEnumerable<ISymbol> GetAllUnimplementedInterfaceMembers(INamedTypeSymbol classType, INamedTypeSymbol interfaceType) =>
 		interfaceType.AllInterfaces.Append(interfaceType).SelectMany(inter => GetAllUnimplementedMembers(classType, inter));
