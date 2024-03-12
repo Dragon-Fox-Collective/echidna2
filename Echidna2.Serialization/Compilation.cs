@@ -18,7 +18,9 @@ public class Compilation
 		CreateCSProj();
 		CreateCSFiles(prefabPath);
 		CompileCSProj();
-		
+		Dictionary<string, Dictionary<string, string>> serializedEvents = GetSerializedEvents(prefabPath);
+		CreateCSFiles(prefabPath, serializedEvents);
+		CompileCSProj();
 	}
 	
 	public static void RecreateDirectory()
@@ -56,7 +58,7 @@ public class Compilation
 		File.WriteAllText($"{CompilationFolder}/EchidnaProject.csproj", csprojString);
 	}
 	
-	public static void CreateCSFiles(string prefabPath)
+	public static void CreateCSFiles(string prefabPath, Dictionary<string, Dictionary<string, string>>? serializedEvents = null)
 	{
 		TomlTable table = Toml.ToModel(File.ReadAllText(prefabPath));
 		foreach ((string id, object value) in table)
@@ -65,7 +67,7 @@ public class Compilation
 			if (!valueTable.TryGetValue("ScriptContent", out object scriptContent))
 				continue;
 			
-			string baseType = GetComponentBaseType(prefabPath, id, valueTable);
+			string baseType = GetComponentBaseTypeName(prefabPath, id, valueTable);
 			
 			string className = $"{Path.GetFileNameWithoutExtension(prefabPath)}_{id}";
 			
@@ -76,7 +78,18 @@ public class Compilation
 			scriptString += "\n";
 			scriptString += $"public class {className} : {baseType}\n";
 			scriptString += "{\n";
-			scriptString += scriptContent;
+			
+			scriptString += "\t" + ((string)scriptContent).Split("\n").Join("\n\t").Trim() + "\n";
+			
+			if (serializedEvents != null && serializedEvents.TryGetValue(id, out Dictionary<string, string>? events))
+			{
+				scriptString += "\n";
+				scriptString += $"\tpublic {className}() : base() {{\n";
+				foreach ((string eventName, string eventContent) in events)
+					scriptString += $"\t\t{eventName} += () => {{ {eventContent} }};\n";
+				scriptString += "\t}\n";
+			}
+			
 			scriptString += "}\n";
 			
 			File.WriteAllText($"{CompilationFolder}/{className}.cs", scriptString);
@@ -113,23 +126,42 @@ public class Compilation
 		Console.WriteLine(process.StandardError.ReadToEnd());
 	}
 	
-	public static string GetComponentBaseType(string prefabPath, string id, TomlTable componentTable)
+	public static string GetComponentBaseTypeName(string prefabPath, string id, TomlTable componentTable)
 	{
 		string className = $"{Path.GetFileNameWithoutExtension(prefabPath)}_{id}";
-		if (File.Exists(className))
+		if (File.Exists(className + ".cs"))
 			return className;
 		
 		if (componentTable.TryGetValue("Prefab", out object basePrefab))
 		{
 			string basePrefabPath = $"{Path.GetDirectoryName(prefabPath)}/{(string)basePrefab}";
-			(string baseId, object baseComponentTable) = Toml.ToModel(File.ReadAllText(prefabPath)).First();
-			return GetComponentBaseType(basePrefabPath, baseId, (TomlTable)baseComponentTable);
+			(string baseId, object baseComponentTable) = Toml.ToModel(File.ReadAllText(basePrefabPath)).First();
+			return GetComponentBaseTypeName(basePrefabPath, baseId, (TomlTable)baseComponentTable);
 		}
 		
 		if (!componentTable.TryGetValue("Component", out object typeName))
 			throw new InvalidOperationException($"Component table {id} of {prefabPath} does not contain a Component key or Prefab key");
 		
 		return ((string)typeName).Split(",")[0];
+	}
+	
+	public static Type GetComponentBaseType(string prefabPath, string id, TomlTable componentTable, Assembly projectAssembly)
+	{
+		string className = $"{Path.GetFileNameWithoutExtension(prefabPath)}_{id}";
+		if (File.Exists(className + ".cs"))
+			return projectAssembly.GetType(className) ?? throw new NullReferenceException($"Type {className} does not exist");
+		
+		if (componentTable.TryGetValue("Prefab", out object basePrefab))
+		{
+			string basePrefabPath = $"{Path.GetDirectoryName(prefabPath)}/{(string)basePrefab}";
+			(string baseId, object baseComponentTable) = Toml.ToModel(File.ReadAllText(basePrefabPath)).First();
+			return GetComponentBaseType(basePrefabPath, baseId, (TomlTable)baseComponentTable, projectAssembly);
+		}
+		
+		if (!componentTable.TryGetValue("Component", out object typeName))
+			throw new InvalidOperationException($"Component table {id} of {prefabPath} does not contain a Component key or Prefab key");
+		
+		return Type.GetType((string)typeName) ?? throw new NullReferenceException($"Type {(string)typeName} does not exist");
 	}
 	
 	public static Dictionary<string, Dictionary<string, string>> GetSerializedEvents(string prefabPath)
@@ -145,7 +177,13 @@ public class Compilation
 		foreach ((string id, object value) in table)
 		{
 			TomlTable valueTable = (TomlTable)value;
-			
+			Dictionary<string, string> events = GetComponentBaseType(prefabPath, id, valueTable, assembly)
+				.GetEvents()
+				.Where(@event => @event.GetCustomAttributes<SerializedEventAttribute>().Any())
+				.Where(@event => valueTable.ContainsKey(@event.Name))
+				.ToDictionary(@event => @event.Name, @event => (string)valueTable[@event.Name]);
+			if (events.Count != 0)
+				serializedEvents.Add(id, events);
 		}
 		
 		assemblyLoadContext.Unload();
