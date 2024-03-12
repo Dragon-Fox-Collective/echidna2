@@ -34,7 +34,7 @@ AnchorPreset = "Full"
 Prefab = "RectLayoutWithHierarchy.toml"
 Name = "Overlay"
 AnchorPreset = "Full"
-Children = [ "4", "9", "14" ]
+Children = [ "4", "9", "14", "20" ]
 
 [4]
 Prefab = "RectWithHierarchy.toml"
@@ -132,7 +132,7 @@ Color = { R = 1.0, G = 0.0, B = 0.0, A = 1.0 }
 ScriptContent = """
 [SerializedReference] public IVisible ObjectPanel = null!;
 """
-ObjectPanel = "19"
+ObjectPanel = "20"
 Clicked = "ObjectPanel.ToggleVisibility();"
 
 [17]
@@ -152,3 +152,12 @@ Prefab = "ButtonRect.toml"
 Name = "State Machine Panel Button"
 MinimumSize = { X = 26.0, Y = 26.0 }
 Color = { R = 1.0, G = 0.0, B = 1.0, A = 1.0 }
+
+[20]
+Prefab = "ObjectPanel.toml"
+AnchorPreset = "TopRight"
+AnchorOffsetTop = -10.0
+AnchorOffsetBottom = -10.0
+AnchorOffsetRight = -70.0
+AnchorOffsetLeft = -70.0
+IsVisible = false

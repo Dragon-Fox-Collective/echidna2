@@ -1,0 +1,5 @@
+﻿[1]
+Prefab = "FullRectWithHierarchy.toml"
+Name = "Object Panel"
+Margin = 10.0
+Children = [ ]
