@@ -1,4 +1,6 @@
 ﻿using System.Diagnostics;
+using System.Reflection;
+using System.Runtime.Loader;
 using Tomlyn;
 using Tomlyn.Model;
 
@@ -6,10 +8,29 @@ namespace Echidna2.Serialization;
 
 public class Compilation
 {
+	private static string CompilationFolder => $"{AppContext.BaseDirectory}/.echidna";
+	private static string CompilationBinFolder => $"{CompilationFolder}/bin/Debug/net8.0";
+	private static string CompilationDllPath => $"{CompilationBinFolder}/EchidnaProject.dll";
+	
+	public static void CompileCSProj(string prefabPath)
+	{
+		RecreateDirectory();
+		CreateCSProj();
+		CreateCSFiles(prefabPath);
+		CompileCSProj();
+		
+	}
+	
 	public static void RecreateDirectory()
 	{
-		Directory.Delete($"{AppContext.BaseDirectory}/.echidna", true);
-		Directory.CreateDirectory($"{AppContext.BaseDirectory}/.echidna");
+		if (Directory.Exists(CompilationFolder))
+		{
+			DirectoryInfo directory = new(CompilationFolder);
+			directory.EnumerateFiles().ForEach(file => file.Delete());
+			directory.EnumerateDirectories().ForEach(dir => dir.Delete(true));
+		}
+		else
+			Directory.CreateDirectory(CompilationFolder);
 	}
 	
 	public static void CreateCSProj()
@@ -32,7 +53,7 @@ public class Compilation
 
 </Project>
 ";
-		File.WriteAllText($"{AppContext.BaseDirectory}/.echidna/EchidnaProject.csproj", csprojString);
+		File.WriteAllText($"{CompilationFolder}/EchidnaProject.csproj", csprojString);
 	}
 	
 	public static void CreateCSFiles(string prefabPath)
@@ -58,7 +79,7 @@ public class Compilation
 			scriptString += scriptContent;
 			scriptString += "}\n";
 			
-			File.WriteAllText($"{AppContext.BaseDirectory}/.echidna/{className}.cs", scriptString);
+			File.WriteAllText($"{CompilationFolder}/{className}.cs", scriptString);
 		}
 	}
 	
@@ -67,7 +88,7 @@ public class Compilation
 		Process process = new();
 		process.StartInfo.FileName = "dotnet";
 		process.StartInfo.Arguments = "build";
-		process.StartInfo.WorkingDirectory = $"{AppContext.BaseDirectory}/.echidna";
+		process.StartInfo.WorkingDirectory = CompilationFolder;
 		process.StartInfo.UseShellExecute = false;
 		process.StartInfo.CreateNoWindow = true;
 		process.StartInfo.RedirectStandardOutput = true;
@@ -82,7 +103,7 @@ public class Compilation
 	{
 		Process process = new();
 		process.StartInfo.FileName = "dotnet";
-		process.StartInfo.Arguments = $"{AppContext.BaseDirectory}/.echidna/bin/Debug/net8.0/EchidnaProject.dll";
+		process.StartInfo.Arguments = CompilationDllPath;
 		process.StartInfo.UseShellExecute = false;
 		process.StartInfo.RedirectStandardOutput = true;
 		process.StartInfo.RedirectStandardError = true;
@@ -111,12 +132,23 @@ public class Compilation
 		return ((string)typeName).Split(",")[0];
 	}
 	
-	public static void CompileCSProj(string prefabPath)
+	public static Dictionary<string, Dictionary<string, string>> GetSerializedEvents(string prefabPath)
 	{
-		RecreateDirectory();
-		CreateCSProj();
-		CreateCSFiles(prefabPath);
-		CompileCSProj();
-		// https://stackoverflow.com/questions/6258160/unloading-the-assembly-loaded-with-assembly-loadfrom
+		AssemblyLoadContext assemblyLoadContext = new("EchidnaProject", true);
+		// AssemblyName assemblyName = new("EchidnaProject");
+		// AssemblyDependencyResolver resolver = new(CompilationDllPath);
+		using FileStream fileStream = new(CompilationDllPath, FileMode.Open, FileAccess.Read);
+		Assembly assembly = assemblyLoadContext.LoadFromStream(fileStream);
+		
+		TomlTable table = Toml.ToModel(File.ReadAllText(prefabPath));
+		Dictionary<string, Dictionary<string, string>> serializedEvents = new();
+		foreach ((string id, object value) in table)
+		{
+			TomlTable valueTable = (TomlTable)value;
+			
+		}
+		
+		assemblyLoadContext.Unload();
+		return serializedEvents;
 	}
 }
