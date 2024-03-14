@@ -112,7 +112,7 @@ public partial class Editor : ICanBeLaidOut
 }
 
 [SerializeExposedMembers, Prefab("Prefabs/EditorViewportGui.toml")]
-public partial class EditorViewportGui : INotificationPropagator, INamed, IMouseDown, IMouseMoved, IMouseUp, IMouseWheelScrolled
+public partial class EditorViewportGui : IMouseDown, IMouseMoved, IMouseUp, IMouseWheelScrolled
 {
 	[SerializedReference, ExposeMembersInClass] public ViewportGui Viewport { get; set; } = null!;
 	
@@ -159,7 +159,7 @@ public partial class EditorViewportGui : INotificationPropagator, INamed, IMouse
 }
 
 [SerializeExposedMembers, Prefab("Prefabs/EditorViewport3D.toml")]
-public partial class EditorViewport3D : INotificationPropagator, INamed, IMouseDown, IMouseMoved, IMouseUp, IMouseWheelScrolled, IKeyDown, IKeyUp
+public partial class EditorViewport3D : IMouseDown, IMouseMoved, IMouseUp, IMouseWheelScrolled, IKeyDown, IKeyUp
 {
 	[SerializedReference, ExposeMembersInClass] public Viewport3D Viewport { get; set; } = null!;
 	[SerializedReference] public Transform3D CameraPivot { get; set; } = null!;
