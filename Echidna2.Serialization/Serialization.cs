@@ -20,6 +20,7 @@ public static class TomlSerializer
 	public static T Deserialize<T>(string path, string? overridenTypeName = null) where T : class
 	{
 		Dictionary<string, object> references = new();
+		List<(string id, object component, TomlTable componentTable)> components = [];
 		
 		bool doneFirstObject = false;
 		T? returnValue = null;
@@ -35,23 +36,31 @@ public static class TomlSerializer
 			
 			object component;
 			if (componentTable.Remove("Component", out object? typeName))
-				component = DeserializeComponent(id, componentTable, scriptName ?? (string)typeName, scriptName != null);
+				component = DeserializeComponent(id, scriptName ?? (string)typeName, scriptName != null);
 			else if (componentTable.Remove("Prefab", out object? prefabPath))
-				component = DeserializePrefab(id, componentTable, $"{Path.GetDirectoryName(path)}/{(string)prefabPath}", scriptName);
+				component = DeserializePrefab($"{Path.GetDirectoryName(path)}/{(string)prefabPath}", scriptName);
 			else
 				throw new InvalidOperationException("Component table does not contain a Component or Prefab key");
 			
-			RemoveEvents(component, componentTable);
+			RemoveEvents(component, componentTable); // Should've been handled by Compilation
 			
 			references.Add(id, component);
+			components.Add((id, component, componentTable));
 			
 			if (!doneFirstObject)
 				returnValue = (T)component;
 			doneFirstObject = true;
 		}
 		
-		foreach ((string key, object component) in references)
-			DeserializeReference(key, component, (TomlTable)table[key], references);
+		foreach ((string id, object component, TomlTable componentTable) in components)
+			DeserializeReference(id, component, componentTable, references);
+		
+		foreach ((string id, object component, TomlTable componentTable) in components)
+			DeserializeValue(id, component, componentTable);
+		
+		foreach ((string id, object _, TomlTable componentTable) in components)
+			if (componentTable.Count != 0)
+				Console.WriteLine($"WARN: Unused table {id} {componentTable.ToDelimString()} of prefab leftover");
 		
 		if (returnValue == null)
 			throw new InvalidOperationException("No objects were deserialized");
@@ -59,7 +68,7 @@ public static class TomlSerializer
 		return returnValue;
 	}
 	
-	private static object DeserializeComponent(string id, TomlTable componentTable, string typeName, bool useProjectAssembly)
+	private static object DeserializeComponent(string id, string typeName, bool useProjectAssembly)
 	{
 		Type? type = useProjectAssembly ? ProjectAssembly.GetType(typeName) : Type.GetType(typeName);
 		if (type == null)
@@ -69,17 +78,12 @@ public static class TomlSerializer
 		if (constructor == null)
 			throw new InvalidOperationException($"Type {type} of id {id} does not have a parameterless constructor");
 		
-		object component = constructor.Invoke([]);
-		
-		component = DeserializeValue(id, component, componentTable);
-		
-		return component;
+		return constructor.Invoke([]);
 	}
 	
-	private static object DeserializePrefab(string id, TomlTable componentTable, string prefabPath, string? overridenTypeName = null)
+	private static object DeserializePrefab(string prefabPath, string? overridenTypeName = null)
 	{
-		object prefab = Deserialize<object>(prefabPath, overridenTypeName);
-		return DeserializeValue(id, prefab, componentTable);
+		return Deserialize<object>(prefabPath, overridenTypeName);
 	}
 	
 	private static T DeserializeValue<T>(string id, T component, TomlTable componentTable) where T : notnull
@@ -216,9 +220,6 @@ public static class TomlSerializer
 				Console.WriteLine($"WARN: Unused table {usedValue} {usedTable.ToDelimString()} of {id} leftover");
 			componentTable.Remove(usedValue);
 		}
-		
-		if (componentTable.Count != 0)
-			Console.WriteLine($"WARN: Unused table {id} {componentTable.ToDelimString()} of prefab leftover");
 	}
 	
 	public static void RemoveEvents<T>(T component, TomlTable componentTable) where T : notnull

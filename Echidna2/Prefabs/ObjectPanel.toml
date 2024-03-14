@@ -6,4 +6,4 @@ Children = [ "2" ]
 
 [2]
 Prefab = "HierarchyDisplay.toml"
-Anchor = "Full"
+AnchorPreset = "Full"

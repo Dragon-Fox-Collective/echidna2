@@ -5,31 +5,31 @@ namespace Echidna2.Rendering;
 
 public interface IVisibility
 {
-	public bool SelfIsVisible { get; set; }
+	public bool IsSelfVisible { get; set; }
 	public bool IsVisible { get; }
 }
 
 public static class IVisibleExtensions
 {
-	public static void ToggleVisibility(this IVisibility visibility) => visibility.SelfIsVisible = !visibility.SelfIsVisible;
-	public static void Show(this IVisibility visibility) => visibility.SelfIsVisible = true;
-	public static void Hide(this IVisibility visibility) => visibility.SelfIsVisible = false;
+	public static void ToggleVisibility(this IVisibility visibility) => visibility.IsSelfVisible = !visibility.IsSelfVisible;
+	public static void Show(this IVisibility visibility) => visibility.IsSelfVisible = true;
+	public static void Hide(this IVisibility visibility) => visibility.IsSelfVisible = false;
 }
 
 public class Visibility : IVisibility, INotificationPredicate<IDraw.Notification>, INotificationPredicate<IParentVisibilityChanged.Notification>
 {
 	[SerializedReference] public INotificationPropagator NotificationPropagator = null!;
 	
-	private bool selfIsVisible = true;
-	private bool parentIsVisible = true;
-	public bool IsVisible => selfIsVisible && parentIsVisible;
-	public bool SelfIsVisible
+	private bool isSelfVisible = true;
+	private bool isParentVisible = true;
+	public bool IsVisible => isSelfVisible && isParentVisible;
+	[SerializedValue] public bool IsSelfVisible
 	{
-		get => selfIsVisible;
+		get => isSelfVisible;
 		set
 		{
 			bool wasVisible = IsVisible;
-			selfIsVisible = value;
+			isSelfVisible = value;
 			if (wasVisible != IsVisible)
 				NotificationPropagator.Notify(new IParentVisibilityChanged.Notification(IsVisible));
 		}
@@ -39,8 +39,8 @@ public class Visibility : IVisibility, INotificationPredicate<IDraw.Notification
 	
 	public bool ShouldNotificationPropagate(IParentVisibilityChanged.Notification notification)
 	{
-		parentIsVisible = notification.Visible;
-		return selfIsVisible;
+		isParentVisible = notification.Visible;
+		return isSelfVisible;
 	}
 }
 
