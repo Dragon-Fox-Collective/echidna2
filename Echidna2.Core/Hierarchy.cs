@@ -38,6 +38,12 @@ public class Hierarchy : INotificationPropagator, IHasChildren, ICanAddChildren,
 		return false;
 	}
 	
+	public void ClearChildren()
+	{
+		while (children.Count > 0)
+			RemoveChild(children[0]);
+	}
+	
 	public void Serialize(TomlTable table)
 	{
 		
@@ -86,4 +92,5 @@ public interface ICanAddChildren
 {
 	public void AddChild(object child);
 	public bool RemoveChild(object child);
+	public void ClearChildren();
 }

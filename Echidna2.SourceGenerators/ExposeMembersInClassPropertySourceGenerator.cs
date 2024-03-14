@@ -49,7 +49,7 @@ public class ExposeMembersInClassPropertySourceGenerator : IIncrementalGenerator
 		INamedTypeSymbol classType = symbol.ContainingType;
 		INamedTypeSymbol prefabType = (INamedTypeSymbol)symbol.Type;
 		string propertyName = symbol.Name;
-		INamedTypeSymbol[] interfaces = prefabType.AllInterfaces
+		INamedTypeSymbol[] interfaces = GetAllExposedInterfaces(prefabType)
 			.Where(inter =>
 				inter.Name != "INotificationListener"
 				&& inter.Name != "INotificationHook"
@@ -70,17 +70,39 @@ public class ExposeMembersInClassPropertySourceGenerator : IIncrementalGenerator
 		return source;
 	}
 	
-	public static IEnumerable<ISymbol> GetAllUnimplementedMembersExposeRecursive(INamedTypeSymbol classType, INamedTypeSymbol prefabType)
+	public static IEnumerable<ISymbol> GetAllUnimplementedMembersExposeRecursive(INamedTypeSymbol classType, INamedTypeSymbol prefabType) =>
+		GetAllUnimplementedMembersExposeRecursiveIncludingConflicts(classType, prefabType).Distinct(SymbolSignatureEqualityComparer.Default);
+	
+	public static IEnumerable<ISymbol> GetAllUnimplementedMembersExposeRecursiveIncludingConflicts(INamedTypeSymbol classType, INamedTypeSymbol prefabType)
 	{
 		foreach (ISymbol member in ComponentSourceGenerator.GetAllUnimplementedMembers(classType, prefabType))
 		{
 			yield return member;
 			
 			if (member is IPropertySymbol property && property.GetAttributes().Any(attribute => attribute.AttributeClass?.Name == "ExposeMembersInClassAttribute"))
-				foreach (ISymbol member2 in GetAllUnimplementedMembersExposeRecursive(classType, (INamedTypeSymbol)property.Type))
+				foreach (ISymbol member2 in GetAllUnimplementedMembersExposeRecursiveIncludingConflicts(classType, (INamedTypeSymbol)property.Type))
 					yield return member2;
 			else if (member is IFieldSymbol field && field.GetAttributes().Any(attribute => attribute.AttributeClass?.Name == "ExposeMembersInClassAttribute"))
-				foreach (ISymbol member2 in GetAllUnimplementedMembersExposeRecursive(classType, (INamedTypeSymbol)field.Type))
+				foreach (ISymbol member2 in GetAllUnimplementedMembersExposeRecursiveIncludingConflicts(classType, (INamedTypeSymbol)field.Type))
+					yield return member2;
+		}
+	}
+	
+	public static IEnumerable<INamedTypeSymbol> GetAllExposedInterfaces(ITypeSymbol type) =>
+		GetAllExposedInterfacesIncludingConflicts(type).Distinct<INamedTypeSymbol>(SymbolSignatureEqualityComparer.Default);
+	
+	public static IEnumerable<INamedTypeSymbol> GetAllExposedInterfacesIncludingConflicts(ITypeSymbol type)
+	{
+		foreach (INamedTypeSymbol inter in type.AllInterfaces)
+			yield return inter;
+		
+		foreach (ISymbol member in type.GetMembers())
+		{
+			if (member is IPropertySymbol property && property.GetAttributes().Any(attribute => attribute.AttributeClass?.Name == "ExposeMembersInClassAttribute"))
+				foreach (INamedTypeSymbol member2 in GetAllExposedInterfaces(property.Type))
+					yield return member2;
+			else if (member is IFieldSymbol field && field.GetAttributes().Any(attribute => attribute.AttributeClass?.Name == "ExposeMembersInClassAttribute"))
+				foreach (INamedTypeSymbol member2 in GetAllExposedInterfaces(field.Type))
 					yield return member2;
 		}
 	}

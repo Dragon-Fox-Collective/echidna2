@@ -8,10 +8,7 @@ using OpenTK.Graphics.OpenGL4;
 
 namespace Echidna2;
 
-public interface Viewport
-{
-	public void AddChild(object child);
-}
+public interface Viewport : ICanAddChildren;
 
 [SerializeExposedMembers, Prefab("Prefabs/ViewportGui.toml")]
 public partial class ViewportGui : Viewport, ICanBeLaidOut, INotificationListener<IDraw.Notification>, IUpdate

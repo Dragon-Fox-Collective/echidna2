@@ -135,3 +135,17 @@ public class ComponentSourceGenerator : IIncrementalGenerator
 		};
 	}
 }
+
+public class SymbolSignatureEqualityComparer : IEqualityComparer<ISymbol>
+{
+	public static SymbolSignatureEqualityComparer Default { get; } = new();
+	
+	public bool Equals(ISymbol? x, ISymbol? y)
+	{
+		if (x is null || y is null) return x is null && y is null;
+		if (x.Kind != y.Kind) return false;
+		if (x.Name != y.Name) return false;
+		return true;
+	}
+	public int GetHashCode(ISymbol obj) => obj.Name.GetHashCode();
+}

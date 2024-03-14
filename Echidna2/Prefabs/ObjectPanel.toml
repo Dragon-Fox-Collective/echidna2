@@ -1,6 +1,11 @@
-﻿[1]
-Prefab = "FullRectWithHierarchy.toml"
+﻿[0]
+Component = "Echidna2.ObjectPanel, Echidna2"
 Name = "Object Panel"
+Rect = "1"
+HierarchyDisplay = "2"
+
+[1]
+Prefab = "FullRectWithHierarchy.toml"
 Margin = 10.0
 Children = [ "2" ]
 

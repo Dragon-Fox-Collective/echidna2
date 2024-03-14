@@ -9,17 +9,24 @@ using OpenTK.Windowing.GraphicsLibraryFramework;
 namespace Echidna2;
 
 [SerializeExposedMembers, Prefab("Prefabs/HierarchyDisplay.toml")]
-public partial class HierarchyDisplay : INotificationPropagator, ICanBeLaidOut, IInitialize
+public partial class HierarchyDisplay : INotificationPropagator, ICanBeLaidOut
 {
 	[SerializedReference, ExposeMembersInClass] public Named Named { get; set; } = null!;
 	[SerializedReference, ExposeMembersInClass] public RectTransform RectTransform { get; set; } = null!;
-	[SerializedReference] public IHasChildren? HierarchyToDisplay { get; set; } = null!;
 	[SerializedReference] private Hierarchy DisplayElements { get; set; } = null!;
 	[SerializedReference, ExposeMembersInClass] public FullLayout Layout { get; set; } = null!;
 	
-	public void OnInitialize()
+	private IHasChildren? hierarchyToDisplay = null;
+	[SerializedReference] public IHasChildren? HierarchyToDisplay
 	{
-		DisplayElements.AddChild(BoxOfHierarchy(HierarchyToDisplay));
+		get => hierarchyToDisplay;
+		set
+		{
+			DisplayElements.ClearChildren();
+			hierarchyToDisplay = value;
+			if (hierarchyToDisplay is not null)
+				DisplayElements.AddChild(BoxOfHierarchy(hierarchyToDisplay));
+		}
 	}
 	
 	private static FullLayoutWithHierarchy BoxOfHierarchy(object? obj)
@@ -81,7 +88,22 @@ public partial class Editor : ICanBeLaidOut
 	[SerializedReference, ExposeMembersInClass] public RectLayout RectLayout { get; set; } = null!;
 	[SerializedReference, ExposeMembersInClass] public Hierarchy PrefabChildren { get; set; } = null!;
 	[SerializedReference] public Viewport Viewport { get; set; } = null!;
+	[SerializedReference] public ObjectPanel ObjectPanel { get; set; } = null!;
 	[SerializedValue] public string PrefabPath { get; set; } = "";
+	
+	private object? prefab;
+	public object? Prefab
+	{
+		get => prefab;
+		set
+		{
+			Viewport.ClearChildren();
+			prefab = value;
+			ObjectPanel.Prefab = value;
+			if (prefab is not null)
+				Viewport.AddChild(prefab);
+		}
+	}
 	
 	public void Notify<T>(T notification) where T : notnull
 	{
@@ -227,5 +249,23 @@ public partial class EditorViewport3D : INotificationPropagator, INamed, IMouseD
 	{
 		if (key is Keys.LeftShift)
 			isModifierPressed = false;
+	}
+}
+
+[SerializeExposedMembers, Prefab("Prefabs/ObjectPanel.toml")]
+public partial class ObjectPanel
+{
+	[SerializedReference, ExposeMembersInClass] public FullRectWithHierarchy Rect { get; set; } = null!;
+	[SerializedReference] public HierarchyDisplay HierarchyDisplay { get; set; } = null!;
+	
+	private object? prefab;
+	public object? Prefab
+	{
+		get => prefab;
+		set
+		{
+			prefab = value;
+			HierarchyDisplay.HierarchyToDisplay = prefab as IHasChildren;
+		}
 	}
 }
