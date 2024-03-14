@@ -88,7 +88,15 @@ public class ComponentSourceGenerator : IIncrementalGenerator
 	}
 	
 	public static IEnumerable<ISymbol> GetAllUnimplementedMembers(INamedTypeSymbol classType, INamedTypeSymbol interfaceType) =>
-		GetAllPublicInstanceMembers(interfaceType).Where(member => !member.Name.StartsWith("get_") && !member.Name.StartsWith("set_") && !member.Name.StartsWith("add_") && !member.Name.StartsWith("remove_") && member.Name != "Serialize" && member.Name != "DeserializeValue" && member.Name != "DeserializeReference" && !classType.GetMembers(member.Name).Any());
+		GetAllPublicInstanceMembers(interfaceType).Where(member =>
+			!member.Name.StartsWith("get_")
+			&& !member.Name.StartsWith("set_")
+			&& !member.Name.StartsWith("add_")
+			&& !member.Name.StartsWith("remove_")
+			&& member.Name != "Serialize"
+			&& member.Name != "DeserializeValue"
+			&& member.Name != "DeserializeReference"
+			&& !classType.GetMembers(member.Name).Any());
 	
 	private static IEnumerable<ISymbol> GetAllUnimplementedInterfaceMembers(INamedTypeSymbol classType, INamedTypeSymbol interfaceType) =>
 		interfaceType.AllInterfaces.Append(interfaceType).SelectMany(inter => GetAllUnimplementedMembers(classType, inter));

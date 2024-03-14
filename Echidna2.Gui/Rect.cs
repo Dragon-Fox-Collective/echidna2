@@ -7,10 +7,8 @@ using Tomlyn.Model;
 
 namespace Echidna2.Gui;
 
-public class Rect : INotificationListener<IDraw.Notification>, ITomlSerializable, IVisible
+public class Rect : INotificationListener<IDraw.Notification>, ITomlSerializable
 {
-	[SerializedValue] public bool IsVisible { get; set; } = true;
-	
 	private static readonly Shader Shader = new(ShaderNodeUtil.MainVertexShader, File.ReadAllText("Assets/rect.frag"));
 	
 	[SerializedReference] public RectTransform RectTransform { get; set; } = null!;
@@ -19,9 +17,6 @@ public class Rect : INotificationListener<IDraw.Notification>, ITomlSerializable
 	
 	public void OnNotify(IDraw.Notification notification)
 	{
-		if (!IsVisible)
-			return;
-		
 		Shader.Bind();
 		Shader.SetMatrix4("view", notification.Camera.ViewMatrix);
 		Shader.SetMatrix4("projection", notification.Camera.ProjectionMatrix);

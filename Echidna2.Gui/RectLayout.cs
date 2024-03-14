@@ -33,7 +33,7 @@ public class RectLayout : INotificationHook<IUpdate.Notification>, INotification
 			}
 		}
 	}
-	public IEnumerable<ICanBeLaidOut> ChildrenThatCanBeLaidOut => Hierarchy.Children.OfType<ICanBeLaidOut>().Where(child => child is not IVisible visible || visible.IsVisible);
+	public IEnumerable<ICanBeLaidOut> ChildrenThatCanBeLaidOut => Hierarchy.Children.OfType<ICanBeLaidOut>().Where(child => child is not IVisibility visible || visible.IsVisible);
 	
 	public void AddLayoutChild(object child)
 	{

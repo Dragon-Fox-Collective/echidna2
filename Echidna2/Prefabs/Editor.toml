@@ -130,7 +130,7 @@ Name = "Object Panel Button"
 MinimumSize = { X = 26.0, Y = 26.0 }
 Color = { R = 1.0, G = 0.0, B = 0.0, A = 1.0 }
 ScriptContent = """
-[SerializedReference] public IVisible ObjectPanel = null!;
+[SerializedReference] public IVisibility ObjectPanel = null!;
 """
 ObjectPanel = "20"
 Clicked = "ObjectPanel.ToggleVisibility();"
@@ -161,3 +161,4 @@ AnchorOffsetBottom = -10.0
 AnchorOffsetRight = -70.0
 AnchorOffsetLeft = -70.0
 IsVisible = false
+MinimumSize = { X = 400.0, Y = 200.0 }

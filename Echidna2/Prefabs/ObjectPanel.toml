@@ -2,4 +2,8 @@
 Prefab = "FullRectWithHierarchy.toml"
 Name = "Object Panel"
 Margin = 10.0
-Children = [ ]
+Children = [ "2" ]
+
+[2]
+Prefab = "HierarchyDisplay.toml"
+Anchor = "Full"

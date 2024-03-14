@@ -31,10 +31,11 @@ public partial class FullRectWithHierarchy : ICanBeLaidOut
 	[SerializedReference, ExposeMembersInClass] public FullLayout Layout { get; set; } = null!;
 	[SerializedReference, ExposeMembersInClass] public Rect Rect { get; set; } = null!;
 	[SerializedReference, ExposeMembersInClass] public Hierarchy PrefabChildren { get; set; } = null!;
+	[SerializedReference, ExposeMembersInClass] public Visibility Visibility { get; set; } = null!;
 	
 	public void Notify<T>(T notification) where T : notnull
 	{
-		INotificationPropagator.Notify(notification, Rect, Layout, PrefabChildren);
+		INotificationPropagator.Notify(notification, Rect, Layout, PrefabChildren, Visibility);
 	}
 }
 

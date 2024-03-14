@@ -5,6 +5,7 @@ RectTransform = "4"
 Layout = "5"
 Rect = "6"
 PrefabChildren = "3"
+Visibility = "7"
 
 [2]
 Component = "Echidna2.Core.Named, Echidna2.Core"
@@ -24,3 +25,7 @@ Hierarchy = "3"
 [6]
 Component = "Echidna2.Gui.Rect, Echidna2.Gui"
 RectTransform = "4"
+
+[7]
+Component = "Echidna2.Rendering.Visibility, Echidna2.Rendering"
+NotificationPropagator = "3"

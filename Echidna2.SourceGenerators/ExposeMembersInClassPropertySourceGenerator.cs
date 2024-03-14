@@ -49,7 +49,12 @@ public class ExposeMembersInClassPropertySourceGenerator : IIncrementalGenerator
 		INamedTypeSymbol classType = symbol.ContainingType;
 		INamedTypeSymbol prefabType = (INamedTypeSymbol)symbol.Type;
 		string propertyName = symbol.Name;
-		INamedTypeSymbol[] interfaces = prefabType.AllInterfaces.ToArray();//.Where(@interface => @interface.GetMembers().All(member => member is IFieldSymbol or IPropertySymbol)).ToArray();
+		INamedTypeSymbol[] interfaces = prefabType.AllInterfaces
+			.Where(inter =>
+				inter.Name != "INotificationListener"
+				&& inter.Name != "INotificationHook"
+				&& inter.Name != "INotificationPredicate")
+			.ToArray();
 		
 		string source = "#nullable enable\n";
 		if (!classType.ContainingNamespace.IsGlobalNamespace)
