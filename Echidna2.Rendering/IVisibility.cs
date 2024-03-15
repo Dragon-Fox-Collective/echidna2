@@ -9,7 +9,7 @@ public interface IVisibility
 	public bool IsVisible { get; }
 }
 
-public static class IVisibleExtensions
+public static class IVisibilityExtensions
 {
 	public static void ToggleVisibility(this IVisibility visibility) => visibility.IsSelfVisible = !visibility.IsSelfVisible;
 	public static void Show(this IVisibility visibility) => visibility.IsSelfVisible = true;
