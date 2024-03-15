@@ -16,7 +16,12 @@ public static class IVisibilityExtensions
 	public static void Hide(this IVisibility visibility) => visibility.IsSelfVisible = false;
 }
 
-public class Visibility : IVisibility, INotificationPredicate<IDraw.Notification>, INotificationPredicate<IParentVisibilityChanged.Notification>
+public class Visibility : IVisibility,
+	INotificationPredicate<IDraw.Notification>,
+	INotificationPredicate<IParentVisibilityChanged.Notification>,
+	INotificationPredicate<IMouseDown.Notification>,
+	INotificationPredicate<IMouseUp.Notification>,
+	INotificationPredicate<IMouseMoved.Notification>
 {
 	[SerializedReference] public INotificationPropagator NotificationPropagator = null!;
 	
@@ -36,6 +41,9 @@ public class Visibility : IVisibility, INotificationPredicate<IDraw.Notification
 	}
 	
 	public bool ShouldNotificationPropagate(IDraw.Notification notification) => IsVisible;
+	public bool ShouldNotificationPropagate(IMouseDown.Notification notification) => IsVisible;
+	public bool ShouldNotificationPropagate(IMouseUp.Notification notification) => IsVisible;
+	public bool ShouldNotificationPropagate(IMouseMoved.Notification notification) => IsVisible;
 	
 	public bool ShouldNotificationPropagate(IParentVisibilityChanged.Notification notification)
 	{

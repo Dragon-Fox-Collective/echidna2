@@ -53,7 +53,8 @@ public class ExposeMembersInClassPropertySourceGenerator : IIncrementalGenerator
 			.Where(inter =>
 				inter.Name != "INotificationListener"
 				&& inter.Name != "INotificationHook"
-				&& inter.Name != "INotificationPredicate")
+				&& inter.Name != "INotificationPredicate"
+				&& inter.Name != "ITomlSerializable")
 			.ToArray();
 		
 		string source = "#nullable enable\n";
