@@ -6,6 +6,7 @@ RectLayout = "03"
 PrefabChildren = "04"
 Viewport = "2"
 ObjectPanel = "20"
+ComponentPanel = "21"
 PrefabPath = "Prefabs/Some3dScene.toml"
 
 [01]
@@ -35,7 +36,7 @@ AnchorPreset = "Full"
 Prefab = "RectLayoutWithHierarchy.toml"
 Name = "Overlay"
 AnchorPreset = "Full"
-Children = [ "4", "9", "14", "20" ]
+Children = [ "4", "9", "14", "20", "21" ]
 
 [4]
 Prefab = "RectWithHierarchy.toml"
@@ -131,16 +132,21 @@ Name = "Object Panel Button"
 MinimumSize = { X = 26.0, Y = 26.0 }
 Color = { R = 1.0, G = 0.0, B = 0.0, A = 1.0 }
 ScriptContent = """
-[SerializedReference] public IVisibility ObjectPanel = null!;
+[SerializedReference] public IVisibility Panel = null!;
 """
-ObjectPanel = "20"
-Clicked = "ObjectPanel.ToggleVisibility();"
+Panel = "20"
+Clicked = "Panel.ToggleVisibility();"
 
 [17]
 Prefab = "ButtonRect.toml"
 Name = "Component Panel Button"
 MinimumSize = { X = 26.0, Y = 26.0 }
 Color = { R = 0.0, G = 0.0, B = 1.0, A = 1.0 }
+ScriptContent = """
+[SerializedReference] public IVisibility Panel = null!;
+"""
+Panel = "21"
+Clicked = "Panel.ToggleVisibility();"
 
 [18]
 Prefab = "ButtonRect.toml"
@@ -156,6 +162,16 @@ Color = { R = 1.0, G = 0.0, B = 1.0, A = 1.0 }
 
 [20]
 Prefab = "ObjectPanel.toml"
+AnchorPreset = "TopRight"
+AnchorOffsetTop = -10.0
+AnchorOffsetBottom = -10.0
+AnchorOffsetRight = -70.0
+AnchorOffsetLeft = -70.0
+IsSelfVisible = false
+MinimumSize = { X = 300.0, Y = 400.0 }
+
+[21]
+Prefab = "ComponentPanel.toml"
 AnchorPreset = "TopRight"
 AnchorOffsetTop = -10.0
 AnchorOffsetBottom = -10.0

@@ -17,6 +17,8 @@ public partial class HierarchyDisplay : INotificationPropagator, ICanBeLaidOut
 	[SerializedReference] private Hierarchy DisplayElements { get; set; } = null!;
 	[SerializedReference, ExposeMembersInClass] public FullLayout Layout { get; set; } = null!;
 	
+	public event Action<object>? ItemSelected;
+	
 	private IHasChildren? hierarchyToDisplay = null;
 	[SerializedReference] public IHasChildren? HierarchyToDisplay
 	{
@@ -34,7 +36,7 @@ public partial class HierarchyDisplay : INotificationPropagator, ICanBeLaidOut
 		}
 	}
 	
-	private static FullLayoutWithHierarchy BoxOfHierarchy(object? obj)
+	private FullLayoutWithHierarchy BoxOfHierarchy(object obj)
 	{
 		FullLayoutWithHierarchy box = FullLayoutWithHierarchy.Instantiate();
 		box.Name = $"Box for {obj}";
@@ -48,15 +50,11 @@ public partial class HierarchyDisplay : INotificationPropagator, ICanBeLaidOut
 		ButtonRect button = ButtonRect.Instantiate();
 		button.AnchorPreset = AnchorPreset.Full;
 		button.Margin = 5;
+		button.MouseUp += () => ItemSelected?.Invoke(obj);
 		layout.AddChild(button);
 		
 		TextRect text = TextRect.Instantiate();
-		text.TextString = obj switch
-		{
-			INamed named => named.Name,
-			not null => obj.GetType().Name + " (no name)",
-			_ => "(no prefab loaded)"
-		};
+		text.TextString = INamed.GetName(obj) ?? "(no prefab loaded)";
 		text.Justification = TextJustification.Left;
 		text.AnchorPreset = AnchorPreset.Full;
 		text.MinimumSize = (0, 25);
@@ -98,8 +96,22 @@ public partial class Editor : ICanBeLaidOut
 	[SerializedReference, ExposeMembersInClass] public RectLayout RectLayout { get; set; } = null!;
 	[SerializedReference, ExposeMembersInClass] public Hierarchy PrefabChildren { get; set; } = null!;
 	[SerializedReference] public Viewport Viewport { get; set; } = null!;
-	[SerializedReference] public ObjectPanel ObjectPanel { get; set; } = null!;
+	[SerializedReference] public ComponentPanel ComponentPanel { get; set; } = null!;
 	[SerializedValue] public string PrefabPath { get; set; } = "";
+	
+	private ObjectPanel? objectPanel;
+	[SerializedReference] public ObjectPanel ObjectPanel
+	{
+		get => objectPanel!;
+		set
+		{
+			if (objectPanel is not null)
+				objectPanel.ItemSelected -= OnObjectSelected;
+			objectPanel = value;
+			if (objectPanel is not null)
+				objectPanel.ItemSelected += OnObjectSelected;
+		}
+	}
 	
 	private object? prefab;
 	public object? Prefab
@@ -118,6 +130,12 @@ public partial class Editor : ICanBeLaidOut
 	public void Notify<T>(T notification) where T : notnull
 	{
 		INotificationPropagator.Notify(notification, RectLayout, PrefabChildren);
+	}
+	
+	public void OnObjectSelected(object obj)
+	{
+		Console.WriteLine("Selected " + obj);
+		ComponentPanel.SelectedObject = obj;
 	}
 }
 
@@ -268,6 +286,12 @@ public partial class ObjectPanel
 	[SerializedReference, ExposeMembersInClass] public FullRectWithHierarchy Rect { get; set; } = null!;
 	[SerializedReference] public HierarchyDisplay HierarchyDisplay { get; set; } = null!;
 	
+	public event Action<object> ItemSelected
+	{
+		add => HierarchyDisplay.ItemSelected += value;
+		remove => HierarchyDisplay.ItemSelected -= value;
+	} 
+	
 	private object? prefab;
 	public object? Prefab
 	{
@@ -276,6 +300,24 @@ public partial class ObjectPanel
 		{
 			prefab = value;
 			HierarchyDisplay.HierarchyToDisplay = prefab as IHasChildren;
+		}
+	}
+}
+
+[UsedImplicitly, SerializeExposedMembers, Prefab("Prefabs/ComponentPanel.toml")]
+public partial class ComponentPanel
+{
+	[SerializedReference, ExposeMembersInClass] public FullRectWithHierarchy Rect { get; set; } = null!;
+	[SerializedReference] public TextRect Text { get; set; } = null!;
+	
+	private object? selectedObject;
+	public object? SelectedObject
+	{
+		get => selectedObject;
+		set
+		{
+			selectedObject = value;
+			Text.TextString = INamed.GetName(selectedObject) ?? "(no object selected)";
 		}
 	}
 }
