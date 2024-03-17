@@ -60,7 +60,7 @@ public partial class ButtonRect : ICanBeLaidOut, IInitialize
 {
 	[SerializedReference, ExposeMembersInClass] public Named Named { get; set; } = null!;
 	[SerializedReference, ExposeMembersInClass] public RectTransform RectTransform { get; set; } = null!;
-	[SerializedReference, ExposeMembersInClass] public RectLayout Layout { get; set; } = null!;
+	[SerializedReference, ExposeMembersInClass] public FullLayout Layout { get; set; } = null!;
 	[SerializedReference, ExposeMembersInClass] public Rect Rect { get; set; } = null!;
 	[SerializedReference, ExposeMembersInClass] public Hierarchy PrefabChildren { get; set; } = null!;
 	[SerializedReference, ExposeMembersInClass] public Button Button { get; set; } = null!;

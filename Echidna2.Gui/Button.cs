@@ -21,6 +21,8 @@ public class Button : IMouseDown, IMouseUp, IMouseMoved
 	
 	public void OnMouseDown(MouseButton button, Vector2 position, Vector3 globalPosition)
 	{
+		if (button != MouseButton.Left) return;
+		
 		if (RectTransform.ContainsGlobalPoint(globalPosition.XY))
 		{
 			wasPressed = true;
@@ -30,6 +32,8 @@ public class Button : IMouseDown, IMouseUp, IMouseMoved
 	
 	public void OnMouseUp(MouseButton button, Vector2 position, Vector3 globalPosition)
 	{
+		if (button != MouseButton.Left) return;
+		
 		if (wasPressed)
 		{
 			wasPressed = false;

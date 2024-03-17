@@ -18,7 +18,7 @@ Component = "Echidna2.Core.Hierarchy, Echidna2.Core"
 Component = "Echidna2.Gui.RectTransform, Echidna2.Gui"
 
 [5]
-Component = "Echidna2.Gui.RectLayout, Echidna2.Gui"
+Component = "Echidna2.Gui.FullLayout, Echidna2.Gui"
 RectTransform = "4"
 Hierarchy = "3"
 

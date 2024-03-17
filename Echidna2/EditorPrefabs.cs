@@ -25,7 +25,11 @@ public partial class HierarchyDisplay : INotificationPropagator, ICanBeLaidOut
 			DisplayElements.ClearChildren();
 			hierarchyToDisplay = value;
 			if (hierarchyToDisplay is not null)
-				DisplayElements.AddChild(BoxOfHierarchy(hierarchyToDisplay));
+			{
+				FullLayoutWithHierarchy box = BoxOfHierarchy(hierarchyToDisplay);
+				box.LeftMargin = 0;
+				DisplayElements.AddChild(box);
+			}
 		}
 	}
 	
@@ -40,6 +44,11 @@ public partial class HierarchyDisplay : INotificationPropagator, ICanBeLaidOut
 		layout.AnchorPreset = AnchorPreset.Full;
 		box.AddChild(layout);
 		
+		ButtonRect button = ButtonRect.Instantiate();
+		button.AnchorPreset = AnchorPreset.Full;
+		button.Margin = 5;
+		layout.AddChild(button);
+		
 		TextRect text = TextRect.Instantiate();
 		text.TextString = obj switch
 		{
@@ -47,11 +56,11 @@ public partial class HierarchyDisplay : INotificationPropagator, ICanBeLaidOut
 			not null => obj.GetType().Name + " (no name)",
 			_ => "(no prefab loaded)"
 		};
-		text.AnchorPreset = AnchorPreset.Full;
-		text.LocalScale = Vector2.One * 0.5;
-		text.MinimumSize = (0, 25);
 		text.Justification = TextJustification.Left;
-		layout.AddChild(text);
+		text.AnchorPreset = AnchorPreset.Full;
+		text.MinimumSize = (0, 25);
+		text.LocalScale = Vector2.One * 0.5;
+		button.AddChild(text);
 		
 		if (obj is IHasChildren hasChildren)
 			foreach (object child in hasChildren.Children)
