@@ -2,12 +2,13 @@
 using Echidna2.Gui;
 using Echidna2.Rendering;
 using Echidna2.Serialization;
+using JetBrains.Annotations;
 using Color = System.Drawing.Color;
 
 namespace Echidna2;
 
 
-[SerializeExposedMembers, Prefab("Prefabs/RectWithHierarchy.toml")]
+[UsedImplicitly, SerializeExposedMembers, Prefab("Prefabs/RectWithHierarchy.toml")]
 public partial class RectWithHierarchy : ICanBeLaidOut
 {
 	[SerializedReference, ExposeMembersInClass] public Named Named { get; set; } = null!;
@@ -23,7 +24,7 @@ public partial class RectWithHierarchy : ICanBeLaidOut
 }
 
 
-[SerializeExposedMembers, Prefab("Prefabs/FullRectWithHierarchy.toml")]
+[UsedImplicitly, SerializeExposedMembers, Prefab("Prefabs/FullRectWithHierarchy.toml")]
 public partial class FullRectWithHierarchy : ICanBeLaidOut
 {
 	[SerializedReference, ExposeMembersInClass] public Named Named { get; set; } = null!;
@@ -40,7 +41,7 @@ public partial class FullRectWithHierarchy : ICanBeLaidOut
 }
 
 
-[SerializeExposedMembers, Prefab("Prefabs/RectLayoutWithHierarchy.toml")]
+[UsedImplicitly, SerializeExposedMembers, Prefab("Prefabs/RectLayoutWithHierarchy.toml")]
 public partial class RectLayoutWithHierarchy : ICanBeLaidOut
 {
 	[SerializedReference, ExposeMembersInClass] public Named Named { get; set; } = null!;
@@ -55,7 +56,7 @@ public partial class RectLayoutWithHierarchy : ICanBeLaidOut
 }
 
 
-[SerializeExposedMembers, Prefab("Prefabs/ButtonRect.toml")]
+[UsedImplicitly, SerializeExposedMembers, Prefab("Prefabs/ButtonRect.toml")]
 public partial class ButtonRect : ICanBeLaidOut, IInitialize
 {
 	[SerializedReference, ExposeMembersInClass] public Named Named { get; set; } = null!;
@@ -80,7 +81,7 @@ public partial class ButtonRect : ICanBeLaidOut, IInitialize
 }
 
 
-[SerializeExposedMembers, Prefab("Prefabs/Named.toml")]
+[UsedImplicitly, SerializeExposedMembers, Prefab("Prefabs/Named.toml")]
 public partial class HLayoutWithHierarchy : ICanBeLaidOut
 {
 	[SerializedReference, ExposeMembersInClass] public Named Named { get; set; } = null!;
@@ -95,7 +96,7 @@ public partial class HLayoutWithHierarchy : ICanBeLaidOut
 }
 
 
-[SerializeExposedMembers, Prefab("Prefabs/VLayoutWithHierarchy.toml")]
+[UsedImplicitly, SerializeExposedMembers, Prefab("Prefabs/VLayoutWithHierarchy.toml")]
 public partial class VLayoutWithHierarchy : ICanBeLaidOut
 {
 	[SerializedReference, ExposeMembersInClass] public Named Named { get; set; } = null!;
@@ -110,7 +111,7 @@ public partial class VLayoutWithHierarchy : ICanBeLaidOut
 }
 
 
-[SerializeExposedMembers, Prefab("Prefabs/TextRect.toml")]
+[UsedImplicitly, SerializeExposedMembers, Prefab("Prefabs/TextRect.toml")]
 public partial class TextRect : INotificationPropagator, ICanBeLaidOut
 {
 	[SerializedReference, ExposeMembersInClass] public Named Named { get; set; } = null!;
@@ -124,7 +125,7 @@ public partial class TextRect : INotificationPropagator, ICanBeLaidOut
 }
 
 
-[SerializeExposedMembers, Prefab("Prefabs/FullLayoutWithHierarchy.toml")]
+[UsedImplicitly, SerializeExposedMembers, Prefab("Prefabs/FullLayoutWithHierarchy.toml")]
 public partial class FullLayoutWithHierarchy : ICanBeLaidOut
 {
 	[SerializedReference, ExposeMembersInClass] public Named Named { get; set; } = null!;

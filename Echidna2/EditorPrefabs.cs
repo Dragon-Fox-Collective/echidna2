@@ -4,11 +4,12 @@ using Echidna2.Mathematics;
 using Echidna2.Rendering;
 using Echidna2.Rendering3D;
 using Echidna2.Serialization;
+using JetBrains.Annotations;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 
 namespace Echidna2;
 
-[SerializeExposedMembers, Prefab("Prefabs/HierarchyDisplay.toml")]
+[UsedImplicitly, SerializeExposedMembers, Prefab("Prefabs/HierarchyDisplay.toml")]
 public partial class HierarchyDisplay : INotificationPropagator, ICanBeLaidOut
 {
 	[SerializedReference, ExposeMembersInClass] public Named Named { get; set; } = null!;
@@ -75,7 +76,7 @@ public partial class HierarchyDisplay : INotificationPropagator, ICanBeLaidOut
 	}
 }
 
-[SerializeExposedMembers, Prefab("Prefabs/Cube.toml")]
+[UsedImplicitly, SerializeExposedMembers, Prefab("Prefabs/Cube.toml")]
 public partial class Cube
 {
 	[SerializedReference, ExposeMembersInClass] public Named Named { get; set; } = null!;
@@ -89,7 +90,7 @@ public partial class Cube
 	}
 }
 
-[SerializeExposedMembers, Prefab("Prefabs/Editor.toml")]
+[UsedImplicitly, SerializeExposedMembers, Prefab("Prefabs/Editor.toml")]
 public partial class Editor : ICanBeLaidOut
 {
 	[SerializedReference, ExposeMembersInClass] public Named Named { get; set; } = null!;
@@ -120,7 +121,7 @@ public partial class Editor : ICanBeLaidOut
 	}
 }
 
-[SerializeExposedMembers, Prefab("Prefabs/EditorViewportGui.toml")]
+[UsedImplicitly, SerializeExposedMembers, Prefab("Prefabs/EditorViewportGui.toml")]
 public partial class EditorViewportGui : IMouseDown, IMouseMoved, IMouseUp, IMouseWheelScrolled
 {
 	[SerializedReference, ExposeMembersInClass] public ViewportGui Viewport { get; set; } = null!;
@@ -167,7 +168,7 @@ public partial class EditorViewportGui : IMouseDown, IMouseMoved, IMouseUp, IMou
 	}
 }
 
-[SerializeExposedMembers, Prefab("Prefabs/EditorViewport3D.toml")]
+[UsedImplicitly, SerializeExposedMembers, Prefab("Prefabs/EditorViewport3D.toml")]
 public partial class EditorViewport3D : IMouseDown, IMouseMoved, IMouseUp, IMouseWheelScrolled, IKeyDown, IKeyUp
 {
 	[SerializedReference, ExposeMembersInClass] public Viewport3D Viewport { get; set; } = null!;
@@ -261,7 +262,7 @@ public partial class EditorViewport3D : IMouseDown, IMouseMoved, IMouseUp, IMous
 	}
 }
 
-[SerializeExposedMembers, Prefab("Prefabs/ObjectPanel.toml")]
+[UsedImplicitly, SerializeExposedMembers, Prefab("Prefabs/ObjectPanel.toml")]
 public partial class ObjectPanel
 {
 	[SerializedReference, ExposeMembersInClass] public FullRectWithHierarchy Rect { get; set; } = null!;
