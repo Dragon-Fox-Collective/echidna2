@@ -15,6 +15,7 @@ TomlSerializer.ProjectAssembly = projectAssemblyLoadContext.LoadFromStream(proej
 
 
 Editor root = TomlSerializer.Deserialize<Editor>($"{AppContext.BaseDirectory}/Prefabs/Editor.toml");
+root.Notify(new IEditorInitialize.Notification(root));
 
 IHasChildren prefab = TomlSerializer.Deserialize<IHasChildren>($"{AppContext.BaseDirectory}/{root.PrefabPath}");
 root.Prefab = prefab;

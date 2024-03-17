@@ -1,4 +1,5 @@
-﻿using Echidna2.Core;
+﻿using System.Reflection;
+using Echidna2.Core;
 using Echidna2.Gui;
 using Echidna2.Mathematics;
 using Echidna2.Rendering;
@@ -127,6 +128,11 @@ public partial class Editor : ICanBeLaidOut
 		}
 	}
 	
+	private Dictionary<Type, Func<IFieldEditor>> editorInstantiators = new()
+	{
+		{ typeof(double), DoubleFieldEditor.Instantiate },
+	};
+	
 	public void Notify<T>(T notification) where T : notnull
 	{
 		INotificationPropagator.Notify(notification, RectLayout, PrefabChildren);
@@ -137,6 +143,10 @@ public partial class Editor : ICanBeLaidOut
 		Console.WriteLine("Selected " + obj);
 		ComponentPanel.SelectedObject = obj;
 	}
+	
+	public void RegisterFieldEditor<TFieldType, TFieldEditor>() where TFieldEditor : IFieldEditor<TFieldType> => editorInstantiators.Add(typeof(TFieldType), TFieldEditor.Instantiate);
+	public IFieldEditor InstantiateFieldEditor(Type type) => editorInstantiators[type]();
+	public bool HasRegisteredFieldEditor(Type type) => editorInstantiators.ContainsKey(type);
 }
 
 [UsedImplicitly, SerializeExposedMembers, Prefab("Prefabs/EditorViewportGui.toml")]
@@ -305,10 +315,13 @@ public partial class ObjectPanel
 }
 
 [UsedImplicitly, SerializeExposedMembers, Prefab("Prefabs/ComponentPanel.toml")]
-public partial class ComponentPanel
+public partial class ComponentPanel : IEditorInitialize
 {
 	[SerializedReference, ExposeMembersInClass] public FullRectWithHierarchy Rect { get; set; } = null!;
 	[SerializedReference] public TextRect Text { get; set; } = null!;
+	[SerializedReference] public ICanAddChildren Fields { get; set; } = null!;
+	
+	private Editor editor = null!;
 	
 	private object? selectedObject;
 	public object? SelectedObject
@@ -318,6 +331,47 @@ public partial class ComponentPanel
 		{
 			selectedObject = value;
 			Text.TextString = INamed.GetName(selectedObject) ?? "(no object selected)";
+			RefreshFields();
 		}
 	}
+	
+	public void RefreshFields()
+	{
+		Fields.ClearChildren();
+		if (selectedObject is null) return;
+		
+		foreach (MemberInfo memberInfo in selectedObject.GetType().GetMembers(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance).Where(member => member.GetCustomAttribute<SerializedValueAttribute>() is not null))
+		{
+			HLayoutWithHierarchy layout = HLayoutWithHierarchy.Instantiate();
+			Fields.AddChild(layout);
+			
+			TextRect text = TextRect.Instantiate();
+			text.TextString = memberInfo.Name;
+			text.LocalScale = (0.5, 0.5);
+			text.MinimumSize = (150, 25);
+			text.Justification = TextJustification.Left;
+			layout.AddChild(text);
+			
+			if (memberInfo is FieldInfo fieldInfo)
+			{
+				if (editor.HasRegisteredFieldEditor(fieldInfo.FieldType))
+				{
+					IFieldEditor fieldEditor = editor.InstantiateFieldEditor(fieldInfo.FieldType);
+					fieldEditor.Load(fieldInfo.GetValue(selectedObject)!);
+					layout.AddChild(fieldEditor);
+				}
+			}
+			else if (memberInfo is PropertyInfo propertyInfo)
+			{
+				if (editor.HasRegisteredFieldEditor(propertyInfo.PropertyType))
+				{
+					IFieldEditor fieldEditor = editor.InstantiateFieldEditor(propertyInfo.PropertyType);
+					fieldEditor.Load(propertyInfo.GetValue(selectedObject)!);
+					layout.AddChild(fieldEditor);
+				}
+			}
+		}
+	}
+	
+	public void OnEditorInitialize(Editor editor) => this.editor = editor;
 }

@@ -81,7 +81,7 @@ public partial class ButtonRect : ICanBeLaidOut, IInitialize
 }
 
 
-[UsedImplicitly, SerializeExposedMembers, Prefab("Prefabs/Named.toml")]
+[UsedImplicitly, SerializeExposedMembers, Prefab("Prefabs/HLayoutWithHierarchy.toml")]
 public partial class HLayoutWithHierarchy : ICanBeLaidOut
 {
 	[SerializedReference, ExposeMembersInClass] public Named Named { get; set; } = null!;

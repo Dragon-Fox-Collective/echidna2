@@ -8,7 +8,12 @@ using StbSharp.MonoGame.Test;
 
 namespace Echidna2.Gui;
 
-public class Text : INotificationListener<IDraw.Notification>
+public interface IHasText
+{
+	public string TextString { get; set; }
+}
+
+public class Text : INotificationListener<IDraw.Notification>, IHasText
 {
 	public static readonly Font CascadiaCode = new("Assets/CascadiaCode.ttf");
 	private static readonly Shader Shader = new(ShaderNodeUtil.MainVertexShader, File.ReadAllText("Assets/font.frag"));
