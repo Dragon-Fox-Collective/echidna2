@@ -18,6 +18,8 @@ public class RenderTarget : IInitialize, INotificationHook<IDrawPass.Notificatio
 	[SerializedReference] public IHasCamera CameraHaver = null!;
 	public Camera Camera => CameraHaver.HavedCamera;
 	
+	public bool HasBeenInitialized { get; set; }
+	
 	public void OnInitialize()
 	{
 		colorTexture = GL.GenTexture();

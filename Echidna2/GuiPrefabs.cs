@@ -57,7 +57,7 @@ public partial class RectLayoutWithHierarchy : ICanBeLaidOut
 
 
 [UsedImplicitly, SerializeExposedMembers, Prefab("Prefabs/ButtonRect.toml")]
-public partial class ButtonRect : ICanBeLaidOut, IInitialize
+public partial class ButtonRect : ICanBeLaidOut
 {
 	[SerializedReference, ExposeMembersInClass] public Named Named { get; set; } = null!;
 	[SerializedReference, ExposeMembersInClass] public RectTransform RectTransform { get; set; } = null!;
@@ -65,6 +65,8 @@ public partial class ButtonRect : ICanBeLaidOut, IInitialize
 	[SerializedReference, ExposeMembersInClass] public Rect Rect { get; set; } = null!;
 	[SerializedReference, ExposeMembersInClass] public Hierarchy PrefabChildren { get; set; } = null!;
 	[SerializedReference, ExposeMembersInClass] public Button Button { get; set; } = null!;
+	
+	public bool HasBeenInitialized { get; set; }
 	
 	public virtual void OnInitialize()
 	{

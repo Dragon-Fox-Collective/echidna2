@@ -300,7 +300,7 @@ public partial class ObjectPanel
 	{
 		add => HierarchyDisplay.ItemSelected += value;
 		remove => HierarchyDisplay.ItemSelected -= value;
-	} 
+	}
 	
 	private object? prefab;
 	public object? Prefab

@@ -58,6 +58,19 @@ public interface INotificationPropagator
 	}
 }
 
+public interface IInitialize : INotificationListener<IInitialize.Notification>
+{
+	public class Notification;
+	public bool HasBeenInitialized { get; set; }
+	void INotificationListener<Notification>.OnNotify(Notification notification)
+	{
+		if (HasBeenInitialized)	return;
+		HasBeenInitialized = true;
+		OnInitialize();
+	}
+	public void OnInitialize();
+}
+
 public interface IPreUpdate : INotificationListener<IPreUpdate.Notification>
 {
 	public class Notification;

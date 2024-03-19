@@ -26,6 +26,7 @@ public class WorldSimulation : IUpdate, IInitialize
 	public readonly CollidableProperty<PhysicsMaterial> PhysicsMaterials = new();
 	public readonly CollidableProperty<CollisionFilter> CollisionFilters = new();
 	
+	public bool HasBeenInitialized { get; set; }
 	private bool hasBeenDisposed;
 	
 	public void OnInitialize()

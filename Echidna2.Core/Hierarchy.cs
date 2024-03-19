@@ -3,7 +3,7 @@ using Tomlyn.Model;
 
 namespace Echidna2.Core;
 
-public class Hierarchy : INotificationPropagator, IHasChildren, ICanAddChildren, ITomlSerializable
+public class Hierarchy : INotificationPropagator, IHasChildren, ICanAddChildren, ITomlSerializable, IInitialize
 {
 	public delegate void ChildAddedHandler(object child);
 	public event ChildAddedHandler? ChildAdded;
@@ -15,6 +15,8 @@ public class Hierarchy : INotificationPropagator, IHasChildren, ICanAddChildren,
 	
 	private HashSet<object> currentNotifications = [];
 	
+	public bool HasBeenInitialized { get; set; }
+	
 	public void Notify<T>(T notification) where T : notnull
 	{
 		if (!currentNotifications.Add(notification)) return;
@@ -25,6 +27,8 @@ public class Hierarchy : INotificationPropagator, IHasChildren, ICanAddChildren,
 	public void AddChild(object child)
 	{
 		children.Add(child);
+		if (HasBeenInitialized)
+			INotificationPropagator.Notify(new IInitialize.Notification(), child);
 		ChildAdded?.Invoke(child);
 	}
 	
@@ -66,6 +70,8 @@ public class Hierarchy : INotificationPropagator, IHasChildren, ICanAddChildren,
 				return false;
 		}
 	}
+	
+	public void OnInitialize() { }
 }
 
 public interface IHasChildren

@@ -1,13 +1,18 @@
 ﻿[1]
 Component = "Echidna2.DoubleFieldEditor, Echidna2"
 Rect = "2"
-Text = "3"
+Text = "4"
 
 [2]
 Prefab = "../Prefabs/FullLayoutWithHierarchy.toml"
+HorizontalExpand = true
 Children = [ "3" ]
 
 [3]
+Prefab = "../Prefabs/ButtonRect.toml"
+Children = [ "4" ]
+
+[4]
 Prefab = "../Prefabs/TextRect.toml"
 Justification = "Left"
 LocalScale = { X = 0.5, Y = 0.5 }
