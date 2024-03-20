@@ -36,7 +36,7 @@ public class Window
 		gameWindow.MouseDown += args => OnMouseDown(args.Button);
 		gameWindow.MouseUp += args => OnMouseUp(args.Button);
 		gameWindow.MouseWheel += args => OnMouseWheel(args.Offset);
-		gameWindow.KeyDown += args => OnKeyDown(args.Key, args.IsRepeat);
+		gameWindow.KeyDown += args => OnKeyDown(args.Key, args.Modifiers, args.IsRepeat);
 		gameWindow.KeyUp += args => OnKeyUp(args.Key);
 		gameWindow.Resize += args => OnResize(args.Size);
 	}
@@ -95,10 +95,11 @@ public class Window
 		Camera?.Notify(new IMouseWheelScrolled.Notification(offset, mousePosition, Camera.ScreenToGlobal(mousePosition)));
 	}
 	
-	private void OnKeyDown(Keys key, bool isRepeat)
+	private void OnKeyDown(Keys key, KeyModifiers modifiers, bool isRepeat)
 	{
 		if (!isRepeat)
 			Camera?.Notify(new IKeyDown.Notification(key));
+		Camera?.Notify(new ITextInput.Notification(key, modifiers));
 	}
 	
 	private void OnKeyUp(Keys key)

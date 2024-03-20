@@ -28,6 +28,8 @@ public class Text : INotificationListener<IDraw.Notification>, IHasText
 	
 	public void OnNotify(IDraw.Notification notification)
 	{
+		if (TextString.Length == 0) return;
+		
 		GL.Disable(EnableCap.CullFace);
 		GL.Enable(EnableCap.Blend);
 		GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);

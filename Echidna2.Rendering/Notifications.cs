@@ -82,6 +82,17 @@ public interface IKeyUp : INotificationListener<IKeyUp.Notification>
 	public void OnKeyUp(Keys key);
 }
 
+public interface ITextInput : INotificationListener<ITextInput.Notification>
+{
+	public class Notification(Keys key, KeyModifiers modifiers)
+	{
+		public Keys Key { get; } = key;
+		public KeyModifiers Modifiers { get; } = modifiers;
+	}
+	void INotificationListener<Notification>.OnNotify(Notification notification) => OnTextInput(notification.Key, notification.Modifiers);
+	public void OnTextInput(Keys key, KeyModifiers modifiers);
+}
+
 public interface IDispose : INotificationListener<IDispose.Notification>
 {
 	public class Notification;

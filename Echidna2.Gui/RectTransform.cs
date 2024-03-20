@@ -3,7 +3,20 @@ using Echidna2.Serialization;
 
 namespace Echidna2.Gui;
 
-public class RectTransform
+public interface IRectTransform
+{
+	public Vector2 LocalPosition { get; }
+	public Vector2 GlobalPosition { get; }
+	public Vector2 LocalSize { get; }
+	public Vector2 GlobalSize { get; }
+	public Vector2 LocalScale { get; }
+	public Matrix4 LocalTransform { get; }
+	public Matrix4 GlobalTransform { get; }
+	public int Depth { get; }
+	public Vector2 MinimumSize { get; }
+}
+
+public class RectTransform : IRectTransform
 {
 	public delegate void LocalTransformChangedHandler();
 	public event LocalTransformChangedHandler? LocalTransformChanged;
@@ -122,9 +135,12 @@ public class RectTransform
 	{
 		LocalTransform = Matrix4.FromTranslation(LocalPosition.WithZ(Depth)) * Matrix4.FromScale(LocalScale.WithZ(1));
 	}
-	
-	public bool ContainsGlobalPoint(Vector2 point) => ContainsLocalPoint(GlobalTransform.InverseTransformPoint(point));
-	public bool ContainsLocalPoint(Vector2 point) => point.X >= -LocalSize.X / 2 && point.X <= +LocalSize.X / 2 && point.Y >= -LocalSize.Y / 2 && point.Y <= +LocalSize.Y / 2;
+}
+
+public static class RectTransformExtensions
+{
+	public static bool ContainsGlobalPoint(this IRectTransform rectTransform, Vector2 point) => rectTransform.ContainsLocalPoint(rectTransform.GlobalTransform.InverseTransformPoint(point));
+	public static bool ContainsLocalPoint(this IRectTransform rectTransform, Vector2 point) => point.X >= -rectTransform.LocalSize.X / 2 && point.X <= +rectTransform.LocalSize.X / 2 && point.Y >= -rectTransform.LocalSize.Y / 2 && point.Y <= +rectTransform.LocalSize.Y / 2;
 }
 
 [Flags]

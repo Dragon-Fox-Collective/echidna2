@@ -2,7 +2,7 @@
 Component = "Echidna2.ComponentPanel, Echidna2"
 Name = "Component Panel"
 Rect = "1"
-Text = "3"
+NameText = "3"
 Fields = "4"
 
 [1]

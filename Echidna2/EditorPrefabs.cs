@@ -130,7 +130,7 @@ public partial class Editor : ICanBeLaidOut
 	
 	private Dictionary<Type, Func<IFieldEditor>> editorInstantiators = new()
 	{
-		{ typeof(double), DoubleFieldEditor.Instantiate },
+		{ typeof(string), StringFieldEditor.Instantiate },
 	};
 	
 	public void Notify<T>(T notification) where T : notnull
@@ -318,7 +318,7 @@ public partial class ObjectPanel
 public partial class ComponentPanel : IEditorInitialize
 {
 	[SerializedReference, ExposeMembersInClass] public FullRectWithHierarchy Rect { get; set; } = null!;
-	[SerializedReference] public TextRect Text { get; set; } = null!;
+	[SerializedReference] public TextRect NameText { get; set; } = null!;
 	[SerializedReference] public ICanAddChildren Fields { get; set; } = null!;
 	
 	private Editor editor = null!;
@@ -330,7 +330,16 @@ public partial class ComponentPanel : IEditorInitialize
 		set
 		{
 			selectedObject = value;
-			Text.TextString = INamed.GetName(selectedObject) ?? "(no object selected)";
+			if (selectedObject is not null)
+			{
+				if (selectedObject is INamed named)
+					named.NameChanged += name => NameText.TextString = name;
+				NameText.TextString = INamed.GetName(selectedObject);
+			}
+			else
+			{
+				NameText.TextString = "(no object selected)";
+			}
 			RefreshFields();
 		}
 	}
@@ -358,6 +367,7 @@ public partial class ComponentPanel : IEditorInitialize
 				{
 					IFieldEditor fieldEditor = editor.InstantiateFieldEditor(fieldInfo.FieldType);
 					fieldEditor.Load(fieldInfo.GetValue(selectedObject)!);
+					fieldEditor.ValueChanged += value => fieldInfo.SetValue(selectedObject, value);
 					layout.AddChild(fieldEditor);
 				}
 			}
@@ -367,6 +377,7 @@ public partial class ComponentPanel : IEditorInitialize
 				{
 					IFieldEditor fieldEditor = editor.InstantiateFieldEditor(propertyInfo.PropertyType);
 					fieldEditor.Load(propertyInfo.GetValue(selectedObject)!);
+					fieldEditor.ValueChanged += value => propertyInfo.SetValue(selectedObject, value);
 					layout.AddChild(fieldEditor);
 				}
 			}

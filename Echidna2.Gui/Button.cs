@@ -5,16 +5,23 @@ using OpenTK.Windowing.GraphicsLibraryFramework;
 
 namespace Echidna2.Gui;
 
-public class Button : IMouseDown, IMouseUp, IMouseMoved
+public interface IButton
+{
+	public event Action? Clicked;
+}
+
+public class Button : IButton, IMouseDown, IMouseUp, IMouseMoved
 {
 	[SerializedEvent] public event Action? Clicked;
 	public event Action? Dragged;
 	public event Action? MouseDown;
+	public event Action? MouseDownOutside;
 	public event Action? MouseUp;
+	public event Action? MouseUpOutside;
 	public event Action? MouseEnter;
 	public event Action? MouseExit;
 	
-	[SerializedReference] public RectTransform RectTransform { get; set; } = null!;
+	[SerializedReference] public IRectTransform RectTransform { get; set; } = null!;
 	
 	private bool wasPressed;
 	private bool wasInside;
@@ -27,6 +34,10 @@ public class Button : IMouseDown, IMouseUp, IMouseMoved
 		{
 			wasPressed = true;
 			MouseDown?.Invoke();
+		}
+		else
+		{
+			MouseDownOutside?.Invoke();
 		}
 	}
 	
@@ -41,6 +52,10 @@ public class Button : IMouseDown, IMouseUp, IMouseMoved
 			
 			if (RectTransform.ContainsGlobalPoint(globalPosition.XY))
 				Clicked?.Invoke();
+		}
+		else
+		{
+			MouseUpOutside?.Invoke();
 		}
 	}
 	
