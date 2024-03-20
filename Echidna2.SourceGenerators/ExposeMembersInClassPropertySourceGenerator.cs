@@ -49,13 +49,7 @@ public class ExposeMembersInClassPropertySourceGenerator : IIncrementalGenerator
 		INamedTypeSymbol classType = symbol.ContainingType;
 		INamedTypeSymbol prefabType = (INamedTypeSymbol)symbol.Type;
 		string propertyName = symbol.Name;
-		INamedTypeSymbol[] interfaces = GetAllExposedInterfaces(prefabType)
-			.Where(inter =>
-				inter.Name != "INotificationListener"
-				&& inter.Name != "INotificationHook"
-				&& inter.Name != "INotificationPredicate"
-				&& inter.Name != "ITomlSerializable")
-			.ToArray();
+		INamedTypeSymbol[] interfaces = GetAllExposedInterfaces(prefabType).ToArray();
 		
 		string source = "#nullable enable\n";
 		if (!classType.ContainingNamespace.IsGlobalNamespace)
@@ -94,16 +88,16 @@ public class ExposeMembersInClassPropertySourceGenerator : IIncrementalGenerator
 	
 	public static IEnumerable<INamedTypeSymbol> GetAllExposedInterfacesIncludingConflicts(ITypeSymbol type)
 	{
-		foreach (INamedTypeSymbol inter in type.AllInterfaces)
+		foreach (INamedTypeSymbol inter in type.AllInterfaces.Where(inter => !inter.GetAttributes().Any(attribute => attribute.AttributeClass?.Name == "DontExposeAttribute")))
 			yield return inter;
 		
 		foreach (ISymbol member in type.GetMembers())
 		{
 			if (member is IPropertySymbol property && property.GetAttributes().Any(attribute => attribute.AttributeClass?.Name == "ExposeMembersInClassAttribute"))
-				foreach (INamedTypeSymbol member2 in GetAllExposedInterfaces(property.Type))
+				foreach (INamedTypeSymbol member2 in GetAllExposedInterfacesIncludingConflicts(property.Type))
 					yield return member2;
 			else if (member is IFieldSymbol field && field.GetAttributes().Any(attribute => attribute.AttributeClass?.Name == "ExposeMembersInClassAttribute"))
-				foreach (INamedTypeSymbol member2 in GetAllExposedInterfaces(field.Type))
+				foreach (INamedTypeSymbol member2 in GetAllExposedInterfacesIncludingConflicts(field.Type))
 					yield return member2;
 		}
 	}

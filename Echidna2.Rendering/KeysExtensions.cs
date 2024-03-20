@@ -40,16 +40,20 @@ public static class KeysExtensions
 			value = value.Insert(cursorPosition++, "8");
 		else if (key is Keys.D9 or Keys.KeyPad9)
 			value = value.Insert(cursorPosition++, "9");
-		else if (key is Keys.KeyPadDivide)
+		else if (key is Keys.Slash or Keys.KeyPadDivide)
 			value = value.Insert(cursorPosition++, "/");
 		else if (key is Keys.KeyPadMultiply)
 			value = value.Insert(cursorPosition++, "*");
-		else if (key is Keys.KeyPadSubtract)
+		else if (key is Keys.Minus or Keys.KeyPadSubtract)
 			value = value.Insert(cursorPosition++, "-");
 		else if (key is Keys.KeyPadAdd)
 			value = value.Insert(cursorPosition++, "+");
-		else if (key is Keys.KeyPadDecimal)
+		else if (key is Keys.Period or Keys.KeyPadDecimal)
 			value = value.Insert(cursorPosition++, ".");
+		else if (key is Keys.Comma)
+			value = value.Insert(cursorPosition++, ",");
+		else if (key is Keys.Semicolon)
+			value = value.Insert(cursorPosition++, ";");
 		else if (key is Keys.Home or Keys.PageUp)
 			cursorPosition = 0;
 		else if (key is Keys.End or Keys.PageDown)

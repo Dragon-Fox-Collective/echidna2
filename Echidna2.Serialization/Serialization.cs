@@ -1,9 +1,11 @@
 ﻿using System.Reflection;
+using Echidna2.SourceGenerators;
 using Tomlyn;
 using Tomlyn.Model;
 
 namespace Echidna2.Serialization;
 
+[DontExpose]
 public interface ITomlSerializable
 {
 	public void Serialize(TomlTable table);

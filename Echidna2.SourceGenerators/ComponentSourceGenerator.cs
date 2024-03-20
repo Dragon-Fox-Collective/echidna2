@@ -93,9 +93,10 @@ public class ComponentSourceGenerator : IIncrementalGenerator
 			&& !member.Name.StartsWith("set_")
 			&& !member.Name.StartsWith("add_")
 			&& !member.Name.StartsWith("remove_")
-			&& member.Name != "Serialize"
+			&& member.Name != "Serialize" // Preemptively prevent duplicate methods
 			&& member.Name != "DeserializeValue"
 			&& member.Name != "DeserializeReference"
+			&& member.Name != ".ctor"
 			&& !classType.GetMembers(member.Name).Any());
 	
 	private static IEnumerable<ISymbol> GetAllUnimplementedInterfaceMembers(INamedTypeSymbol classType, INamedTypeSymbol interfaceType) =>
@@ -121,11 +122,11 @@ public class ComponentSourceGenerator : IIncrementalGenerator
 				]).Where(constraint => constraint != null).ToArray())).Select(args => $" where {args.typeParameter} : {string.Join(", ", args.Item2)}"))
 				+ " => "
 				+ $"{propertyName}.{method.Name}({string.Join(", ", method.Parameters.Select(parameter => parameter.Name))});\n",
-			IPropertySymbol { GetMethod: not null, SetMethod: not null } property =>
+			IPropertySymbol { GetMethod.DeclaredAccessibility: Accessibility.Public, SetMethod.DeclaredAccessibility: Accessibility.Public } property =>
 				$"\t{attributes}{accessibility} {property.Type} {property.Name} {{ get => {propertyName}.{property.Name}; set => {propertyName}.{property.Name} = value; }}\n",
-			IPropertySymbol { GetMethod: not null } property =>
+			IPropertySymbol { GetMethod.DeclaredAccessibility: Accessibility.Public } property =>
 				$"\t{attributes}{accessibility} {property.Type} {property.Name} => {propertyName}.{property.Name};\n",
-			IPropertySymbol { SetMethod: not null } property =>
+			IPropertySymbol { SetMethod.DeclaredAccessibility: Accessibility.Public } property =>
 				$"\t{attributes}{accessibility} {property.Type} {property.Name} {{ set => {propertyName}.{property.Name} = value; }}\n",
 			IEventSymbol @event =>
 				$"\t{attributes}{accessibility} event {@event.Type} {@event.Name} {{ add => {propertyName}.{@event.Name} += value; remove => {propertyName}.{@event.Name} -= value; }}\n",
@@ -147,5 +148,5 @@ public class SymbolSignatureEqualityComparer : IEqualityComparer<ISymbol>
 		if (x.Name != y.Name) return false;
 		return true;
 	}
-	public int GetHashCode(ISymbol obj) => obj.Name.GetHashCode();
+	public int GetHashCode(ISymbol obj) => (obj.Kind, obj.Name).GetHashCode();
 }

@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Drawing;
+using System.Reflection;
 using Echidna2.Core;
 using Echidna2.Gui;
 using Echidna2.Mathematics;
@@ -55,7 +56,7 @@ public partial class HierarchyDisplay : INotificationPropagator, ICanBeLaidOut
 		layout.AddChild(button);
 		
 		TextRect text = TextRect.Instantiate();
-		text.TextString = INamed.GetName(obj) ?? "(no prefab loaded)";
+		text.TextString = INamed.GetName(obj);
 		text.Justification = TextJustification.Left;
 		text.AnchorPreset = AnchorPreset.Full;
 		text.MinimumSize = (0, 25);
@@ -76,7 +77,7 @@ public partial class HierarchyDisplay : INotificationPropagator, ICanBeLaidOut
 }
 
 [UsedImplicitly, SerializeExposedMembers, Prefab("Prefabs/Cube.toml")]
-public partial class Cube
+public partial class Cube : INotificationPropagator
 {
 	[SerializedReference, ExposeMembersInClass] public Named Named { get; set; } = null!;
 	[SerializedReference, ExposeMembersInClass] public Transform3D Transform { get; set; } = null!;
@@ -90,7 +91,7 @@ public partial class Cube
 }
 
 [UsedImplicitly, SerializeExposedMembers, Prefab("Prefabs/Editor.toml")]
-public partial class Editor : ICanBeLaidOut
+public partial class Editor : INotificationPropagator, ICanBeLaidOut
 {
 	[SerializedReference, ExposeMembersInClass] public Named Named { get; set; } = null!;
 	[SerializedReference, ExposeMembersInClass] public RectTransform RectTransform { get; set; } = null!;
@@ -108,7 +109,9 @@ public partial class Editor : ICanBeLaidOut
 		{
 			if (objectPanel is not null)
 				objectPanel.ItemSelected -= OnObjectSelected;
+			
 			objectPanel = value;
+			
 			if (objectPanel is not null)
 				objectPanel.ItemSelected += OnObjectSelected;
 		}
@@ -131,6 +134,7 @@ public partial class Editor : ICanBeLaidOut
 	private Dictionary<Type, Func<IFieldEditor>> editorInstantiators = new()
 	{
 		{ typeof(string), StringFieldEditor.Instantiate },
+		{ typeof(double), DoubleFieldEditor.Instantiate }
 	};
 	
 	public void Notify<T>(T notification) where T : notnull
@@ -150,7 +154,7 @@ public partial class Editor : ICanBeLaidOut
 }
 
 [UsedImplicitly, SerializeExposedMembers, Prefab("Prefabs/EditorViewportGui.toml")]
-public partial class EditorViewportGui : IMouseDown, IMouseMoved, IMouseUp, IMouseWheelScrolled
+public partial class EditorViewportGui : INotificationPropagator, IMouseDown, IMouseMoved, IMouseUp, IMouseWheelScrolled
 {
 	[SerializedReference, ExposeMembersInClass] public ViewportGui Viewport { get; set; } = null!;
 	
@@ -197,7 +201,7 @@ public partial class EditorViewportGui : IMouseDown, IMouseMoved, IMouseUp, IMou
 }
 
 [UsedImplicitly, SerializeExposedMembers, Prefab("Prefabs/EditorViewport3D.toml")]
-public partial class EditorViewport3D : IMouseDown, IMouseMoved, IMouseUp, IMouseWheelScrolled, IKeyDown, IKeyUp
+public partial class EditorViewport3D : INotificationPropagator, IUpdate, IMouseDown, IMouseMoved, IMouseUp, IMouseWheelScrolled, IKeyDown, IKeyUp
 {
 	[SerializedReference, ExposeMembersInClass] public Viewport3D Viewport { get; set; } = null!;
 	[SerializedReference] public Transform3D CameraPivot { get; set; } = null!;
@@ -291,7 +295,7 @@ public partial class EditorViewport3D : IMouseDown, IMouseMoved, IMouseUp, IMous
 }
 
 [UsedImplicitly, SerializeExposedMembers, Prefab("Prefabs/ObjectPanel.toml")]
-public partial class ObjectPanel
+public partial class ObjectPanel : INotificationPropagator
 {
 	[SerializedReference, ExposeMembersInClass] public FullRectWithHierarchy Rect { get; set; } = null!;
 	[SerializedReference] public HierarchyDisplay HierarchyDisplay { get; set; } = null!;
@@ -312,10 +316,15 @@ public partial class ObjectPanel
 			HierarchyDisplay.HierarchyToDisplay = prefab as IHasChildren;
 		}
 	}
+	
+	public void Notify<T>(T notification) where T : notnull
+	{
+		INotificationPropagator.Notify(notification, Rect);
+	}
 }
 
 [UsedImplicitly, SerializeExposedMembers, Prefab("Prefabs/ComponentPanel.toml")]
-public partial class ComponentPanel : IEditorInitialize
+public partial class ComponentPanel : INotificationPropagator, IEditorInitialize
 {
 	[SerializedReference, ExposeMembersInClass] public FullRectWithHierarchy Rect { get; set; } = null!;
 	[SerializedReference] public TextRect NameText { get; set; } = null!;
@@ -385,4 +394,9 @@ public partial class ComponentPanel : IEditorInitialize
 	}
 	
 	public void OnEditorInitialize(Editor editor) => this.editor = editor;
+	
+	public void Notify<T>(T notification) where T : notnull
+	{
+		INotificationPropagator.Notify(notification, Rect);
+	}
 }

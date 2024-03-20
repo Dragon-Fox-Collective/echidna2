@@ -1,10 +1,14 @@
-﻿namespace Echidna2.Core;
+﻿using Echidna2.SourceGenerators;
 
+namespace Echidna2.Core;
+
+[DontExpose]
 public interface INotificationListener<in T>
 {
 	public void OnNotify(T notification);
 }
 
+[DontExpose]
 public interface INotificationHook<in T>
 {
 	public void OnPreNotify(T notification);
@@ -12,11 +16,13 @@ public interface INotificationHook<in T>
 	public void OnPostPropagate(T notification);
 }
 
+[DontExpose]
 public interface INotificationPredicate<in T>
 {
 	public bool ShouldNotificationPropagate(T notification);
 }
 
+[DontExpose]
 public interface INotificationPropagator
 {
 	public void Notify<T>(T notification) where T : notnull;
@@ -58,6 +64,7 @@ public interface INotificationPropagator
 	}
 }
 
+[DontExpose]
 public interface IInitialize : INotificationListener<IInitialize.Notification>
 {
 	public class Notification;
@@ -71,6 +78,7 @@ public interface IInitialize : INotificationListener<IInitialize.Notification>
 	public void OnInitialize();
 }
 
+[DontExpose]
 public interface IPreUpdate : INotificationListener<IPreUpdate.Notification>
 {
 	public class Notification;
@@ -78,6 +86,7 @@ public interface IPreUpdate : INotificationListener<IPreUpdate.Notification>
 	public void OnPreUpdate();
 }
 
+[DontExpose]
 public interface IUpdate : INotificationListener<IUpdate.Notification>
 {
 	public class Notification(double deltaTime)

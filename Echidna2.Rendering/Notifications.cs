@@ -1,9 +1,11 @@
 ﻿using Echidna2.Core;
 using Echidna2.Mathematics;
+using Echidna2.SourceGenerators;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 
 namespace Echidna2.Rendering;
 
+[DontExpose]
 public interface IDraw : INotificationListener<IDraw.Notification>
 {
 	public class Notification(Camera camera)
@@ -14,6 +16,7 @@ public interface IDraw : INotificationListener<IDraw.Notification>
 	public void OnDraw();
 }
 
+[DontExpose]
 public interface IMouseMoved : INotificationListener<IMouseMoved.Notification>
 {
 	public class Notification(Vector2 position, Vector2 delta, Vector3 globalPosition)
@@ -26,6 +29,7 @@ public interface IMouseMoved : INotificationListener<IMouseMoved.Notification>
 	public void OnMouseMoved(Vector2 position, Vector2 delta, Vector3 globalPosition);
 }
 
+[DontExpose]
 public interface IMouseDown : INotificationListener<IMouseDown.Notification>
 {
 	public class Notification(MouseButton button, Vector2 position, Vector3 globalPosition)
@@ -38,6 +42,7 @@ public interface IMouseDown : INotificationListener<IMouseDown.Notification>
 	public void OnMouseDown(MouseButton button, Vector2 position, Vector3 globalPosition);
 }
 
+[DontExpose]
 public interface IMouseUp : INotificationListener<IMouseUp.Notification>
 {
 	public class Notification(MouseButton button, Vector2 position, Vector3 globalPosition)
@@ -50,6 +55,7 @@ public interface IMouseUp : INotificationListener<IMouseUp.Notification>
 	public void OnMouseUp(MouseButton button, Vector2 position, Vector3 globalPosition);
 }
 
+[DontExpose]
 public interface IMouseWheelScrolled : INotificationListener<IMouseWheelScrolled.Notification>
 {
 	public class Notification(Vector2 offset, Vector2 position, Vector3 globalPosition)
@@ -62,6 +68,7 @@ public interface IMouseWheelScrolled : INotificationListener<IMouseWheelScrolled
 	public void OnMouseWheelScrolled(Vector2 offset, Vector2 position, Vector3 globalPosition);
 }
 
+[DontExpose]
 public interface IKeyDown : INotificationListener<IKeyDown.Notification>
 {
 	public class Notification(Keys key)
@@ -72,6 +79,7 @@ public interface IKeyDown : INotificationListener<IKeyDown.Notification>
 	public void OnKeyDown(Keys key);
 }
 
+[DontExpose]
 public interface IKeyUp : INotificationListener<IKeyUp.Notification>
 {
 	public class Notification(Keys key)
@@ -82,6 +90,7 @@ public interface IKeyUp : INotificationListener<IKeyUp.Notification>
 	public void OnKeyUp(Keys key);
 }
 
+[DontExpose]
 public interface ITextInput : INotificationListener<ITextInput.Notification>
 {
 	public class Notification(Keys key, KeyModifiers modifiers)
