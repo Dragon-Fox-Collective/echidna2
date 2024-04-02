@@ -93,7 +93,7 @@ public class ComponentSourceGenerator : IIncrementalGenerator
 			&& !member.Name.StartsWith("set_")
 			&& !member.Name.StartsWith("add_")
 			&& !member.Name.StartsWith("remove_")
-			&& member.Name != "Serialize" // Preemptively prevent duplicate methods
+			&& member.Name != "SerializeReferences" // Preemptively prevent duplicate methods
 			&& member.Name != "DeserializeValue"
 			&& member.Name != "DeserializeReference"
 			&& member.Name != ".ctor"

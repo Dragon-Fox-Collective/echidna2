@@ -48,9 +48,12 @@ public class Hierarchy : INotificationPropagator, IHasChildren, ICanAddChildren,
 			RemoveChild(children[0]);
 	}
 	
-	public void Serialize(TomlTable table)
+	public void SerializeReferences(TomlTable table, Func<object, string> getReferenceTo)
 	{
-		
+		TomlArray serializedChildren = [];
+		foreach (string reference in children.Select(getReferenceTo))
+			serializedChildren.Add(reference);
+		table.Add("Children", serializedChildren);
 	}
 	
 	public bool DeserializeValue(string id, object value)

@@ -8,12 +8,87 @@ namespace Echidna2.Serialization;
 [DontExpose]
 public interface ITomlSerializable
 {
-	public void Serialize(TomlTable table);
+	public void SerializeReferences(TomlTable table, Func<object, string> getReferenceTo);
 	public bool DeserializeValue(string id, object value);
 	public bool DeserializeReference(string id, object value, Dictionary<string, object> references);
 }
 
 public static class TomlSerializer
+{
+	public static void Serialize<T>(T component, string path) where T : class
+	{
+		Dictionary<object, string> references = new();
+		Dictionary<object, TomlTable> tables = new();
+		GetReferenceTo(component);
+		
+		TomlTable prefabTable = new();
+		foreach ((string id, TomlTable table) in references.Select(pair => (pair.Value, tables[pair.Key])))
+			prefabTable.Add(id, table);
+		
+		Console.WriteLine(Toml.FromModel(prefabTable));
+		// SerializeValues(component, table);
+		// SerializeEvents(component, table);
+		// File.WriteAllText(path, Toml.FromModel(table));
+		return;
+		
+		string GetReferenceTo(object subcomponent)
+		{
+			if (!references.TryGetValue(subcomponent, out string? id))
+			{
+                id = references.Count.ToString();
+                references.Add(subcomponent, id);
+				tables.Add(subcomponent, SerializeReferences(subcomponent, GetReferenceTo, path));
+			}
+			return id;
+		}
+	}
+	
+	private static string GetPathRelativeTo(string path, string relativeTo)
+	{
+		Uri pathUri = new(path);
+		Uri relativeToUri = new(relativeTo);
+		Uri relativeUri = relativeToUri.MakeRelativeUri(pathUri);
+		return Uri.UnescapeDataString(relativeUri.ToString());
+	}
+	
+	private static TomlTable SerializeReferences(object component, Func<object, string> getReferenceTo, string relativeTo)
+	{
+		TomlTable table = new();
+		
+		if (component is IPrefab prefab)
+		{
+			table.Add("Prefab", GetPathRelativeTo(prefab.PrefabPath, relativeTo));
+		}
+		else
+		{
+			table.Add("Component", component.GetType().AssemblyQualifiedName!.Split(',')[..2].Join(","));
+			
+			foreach (MemberInfo member in component.GetType()
+				         .GetMembers(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
+				         .Where(member => member.GetCustomAttribute<SerializedReferenceAttribute>() is not null))
+			{
+				object? subcomponent = member switch
+				{
+					FieldInfo field => field.GetValue(component),
+					PropertyInfo property => property.GetValue(component),
+					_ => throw new InvalidOperationException($"Member {member} is not a field or property")
+				};
+				if (subcomponent is null) continue;
+				string subcomponentReference = getReferenceTo(subcomponent);
+				table.Add(member.Name, subcomponentReference);
+			}
+			
+			if (component is ITomlSerializable serializable)
+				serializable.SerializeReferences(table, getReferenceTo);
+			
+			return table;
+		}
+		
+		return table;
+	}
+}
+
+public static class TomlDeserializer
 {
 	public static Assembly ProjectAssembly = null!;
 	

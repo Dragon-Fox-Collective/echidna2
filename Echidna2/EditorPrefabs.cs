@@ -1,5 +1,4 @@
-﻿using System.Drawing;
-using System.Reflection;
+﻿using System.Reflection;
 using Echidna2.Core;
 using Echidna2.Gui;
 using Echidna2.Mathematics;
@@ -57,6 +56,8 @@ public partial class HierarchyDisplay : INotificationPropagator, ICanBeLaidOut
 		
 		TextRect text = TextRect.Instantiate();
 		text.TextString = INamed.GetName(obj);
+		if (obj is INamed named)
+			named.NameChanged += name => text.TextString = name;
 		text.Justification = TextJustification.Left;
 		text.AnchorPreset = AnchorPreset.Full;
 		text.MinimumSize = (0, 25);
@@ -76,13 +77,15 @@ public partial class HierarchyDisplay : INotificationPropagator, ICanBeLaidOut
 	}
 }
 
-[UsedImplicitly, SerializeExposedMembers, Prefab("Prefabs/Cube.toml")]
-public partial class Cube : INotificationPropagator
+[UsedImplicitly, SerializeExposedMembers]
+public partial class Cube : INotificationPropagator, IPrefab
 {
 	[SerializedReference, ExposeMembersInClass] public Named Named { get; set; } = null!;
 	[SerializedReference, ExposeMembersInClass] public Transform3D Transform { get; set; } = null!;
 	[SerializedReference, ExposeMembersInClass] public PBRMeshRenderer MeshRenderer { get; set; } = null!;
 	[SerializedReference, ExposeMembersInClass] public Hierarchy PrefabChildren { get; set; } = null!;
+	
+	public string PrefabPath => $"{AppContext.BaseDirectory}/Prefabs/Cube.toml";
 	
 	public void Notify<T>(T notification) where T : notnull
 	{
@@ -151,6 +154,14 @@ public partial class Editor : INotificationPropagator, ICanBeLaidOut
 	public void RegisterFieldEditor<TFieldType, TFieldEditor>() where TFieldEditor : IFieldEditor<TFieldType> => editorInstantiators.Add(typeof(TFieldType), TFieldEditor.Instantiate);
 	public IFieldEditor InstantiateFieldEditor(Type type) => editorInstantiators[type]();
 	public bool HasRegisteredFieldEditor(Type type) => editorInstantiators.ContainsKey(type);
+	
+	public void SerializePrefab()
+	{
+		if (Prefab is null)
+			return;
+		
+		TomlSerializer.Serialize(Prefab, PrefabPath);
+	}
 }
 
 [UsedImplicitly, SerializeExposedMembers, Prefab("Prefabs/EditorViewportGui.toml")]
@@ -358,7 +369,9 @@ public partial class ComponentPanel : INotificationPropagator, IEditorInitialize
 		Fields.ClearChildren();
 		if (selectedObject is null) return;
 		
-		foreach (MemberInfo memberInfo in selectedObject.GetType().GetMembers(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance).Where(member => member.GetCustomAttribute<SerializedValueAttribute>() is not null))
+		foreach (MemberInfo memberInfo in selectedObject.GetType()
+			         .GetMembers(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
+			         .Where(member => member.GetCustomAttribute<SerializedValueAttribute>() is not null))
 		{
 			HLayoutWithHierarchy layout = HLayoutWithHierarchy.Instantiate();
 			Fields.AddChild(layout);
@@ -376,7 +389,11 @@ public partial class ComponentPanel : INotificationPropagator, IEditorInitialize
 				{
 					IFieldEditor fieldEditor = editor.InstantiateFieldEditor(fieldInfo.FieldType);
 					fieldEditor.Load(fieldInfo.GetValue(selectedObject)!);
-					fieldEditor.ValueChanged += value => fieldInfo.SetValue(selectedObject, value);
+					fieldEditor.ValueChanged += value =>
+					{
+						fieldInfo.SetValue(selectedObject, value);
+						editor.SerializePrefab();
+					};
 					layout.AddChild(fieldEditor);
 				}
 			}
@@ -386,7 +403,11 @@ public partial class ComponentPanel : INotificationPropagator, IEditorInitialize
 				{
 					IFieldEditor fieldEditor = editor.InstantiateFieldEditor(propertyInfo.PropertyType);
 					fieldEditor.Load(propertyInfo.GetValue(selectedObject)!);
-					fieldEditor.ValueChanged += value => propertyInfo.SetValue(selectedObject, value);
+					fieldEditor.ValueChanged += value =>
+					{
+						propertyInfo.SetValue(selectedObject, value);
+						editor.SerializePrefab();
+					};
 					layout.AddChild(fieldEditor);
 				}
 			}

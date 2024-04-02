@@ -26,7 +26,7 @@ public class Rect : INotificationListener<IDraw.Notification>, ITomlSerializable
 		Mesh.Quad.Draw();
 	}
 	
-	public void Serialize(TomlTable table)
+	public void SerializeReferences(TomlTable table, Func<object, string> getReferenceTo)
 	{
 		
 	}

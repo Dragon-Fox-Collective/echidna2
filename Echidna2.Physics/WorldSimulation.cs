@@ -7,7 +7,6 @@ using BepuPhysics.Constraints;
 using BepuUtilities;
 using BepuUtilities.Memory;
 using Echidna2.Core;
-using Echidna2.Rendering;
 using Echidna2.Rendering3D;
 using Echidna2.Serialization;
 

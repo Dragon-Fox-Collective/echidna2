@@ -74,7 +74,7 @@ public class DynamicBody : IUpdate, IInitializeIntoSimulation, ITomlSerializable
 		GlobalRotation = Reference.Pose.Orientation;
 	}
 	
-	public void Serialize(TomlTable table)
+	public void SerializeReferences(TomlTable table, Func<object, string> getReferenceTo)
 	{
 		
 	}

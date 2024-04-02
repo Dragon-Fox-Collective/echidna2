@@ -65,7 +65,7 @@ public class SerializeExposedMembersSourceGenerator : IIncrementalGenerator
 		source += "{\n";
 		
 		source += $"\tprivate IEnumerable<Echidna2.Serialization.ITomlSerializable> ChildSerializables => EnumerableOf.Of<Echidna2.Serialization.ITomlSerializable?>({string.Join(", ", childSerializables.Select(child => child.Name))}).Where(child => child != null)!;\n";
-		source += "\tpublic void Serialize(Tomlyn.Model.TomlTable table) => ChildSerializables.ForEach(serializable => serializable.Serialize(table));\n";
+		source += "\tpublic void SerializeReferences(Tomlyn.Model.TomlTable table, Func<object, string> getReferenceTo) => ChildSerializables.ForEach(serializable => serializable.SerializeReferences(table, getReferenceTo));\n";
 		source += "\tpublic bool DeserializeValue(string id, object value) => ChildSerializables.Any(serializable => serializable.DeserializeValue(id, value));\n";
 		source += "\tpublic bool DeserializeReference(string id, object value, Dictionary<string, object> references) => ChildSerializables.Any(serializable => serializable.DeserializeReference(id, value, references));\n";
 		

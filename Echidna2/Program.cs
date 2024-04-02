@@ -11,17 +11,18 @@ Compilation.CompileCSProj("Prefabs/Editor.toml");
 
 AssemblyLoadContext projectAssemblyLoadContext = new("EchidnaProject");
 using FileStream proejctAssemblyFileStream = new(Compilation.CompilationDllPath, FileMode.Open, FileAccess.Read);
-TomlSerializer.ProjectAssembly = projectAssemblyLoadContext.LoadFromStream(proejctAssemblyFileStream);
+TomlDeserializer.ProjectAssembly = projectAssemblyLoadContext.LoadFromStream(proejctAssemblyFileStream);
 
 
-Editor root = TomlSerializer.Deserialize<Editor>($"{AppContext.BaseDirectory}/Prefabs/Editor.toml");
+Editor root = TomlDeserializer.Deserialize<Editor>($"{AppContext.BaseDirectory}/Prefabs/Editor.toml");
 root.Notify(new IEditorInitialize.Notification(root));
 
-IHasChildren prefab = TomlSerializer.Deserialize<IHasChildren>($"{AppContext.BaseDirectory}/{root.PrefabPath}");
+IHasChildren prefab = TomlDeserializer.Deserialize<IHasChildren>($"{AppContext.BaseDirectory}/{root.PrefabPath}");
 root.Prefab = prefab;
 
 
 IHasChildren.PrintTree(root);
+TomlSerializer.Serialize(prefab, $"{AppContext.BaseDirectory}/{root.PrefabPath}");
 
 Window window = new(new GameWindow(
 	new GameWindowSettings(),

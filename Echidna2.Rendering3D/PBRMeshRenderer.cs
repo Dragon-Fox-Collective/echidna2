@@ -37,7 +37,7 @@ public class PBRMeshRenderer : INotificationListener<IDraw.Notification>, ITomlS
 		Mesh.Draw();
 	}
 	
-	public void Serialize(TomlTable table)
+	public void SerializeReferences(TomlTable table, Func<object, string> getReferenceTo)
 	{
 		
 	}

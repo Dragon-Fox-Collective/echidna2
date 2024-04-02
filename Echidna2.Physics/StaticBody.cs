@@ -44,7 +44,7 @@ public class StaticBody : IInitializeIntoSimulation, ITomlSerializable
 		Reference = simulation[Handle];
 	}
 	
-	public void Serialize(TomlTable table)
+	public void SerializeReferences(TomlTable table, Func<object, string> getReferenceTo)
 	{
 		
 	}

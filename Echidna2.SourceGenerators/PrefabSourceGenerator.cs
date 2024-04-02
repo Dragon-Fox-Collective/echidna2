@@ -56,7 +56,7 @@ public class PrefabSourceGenerator : IIncrementalGenerator
 		source += $"partial class {className}\n";
 		source += "{\n";
 		
-		source += $"\tpublic static {className} Instantiate() => Echidna2.Serialization.TomlSerializer.Deserialize<{className}>($\"{{AppContext.BaseDirectory}}/{path}\");\n";
+		source += $"\tpublic static {className} Instantiate() => Echidna2.Serialization.TomlDeserializer.Deserialize<{className}>($\"{{AppContext.BaseDirectory}}/{path}\");\n";
 		
 		source += "}";
 		return source;
