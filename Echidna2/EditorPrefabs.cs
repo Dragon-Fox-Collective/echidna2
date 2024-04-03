@@ -77,15 +77,13 @@ public partial class HierarchyDisplay : INotificationPropagator, ICanBeLaidOut
 	}
 }
 
-[UsedImplicitly, SerializeExposedMembers]
-public partial class Cube : INotificationPropagator, IPrefab
+[UsedImplicitly, SerializeExposedMembers, Prefab("Prefabs/Cube.toml")]
+public partial class Cube : INotificationPropagator
 {
 	[SerializedReference, ExposeMembersInClass] public Named Named { get; set; } = null!;
 	[SerializedReference, ExposeMembersInClass] public Transform3D Transform { get; set; } = null!;
 	[SerializedReference, ExposeMembersInClass] public PBRMeshRenderer MeshRenderer { get; set; } = null!;
 	[SerializedReference, ExposeMembersInClass] public Hierarchy PrefabChildren { get; set; } = null!;
-	
-	public string PrefabPath => $"{AppContext.BaseDirectory}/Prefabs/Cube.toml";
 	
 	public void Notify<T>(T notification) where T : notnull
 	{
@@ -120,17 +118,17 @@ public partial class Editor : INotificationPropagator, ICanBeLaidOut
 		}
 	}
 	
-	private object? prefab;
-	public object? Prefab
+	private PrefabRoot? prefabRoot;
+	public PrefabRoot? PrefabRoot
 	{
-		get => prefab;
+		get => prefabRoot;
 		set
 		{
 			Viewport.ClearChildren();
-			prefab = value;
-			ObjectPanel.Prefab = value;
-			if (prefab is not null)
-				Viewport.AddChild(prefab);
+			prefabRoot = value;
+			ObjectPanel.PrefabRoot = value;
+			if (prefabRoot is not null)
+				Viewport.AddChild(prefabRoot.RootObject);
 		}
 	}
 	
@@ -157,10 +155,10 @@ public partial class Editor : INotificationPropagator, ICanBeLaidOut
 	
 	public void SerializePrefab()
 	{
-		if (Prefab is null)
+		if (PrefabRoot is null)
 			return;
 		
-		TomlSerializer.Serialize(Prefab, PrefabPath);
+		TomlSerializer.Serialize(PrefabRoot, PrefabPath);
 	}
 }
 
@@ -317,14 +315,14 @@ public partial class ObjectPanel : INotificationPropagator
 		remove => HierarchyDisplay.ItemSelected -= value;
 	}
 	
-	private object? prefab;
-	public object? Prefab
+	private PrefabRoot? prefabRoot;
+	public PrefabRoot? PrefabRoot
 	{
-		get => prefab;
+		get => prefabRoot;
 		set
 		{
-			prefab = value;
-			HierarchyDisplay.HierarchyToDisplay = prefab as IHasChildren;
+			prefabRoot = value;
+			HierarchyDisplay.HierarchyToDisplay = prefabRoot?.RootObject as IHasChildren;
 		}
 	}
 	

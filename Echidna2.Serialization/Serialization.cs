@@ -15,8 +15,9 @@ public interface ITomlSerializable
 
 public static class TomlSerializer
 {
-	public static void Serialize<T>(T component, string path) where T : class
+	public static void Serialize(PrefabRoot prefabRoot, string path)
 	{
+		object component = prefabRoot.RootObject;
 		Dictionary<object, string> references = new();
 		Dictionary<object, TomlTable> tables = new();
 		GetReferenceTo(component);
@@ -37,7 +38,7 @@ public static class TomlSerializer
 			{
                 id = references.Count.ToString();
                 references.Add(subcomponent, id);
-				tables.Add(subcomponent, SerializeReferences(subcomponent, GetReferenceTo, path));
+				tables.Add(subcomponent, SerializeReferences(prefabRoot, subcomponent, GetReferenceTo, path));
 			}
 			return id;
 		}
@@ -51,13 +52,13 @@ public static class TomlSerializer
 		return Uri.UnescapeDataString(relativeUri.ToString());
 	}
 	
-	private static TomlTable SerializeReferences(object component, Func<object, string> getReferenceTo, string relativeTo)
+	private static TomlTable SerializeReferences(PrefabRoot prefabRoot, object component, Func<object, string> getReferenceTo, string relativeTo)
 	{
 		TomlTable table = new();
 		
-		if (component is IPrefab prefab)
+		if (prefabRoot.GetPrefabRoot(component) is { } componentPrefabRoot)
 		{
-			table.Add("Prefab", GetPathRelativeTo(prefab.PrefabPath, relativeTo));
+			table.Add("Prefab", GetPathRelativeTo(componentPrefabRoot.PrefabPath, relativeTo));
 		}
 		else
 		{
@@ -94,13 +95,15 @@ public static class TomlDeserializer
 	
 	// TODO: Make this not a horrible maze
 	// TODO: Make the serialization for external classes automatic instead of calling static methods manually
-	public static T Deserialize<T>(string path, string? overridenTypeName = null) where T : class
+	public static PrefabRoot Deserialize(string path, string? overridenTypeName = null)
 	{
 		Dictionary<string, object> references = new();
 		List<(string id, object component, TomlTable componentTable)> components = [];
 		
+		PrefabRoot prefabRoot = new();
+		prefabRoot.PrefabPath = path;
+		
 		bool doneFirstObject = false;
-		T? returnValue = null;
 		TomlTable table = Toml.ToModel(File.ReadAllText(path));
 		
 		foreach ((string id, object value) in table)
@@ -113,9 +116,16 @@ public static class TomlDeserializer
 			
 			object component;
 			if (componentTable.Remove("Component", out object? typeName))
+			{
 				component = DeserializeComponent(id, scriptName ?? (string)typeName, scriptName != null);
+				prefabRoot.Components.Add(component);
+			}
 			else if (componentTable.Remove("Prefab", out object? prefabPath))
-				component = DeserializePrefab($"{Path.GetDirectoryName(path)}/{(string)prefabPath}", scriptName);
+			{
+				PrefabRoot componentPrefabRoot = Deserialize($"{Path.GetDirectoryName(path)}/{(string)prefabPath}", scriptName);
+				prefabRoot.ChildPrefabs.Add(componentPrefabRoot);
+				component = componentPrefabRoot.RootObject;
+			}
 			else
 				throw new InvalidOperationException("Component table does not contain a Component or Prefab key");
 			
@@ -125,7 +135,7 @@ public static class TomlDeserializer
 			components.Add((id, component, componentTable));
 			
 			if (!doneFirstObject)
-				returnValue = (T)component;
+				prefabRoot.RootObject = component;
 			doneFirstObject = true;
 		}
 		
@@ -139,10 +149,10 @@ public static class TomlDeserializer
 			if (componentTable.Count != 0)
 				Console.WriteLine($"WARN: Unused table {id} {componentTable.ToDelimString()} of prefab leftover");
 		
-		if (returnValue == null)
+		if (prefabRoot.RootObject == null)
 			throw new InvalidOperationException("No objects were deserialized");
 		
-		return returnValue;
+		return prefabRoot;
 	}
 	
 	private static object DeserializeComponent(string id, string typeName, bool useProjectAssembly)
@@ -156,11 +166,6 @@ public static class TomlDeserializer
 			throw new InvalidOperationException($"Type {type} of id {id} does not have a parameterless constructor");
 		
 		return constructor.Invoke([]);
-	}
-	
-	private static object DeserializePrefab(string prefabPath, string? overridenTypeName = null)
-	{
-		return Deserialize<object>(prefabPath, overridenTypeName);
 	}
 	
 	private static T DeserializeValue<T>(string id, T component, TomlTable componentTable) where T : notnull

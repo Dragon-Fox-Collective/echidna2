@@ -14,15 +14,15 @@ using FileStream proejctAssemblyFileStream = new(Compilation.CompilationDllPath,
 TomlDeserializer.ProjectAssembly = projectAssemblyLoadContext.LoadFromStream(proejctAssemblyFileStream);
 
 
-Editor root = TomlDeserializer.Deserialize<Editor>($"{AppContext.BaseDirectory}/Prefabs/Editor.toml");
+Editor root = (Editor)TomlDeserializer.Deserialize(AppContext.BaseDirectory + "Prefabs/Editor.toml").RootObject;
 root.Notify(new IEditorInitialize.Notification(root));
 
-IHasChildren prefab = TomlDeserializer.Deserialize<IHasChildren>($"{AppContext.BaseDirectory}/{root.PrefabPath}");
-root.Prefab = prefab;
+PrefabRoot prefab = TomlDeserializer.Deserialize(AppContext.BaseDirectory + root.PrefabPath);
+root.PrefabRoot = prefab;
 
 
 IHasChildren.PrintTree(root);
-TomlSerializer.Serialize(prefab, $"{AppContext.BaseDirectory}/{root.PrefabPath}");
+TomlSerializer.Serialize(prefab, AppContext.BaseDirectory + root.PrefabPath);
 
 Window window = new(new GameWindow(
 	new GameWindowSettings(),
@@ -30,7 +30,7 @@ Window window = new(new GameWindow(
 	{
 		ClientSize = (1280, 720),
 		Title = "Echidna Engine",
-		Icon = Window.CreateWindowIcon($"{AppContext.BaseDirectory}/Assets/Echidna.png"),
+		Icon = Window.CreateWindowIcon(AppContext.BaseDirectory +  "Assets/Echidna.png"),
 	}
 ))
 {
