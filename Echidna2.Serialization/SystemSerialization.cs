@@ -3,11 +3,25 @@ using Tomlyn.Model;
 
 namespace Echidna2.Serialization;
 
-public static class SystemSerialization
+public class ColorSerializer : Serializer<TomlTable, Color>
 {
-	public static Color DeserializeColor(TomlTable table)
+	public static TomlTable Serialize(Color color)
 	{
-		Color color = Color.FromArgb((int)((double)table["A"] * 255), (int)((double)table["R"] * 255), (int)((double)table["G"] * 255), (int)((double)table["B"] * 255));
+		TomlTable table = new();
+		table.Add("A", color.A / 255.0);
+		table.Add("R", color.R / 255.0);
+		table.Add("G", color.G / 255.0);
+		table.Add("B", color.B / 255.0);
+		return table;
+	}
+	
+	public static Color Deserialize(TomlTable table)
+	{
+		Color color = Color.FromArgb(
+			(int)((double)table["A"] * 255),
+			(int)((double)table["R"] * 255),
+			(int)((double)table["G"] * 255),
+			(int)((double)table["B"] * 255));
 		table.Remove("A");
 		table.Remove("R");
 		table.Remove("G");

@@ -59,6 +59,8 @@ public static class TomlSerializer
 		if (prefabRoot.GetPrefabRoot(component) is { } componentPrefabRoot)
 		{
 			table.Add("Prefab", GetPathRelativeTo(componentPrefabRoot.PrefabPath, relativeTo));
+			foreach ((MemberInfo member, object value) in componentPrefabRoot.Changes)
+				table.Add(member.Name, value);
 		}
 		else
 		{
@@ -322,6 +324,15 @@ public static class TomlDeserializer
 
 [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
 public class SerializedValueAttribute : Attribute;
+
+[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
+public class SerializedValueAttribute<TSerializer, TSerialized, TDeserialized> : Attribute where TSerializer : Serializer<TSerialized, TDeserialized>;
+
+public interface Serializer<TSerialized, TDeserialized>
+{
+	public static abstract TSerialized Serialize(TDeserialized value);
+	public static abstract TDeserialized Deserialize(TSerialized value);
+}
 
 [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
 public class SerializedReferenceAttribute : Attribute;

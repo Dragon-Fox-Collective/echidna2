@@ -14,7 +14,7 @@ public class PBRMeshRenderer : INotificationListener<IDraw.Notification>, ITomlS
 	public Mesh Mesh { get; set; } = Mesh.Cube;
 	public Shader Shader { get; set; } = Shader.PBR;
 	
-	public Color Albedo { get; set; } = Color.Gray;
+	[SerializedValue<ColorSerializer, TomlTable, Color>] public Color Albedo { get; set; } = Color.Gray;
 	[SerializedValue] public double Metallic { get; set; } = 0.0;
 	[SerializedValue] public double Roughness { get; set; } = 0.25;
 	[SerializedValue] public double AmbientOcclusion { get; set; } = 1.0;
@@ -46,9 +46,6 @@ public class PBRMeshRenderer : INotificationListener<IDraw.Notification>, ITomlS
 	{
 		switch (id)
 		{
-			case "Albedo":
-				Albedo = SystemSerialization.DeserializeColor((TomlTable)value);
-				return true;
 			case "Mesh":
 				Mesh = RenderingSerialization.DeserializeMesh((string)value);
 				return true;

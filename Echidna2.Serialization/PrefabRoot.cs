@@ -1,9 +1,12 @@
-﻿namespace Echidna2.Serialization;
+﻿using System.Reflection;
+
+namespace Echidna2.Serialization;
 
 public class PrefabRoot
 {
 	public List<PrefabRoot> ChildPrefabs = [];
 	public List<object> Components = [];
+	public Dictionary<MemberInfo, object> Changes = new();
 	public object RootObject = null!;
 	public string PrefabPath = "";
 	
@@ -27,5 +30,11 @@ public class PrefabRoot
 			if (childPrefab.GetOwningPrefabRoot(component) is { } childPrefabRoot)
 				return childPrefabRoot;
 		throw new Exception("Component not found in prefab root");
+	}
+	
+	public void RegisterChange(object component, MemberInfo member, object value)
+	{
+		PrefabRoot owningPrefabRoot = GetOwningPrefabRoot(component);
+		owningPrefabRoot.Changes[member] = value;
 	}
 }

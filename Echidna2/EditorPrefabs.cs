@@ -390,6 +390,7 @@ public partial class ComponentPanel : INotificationPropagator, IEditorInitialize
 					fieldEditor.ValueChanged += value =>
 					{
 						fieldInfo.SetValue(selectedObject, value);
+						editor.PrefabRoot?.RegisterChange(selectedObject, fieldInfo, value);
 						editor.SerializePrefab();
 					};
 					layout.AddChild(fieldEditor);
@@ -404,6 +405,7 @@ public partial class ComponentPanel : INotificationPropagator, IEditorInitialize
 					fieldEditor.ValueChanged += value =>
 					{
 						propertyInfo.SetValue(selectedObject, value);
+						editor.PrefabRoot?.RegisterChange(selectedObject, propertyInfo, value);
 						editor.SerializePrefab();
 					};
 					layout.AddChild(fieldEditor);
