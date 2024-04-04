@@ -8,7 +8,7 @@ public class PrefabRoot
 	public List<object> Components = [];
 	public Dictionary<MemberInfo, object> Changes = new();
 	public object RootObject = null!;
-	public string PrefabPath = "";
+	public string PrefabPath = null!;
 	
 	public PrefabRoot? GetPrefabRoot(object component)
 	{
@@ -22,19 +22,16 @@ public class PrefabRoot
 		return null;
 	}
 	
-	public PrefabRoot GetOwningPrefabRoot(object component)
+	public PrefabRoot? GetOwningPrefabRoot(object component)
 	{
-		if (Components.Contains(component))
-			return this;
-		foreach (PrefabRoot childPrefab in ChildPrefabs)
-			if (childPrefab.GetOwningPrefabRoot(component) is { } childPrefabRoot)
-				return childPrefabRoot;
-		throw new Exception("Component not found in prefab root");
+		return Components.Contains(component) ? this : ChildPrefabs.FirstOrDefault(childPrefab => childPrefab.RootObject == component);
 	}
 	
 	public void RegisterChange(object component, MemberInfo member, object value)
 	{
-		PrefabRoot owningPrefabRoot = GetOwningPrefabRoot(component);
+		// FIXME: Changes to child prefab components are regestered to the child prefab, causing conflicts when the parent prefab changes it
+		PrefabRoot? owningPrefabRoot = GetOwningPrefabRoot(component);
+		if (owningPrefabRoot is null) return;
 		owningPrefabRoot.Changes[member] = value;
 	}
 }

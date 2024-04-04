@@ -143,10 +143,10 @@ public static class TomlDeserializer
 		}
 		
 		foreach ((string id, object component, TomlTable componentTable) in components)
-			DeserializeReference(id, component, componentTable, references);
+			DeserializeReference(prefabRoot, id, component, componentTable, references);
 		
 		foreach ((string id, object component, TomlTable componentTable) in components)
-			DeserializeValue(id, component, componentTable);
+			DeserializeValue(prefabRoot, id, component, componentTable);
 		
 		foreach ((string id, object _, TomlTable componentTable) in components)
 			if (componentTable.Count != 0)
@@ -171,7 +171,7 @@ public static class TomlDeserializer
 		return constructor.Invoke([]);
 	}
 	
-	private static T DeserializeValue<T>(string id, T component, TomlTable componentTable) where T : notnull
+	private static object DeserializeValue(PrefabRoot prefabRoot, string id, object component, TomlTable componentTable)
 	{
 		List<string> usedValues = [];
 		
@@ -194,13 +194,14 @@ public static class TomlDeserializer
 					deserializedValue = Enum.Parse(field.FieldType, (string)serializedValue);
 				else if (serializedValue is TomlTable valueTable)
 				{
-					deserializedValue = DeserializeValue(member.Name, field.GetValue(component)!, valueTable);
+					deserializedValue = DeserializeValue(prefabRoot, member.Name, field.GetValue(component)!, valueTable);
 					if (valueTable.Count != 0)
 						Console.WriteLine($"WARN: Unused table {member.Name} {valueTable.ToDelimString()} of {id} leftover");
 				}
 				else
 					throw new InvalidOperationException($"No serializer found for type {field.FieldType}");
 				field.SetValue(component, deserializedValue);
+				prefabRoot.RegisterChange(component, field, deserializedValue);
 				usedValues.Add(member.Name);
 			}
 			
@@ -215,13 +216,14 @@ public static class TomlDeserializer
 					deserializedValue = Enum.Parse(property.PropertyType, (string)serializedValue);
 				else if (serializedValue is TomlTable valueTable)
 				{
-					deserializedValue = DeserializeValue(member.Name, property.GetValue(component)!, valueTable);
+					deserializedValue = DeserializeValue(prefabRoot, member.Name, property.GetValue(component)!, valueTable);
 					if (valueTable.Count != 0)
 						Console.WriteLine($"WARN: Unused table {member.Name} {valueTable.ToDelimString()} of {id} leftover");
 				}
 				else
 					throw new InvalidOperationException($"No serializer found for type {property.PropertyType}");
 				property.SetValue(component, deserializedValue);
+				prefabRoot.RegisterChange(component, property, deserializedValue);
 				usedValues.Add(member.Name);
 			}
 			
@@ -244,7 +246,7 @@ public static class TomlDeserializer
 		return component;
 	}
 	
-	private static void DeserializeReference<T>(string id, T component, TomlTable componentTable, Dictionary<string, object> references) where T : notnull
+	private static void DeserializeReference(PrefabRoot prefabRoot, string id, object component, TomlTable componentTable, Dictionary<string, object> references)
 	{
 		List<string> usedValues = [];
 		
@@ -259,8 +261,8 @@ public static class TomlDeserializer
 			{
 				if (componentTable[member.Name] is TomlTable valueTable)
 				{
-					object newValue = DeserializeValue(member.Name, field.GetValue(component)!, valueTable);
-					DeserializeReference(member.Name, newValue, valueTable, references);
+					object newValue = DeserializeValue(prefabRoot, member.Name, field.GetValue(component)!, valueTable);
+					DeserializeReference(prefabRoot, member.Name, newValue, valueTable, references);
 					field.SetValue(component, newValue);
 					if (valueTable.Count != 0)
 						Console.WriteLine($"WARN: Unused table {member.Name} {valueTable.ToDelimString()} of {id} leftover");
@@ -279,8 +281,8 @@ public static class TomlDeserializer
 			{
 				if (componentTable[member.Name] is TomlTable valueTable)
 				{
-					object newValue = DeserializeValue(member.Name, property.GetValue(component)!, valueTable);
-					DeserializeReference(member.Name, newValue, valueTable, references);
+					object newValue = DeserializeValue(prefabRoot, member.Name, property.GetValue(component)!, valueTable);
+					DeserializeReference(prefabRoot, member.Name, newValue, valueTable, references);
 					property.SetValue(component, newValue);
 					if (valueTable.Count != 0)
 						Console.WriteLine($"WARN: Unused table {member.Name} {valueTable.ToDelimString()} of {id} leftover");
@@ -312,7 +314,7 @@ public static class TomlDeserializer
 		}
 	}
 	
-	public static void RemoveEvents<T>(T component, TomlTable componentTable) where T : notnull
+	public static void RemoveEvents(object component, TomlTable componentTable)
 	{
 		List<string> usedValues = [];
 		
