@@ -3,17 +3,16 @@ using Echidna2.Core;
 using Echidna2.Mathematics;
 using Echidna2.Rendering;
 using Echidna2.Serialization;
-using Tomlyn.Model;
 
 namespace Echidna2.Gui;
 
-public class Rect : INotificationListener<IDraw.Notification>, ITomlSerializable
+public class Rect : INotificationListener<IDraw.Notification>
 {
 	private static readonly Shader Shader = new(ShaderNodeUtil.MainVertexShader, File.ReadAllText("Assets/rect.frag"));
 	
 	[SerializedReference] public RectTransform RectTransform { get; set; } = null!;
 	
-	public Color Color { get; set; } = Color.Gray;
+	[SerializedValue] public Color Color { get; set; } = Color.Gray;
 	
 	public void OnNotify(IDraw.Notification notification)
 	{
@@ -24,27 +23,5 @@ public class Rect : INotificationListener<IDraw.Notification>, ITomlSerializable
 		Shader.SetMatrix4("transform", RectTransform.GlobalTransform);
 		Shader.SetColorRgba("color", Color);
 		Mesh.Quad.Draw();
-	}
-	
-	public void SerializeReferences(TomlTable table, Func<object, string> getReferenceTo)
-	{
-		
-	}
-	
-	public bool DeserializeValue(string id, object value)
-	{
-		switch (id)
-		{
-			case "Color":
-				Color = SystemSerialization.DeserializeColor((TomlTable)value);
-				return true;
-			default:
-				return false;
-		}
-	}
-	
-	public bool DeserializeReference(string id, object value, Dictionary<string, object> references)
-	{
-		return false;
 	}
 }

@@ -1,10 +1,13 @@
-﻿using ObjLoader.Loader.Loaders;
+﻿using Echidna2.Serialization;
+using ObjLoader.Loader.Loaders;
 using OpenTK.Graphics.OpenGL4;
 
 namespace Echidna2.Rendering;
 
 public class Mesh(float[] positions, float[] normals, float[] texCoords, float[] colors, uint[] indices)
 {
+	static Mesh() => SerializedValueAttribute.AddDefaultSerializer(typeof(Mesh), new MeshSerializer());
+	
 	private const int Dims = 3;
 	
 	public static readonly Mesh Triangle = new([

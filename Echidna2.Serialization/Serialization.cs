@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Drawing;
+using System.Reflection;
 using Echidna2.SourceGenerators;
 using Tomlyn;
 using Tomlyn.Model;
@@ -183,39 +184,44 @@ public static class TomlDeserializer
 		{
 			if (member is FieldInfo field)
 			{
-				object? newValue;
-				if (componentTable[member.Name] is TomlTable valueTable)
+				// TODO: Figure out how to stick the Enum and ITomlSerializable deserialization into serializers
+				Serializer? serializer = member.GetCustomAttribute<SerializedValueAttribute>()!.GetSerializer(field.FieldType);
+				object serializedValue = componentTable[member.Name];
+				object deserializedValue;
+				if (serializer is not null)
+					deserializedValue = serializer.Deserialize(field.GetValue(component), serializedValue);
+				else if (field.FieldType.IsEnum)
+					deserializedValue = Enum.Parse(field.FieldType, (string)serializedValue);
+				else if (serializedValue is TomlTable valueTable)
 				{
-					newValue = DeserializeValue(member.Name, field.GetValue(component)!, valueTable);
+					deserializedValue = DeserializeValue(member.Name, field.GetValue(component)!, valueTable);
 					if (valueTable.Count != 0)
 						Console.WriteLine($"WARN: Unused table {member.Name} {valueTable.ToDelimString()} of {id} leftover");
 				}
 				else
-				{
-					newValue = componentTable[member.Name];
-					if (field.FieldType.IsEnum)
-						newValue = Enum.Parse(field.FieldType, (string)newValue);
-				}
-				field.SetValue(component, newValue);
+					throw new InvalidOperationException($"No serializer found for type {field.FieldType}");
+				field.SetValue(component, deserializedValue);
 				usedValues.Add(member.Name);
 			}
 			
 			else if (member is PropertyInfo property)
 			{
-				object? newValue;
-				if (componentTable[member.Name] is TomlTable valueTable)
+				Serializer? serializer = member.GetCustomAttribute<SerializedValueAttribute>()!.GetSerializer(property.PropertyType);
+				object serializedValue = componentTable[member.Name];
+				object deserializedValue;
+				if (serializer is not null)
+					deserializedValue = serializer.Deserialize(property.CanRead ? property.GetValue(component) : default, serializedValue);
+				else if (property.PropertyType.IsEnum)
+					deserializedValue = Enum.Parse(property.PropertyType, (string)serializedValue);
+				else if (serializedValue is TomlTable valueTable)
 				{
-					newValue = DeserializeValue(member.Name, property.GetValue(component)!, valueTable);
+					deserializedValue = DeserializeValue(member.Name, property.GetValue(component)!, valueTable);
 					if (valueTable.Count != 0)
 						Console.WriteLine($"WARN: Unused table {member.Name} {valueTable.ToDelimString()} of {id} leftover");
 				}
 				else
-				{
-					newValue = componentTable[member.Name];
-					if (property.PropertyType.IsEnum)
-						newValue = Enum.Parse(property.PropertyType, (string)newValue);
-				}
-				property.SetValue(component, newValue);
+					throw new InvalidOperationException($"No serializer found for type {property.PropertyType}");
+				property.SetValue(component, deserializedValue);
 				usedValues.Add(member.Name);
 			}
 			
@@ -323,15 +329,21 @@ public static class TomlDeserializer
 }
 
 [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
-public class SerializedValueAttribute : Attribute;
-
-[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
-public class SerializedValueAttribute<TSerializer, TSerialized, TDeserialized> : Attribute where TSerializer : Serializer<TSerialized, TDeserialized>;
-
-public interface Serializer<TSerialized, TDeserialized>
+public class SerializedValueAttribute(Type? serializerType = null) : Attribute
 {
-	public static abstract TSerialized Serialize(TDeserialized value);
-	public static abstract TDeserialized Deserialize(TSerialized value);
+	private static Dictionary<Type, Serializer> defaultSerializers = new()
+	{
+		{ typeof(double), new DirectSerializer<double>() },
+		{ typeof(string), new DirectSerializer<string>() },
+		{ typeof(bool), new DirectSerializer<bool>() },
+		{ typeof(Color), new ColorSerializer() },
+	};
+	
+	public static void AddDefaultSerializer(Type type, Serializer serializer) => defaultSerializers[type] = serializer;
+	
+	private Serializer? serializer = (Serializer)serializerType?.GetConstructor([])!.Invoke([])!;
+	
+	public Serializer? GetSerializer(Type type) => serializer ?? defaultSerializers.GetValueOrDefault(type);
 }
 
 [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
