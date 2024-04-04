@@ -56,11 +56,6 @@ public class Hierarchy : INotificationPropagator, IHasChildren, ICanAddChildren,
 		table.Add("Children", serializedChildren);
 	}
 	
-	public bool DeserializeValue(string id, object value)
-	{
-		return false;
-	}
-	
 	public bool DeserializeReference(string id, object value, Dictionary<string, object> references)
 	{
 		switch (id)

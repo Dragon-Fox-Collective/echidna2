@@ -3,11 +3,10 @@ using Echidna2.Core;
 using Echidna2.Mathematics;
 using Echidna2.Rendering3D;
 using Echidna2.Serialization;
-using Tomlyn.Model;
 
 namespace Echidna2.Physics;
 
-public class DynamicBody : IUpdate, IInitializeIntoSimulation, ITomlSerializable
+public class DynamicBody : IUpdate, IInitializeIntoSimulation
 {
 	private PhysicsMaterial physicsMaterial;
 	[SerializedValue] public PhysicsMaterial PhysicsMaterial
@@ -35,8 +34,8 @@ public class DynamicBody : IUpdate, IInitializeIntoSimulation, ITomlSerializable
 	
 	public WorldSimulation? Simulation { get; private set; }
 	[SerializedReference] public Transform3D Transform = null!;
-	public BodyShape Shape = null!;
-	public BodyInertia Inertia;
+	[SerializedValue(typeof(BodyShapeSerializer))] public BodyShape Shape = null!;
+	[SerializedValue(typeof(BodyInertiaSerializer))] public BodyInertia Inertia;
 	public BodyHandle Handle { get; private set; }
 	public BodyReference Reference { get; private set; }
 	
@@ -72,30 +71,5 @@ public class DynamicBody : IUpdate, IInitializeIntoSimulation, ITomlSerializable
 	{
 		GlobalPosition = Reference.Pose.Position;
 		GlobalRotation = Reference.Pose.Orientation;
-	}
-	
-	public void SerializeReferences(TomlTable table, Func<object, string> getReferenceTo)
-	{
-		
-	}
-	
-	public bool DeserializeValue(string id, object value)
-	{
-		switch (id)
-		{
-			case "Inertia":
-				Inertia = BepuPhysicsSerialization.DeserializeBodyInertia((TomlTable)value);
-				return true;
-			case "Shape":
-				Shape = BepuPhysicsSerialization.DeserializeBodyShape((TomlTable)value);
-				return true;
-			default:
-				return false;
-		}
-	}
-	
-	public bool DeserializeReference(string id, object value, Dictionary<string, object> references)
-	{
-		return false;
 	}
 }

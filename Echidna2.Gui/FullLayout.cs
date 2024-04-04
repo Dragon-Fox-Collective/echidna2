@@ -11,19 +11,25 @@ public class FullLayout : RectLayout
 	[SerializedValue] public double BottomMargin = 0;
 	[SerializedValue] public double TopMargin = 0;
 	
+	private double margin = 0;
 	[SerializedValue] public double Margin
 	{
-		set => LeftMargin = RightMargin = BottomMargin = TopMargin = value;
+		get => margin;
+		set => margin = LeftMargin = RightMargin = BottomMargin = TopMargin = value;
 	}
 	
+	private double horizontalMargin = 0;
 	[SerializedValue] public double HorizontalMargin
 	{
-		set => LeftMargin = RightMargin = value;
+		get => horizontalMargin;
+		set => horizontalMargin = LeftMargin = RightMargin = value;
 	}
 	
+	private double verticalMargin = 0;
 	[SerializedValue] public double VerticalMargin
 	{
-		set => BottomMargin = TopMargin = value;
+		get => verticalMargin;
+		set => verticalMargin = BottomMargin = TopMargin = value;
 	}
 	
 	public override void OnPreNotify(IUpdate.Notification notification)

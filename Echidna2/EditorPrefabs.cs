@@ -367,7 +367,7 @@ public partial class ComponentPanel : INotificationPropagator, IEditorInitialize
 		Fields.ClearChildren();
 		if (selectedObject is null) return;
 		
-		foreach (MemberInfo memberInfo in selectedObject.GetType()
+		foreach (MemberInfo member in selectedObject.GetType()
 			         .GetMembers(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
 			         .Where(member => member.GetCustomAttribute<SerializedValueAttribute>() is not null))
 		{
@@ -375,41 +375,24 @@ public partial class ComponentPanel : INotificationPropagator, IEditorInitialize
 			Fields.AddChild(layout);
 			
 			TextRect text = TextRect.Instantiate();
-			text.TextString = memberInfo.Name;
+			text.TextString = member.Name;
 			text.LocalScale = (0.5, 0.5);
 			text.MinimumSize = (150, 25);
 			text.Justification = TextJustification.Left;
 			layout.AddChild(text);
 			
-			if (memberInfo is FieldInfo fieldInfo)
+			IMemberWrapper wrapper = IMemberWrapper.Wrap(member);
+			if (editor.HasRegisteredFieldEditor(wrapper.FieldType))
 			{
-				if (editor.HasRegisteredFieldEditor(fieldInfo.FieldType))
+				IFieldEditor fieldEditor = editor.InstantiateFieldEditor(wrapper.FieldType);
+				fieldEditor.Load(wrapper.GetValue(selectedObject)!);
+				fieldEditor.ValueChanged += value =>
 				{
-					IFieldEditor fieldEditor = editor.InstantiateFieldEditor(fieldInfo.FieldType);
-					fieldEditor.Load(fieldInfo.GetValue(selectedObject)!);
-					fieldEditor.ValueChanged += value =>
-					{
-						fieldInfo.SetValue(selectedObject, value);
-						editor.PrefabRoot?.RegisterChange(selectedObject, fieldInfo, value);
-						editor.SerializePrefab();
-					};
-					layout.AddChild(fieldEditor);
-				}
-			}
-			else if (memberInfo is PropertyInfo propertyInfo)
-			{
-				if (editor.HasRegisteredFieldEditor(propertyInfo.PropertyType))
-				{
-					IFieldEditor fieldEditor = editor.InstantiateFieldEditor(propertyInfo.PropertyType);
-					fieldEditor.Load(propertyInfo.GetValue(selectedObject)!);
-					fieldEditor.ValueChanged += value =>
-					{
-						propertyInfo.SetValue(selectedObject, value);
-						editor.PrefabRoot?.RegisterChange(selectedObject, propertyInfo, value);
-						editor.SerializePrefab();
-					};
-					layout.AddChild(fieldEditor);
-				}
+					wrapper.SetValue(selectedObject, value);
+					editor.PrefabRoot?.RegisterChange(new MemberPath(wrapper, new ComponentPath(selectedObject)));
+					editor.SerializePrefab();
+				};
+				layout.AddChild(fieldEditor);
 			}
 		}
 	}

@@ -1,4 +1,5 @@
 ﻿using System.Drawing;
+using System.Reflection;
 using Tomlyn.Model;
 
 namespace Echidna2.Serialization;
@@ -21,6 +22,40 @@ public class DirectSerializer<T> : Serializer<T, T> where T : notnull
 {
 	public T Serialize(T value) => value;
 	public T Deserialize(T? value, T data) => data;
+}
+
+public class EnumSerializer(Type type) : Serializer<string, Enum>
+{
+	public string Serialize(Enum value) => value.ToString();
+	public Enum Deserialize(Enum? value, string data) => (Enum)Enum.Parse(type, data);
+}
+
+public class SubComponentSerializer(Func<TomlTable, object> deserializeValue, string fieldName, string componentId) : Serializer<TomlTable, object>
+{
+	public TomlTable Serialize(object value)
+	{
+		TomlTable table = new();
+		
+		foreach (MemberInfo member in value.GetType()
+			         .GetMembers(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
+			         .Where(member => member.GetCustomAttribute<SerializedValueAttribute>() is not null))
+		{
+			IMemberWrapper wrapper = IMemberWrapper.Wrap(member);
+			SerializedValueAttribute attribute = wrapper.Member.GetCustomAttribute<SerializedValueAttribute>()!;
+			Serializer serializer = attribute.GetSerializer(wrapper.FieldType, null, null, null);
+			table.Add(wrapper.Name, serializer.Serialize(wrapper.GetValue(value)!));
+		}
+		
+		return table;
+	}
+	
+	public object Deserialize(object? value, TomlTable data)
+	{
+		object deserializedValue = deserializeValue(data);
+		if (data.Count != 0)
+			Console.WriteLine($"WARN: Unused table {fieldName} {data.ToDelimString()} of {componentId} leftover");
+		return deserializedValue;
+	}
 }
 
 public class ColorSerializer : Serializer<TomlTable, Color>

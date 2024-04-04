@@ -1,37 +1,45 @@
-﻿using System.Reflection;
+﻿namespace Echidna2.Serialization;
 
-namespace Echidna2.Serialization;
-
-public class PrefabRoot
+public class PrefabRoot : IPrefabChangeRegistry
 {
-	public List<PrefabRoot> ChildPrefabs = [];
+	public List<PrefabInstance> ChildPrefabs = [];
 	public List<object> Components = [];
-	public Dictionary<MemberInfo, object> Changes = new();
+	public Dictionary<MemberPath, object> SerializedData = new();
 	public object RootObject = null!;
 	public string PrefabPath = null!;
 	
-	public PrefabRoot? GetPrefabRoot(object component)
+	public PrefabInstance? GetPrefabInstance(IMemberPath path)
 	{
-		foreach (PrefabRoot childPrefab in ChildPrefabs)
-		{
-			if (childPrefab.RootObject == component)
-				return childPrefab;
-			if (childPrefab.GetPrefabRoot(component) is { } childPrefabRoot)
-				return childPrefabRoot;
-		}
-		return null;
+		return ChildPrefabs.FirstOrDefault(child => child.PrefabRoot.RootObject == path.Root.Component);
 	}
 	
-	public PrefabRoot? GetOwningPrefabRoot(object component)
+	public IPrefabChangeRegistry? GetChangeRegistry(IMemberPath path)
 	{
-		return Components.Contains(component) ? this : ChildPrefabs.FirstOrDefault(childPrefab => childPrefab.RootObject == component);
+		return Components.Contains(path.Root) ? this : GetPrefabInstance(path);
 	}
 	
-	public void RegisterChange(object component, MemberInfo member, object value)
+	public void RegisterChange(MemberPath path)
 	{
-		// FIXME: Changes to child prefab components are regestered to the child prefab, causing conflicts when the parent prefab changes it
-		PrefabRoot? owningPrefabRoot = GetOwningPrefabRoot(component);
-		if (owningPrefabRoot is null) return;
-		owningPrefabRoot.Changes[member] = value;
+		GetChangeRegistry(path)?.RegisterChangeInSelf(path.HighestMemberPath);
 	}
+	
+	public void RegisterChangeInSelf(MemberPath path) => SerializedData[path] = path.Value;
+}
+
+public class PrefabInstance(PrefabRoot prefabRoot) : IPrefabChangeRegistry
+{
+	public PrefabRoot PrefabRoot => prefabRoot;
+	public Dictionary<MemberPath, object> SerializedChanges = new();
+	
+	public void RegisterChangeInSelf(MemberPath path)
+	{
+		if (path.Root.Component != prefabRoot.RootObject)
+			throw new ArgumentException("Component must be the root object of the prefab");
+		SerializedChanges[path] = path.Value;
+	}
+}
+
+public interface IPrefabChangeRegistry
+{
+	public void RegisterChangeInSelf(MemberPath path);
 }
