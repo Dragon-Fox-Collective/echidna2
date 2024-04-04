@@ -7,7 +7,7 @@ Button = "4"
 [2]
 Prefab = "../Prefabs/FullRectWithHierarchy.toml"
 HorizontalExpand = true
-Margin = 4
+Margin = 4.0
 Children = [ "3" ]
 
 [3]

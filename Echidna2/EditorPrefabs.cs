@@ -158,7 +158,7 @@ public partial class Editor : INotificationPropagator, ICanBeLaidOut
 		if (PrefabRoot is null)
 			return;
 		
-		TomlSerializer.Serialize(PrefabRoot, PrefabPath);
+		TomlSerializer.Serialize(PrefabRoot, AppContext.BaseDirectory + PrefabPath);
 	}
 }
 
