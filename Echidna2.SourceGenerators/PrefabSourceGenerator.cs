@@ -27,7 +27,7 @@ public class PrefabSourceGenerator : IIncrementalGenerator
 	
 	private static void OnExecute(SourceProductionContext context, Compilation compilation, ImmutableArray<ClassDeclarationSyntax> nodes)
 	{
-		context.AddSource("debug.g.cs", "// " + string.Join(", ", nodes).Replace("\n", "\n// "));
+		// context.AddSource("debug.g.cs", "// " + string.Join(", ", nodes).Replace("\n", "\n// "));
 		foreach (ClassDeclarationSyntax node in nodes.Distinct())
 		{
 			if (context.CancellationToken.IsCancellationRequested)

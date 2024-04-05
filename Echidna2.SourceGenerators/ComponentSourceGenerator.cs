@@ -29,7 +29,7 @@ public class ComponentSourceGenerator : IIncrementalGenerator
 	
 	private static void OnExecute(SourceProductionContext context, Compilation compilation, ImmutableArray<ParameterSyntax> nodes)
 	{
-		context.AddSource("debug.g.cs", "// " + string.Join(", ", nodes).Replace("\n", "\n// "));
+		// context.AddSource("debug.g.cs", "// " + string.Join(", ", nodes).Replace("\n", "\n// "));
 		foreach (ParameterSyntax node in nodes.Distinct())
 		{
 			if (context.CancellationToken.IsCancellationRequested)
@@ -93,9 +93,6 @@ public class ComponentSourceGenerator : IIncrementalGenerator
 			&& !member.Name.StartsWith("set_")
 			&& !member.Name.StartsWith("add_")
 			&& !member.Name.StartsWith("remove_")
-			&& member.Name != "SerializeReferences" // Preemptively prevent duplicate methods
-			&& member.Name != "DeserializeValue"
-			&& member.Name != "DeserializeReference"
 			&& member.Name != ".ctor"
 			&& !classType.GetMembers(member.Name).Any());
 	
@@ -105,7 +102,7 @@ public class ComponentSourceGenerator : IIncrementalGenerator
 	public static string GetMemberDeclaration(ISymbol member, string propertyName)
 	{
 		AttributeData[] inheritedAttributes = member.GetAttributes().Where(attr => attr.AttributeClass?.GetAttributes().Any(subattr => subattr.AttributeClass?.Name == "AttributeUsageAttribute" && (bool)(subattr.NamedArguments.FirstOrDefault(pair => pair.Key == "Inherited").Value.Value ?? true)) ?? false).ToArray();
-		string attributes = inheritedAttributes.Any() ? "[" + string.Join(",", inheritedAttributes.Select(attr => $"{attr.AttributeClass}({string.Join(", ", attr.ConstructorArguments.Select(arg => arg.Value?.ToString() ?? "null").Concat(attr.NamedArguments.Select(arg => $"{arg.Key} = {arg.Value}")))})")) + "] " : "";
+		string attributes = inheritedAttributes.Any() ? "[" + string.Join(",", inheritedAttributes.Select(attr => $"{attr.AttributeClass}({string.Join(", ", attr.ConstructorArguments.Select(arg => arg.Value is null ? "null" : arg.Kind is TypedConstantKind.Type ? $"typeof({arg.Value})" : arg.Value.ToString()).Concat(attr.NamedArguments.Select(arg => $"{arg.Key} = {arg.Value}")))})")) + "] " : "";
 		string accessibility = member.DeclaredAccessibility.ToString().ToLower();
 		return member switch
 		{

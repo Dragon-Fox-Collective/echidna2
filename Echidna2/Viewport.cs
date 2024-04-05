@@ -11,7 +11,7 @@ namespace Echidna2;
 
 public interface Viewport : ICanAddChildren;
 
-[UsedImplicitly, SerializeExposedMembers, Prefab("Prefabs/ViewportGui.toml")]
+[UsedImplicitly, Prefab("Prefabs/ViewportGui.toml")]
 public partial class ViewportGui : Viewport, INotificationPropagator, ICanBeLaidOut, INotificationListener<IDraw.Notification>, IUpdate
 {
 	[SerializedReference, ExposeMembersInClass] public Named Named { get; set; } = null!;
@@ -48,7 +48,7 @@ public partial class ViewportGui : Viewport, INotificationPropagator, ICanBeLaid
 	}
 }
 
-[UsedImplicitly, SerializeExposedMembers, Prefab("Prefabs/Viewport3D.toml")]
+[UsedImplicitly, Prefab("Prefabs/Viewport3D.toml")]
 public partial class Viewport3D : Viewport, INotificationPropagator, ICanBeLaidOut, INotificationListener<IDraw.Notification>, IUpdate
 {
 	[SerializedReference, ExposeMembersInClass] public Named Named { get; set; } = null!;

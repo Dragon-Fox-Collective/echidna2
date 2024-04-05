@@ -84,3 +84,23 @@ public class ColorSerializer : Serializer<TomlTable, Color>
 		return color;
 	}
 }
+
+public interface ReferenceSerializer
+{
+	public object Serialize(object value, Func<object, string> getReferenceTo);
+	public object Deserialize(object? value, object data, Func<string, object> getReferenceFrom);
+}
+
+public interface ReferenceSerializer<TSerialized, TDeserialized> : ReferenceSerializer where TSerialized : notnull where TDeserialized : notnull
+{
+	object ReferenceSerializer.Serialize(object value, Func<object, string> getReferenceTo) => Serialize((TDeserialized)value, getReferenceTo);
+	object ReferenceSerializer.Deserialize(object? value, object data, Func<string, object> getReferenceFrom) => Deserialize(value is null ? default : (TDeserialized)value, (TSerialized)data, getReferenceFrom);
+	public TSerialized Serialize(TDeserialized value, Func<object, string> getReferenceTo);
+	public TDeserialized Deserialize(TDeserialized? value, TSerialized data, Func<string, object> getReferenceFrom);
+}
+
+public class DefaultReferenceSerializer : ReferenceSerializer<string, object>
+{
+	public string Serialize(object value, Func<object, string> getReferenceTo) => getReferenceTo(value);
+	public object Deserialize(object? value, string data, Func<string, object> getReferenceFrom) => getReferenceFrom(data);
+}

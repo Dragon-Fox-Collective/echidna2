@@ -1,18 +1,9 @@
 ﻿using System.Drawing;
 using System.Reflection;
-using Echidna2.SourceGenerators;
 using Tomlyn;
 using Tomlyn.Model;
 
 namespace Echidna2.Serialization;
-
-// TODO: Remove this
-[DontExpose]
-public interface ITomlSerializable
-{
-	public void SerializeReferences(TomlTable table, Func<object, string> getReferenceTo);
-	public bool DeserializeReference(string id, object value, Dictionary<string, object> references);
-}
 
 public static class TomlSerializer
 {
@@ -78,12 +69,10 @@ public static class TomlSerializer
 			IMemberWrapper wrapper = IMemberWrapper.Wrap(member);
 			object? subcomponent = wrapper.GetValue(component);
 			if (subcomponent is null) continue;
-			string subcomponentReference = getReferenceTo(subcomponent);
-			table.Add(member.Name, subcomponentReference);
+			SerializedReferenceAttribute attribute = wrapper.GetCustomAttribute<SerializedReferenceAttribute>()!;
+			ReferenceSerializer serializer = attribute.GetSerializer(wrapper.FieldType);
+			table.Add(member.Name, serializer.Serialize(subcomponent, getReferenceTo));
 		}
-		
-		if (component is ITomlSerializable serializable)
-			serializable.SerializeReferences(table, getReferenceTo);
 	}
 	
 	private static void SerializeValue(PrefabRoot prefabRoot, IMemberPath path, TomlTable table)
@@ -115,8 +104,6 @@ public static class TomlDeserializer
 {
 	public static Assembly ProjectAssembly = null!;
 	
-	// TODO: Make this not a horrible maze
-	// TODO: Make the serialization for external classes automatic instead of calling static methods manually
 	public static PrefabRoot Deserialize(string path, string? overridenTypeName = null)
 	{
 		Dictionary<string, object> references = new();
@@ -163,7 +150,7 @@ public static class TomlDeserializer
 		}
 		
 		foreach ((string id, object component, TomlTable componentTable) in components)
-			DeserializeReference(id, component, componentTable, references);
+			DeserializeReference(id, component, componentTable, valueId => references[valueId]);
 		
 		foreach ((string id, object component, TomlTable componentTable) in components)
 			DeserializeValue(prefabRoot, id, new ComponentPath(component), component, componentTable);
@@ -222,28 +209,24 @@ public static class TomlDeserializer
 		return component;
 	}
 	
-	private static void DeserializeReference(string id, object component, TomlTable componentTable, Dictionary<string, object> references)
+	private static void DeserializeReference(string id, object component, TomlTable componentTable, Func<string, object> getReferenceFrom)
 	{
 		List<string> usedValues = [];
 		
 		MemberInfo[] members = component.GetType().GetMembers(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
-			.Where(member => member.GetCustomAttribute<SerializedReferenceAttribute>() != null)
+			.Where(member => member.GetCustomAttribute<SerializedReferenceAttribute>() is not null)
 			.Where(member => componentTable.ContainsKey(member.Name))
 			.ToArray();
 		
 		foreach (MemberInfo member in members)
 		{
 			IMemberWrapper wrapper = IMemberWrapper.Wrap(member);
-			string newValueId = (string)componentTable[member.Name];
-			object newValue = references[newValueId];
-			wrapper.SetValue(component, newValue);
+			ReferenceSerializer serializer = wrapper.GetCustomAttribute<SerializedReferenceAttribute>()!.GetSerializer(wrapper.FieldType);
+			object serializedValue = componentTable[member.Name];
+			object deserializedValue = serializer.Deserialize(wrapper.GetValue(component), serializedValue, getReferenceFrom);
+			wrapper.SetValue(component, deserializedValue);
 			usedValues.Add(member.Name);
 		}
-		
-		if (component is ITomlSerializable serializable)
-			foreach ((string key, object value) in componentTable)
-				if (serializable.DeserializeReference(key, value, references))
-					usedValues.Add(key);
 		
 		foreach (string usedValue in usedValues)
 		{
@@ -305,7 +288,20 @@ public class SerializedValueAttribute(Type? serializerType = null) : Attribute
 }
 
 [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
-public class SerializedReferenceAttribute : Attribute;
+public class SerializedReferenceAttribute(Type? serializerType = null) : Attribute
+{
+	private static readonly ReferenceSerializer DefaultReferenceSerializer = new DefaultReferenceSerializer();
+	
+	private ReferenceSerializer? serializer = (ReferenceSerializer)serializerType?.GetConstructor([])!.Invoke([])!;
+	
+	public ReferenceSerializer GetSerializer(Type type)
+	{
+		if (serializer is not null)
+			return serializer;
+
+		return serializer = DefaultReferenceSerializer;
+	}
+}
 
 [AttributeUsage(AttributeTargets.Event)]
 public class SerializedEventAttribute : Attribute;

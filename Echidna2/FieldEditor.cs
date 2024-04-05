@@ -25,7 +25,7 @@ public interface IFieldEditor<in T> : IFieldEditor
 	void IFieldEditor.Load(object value) => Load((T)value);
 }
 
-[UsedImplicitly, SerializeExposedMembers, Prefab("Editors/StringFieldEditor.toml")]
+[UsedImplicitly, Prefab("Editors/StringFieldEditor.toml")]
 public partial class StringFieldEditor : INotificationPropagator, IInitialize, IFieldEditor<string>, ITextInput
 {
 	[SerializedReference, ExposeMembersInClass] public FullRectWithHierarchy Rect { get; set; } = null!;
@@ -122,7 +122,7 @@ public partial class StringFieldEditor : INotificationPropagator, IInitialize, I
 	public void OnNotify(IDraw.Notification notification) { }
 }
 
-[UsedImplicitly, SerializeExposedMembers, Prefab("Editors/DoubleFieldEditor.toml")]
+[UsedImplicitly, Prefab("Editors/DoubleFieldEditor.toml")]
 public partial class DoubleFieldEditor : INotificationPropagator, IFieldEditor<double>
 {
 	private StringFieldEditor? stringFieldEditor;

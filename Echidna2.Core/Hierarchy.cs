@@ -1,9 +1,8 @@
 ﻿using Echidna2.Serialization;
-using Tomlyn.Model;
 
 namespace Echidna2.Core;
 
-public class Hierarchy : INotificationPropagator, IHasChildren, ICanAddChildren, ITomlSerializable, IInitialize
+public class Hierarchy : INotificationPropagator, IHasChildren, ICanAddChildren
 {
 	public delegate void ChildAddedHandler(object child);
 	public event ChildAddedHandler? ChildAdded;
@@ -11,7 +10,16 @@ public class Hierarchy : INotificationPropagator, IHasChildren, ICanAddChildren,
 	public event ChildRemovedHandler? ChildRemoved;
 	
 	private List<object> children = [];
-	public IEnumerable<object> Children => children;
+	[SerializedReference(typeof(ChildrenSerializer))]
+	public IEnumerable<object> Children
+	{
+		get => children;
+		set
+		{
+			ClearChildren();
+			value.ForEach(AddChild);
+		}
+	}
 	
 	private HashSet<object> currentNotifications = [];
 	
@@ -47,29 +55,6 @@ public class Hierarchy : INotificationPropagator, IHasChildren, ICanAddChildren,
 		while (children.Count > 0)
 			RemoveChild(children[0]);
 	}
-	
-	public void SerializeReferences(TomlTable table, Func<object, string> getReferenceTo)
-	{
-		TomlArray serializedChildren = [];
-		foreach (string reference in children.Select(getReferenceTo))
-			serializedChildren.Add(reference);
-		table.Add("Children", serializedChildren);
-	}
-	
-	public bool DeserializeReference(string id, object value, Dictionary<string, object> references)
-	{
-		switch (id)
-		{
-			case "Children":
-				TomlArray childrenArray = (TomlArray)value;
-				childrenArray.Select(childId => references[(string)childId!]).ForEach(AddChild);
-				return true;
-			default:
-				return false;
-		}
-	}
-	
-	public void OnInitialize() { }
 }
 
 public interface IHasChildren
