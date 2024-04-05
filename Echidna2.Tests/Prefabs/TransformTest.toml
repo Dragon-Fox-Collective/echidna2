@@ -1,0 +1,3 @@
+[0]
+Component = "Echidna2.Rendering3D.Transform3D, Echidna2.Rendering3D"
+LocalPosition = { X = 0.0, Y = 0.0, Z = 2.5 }

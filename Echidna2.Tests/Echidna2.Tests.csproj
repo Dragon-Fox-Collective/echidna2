@@ -34,4 +34,10 @@
       <ProjectReference Include="..\TooManyExtensions\TooManyExtensions.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+        <Content Include="Prefabs\**">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
+    </ItemGroup>
+
 </Project>

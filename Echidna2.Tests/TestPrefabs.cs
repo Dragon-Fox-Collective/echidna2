@@ -1,6 +1,8 @@
 ﻿using Echidna2.Core;
 using Echidna2.Gui;
 using Echidna2.Rendering;
+using Echidna2.Rendering3D;
+using Echidna2.Serialization;
 
 namespace Echidna2.TestPrefabs;
 
@@ -47,4 +49,9 @@ public partial class VisibilityLayerWithTransform
 	{
 		INotificationPropagator.Notify(notification, Visibility, PrefabChildren);
 	}
+}
+
+public partial class TransformPrefab
+{
+	[SerializedReference, ExposeMembersInClass] public Transform3D Transform { get; set; } = null!;
 }
