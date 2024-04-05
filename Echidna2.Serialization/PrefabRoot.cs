@@ -15,7 +15,7 @@ public class PrefabRoot : IPrefabChangeRegistry
 	
 	public IPrefabChangeRegistry? GetChangeRegistry(IMemberPath path)
 	{
-		return Components.Contains(path.Root) ? this : GetPrefabInstance(path);
+		return Components.Contains(path.Root.Component) ? this : GetPrefabInstance(path);
 	}
 	
 	public void RegisterChange(MemberPath path)

@@ -89,7 +89,8 @@ public static class TomlSerializer
 		}
 		else
 		{
-			foreach ((MemberPath memberPath, object value) in prefabRoot.SerializedData)
+			foreach ((MemberPath memberPath, object value) in prefabRoot.SerializedData
+				         .Where(pair => pair.Key.Root.Equals(path.Root)))
 			{
 				IMemberWrapper wrapper = memberPath.Wrapper;
 				SerializedValueAttribute attribute = wrapper.Member.GetCustomAttribute<SerializedValueAttribute>()!;
