@@ -55,3 +55,13 @@ public partial class TransformPrefab
 {
 	[SerializedReference, ExposeMembersInClass] public Transform3D Transform { get; set; } = null!;
 }
+
+public partial class SubcomponentPrefab
+{
+	[SerializedReference, ExposeMembersInClass] public SubcomponentSubcomponent Subcomponent { get; set; } = null!;
+}
+
+public partial class SubcomponentSubcomponent
+{
+	[SerializedReference, ExposeMembersInClass] public object? Reference { get; set; } = null!;
+}

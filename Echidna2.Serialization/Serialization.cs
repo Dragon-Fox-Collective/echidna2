@@ -7,12 +7,23 @@ namespace Echidna2.Serialization;
 
 public static class TomlSerializer
 {
-	public static void Serialize(PrefabRoot prefabRoot, string path)
+	public static TomlTable Serialize(PrefabRoot prefabRoot, string path)
 	{
-		object component = prefabRoot.RootObject;
 		Dictionary<object, string> references = new();
 		Dictionary<object, TomlTable> tables = new();
-		GetReferenceTo(component);
+		
+		foreach (object subcomponent in prefabRoot.Components.Concat(prefabRoot.ChildPrefabs.Select(prefab => prefab.PrefabRoot.RootObject)))
+		{
+			string id = references.Count.ToString();
+			references.Add(subcomponent, id);
+			
+			TomlTable subcomponentTable = new();
+			SerializeComponentType(prefabRoot, new ComponentPath(subcomponent), subcomponent, subcomponentTable, path);
+			tables.Add(subcomponent, subcomponentTable);
+		}
+		
+		foreach ((object subcomponent, TomlTable subcomponentTable) in tables)
+			SerializeReference(prefabRoot, new ComponentPath(subcomponent), subcomponentTable, valueId => references[valueId]);
 		
 		foreach ((object subcomponent, TomlTable subcomponentTable) in tables)
 			SerializeValue(prefabRoot, new ComponentPath(subcomponent), subcomponentTable);
@@ -21,23 +32,8 @@ public static class TomlSerializer
 		foreach ((string id, TomlTable table) in references.Select(pair => (pair.Value, tables[pair.Key])))
 			prefabTable.Add(id, table);
 		
-		Console.WriteLine(Toml.FromModel(prefabTable));
-		// File.WriteAllText(path, Toml.FromModel(table));
-		return;
-		
-		string GetReferenceTo(object subcomponent)
-		{
-			if (!references.TryGetValue(subcomponent, out string? id))
-			{
-                id = references.Count.ToString();
-                references.Add(subcomponent, id);
-                TomlTable subcomponentTable = new();
-                SerializeComponentType(prefabRoot, new ComponentPath(subcomponent), subcomponent, subcomponentTable, path);
-                SerializeReferences(prefabRoot, new ComponentPath(subcomponent), subcomponent, subcomponentTable, GetReferenceTo);
-				tables.Add(subcomponent, subcomponentTable);
-			}
-			return id;
-		}
+		File.WriteAllText(path, Toml.FromModel(prefabTable));
+		return prefabTable;
 	}
 	
 	private static string GetPathRelativeTo(string path, string relativeTo)
@@ -56,22 +52,30 @@ public static class TomlSerializer
 			table.Add("Component", component.GetType().AssemblyQualifiedName!.Split(',')[..2].Join(","));
 	}
 	
-	private static void SerializeReferences(PrefabRoot prefabRoot, IMemberPath path, object component, TomlTable table, Func<object, string> getReferenceTo)
+	private static void SerializeReference(PrefabRoot prefabRoot, IMemberPath path, TomlTable table, Func<object, string> getReferenceTo)
 	{
-		// FIXME: Instantiated prefabs can't serialize references until references get added to the changes system
-		if (prefabRoot.GetPrefabInstance(path) is not null)
-			return;
-		
-		foreach (MemberInfo member in component.GetType()
-			         .GetMembers(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
-			         .Where(member => member.GetCustomAttribute<SerializedReferenceAttribute>() is not null))
+		if (prefabRoot.GetPrefabInstance(path) is { } componentPrefabInstance)
 		{
-			IMemberWrapper wrapper = IMemberWrapper.Wrap(member);
-			object? subcomponent = wrapper.GetValue(component);
-			if (subcomponent is null) continue;
-			SerializedReferenceAttribute attribute = wrapper.GetCustomAttribute<SerializedReferenceAttribute>()!;
-			ReferenceSerializer serializer = attribute.GetSerializer(wrapper.FieldType);
-			table.Add(member.Name, serializer.Serialize(subcomponent, getReferenceTo));
+			foreach ((MemberPath memberPath, object value) in componentPrefabInstance.SerializedChanges)
+			{
+				IMemberWrapper wrapper = memberPath.Wrapper;
+				SerializedReferenceAttribute? attribute = wrapper.Member.GetCustomAttribute<SerializedReferenceAttribute>();
+				if (attribute is null) continue;
+				ReferenceSerializer serializer = attribute.GetSerializer(wrapper.FieldType);
+				table.Add(wrapper.Name, serializer.Serialize(value, getReferenceTo));
+			}
+		}
+		else
+		{
+			foreach ((MemberPath memberPath, object value) in prefabRoot.SerializedData
+				         .Where(pair => pair.Key.Root.Equals(path.Root)))
+			{
+				IMemberWrapper wrapper = memberPath.Wrapper;
+				SerializedReferenceAttribute? attribute = wrapper.Member.GetCustomAttribute<SerializedReferenceAttribute>();
+				if (attribute is null) continue;
+				ReferenceSerializer serializer = attribute.GetSerializer(wrapper.FieldType);
+				table.Add(wrapper.Name, serializer.Serialize(value, getReferenceTo));
+			}
 		}
 	}
 	
@@ -82,7 +86,8 @@ public static class TomlSerializer
 			foreach ((MemberPath memberPath, object value) in componentPrefabInstance.SerializedChanges)
 			{
 				IMemberWrapper wrapper = memberPath.Wrapper;
-				SerializedValueAttribute attribute = wrapper.Member.GetCustomAttribute<SerializedValueAttribute>()!;
+				SerializedValueAttribute? attribute = wrapper.Member.GetCustomAttribute<SerializedValueAttribute>();
+				if (attribute is null) continue;
 				Serializer serializer = attribute.GetSerializer(wrapper.FieldType, null, null, null);
 				table.Add(wrapper.Name, serializer.Serialize(value));
 			}
@@ -93,7 +98,8 @@ public static class TomlSerializer
 				         .Where(pair => pair.Key.Root.Equals(path.Root)))
 			{
 				IMemberWrapper wrapper = memberPath.Wrapper;
-				SerializedValueAttribute attribute = wrapper.Member.GetCustomAttribute<SerializedValueAttribute>()!;
+				SerializedValueAttribute? attribute = wrapper.Member.GetCustomAttribute<SerializedValueAttribute>();
+				if (attribute is null) continue;
 				Serializer serializer = attribute.GetSerializer(wrapper.FieldType, null, null, null);
 				table.Add(wrapper.Name, serializer.Serialize(value));
 			}
@@ -151,7 +157,7 @@ public static class TomlDeserializer
 		}
 		
 		foreach ((string id, object component, TomlTable componentTable) in components)
-			DeserializeReference(id, component, componentTable, valueId => references[valueId]);
+			DeserializeReference(prefabRoot, id, new ComponentPath(component), component, componentTable, valueId => references[valueId]);
 		
 		foreach ((string id, object component, TomlTable componentTable) in components)
 			DeserializeValue(prefabRoot, id, new ComponentPath(component), component, componentTable);
@@ -177,6 +183,35 @@ public static class TomlDeserializer
 			throw new InvalidOperationException($"Type {type} of id {id} does not have a parameterless constructor");
 		
 		return constructor.Invoke([]);
+	}
+	
+	private static void DeserializeReference(PrefabRoot prefabRoot, string id, IMemberPath path, object component, TomlTable componentTable, Func<string, object> getReferenceFrom)
+	{
+		List<string> usedValues = [];
+		
+		MemberInfo[] members = component.GetType().GetMembers(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
+			.Where(member => member.GetCustomAttribute<SerializedReferenceAttribute>() is not null)
+			.Where(member => componentTable.ContainsKey(member.Name))
+			.ToArray();
+		
+		foreach (MemberInfo member in members)
+		{
+			IMemberWrapper wrapper = IMemberWrapper.Wrap(member);
+			MemberPath memberPath = new(wrapper, path);
+			ReferenceSerializer serializer = wrapper.GetCustomAttribute<SerializedReferenceAttribute>()!.GetSerializer(wrapper.FieldType);
+			object serializedValue = componentTable[member.Name];
+			object deserializedValue = serializer.Deserialize(wrapper.GetValue(component), serializedValue, getReferenceFrom);
+			wrapper.SetValue(component, deserializedValue);
+			prefabRoot.RegisterChange(memberPath);
+			usedValues.Add(member.Name);
+		}
+		
+		foreach (string usedValue in usedValues)
+		{
+			if (componentTable[usedValue] is TomlTable usedTable && usedTable.Count != 0)
+				Console.WriteLine($"WARN: Unused table {usedValue} {usedTable.ToDelimString()} of {id} leftover");
+			componentTable.Remove(usedValue);
+		}
 	}
 	
 	private static object DeserializeValue(PrefabRoot prefabRoot, string id, IMemberPath path, object component, TomlTable componentTable)
@@ -208,33 +243,6 @@ public static class TomlDeserializer
 		}
 		
 		return component;
-	}
-	
-	private static void DeserializeReference(string id, object component, TomlTable componentTable, Func<string, object> getReferenceFrom)
-	{
-		List<string> usedValues = [];
-		
-		MemberInfo[] members = component.GetType().GetMembers(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
-			.Where(member => member.GetCustomAttribute<SerializedReferenceAttribute>() is not null)
-			.Where(member => componentTable.ContainsKey(member.Name))
-			.ToArray();
-		
-		foreach (MemberInfo member in members)
-		{
-			IMemberWrapper wrapper = IMemberWrapper.Wrap(member);
-			ReferenceSerializer serializer = wrapper.GetCustomAttribute<SerializedReferenceAttribute>()!.GetSerializer(wrapper.FieldType);
-			object serializedValue = componentTable[member.Name];
-			object deserializedValue = serializer.Deserialize(wrapper.GetValue(component), serializedValue, getReferenceFrom);
-			wrapper.SetValue(component, deserializedValue);
-			usedValues.Add(member.Name);
-		}
-		
-		foreach (string usedValue in usedValues)
-		{
-			if (componentTable[usedValue] is TomlTable usedTable && usedTable.Count != 0)
-				Console.WriteLine($"WARN: Unused table {usedValue} {usedTable.ToDelimString()} of {id} leftover");
-			componentTable.Remove(usedValue);
-		}
 	}
 	
 	public static void RemoveEvents(object component, TomlTable componentTable)

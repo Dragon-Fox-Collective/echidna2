@@ -18,11 +18,11 @@ Editor root = (Editor)TomlDeserializer.Deserialize(AppContext.BaseDirectory + "P
 root.Notify(new IEditorInitialize.Notification(root));
 
 PrefabRoot prefab = TomlDeserializer.Deserialize(AppContext.BaseDirectory + root.PrefabPath);
-root.PrefabRoot = prefab;
-
-
-IHasChildren.PrintTree(root);
 TomlSerializer.Serialize(prefab, AppContext.BaseDirectory + root.PrefabPath);
+prefab = TomlDeserializer.Deserialize(AppContext.BaseDirectory + root.PrefabPath);
+
+root.PrefabRoot = prefab;
+IHasChildren.PrintTree(root);
 
 Window window = new(new GameWindow(
 	new GameWindowSettings(),
