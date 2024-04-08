@@ -59,7 +59,7 @@ public class ExposeMembersInClassPropertySourceGenerator : IIncrementalGenerator
 		source += "{\n";
 		
 		foreach (ISymbol member in GetAllUnimplementedMembersExposeRecursive(classType, prefabType))
-			source += ComponentSourceGenerator.GetMemberDeclaration(member, propertyName);
+			source += GetMemberDeclaration(member, propertyName);
 		
 		source += "}";
 		return source;
@@ -70,7 +70,7 @@ public class ExposeMembersInClassPropertySourceGenerator : IIncrementalGenerator
 	
 	public static IEnumerable<ISymbol> GetAllUnimplementedMembersExposeRecursiveIncludingConflicts(INamedTypeSymbol classType, INamedTypeSymbol prefabType)
 	{
-		foreach (ISymbol member in ComponentSourceGenerator.GetAllUnimplementedMembers(classType, prefabType))
+		foreach (ISymbol member in GetAllUnimplementedMembers(classType, prefabType))
 		{
 			yield return member;
 			
@@ -101,4 +101,74 @@ public class ExposeMembersInClassPropertySourceGenerator : IIncrementalGenerator
 					yield return member2;
 		}
 	}
+	
+	public static IEnumerable<ISymbol> GetAllPublicInstanceMembers(INamedTypeSymbol type)
+	{
+		if (type.SpecialType == SpecialType.System_Object)
+			yield break;
+		
+		foreach (ISymbol member in type.GetMembers().Where(member => member is { IsOverride: false, IsStatic: false, DeclaredAccessibility: Accessibility.Public }))
+			yield return member;
+		
+		if (type.BaseType is not null)
+			foreach (ISymbol member in GetAllPublicInstanceMembers(type.BaseType))
+				yield return member;
+	}
+	
+	public static IEnumerable<ISymbol> GetAllUnimplementedMembers(INamedTypeSymbol classType, INamedTypeSymbol interfaceType) =>
+		GetAllPublicInstanceMembers(interfaceType).Where(member =>
+			!member.Name.StartsWith("get_")
+			&& !member.Name.StartsWith("set_")
+			&& !member.Name.StartsWith("add_")
+			&& !member.Name.StartsWith("remove_")
+			&& member.Name != ".ctor"
+			&& !classType.GetMembers(member.Name).Any());
+	
+	public static string GetMemberDeclaration(ISymbol member, string propertyName)
+	{
+		AttributeData[] inheritedAttributes = member.GetAttributes().Where(attr => attr.AttributeClass?.GetAttributes().Any(subattr => subattr.AttributeClass?.Name == "AttributeUsageAttribute" && (bool)(subattr.NamedArguments.FirstOrDefault(pair => pair.Key == "Inherited").Value.Value ?? true)) ?? false).ToArray();
+		string attributes = inheritedAttributes.Any() ? "[" + string.Join(",", inheritedAttributes.Select(attr => $"{attr.AttributeClass}({string.Join(", ", attr.ConstructorArguments.Select(arg => arg.Value is null ? "null" : arg.Kind is TypedConstantKind.Type ? $"typeof({arg.Value})" : arg.Value.ToString()).Concat(attr.NamedArguments.Select(arg => $"{arg.Key} = {arg.Value}")))})")) + "] " : "";
+		string accessibility = member.DeclaredAccessibility.ToString().ToLower();
+		return member switch
+		{
+			IMethodSymbol method =>
+				$"\t{attributes}{accessibility} {method.ReturnType} {method.Name}"
+				+ (method.IsGenericMethod ? "<" + string.Join(", ", method.TypeArguments) + ">" : "")
+				+ "(" + string.Join(", ", method.Parameters.Select(parameter => $"{(parameter.IsParams ? "params " : "")}{parameter.Type} {parameter.Name}{(parameter.HasExplicitDefaultValue ? $" = {parameter.ExplicitDefaultValue ?? "default"}" : "")}")) + ")"
+				+ string.Join("", method.TypeArguments.OfType<ITypeParameterSymbol>().Select(typeParameter => (typeParameter, typeParameter.ConstraintTypes.Select(constraint => constraint.ToString()).Concat([
+					typeParameter.HasConstructorConstraint ? "new()" : null,
+					typeParameter.HasNotNullConstraint ? "notnull" : null,
+					typeParameter.HasReferenceTypeConstraint ? "class" : null,
+					typeParameter.HasUnmanagedTypeConstraint ? "unmanaged" : null,
+					typeParameter.HasValueTypeConstraint ? "struct" : null,
+				]).Where(constraint => constraint != null).ToArray())).Select(args => $" where {args.typeParameter} : {string.Join(", ", args.Item2)}"))
+				+ " => "
+				+ $"{propertyName}.{method.Name}({string.Join(", ", method.Parameters.Select(parameter => parameter.Name))});\n",
+			IPropertySymbol { GetMethod.DeclaredAccessibility: Accessibility.Public, SetMethod.DeclaredAccessibility: Accessibility.Public } property =>
+				$"\t{attributes}{accessibility} {property.Type} {property.Name} {{ get => {propertyName}.{property.Name}; set => {propertyName}.{property.Name} = value; }}\n",
+			IPropertySymbol { GetMethod.DeclaredAccessibility: Accessibility.Public } property =>
+				$"\t{attributes}{accessibility} {property.Type} {property.Name} => {propertyName}.{property.Name};\n",
+			IPropertySymbol { SetMethod.DeclaredAccessibility: Accessibility.Public } property =>
+				$"\t{attributes}{accessibility} {property.Type} {property.Name} {{ set => {propertyName}.{property.Name} = value; }}\n",
+			IEventSymbol @event =>
+				$"\t{attributes}{accessibility} event {@event.Type} {@event.Name} {{ add => {propertyName}.{@event.Name} += value; remove => {propertyName}.{@event.Name} -= value; }}\n",
+			IFieldSymbol field =>
+				$"\t{attributes}{accessibility} {field.Type} {field.Name} {{ get => {propertyName}.{field.Name}; set => {propertyName}.{field.Name} = value; }}\n",
+			_ => ""
+		};
+	}
+}
+
+public class SymbolSignatureEqualityComparer : IEqualityComparer<ISymbol>
+{
+	public static SymbolSignatureEqualityComparer Default { get; } = new();
+	
+	public bool Equals(ISymbol? x, ISymbol? y)
+	{
+		if (x is null || y is null) return x is null && y is null;
+		if (x.Kind != y.Kind) return false;
+		if (x.Name != y.Name) return false;
+		return true;
+	}
+	public int GetHashCode(ISymbol obj) => (obj.Kind, obj.Name).GetHashCode();
 }
