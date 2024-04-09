@@ -7,7 +7,7 @@ PrefabChildren = "04"
 Viewport = "2"
 ObjectPanel = "20"
 ComponentPanel = "21"
-PrefabPath = "Prefabs/Editor.toml"
+PrefabPath = "Prefabs/Some3dScene.toml"
 
 [01]
 Component = "Echidna2.Core.Named, Echidna2.Core"

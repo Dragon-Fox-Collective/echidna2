@@ -369,7 +369,8 @@ public partial class ComponentPanel : INotificationPropagator, IEditorInitialize
 		
 		foreach (MemberInfo member in selectedObject.GetType()
 			         .GetMembers(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
-			         .Where(member => member.GetCustomAttribute<SerializedValueAttribute>() is not null))
+			         .Where(member => member.GetCustomAttribute<SerializedValueAttribute>() is not null ||
+			                          member.GetCustomAttribute<SerializedReferenceAttribute>() is not null))
 		{
 			HLayoutWithHierarchy layout = HLayoutWithHierarchy.Instantiate();
 			Fields.AddChild(layout);
@@ -382,17 +383,24 @@ public partial class ComponentPanel : INotificationPropagator, IEditorInitialize
 			layout.AddChild(text);
 			
 			IMemberWrapper wrapper = IMemberWrapper.Wrap(member);
-			if (editor.HasRegisteredFieldEditor(wrapper.FieldType))
+			if (member.GetCustomAttribute<SerializedValueAttribute>() is not null)
 			{
-				IFieldEditor fieldEditor = editor.InstantiateFieldEditor(wrapper.FieldType);
-				fieldEditor.Load(wrapper.GetValue(selectedObject)!);
-				fieldEditor.ValueChanged += value =>
+				if (editor.HasRegisteredFieldEditor(wrapper.FieldType))
 				{
-					wrapper.SetValue(selectedObject, value);
-					editor.PrefabRoot?.RegisterChange(new MemberPath(wrapper, new ComponentPath(selectedObject)));
-					editor.SerializePrefab();
-				};
-				layout.AddChild(fieldEditor);
+					IFieldEditor fieldEditor = editor.InstantiateFieldEditor(wrapper.FieldType);
+					fieldEditor.Load(wrapper.GetValue(selectedObject)!);
+					fieldEditor.ValueChanged += value =>
+					{
+						wrapper.SetValue(selectedObject, value);
+						editor.PrefabRoot?.RegisterChange(new MemberPath(wrapper, new ComponentPath(selectedObject)));
+						editor.SerializePrefab();
+					};
+					layout.AddChild(fieldEditor);
+				}
+			}
+			else if (member.GetCustomAttribute<SerializedReferenceAttribute>() is not null)
+			{
+				
 			}
 		}
 	}
