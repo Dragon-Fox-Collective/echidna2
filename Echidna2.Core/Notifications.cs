@@ -1,6 +1,4 @@
-﻿using Echidna2.SourceGenerators;
-
-namespace Echidna2.Core;
+﻿namespace Echidna2.Core;
 
 [DontExpose]
 public interface INotificationListener<in T>

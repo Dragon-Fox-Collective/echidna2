@@ -4,7 +4,6 @@ using Echidna2.Core;
 using Echidna2.Gui;
 using Echidna2.Rendering;
 using Echidna2.Serialization;
-using Echidna2.SourceGenerators;
 using JetBrains.Annotations;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 

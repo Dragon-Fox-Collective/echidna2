@@ -1,5 +1,4 @@
 ﻿using Echidna2.Core;
-using Echidna2.SourceGenerators;
 
 namespace Echidna2;
 

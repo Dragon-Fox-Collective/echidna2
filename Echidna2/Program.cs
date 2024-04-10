@@ -10,8 +10,8 @@ Console.WriteLine("Hello, World!");
 Compilation.CompileCSProj("Prefabs/Editor.toml");
 
 AssemblyLoadContext projectAssemblyLoadContext = new("EchidnaProject");
-using FileStream proejctAssemblyFileStream = new(Compilation.CompilationDllPath, FileMode.Open, FileAccess.Read);
-TomlDeserializer.ProjectAssembly = projectAssemblyLoadContext.LoadFromStream(proejctAssemblyFileStream);
+using FileStream projectAssemblyFileStream = new(Compilation.CompilationDllPath, FileMode.Open, FileAccess.Read);
+TomlDeserializer.ProjectAssembly = projectAssemblyLoadContext.LoadFromStream(projectAssemblyFileStream);
 
 
 Editor root = (Editor)TomlDeserializer.Deserialize(AppContext.BaseDirectory + "Prefabs/Editor.toml").RootObject;

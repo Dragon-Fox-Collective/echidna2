@@ -1,6 +1,5 @@
 ﻿using Echidna2.Core;
 using Echidna2.Mathematics;
-using Echidna2.SourceGenerators;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 
 namespace Echidna2.Rendering;
