@@ -4,7 +4,7 @@ using Echidna2.Serialization;
 using Echidna2.TestPrefabs;
 using Tomlyn.Model;
 
-namespace Echidna2.Tests;
+namespace Echidna2.SerializationTests;
 
 public class SerializationTests
 {

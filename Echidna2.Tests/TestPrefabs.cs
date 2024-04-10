@@ -6,7 +6,7 @@ using Echidna2.Serialization;
 
 namespace Echidna2.TestPrefabs;
 
-public partial class ButtonWithTransform
+public partial class ButtonWithTransform : INotificationPropagator
 {
 	[ExposeMembersInClass] public RectTransform RectTransform { get; set; }
 	[ExposeMembersInClass] public Button Button { get; set; }
