@@ -2,7 +2,7 @@
 
 namespace Echidna2.Core;
 
-public class Hierarchy : INotificationPropagator, IHasChildren, ICanAddChildren
+public class Hierarchy : INotificationPropagator, IHasChildren, ICanAddChildren, IInitialize
 {
 	public delegate void ChildAddedHandler(object child);
 	public event ChildAddedHandler? ChildAdded;
@@ -24,6 +24,8 @@ public class Hierarchy : INotificationPropagator, IHasChildren, ICanAddChildren
 	private HashSet<object> currentNotifications = [];
 	
 	public bool HasBeenInitialized { get; set; }
+	
+	public void OnInitialize() { }
 	
 	public void Notify<T>(T notification) where T : notnull
 	{

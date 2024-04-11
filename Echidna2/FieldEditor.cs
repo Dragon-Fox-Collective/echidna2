@@ -12,16 +12,23 @@ namespace Echidna2;
 [DontExpose]
 public interface IFieldEditor
 {
-	public void Load(object value);
-	public event Action<object>? ValueChanged;
+	public void Load(object? value);
+	public event Action<object?>? ValueChanged;
 	public static virtual IFieldEditor Instantiate() => throw new NotImplementedException();
 }
 
 [DontExpose]
-public interface IFieldEditor<in T> : IFieldEditor
+public interface IFieldEditor<T> : IFieldEditor
 {
 	public void Load(T value);
-	void IFieldEditor.Load(object value) => Load((T)value);
+	void IFieldEditor.Load(object? value) => Load((T)value);
+	
+	public new event Action<T>? ValueChanged;
+	event Action<object?>? IFieldEditor.ValueChanged
+	{
+		add => ValueChanged += value as Action<T>;
+		remove => ValueChanged -= value as Action<T>;
+	}
 }
 
 [UsedImplicitly, Prefab("Editors/StringFieldEditor.toml")]
@@ -31,7 +38,7 @@ public partial class StringFieldEditor : INotificationPropagator, IInitialize, I
 	[SerializedReference] public TextRect Text { get; set; } = null!;
 	[SerializedReference] public Button Button { get; set; } = null!;
 	
-	public event Action<object>? ValueChanged;
+	public event Action<string>? ValueChanged;
 	
 	private string value = "";
 	public string Value
@@ -52,7 +59,7 @@ public partial class StringFieldEditor : INotificationPropagator, IInitialize, I
 		set
 		{
 			bufferValue = value;
-			Text.TextString = $"{value}";
+			Text.TextString = value;
 		}
 	}
 	
@@ -152,11 +159,10 @@ public partial class DoubleFieldEditor : INotificationPropagator, IFieldEditor<d
 		}
 	}
 	
-	public event Action<object>? ValueChanged;
+	public event Action<double>? ValueChanged;
 	
 	public void Load(double value) => Value = value;
 	
-	public void UpdateValue(object obj) => UpdateValue((string)obj);
 	public void UpdateValue(string stringValue)
 	{
 		if (double.TryParse(stringValue, NumberStyles.Any, CultureInfo.CurrentCulture, out double result))
@@ -174,4 +180,40 @@ public partial class DoubleFieldEditor : INotificationPropagator, IFieldEditor<d
 	{
 		INotificationPropagator.Notify(notification, StringFieldEditor);
 	}
+}
+
+[UsedImplicitly, Prefab("Editors/ReferenceFieldEditor.toml")]
+public partial class ReferenceFieldEditor : IFieldEditor, INotificationPropagator, IInitialize
+{
+	[SerializedReference, ExposeMembersInClass] public FullRectWithHierarchy Rect { get; set; } = null!;
+	[SerializedReference] public TextRect Text { get; set; } = null!;
+	[SerializedReference] public Button Button { get; set; } = null!;
+	
+	public event Action<object?>? ValueChanged;
+	
+	private object? value = null;
+	public object? Value
+	{
+		get => value;
+		set
+		{
+			this.value = value;
+			Text.TextString = INamed.GetName(value) ?? "null";
+			ValueChanged?.Invoke(value);
+		}
+	}
+	
+	public bool HasBeenInitialized { get; set; }
+	
+	public void OnInitialize()
+	{
+		Button.MouseDown += () => Console.WriteLine("bepis");
+	}
+	
+	public void Notify<T>(T notification) where T : notnull
+	{
+		INotificationPropagator.Notify(notification, Rect, Button);
+	}
+	
+	public void Load(object? value) => Value = value;
 }

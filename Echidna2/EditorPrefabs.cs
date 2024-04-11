@@ -383,24 +383,20 @@ public partial class ComponentPanel : INotificationPropagator, IEditorInitialize
 			layout.AddChild(text);
 			
 			IMemberWrapper wrapper = IMemberWrapper.Wrap(member);
-			if (member.GetCustomAttribute<SerializedValueAttribute>() is not null)
+			IFieldEditor? fieldEditor =
+				member.GetCustomAttribute<SerializedValueAttribute>() is not null ? editor.HasRegisteredFieldEditor(wrapper.FieldType) ? editor.InstantiateFieldEditor(wrapper.FieldType) : null :
+				member.GetCustomAttribute<SerializedReferenceAttribute>() is not null ? ReferenceFieldEditor.Instantiate() :
+				null;
+			if (fieldEditor is not null)
 			{
-				if (editor.HasRegisteredFieldEditor(wrapper.FieldType))
+				fieldEditor.Load(wrapper.GetValue(selectedObject));
+				fieldEditor.ValueChanged += value =>
 				{
-					IFieldEditor fieldEditor = editor.InstantiateFieldEditor(wrapper.FieldType);
-					fieldEditor.Load(wrapper.GetValue(selectedObject)!);
-					fieldEditor.ValueChanged += value =>
-					{
-						wrapper.SetValue(selectedObject, value);
-						editor.PrefabRoot?.RegisterChange(new MemberPath(wrapper, new ComponentPath(selectedObject)));
-						editor.SerializePrefab();
-					};
-					layout.AddChild(fieldEditor);
-				}
-			}
-			else if (member.GetCustomAttribute<SerializedReferenceAttribute>() is not null)
-			{
-				
+					wrapper.SetValue(selectedObject, value);
+					editor.PrefabRoot?.RegisterChange(new MemberPath(wrapper, new ComponentPath(selectedObject)));
+					editor.SerializePrefab();
+				};
+				layout.AddChild(fieldEditor);
 			}
 		}
 	}
