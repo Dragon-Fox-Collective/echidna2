@@ -18,17 +18,11 @@ public interface IFieldEditor
 }
 
 [DontExpose]
-public interface IFieldEditor<T> : IFieldEditor
+public interface IFieldEditor<in T> : IFieldEditor
 {
 	public void Load(T value);
 	void IFieldEditor.Load(object? value) => Load((T)value);
-	
-	public new event Action<T>? ValueChanged;
-	event Action<object?>? IFieldEditor.ValueChanged
-	{
-		add => ValueChanged += value as Action<T>;
-		remove => ValueChanged -= value as Action<T>;
-	}
+	// Trying to cast an Action<object> to an Action<T> doesn't work when T is a value type, so don't include ValueChanged
 }
 
 [UsedImplicitly, Prefab("Editors/StringFieldEditor.toml")]
@@ -38,7 +32,7 @@ public partial class StringFieldEditor : INotificationPropagator, IInitialize, I
 	[SerializedReference] public TextRect Text { get; set; } = null!;
 	[SerializedReference] public Button Button { get; set; } = null!;
 	
-	public event Action<string>? ValueChanged;
+	public event Action<object?>? ValueChanged;
 	
 	private string value = "";
 	public string Value
@@ -159,10 +153,11 @@ public partial class DoubleFieldEditor : INotificationPropagator, IFieldEditor<d
 		}
 	}
 	
-	public event Action<double>? ValueChanged;
+	public event Action<object?>? ValueChanged;
 	
 	public void Load(double value) => Value = value;
 	
+	public void UpdateValue(object? value) => UpdateValue((string)value!);
 	public void UpdateValue(string stringValue)
 	{
 		if (double.TryParse(stringValue, NumberStyles.Any, CultureInfo.CurrentCulture, out double result))
