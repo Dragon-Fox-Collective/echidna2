@@ -129,7 +129,16 @@ public class RectTransform : IRectTransform
 	[SerializedValue] public bool VerticalExpand { get; set; }
 	[SerializedValue] public double VerticalExpandWeight { get; set; } = 1;
 	
-	[SerializedValue] public bool IsGlobal { get; set; } = false;
+	private bool isGlobal = false;
+	[SerializedValue] public bool IsGlobal
+	{
+		get => isGlobal;
+		set
+		{
+			isGlobal = value;
+			RecalculateLocalTransform();
+		}
+	}
 	
 	private void RecalculateLocalTransform()
 	{
