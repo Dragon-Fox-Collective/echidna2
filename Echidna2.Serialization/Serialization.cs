@@ -266,7 +266,8 @@ public class SerializedValueAttribute(Type? serializerType = null) : Attribute
 {
 	private static Dictionary<Type, Serializer> defaultSerializers = new()
 	{
-		{ typeof(double), new DirectSerializer<double>() },
+		{ typeof(double), new NumberSerializer<double>() },
+		{ typeof(int), new NumberSerializer<int>() },
 		{ typeof(string), new DirectSerializer<string>() },
 		{ typeof(bool), new DirectSerializer<bool>() },
 		{ typeof(Color), new ColorSerializer() },

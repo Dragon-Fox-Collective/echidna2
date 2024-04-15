@@ -1,4 +1,5 @@
 ﻿using System.Drawing;
+using System.Globalization;
 using System.Reflection;
 using Tomlyn.Model;
 
@@ -28,6 +29,12 @@ public class EnumSerializer(Type type) : Serializer<string, Enum>
 {
 	public string Serialize(Enum value) => value.ToString();
 	public Enum Deserialize(Enum? value, string data) => (Enum)Enum.Parse(type, data);
+}
+
+public class NumberSerializer<T> : Serializer
+{
+	public object Serialize(object value) => value;
+	public object Deserialize(object? value, object data) => (T)Convert.ChangeType(data, typeof(T), CultureInfo.InvariantCulture);
 }
 
 public class SubComponentSerializer(Func<TomlTable, object> deserializeValue, string fieldName, string componentId) : Serializer<TomlTable, object>
