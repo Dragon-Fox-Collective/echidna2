@@ -408,3 +408,14 @@ public partial class ComponentPanel : INotificationPropagator, IEditorInitialize
 		INotificationPropagator.Notify(notification, Rect);
 	}
 }
+
+[UsedImplicitly, Prefab("Prefabs/AddComponentWindow.toml")]
+public partial class AddComponentWindow : INotificationPropagator
+{
+	[SerializedReference, ExposeMembersInClass] public FullRectWindow Rect { get; set; } = null!;
+	
+	public void Notify<T>(T notification) where T : notnull
+	{
+		INotificationPropagator.Notify(notification, Rect);
+	}
+}

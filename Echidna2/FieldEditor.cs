@@ -202,7 +202,11 @@ public partial class ReferenceFieldEditor : IFieldEditor, INotificationPropagato
 	
 	public void OnInitialize()
 	{
-		Button.MouseDown += () => Console.WriteLine("bepis");
+		Button.MouseDown += () =>
+		{
+			AddComponentWindow window = AddComponentWindow.Instantiate();
+			AddChild(window);
+		};
 	}
 	
 	public void Notify<T>(T notification) where T : notnull

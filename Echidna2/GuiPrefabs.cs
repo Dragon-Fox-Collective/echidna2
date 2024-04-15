@@ -140,3 +140,19 @@ public partial class FullLayoutWithHierarchy : INotificationPropagator, ICanBeLa
 		INotificationPropagator.Notify(notification, Layout, PrefabChildren);
 	}
 }
+
+[UsedImplicitly, Prefab("Prefabs/FullRectWindow.toml")]
+public partial class FullRectWindow : INotificationPropagator
+{
+	[SerializedReference, ExposeMembersInClass] public Named Named { get; set; } = null!;
+	[SerializedReference, ExposeMembersInClass] public RectTransform RectTransform { get; set; } = null!;
+	[SerializedReference, ExposeMembersInClass] public FullLayout Layout { get; set; } = null!;
+	[SerializedReference, ExposeMembersInClass] public Rect Rect { get; set; } = null!;
+	[SerializedReference, ExposeMembersInClass] public Hierarchy PrefabChildren { get; set; } = null!;
+	[SerializedReference, ExposeMembersInClass] public Visibility Visibility { get; set; } = null!;
+	
+	public void Notify<T>(T notification) where T : notnull
+	{
+		INotificationPropagator.Notify(notification, Rect, Layout, PrefabChildren, Visibility);
+	}
+}
