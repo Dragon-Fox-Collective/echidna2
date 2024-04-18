@@ -59,7 +59,7 @@ public partial class StringFieldEditor : INotificationPropagator, IInitialize, I
 	
 	private int cursorPosition;
 	
-	public bool HasBeenInitialized { get; set; }
+	[DontExpose] public bool HasBeenInitialized { get; set; }
 	
 	private bool isFocused;
 	public bool IsFocused
@@ -198,7 +198,7 @@ public partial class ReferenceFieldEditor : IFieldEditor, INotificationPropagato
 		}
 	}
 	
-	public bool HasBeenInitialized { get; set; }
+	[DontExpose] public bool HasBeenInitialized { get; set; }
 	
 	public void OnInitialize()
 	{

@@ -6,8 +6,8 @@ namespace Echidna2.Core
 {
 	[AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
 	public class ExposeMembersInClassAttribute : Attribute;
-
-	[AttributeUsage(AttributeTargets.Interface)]
+	
+	[AttributeUsage(AttributeTargets.Interface | AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Method | AttributeTargets.Event)]
 	public class DontExposeAttribute : Attribute;
 }
 
@@ -74,23 +74,20 @@ namespace Echidna2.SourceGenerators
 			return source;
 		}
 		
+		
 		public static IEnumerable<ISymbol> GetAllUnimplementedMembersExposeRecursive(INamedTypeSymbol classType, INamedTypeSymbol prefabType) =>
 			GetAllUnimplementedMembersExposeRecursiveIncludingConflicts(classType, prefabType).Distinct(SymbolSignatureEqualityComparer.Default);
 		
 		public static IEnumerable<ISymbol> GetAllUnimplementedMembersExposeRecursiveIncludingConflicts(INamedTypeSymbol classType, INamedTypeSymbol prefabType)
 		{
-			foreach (ISymbol member in GetAllUnimplementedMembers(classType, prefabType))
-			{
+			foreach (ISymbol member in FilterOutNotExposedSymbols(GetAllUnimplementedMembers(classType, prefabType)))
 				yield return member;
-				
-				if (member is IPropertySymbol property && property.GetAttributes().Any(attribute => attribute.AttributeClass?.Name == "ExposeMembersInClassAttribute"))
-					foreach (ISymbol member2 in GetAllUnimplementedMembersExposeRecursiveIncludingConflicts(classType, (INamedTypeSymbol)property.Type))
-						yield return member2;
-				else if (member is IFieldSymbol field && field.GetAttributes().Any(attribute => attribute.AttributeClass?.Name == "ExposeMembersInClassAttribute"))
-					foreach (ISymbol member2 in GetAllUnimplementedMembersExposeRecursiveIncludingConflicts(classType, (INamedTypeSymbol)field.Type))
-						yield return member2;
-			}
+			
+			foreach (ISymbol member2 in FilterForExposingSymbols(GetAllUnimplementedMembers(classType, prefabType))
+				         .SelectMany(symbol => GetAllUnimplementedMembersExposeRecursiveIncludingConflicts(classType, (INamedTypeSymbol)SymbolWrapper.Wrap(symbol).Type)))
+				yield return member2;
 		}
+		
 		
 		public static IEnumerable<INamedTypeSymbol> GetAllExposedInterfaces(ITypeSymbol type) =>
 			GetAllExposedInterfacesIncludingConflicts(type).Distinct<INamedTypeSymbol>(SymbolSignatureEqualityComparer.Default);
@@ -100,16 +97,18 @@ namespace Echidna2.SourceGenerators
 			foreach (INamedTypeSymbol inter in type.AllInterfaces.Where(inter => !inter.GetAttributes().Any(attribute => attribute.AttributeClass?.Name == "DontExposeAttribute")))
 				yield return inter;
 			
-			foreach (ISymbol member in type.GetMembers())
-			{
-				if (member is IPropertySymbol property && property.GetAttributes().Any(attribute => attribute.AttributeClass?.Name == "ExposeMembersInClassAttribute"))
-					foreach (INamedTypeSymbol member2 in GetAllExposedInterfacesIncludingConflicts(property.Type))
-						yield return member2;
-				else if (member is IFieldSymbol field && field.GetAttributes().Any(attribute => attribute.AttributeClass?.Name == "ExposeMembersInClassAttribute"))
-					foreach (INamedTypeSymbol member2 in GetAllExposedInterfacesIncludingConflicts(field.Type))
-						yield return member2;
-			}
+			foreach (INamedTypeSymbol member2 in FilterForExposingSymbols(type.GetMembers())
+				         .SelectMany(symbol => GetAllExposedInterfacesIncludingConflicts(SymbolWrapper.Wrap(symbol).Type)))
+				yield return member2;
 		}
+		
+		
+		public static IEnumerable<ISymbol> FilterForExposingSymbols(IEnumerable<ISymbol> symbols) => symbols
+			.Where(symbol => symbol.GetAttributes().Any(attribute => attribute.AttributeClass?.Name == "ExposeMembersInClassAttribute"));
+		
+		public static IEnumerable<ISymbol> FilterOutNotExposedSymbols(IEnumerable<ISymbol> symbols) => symbols
+			.Where(symbol => !symbol.GetAttributes().Any(attribute => attribute.AttributeClass?.Name == "DontExposeAttribute"));
+		
 		
 		public static IEnumerable<ISymbol> GetAllPublicInstanceMembers(INamedTypeSymbol type)
 		{
@@ -124,6 +123,7 @@ namespace Echidna2.SourceGenerators
 					yield return member;
 		}
 		
+		
 		public static IEnumerable<ISymbol> GetAllUnimplementedMembers(INamedTypeSymbol classType, INamedTypeSymbol interfaceType) =>
 			GetAllPublicInstanceMembers(interfaceType).Where(member =>
 				!member.Name.StartsWith("get_")
@@ -132,6 +132,7 @@ namespace Echidna2.SourceGenerators
 				&& !member.Name.StartsWith("remove_")
 				&& member.Name != ".ctor"
 				&& !classType.GetMembers(member.Name).Any());
+		
 		
 		public static string GetMemberDeclaration(ISymbol member, string propertyName)
 		{

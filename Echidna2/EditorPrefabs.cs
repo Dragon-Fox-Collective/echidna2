@@ -414,7 +414,7 @@ public partial class AddComponentWindow : INotificationPropagator, IInitialize
 {
 	[SerializedReference, ExposeMembersInClass] public FullRectWindow Window { get; set; } = null!;
 	
-	public bool HasBeenInitialized { get; set; }
+	[DontExpose] public bool HasBeenInitialized { get; set; }
 	
 	public void OnInitialize()
 	{

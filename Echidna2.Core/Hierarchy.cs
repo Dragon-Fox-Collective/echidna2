@@ -25,7 +25,7 @@ public class Hierarchy : INotificationPropagator, IHasChildren, ICanAddChildren,
 	
 	private HashSet<object> currentNotifications = [];
 	
-	public bool HasBeenInitialized { get; set; }
+	[DontExpose] public bool HasBeenInitialized { get; set; }
 	
 	public void OnInitialize() { }
 	

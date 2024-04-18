@@ -75,8 +75,6 @@ public interface INotificationPropagator
 public interface IInitialize : INotificationListener<IInitialize.Notification>
 {
 	public class Notification;
-	// THIS LINE MUST GO IN ALL IMPLEMENTATIONS OF IINITIALIZE OR NOTIFICATIONS WILL NOT PROPAGATE!!!!!
-	// FIXME: Don't expose this (or any members of a DontExpose interface)
 	public bool HasBeenInitialized { get; set; }
 	void INotificationListener<Notification>.OnNotify(Notification notification)
 	{

@@ -66,7 +66,7 @@ public partial class ButtonRect : INotificationPropagator, IInitialize, ICanBeLa
 	[SerializedReference, ExposeMembersInClass] public Hierarchy PrefabChildren { get; set; } = null!;
 	[SerializedReference, ExposeMembersInClass] public Button Button { get; set; } = null!;
 	
-	public bool HasBeenInitialized { get; set; }
+	[DontExpose] public bool HasBeenInitialized { get; set; }
 	
 	public virtual void OnInitialize()
 	{
@@ -154,7 +154,7 @@ public partial class FullRectWindow : INotificationPropagator, IInitialize
 	
 	public event Action? CloseWindowRequest;
 	
-	public bool HasBeenInitialized { get; set; }
+	[DontExpose] public bool HasBeenInitialized { get; set; }
 	
 	public void OnInitialize()
 	{

@@ -17,7 +17,7 @@ public interface IMemberWrapper : IEquatable<IMemberWrapper>
 	{
 		FieldInfo field => new FieldWrapper(field),
 		PropertyInfo property => new PropertyWrapper(property),
-		_ => throw new ArgumentException("Member must be a field or property"),
+		_ => throw new ArgumentException($"Member must be a field or property, not {member.GetType()}"),
 	};
 }
 
