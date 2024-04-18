@@ -23,12 +23,29 @@ public interface INotificationPredicate<in T>
 [DontExpose]
 public interface INotificationPropagator
 {
+	private static Stack<object> currentNotifications = [];
+	private static Dictionary<object, Action?> notificationDelegates = [];
+	
+	public static event Action? NotificationFinished
+	{
+		add => notificationDelegates[currentNotifications.Peek()] += value;
+		remove => notificationDelegates[currentNotifications.Peek()] -= value;
+	}
+	
 	public void Notify<T>(T notification) where T : notnull;
 	
 	public static void Notify<T>(T notification, params object[] objects) where T : notnull
 	{
 		if (objects.Any<object?>(child => child is null))
 			throw new NullReferenceException($"Null child in Notify with objects {objects.ToDelimString()}");
+		
+		bool newNotification = !currentNotifications.Contains(notification);
+		if (newNotification)
+		{
+			currentNotifications.Push(notification);
+			notificationDelegates.Add(notification, null);
+		}
+		
 		if (!objects.OfType<INotificationPredicate<T>>().All(child => child.ShouldNotificationPropagate(notification)))
 			return;
 		foreach (INotificationHook<T> child in objects.OfType<INotificationHook<T>>())
@@ -41,12 +58,29 @@ public interface INotificationPropagator
 			child.Notify(notification);
 		foreach (INotificationHook<T> child in objects.OfType<INotificationHook<T>>())
 			child.OnPostPropagate(notification);
+		
+		if (newNotification)
+		{
+			object poppedNotificaiton = currentNotifications.Pop();
+			if (!poppedNotificaiton.Equals(notification))
+				throw new InvalidOperationException($"Notification stack out of order: {poppedNotificaiton} != {notification}");
+			notificationDelegates.Remove(notification, out Action? action);
+			action?.Invoke();
+		}
 	}
 	
 	public static void Notify<T>(T notification, IList<object> objects) where T : notnull
 	{
 		if (objects.Any<object?>(child => child is null))
 			throw new NullReferenceException($"Null child in Notify with objects {objects.ToDelimString()}");
+		
+		bool newNotification = !currentNotifications.Contains(notification);
+		if (newNotification)
+		{
+			currentNotifications.Push(notification);
+			notificationDelegates.Add(notification, null);
+		}
+		
 		if (!objects.OfType<INotificationPredicate<T>>().All(child => child.ShouldNotificationPropagate(notification)))
 			return;
 		foreach (INotificationHook<T> child in objects.OfType<INotificationHook<T>>())
@@ -59,6 +93,15 @@ public interface INotificationPropagator
 			child.Notify(notification);
 		foreach (INotificationHook<T> child in objects.OfType<INotificationHook<T>>())
 			child.OnPostPropagate(notification);
+		
+		if (newNotification)
+		{
+			object poppedNotificaiton = currentNotifications.Pop();
+			if (!poppedNotificaiton.Equals(notification))
+				throw new InvalidOperationException($"Notification stack out of order: {poppedNotificaiton} != {notification}");
+			notificationDelegates.Remove(notification, out Action? action);
+			action?.Invoke();
+		}
 	}
 }
 
@@ -66,6 +109,8 @@ public interface INotificationPropagator
 public interface IInitialize : INotificationListener<IInitialize.Notification>
 {
 	public class Notification;
+	// THIS LINE MUST GO IN ALL IMPLEMENTATIONS OF IINITIALIZE OR NOTIFICATIONS WILL NOT PROPAGATE!!!!!
+	// FIXME: Don't expose this (or any members of a DontExpose interface)
 	public bool HasBeenInitialized { get; set; }
 	void INotificationListener<Notification>.OnNotify(Notification notification)
 	{
@@ -93,4 +138,23 @@ public interface IUpdate : INotificationListener<IUpdate.Notification>
 	}
 	void INotificationListener<Notification>.OnNotify(Notification notification) => OnUpdate(notification.DeltaTime);
 	public void OnUpdate(double deltaTime);
+}
+
+[DontExpose]
+public interface IPostUpdate : INotificationListener<IPostUpdate.Notification>
+{
+	public class Notification;
+	void INotificationListener<Notification>.OnNotify(Notification notification) => OnPostUpdate();
+	public void OnPostUpdate();
+}
+
+[DontExpose]
+public interface IAddedToHierarchy : INotificationListener<IAddedToHierarchy.Notification>
+{
+	public class Notification(Hierarchy parent)
+	{
+		public Hierarchy Parent { get; } = parent;
+	}
+	void INotificationListener<Notification>.OnNotify(Notification notification) => OnAddedToHierarchy(notification.Parent);
+	public void OnAddedToHierarchy(Hierarchy parent);
 }

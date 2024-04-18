@@ -410,12 +410,19 @@ public partial class ComponentPanel : INotificationPropagator, IEditorInitialize
 }
 
 [UsedImplicitly, Prefab("Prefabs/AddComponentWindow.toml")]
-public partial class AddComponentWindow : INotificationPropagator
+public partial class AddComponentWindow : INotificationPropagator, IInitialize
 {
-	[SerializedReference, ExposeMembersInClass] public FullRectWindow Rect { get; set; } = null!;
+	[SerializedReference, ExposeMembersInClass] public FullRectWindow Window { get; set; } = null!;
+	
+	public bool HasBeenInitialized { get; set; }
+	
+	public void OnInitialize()
+	{
+		Window.CloseWindowRequest += () => Hierarchy.Parent.QueueRemoveChild(this);
+	}
 	
 	public void Notify<T>(T notification) where T : notnull
 	{
-		INotificationPropagator.Notify(notification, Rect);
+		INotificationPropagator.Notify(notification, Window);
 	}
 }

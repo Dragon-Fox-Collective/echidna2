@@ -21,6 +21,8 @@ public class Hierarchy : INotificationPropagator, IHasChildren, ICanAddChildren,
 		}
 	}
 	
+	public Hierarchy? Parent { get; private set; }
+	
 	private HashSet<object> currentNotifications = [];
 	
 	public bool HasBeenInitialized { get; set; }
@@ -29,6 +31,12 @@ public class Hierarchy : INotificationPropagator, IHasChildren, ICanAddChildren,
 	
 	public void Notify<T>(T notification) where T : notnull
 	{
+		if (notification is IAddedToHierarchy.Notification addedToHierarchy)
+		{
+			Parent = addedToHierarchy.Parent;
+			return;
+		}
+		
 		if (!currentNotifications.Add(notification)) return;
 		INotificationPropagator.Notify(notification, children);
 		currentNotifications.Remove(notification);
@@ -39,7 +47,13 @@ public class Hierarchy : INotificationPropagator, IHasChildren, ICanAddChildren,
 		children.Add(child);
 		if (HasBeenInitialized)
 			INotificationPropagator.Notify(new IInitialize.Notification(), child);
+		INotificationPropagator.Notify(new IAddedToHierarchy.Notification(this), child);
 		ChildAdded?.Invoke(child);
+	}
+	
+	public void QueueAddChild(object child)
+	{
+		INotificationPropagator.NotificationFinished += () => AddChild(child);
 	}
 	
 	public bool RemoveChild(object child)
@@ -50,6 +64,15 @@ public class Hierarchy : INotificationPropagator, IHasChildren, ICanAddChildren,
 			return true;
 		}
 		return false;
+	}
+	
+	public void QueueRemoveChild(object child)
+	{
+		INotificationPropagator.NotificationFinished += () =>
+		{
+			if (!RemoveChild(child))
+				Console.WriteLine($"Warning: Tried to remove a child {child} that wasn't in the hierarchy {this}");
+		};
 	}
 	
 	public void ClearChildren()
@@ -82,6 +105,8 @@ public interface IHasChildren
 public interface ICanAddChildren
 {
 	public void AddChild(object child);
+	public void QueueAddChild(object child);
 	public bool RemoveChild(object child);
+	public void QueueRemoveChild(object child);
 	public void ClearChildren();
 }

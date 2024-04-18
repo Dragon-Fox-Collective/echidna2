@@ -58,6 +58,7 @@ public class Window
 	{
 		Camera?.Notify(new IPreUpdate.Notification());
 		Camera?.Notify(new IUpdate.Notification(deltaTime));
+		Camera?.Notify(new IPostUpdate.Notification());
 	}
 	
 	private void OnDraw()

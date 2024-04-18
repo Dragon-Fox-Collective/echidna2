@@ -205,7 +205,7 @@ public partial class ReferenceFieldEditor : IFieldEditor, INotificationPropagato
 		Button.MouseDown += () =>
 		{
 			AddComponentWindow window = AddComponentWindow.Instantiate();
-			AddChild(window);
+			QueueAddChild(window);
 		};
 	}
 	

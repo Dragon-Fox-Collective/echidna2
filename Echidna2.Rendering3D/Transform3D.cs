@@ -21,7 +21,7 @@ public class Transform3D
 	public Vector3 GlobalPosition
 	{
 		get => GlobalTransform.Translation;
-		set => LocalPosition = Parent?.GlobalTransform.InverseTransformPoint(value) ?? value;
+		set => LocalPosition = value;
 	}
 	
 	private Quaternion localRotation = Quaternion.Identity;
@@ -37,7 +37,7 @@ public class Transform3D
 	public Quaternion GlobalRotation
 	{
 		get => GlobalTransform.Rotation;
-		set => LocalRotation = Parent?.GlobalTransform.InverseTransformRotation(value) ?? value;
+		set => LocalRotation = value;
 	}
 	
 	private Vector3 localScale = Vector3.One;
@@ -54,20 +54,6 @@ public class Transform3D
 	public Matrix4 LocalTransform { get; private set; } = Matrix4.Identity;
 	public Matrix4 GlobalTransform { get; private set; } = Matrix4.Identity;
 	
-	private Transform3D? parent;
-	[SerializedReference] public Transform3D? Parent
-	{
-		get => parent;
-		set
-		{
-			if (parent is not null)
-				parent.TransformChanged -= RecalculateGlobalTransform;
-			parent = value;
-			if (parent is not null)
-				parent.TransformChanged += RecalculateGlobalTransform;
-		}
-	}
-	
 	public void LookAt(Transform3D target, Vector3 up, Vector3 fallbackUp = default) => GlobalRotation = Quaternion.LookAt(GlobalPosition, target.GlobalPosition, up, fallbackUp);
 	public void LookAt(Vector3 target, Vector3 up, Vector3 fallbackUp = default) => GlobalRotation = Quaternion.LookAt(GlobalPosition, target, up, fallbackUp);
 	public void LookToward(Vector3 direction, Vector3 up, Vector3 fallbackUp = default) => GlobalRotation = Quaternion.LookToward(direction, up, fallbackUp);
@@ -79,7 +65,7 @@ public class Transform3D
 	}
 	private void RecalculateGlobalTransform()
 	{
-		GlobalTransform = Parent?.GlobalTransform * LocalTransform ?? LocalTransform;
+		GlobalTransform = LocalTransform;
 		TransformChanged?.Invoke();
 	}
 }
