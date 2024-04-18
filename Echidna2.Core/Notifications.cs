@@ -34,42 +34,8 @@ public interface INotificationPropagator
 	
 	public void Notify<T>(T notification) where T : notnull;
 	
-	public static void Notify<T>(T notification, params object[] objects) where T : notnull
-	{
-		if (objects.Any<object?>(child => child is null))
-			throw new NullReferenceException($"Null child in Notify with objects {objects.ToDelimString()}");
-		
-		bool newNotification = !currentNotifications.Contains(notification);
-		if (newNotification)
-		{
-			currentNotifications.Push(notification);
-			notificationDelegates.Add(notification, null);
-		}
-		
-		if (!objects.OfType<INotificationPredicate<T>>().All(child => child.ShouldNotificationPropagate(notification)))
-			return;
-		foreach (INotificationHook<T> child in objects.OfType<INotificationHook<T>>())
-			child.OnPreNotify(notification);
-		foreach (INotificationListener<T> child in objects.OfType<INotificationListener<T>>())
-			child.OnNotify(notification);
-		foreach (INotificationHook<T> child in objects.OfType<INotificationHook<T>>())
-			child.OnPostNotify(notification);
-		foreach (INotificationPropagator child in objects.OfType<INotificationPropagator>())
-			child.Notify(notification);
-		foreach (INotificationHook<T> child in objects.OfType<INotificationHook<T>>())
-			child.OnPostPropagate(notification);
-		
-		if (newNotification)
-		{
-			object poppedNotificaiton = currentNotifications.Pop();
-			if (!poppedNotificaiton.Equals(notification))
-				throw new InvalidOperationException($"Notification stack out of order: {poppedNotificaiton} != {notification}");
-			notificationDelegates.Remove(notification, out Action? action);
-			action?.Invoke();
-		}
-	}
-	
-	public static void Notify<T>(T notification, IList<object> objects) where T : notnull
+	public static void Notify<T>(T notification, params object[] objects) where T : notnull => Notify(notification, objects as ICollection<object>);
+	public static void Notify<T>(T notification, ICollection<object> objects) where T : notnull
 	{
 		if (objects.Any<object?>(child => child is null))
 			throw new NullReferenceException($"Null child in Notify with objects {objects.ToDelimString()}");
