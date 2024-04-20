@@ -32,10 +32,10 @@ public partial class StringFieldEditor : INotificationPropagator, IInitialize, I
 	[SerializedReference, ExposeMembersInClass] public FullRectWithHierarchy Rect { get; set; } = null!;
 	[SerializedReference] public TextRect Text { get; set; } = null!;
 	[SerializedReference] public Button Button { get; set; } = null!;
-
-    public event Action<object?>? ValueChanged;
-
-    private string value = "";
+	
+	public event Action<object?>? ValueChanged;
+	
+	private string value = "";
 	public string Value
 	{
 		get => value;
@@ -94,7 +94,7 @@ public partial class StringFieldEditor : INotificationPropagator, IInitialize, I
 	{
 		INotificationPropagator.Notify(notification, Rect, Button);
 	}
-
+	
 	public void Load(string value) => Value = value;
 	
 	public void OnTextInput(Keys key, KeyModifiers modifiers)
@@ -152,23 +152,23 @@ public partial class DoubleFieldEditor : INotificationPropagator, IFieldEditor<d
 		{
 			this.value = value;
 			StringFieldEditor.Load(value.ToString(CultureInfo.CurrentCulture));
-        }
+		}
 	}
-
-    public event Action<object?>? ValueChanged;
-
-    public void Load(double value) => Value = value;
+	
+	public event Action<object?>? ValueChanged;
+	
+	public void Load(double value) => Value = value;
 	
 	public void UpdateValue(object? value) => UpdateValue((string)value!);
 	public void UpdateValue(string stringValue)
 	{
 		if (double.TryParse(stringValue, NumberStyles.Any, CultureInfo.CurrentCulture, out double result))
 		{
-            value = result;
-            if (value != result)
-                ValueChanged?.Invoke(value);
-        }
-        else
+			value = result;
+			if (value != result)
+				ValueChanged?.Invoke(value);
+		}
+		else
 		{
 			StringFieldEditor.Load(value.ToString(CultureInfo.CurrentCulture));
 		}
@@ -186,10 +186,10 @@ public partial class ReferenceFieldEditor : IFieldEditor, INotificationPropagato
 	[SerializedReference, ExposeMembersInClass] public FullRectWithHierarchy Rect { get; set; } = null!;
 	[SerializedReference] public TextRect Text { get; set; } = null!;
 	[SerializedReference] public Button Button { get; set; } = null!;
-
-    public event Action<object?>? ValueChanged = null;
-
-    private object? value = null;
+	
+	public event Action<object?>? ValueChanged = null;
+	
+	private object? value = null;
 	public object? Value
 	{
 		get => value;
@@ -222,44 +222,44 @@ public partial class ReferenceFieldEditor : IFieldEditor, INotificationPropagato
 
 
 [UsedImplicitly, Prefab("Editors/Vector2FieldEditor.toml")]
-public partial class Vector2FieldEditor : INotificationPropagator, IInitialize, IFieldEditor<Vector2>
+public partial class Vector2FieldEditor : INotificationPropagator, IFieldEditor<Vector2>
 {
-    [SerializedReference, ExposeMembersInClass] public HLayoutWithHierarchy Layout { get; set; } = null!;
-    public DoubleFieldEditor? XEditor;
-    public DoubleFieldEditor? YEditor;
-    [DontExpose] public bool HasBeenInitialized { get; set; }
-    [SerializedReference]
-    private DoubleFieldEditor XFieldEditor
-    {
-        get => XEditor!;
-        set
-        {
-            if (XEditor is not null)
-                XEditor.ValueChanged -= UpdateX;
-
-            XEditor = value;
-
-            if (XEditor is not null)
-                XEditor.ValueChanged += UpdateX;
-        }
-    }
-
+	[SerializedReference, ExposeMembersInClass] public HLayoutWithHierarchy Layout { get; set; } = null!;
+	public DoubleFieldEditor? XEditor;
+	public DoubleFieldEditor? YEditor;
+	[DontExpose] public bool HasBeenInitialized { get; set; }
 	[SerializedReference]
-    private DoubleFieldEditor YFieldEditor
-    {
-        get => YEditor!;
-        set
-        {
-            if (YEditor is not null)
-                YEditor.ValueChanged -= UpdateY;
-
-            YEditor = value;
-
-            if (YEditor is not null)
-                YEditor.ValueChanged += UpdateY;
-        }
-    }
-
+	private DoubleFieldEditor XFieldEditor
+	{
+		get => XEditor!;
+		set
+		{
+			if (XEditor is not null)
+				XEditor.ValueChanged -= UpdateX;
+			
+			XEditor = value;
+			
+			if (XEditor is not null)
+				XEditor.ValueChanged += UpdateX;
+		}
+	}
+	
+	[SerializedReference]
+	private DoubleFieldEditor YFieldEditor
+	{
+		get => YEditor!;
+		set
+		{
+			if (YEditor is not null)
+				YEditor.ValueChanged -= UpdateY;
+			
+			YEditor = value;
+			
+			if (YEditor is not null)
+				YEditor.ValueChanged += UpdateY;
+		}
+	}
+	
 	private Vector2 value;
 	public Vector2 Value
 	{
@@ -267,136 +267,124 @@ public partial class Vector2FieldEditor : INotificationPropagator, IInitialize, 
 		set
 		{
 			this.value = value;
-            ValueChanged?.Invoke(value);
-            XFieldEditor.Load(value.X);
-            YFieldEditor.Load(value.Y);
-        }
+			ValueChanged?.Invoke(value);
+			XFieldEditor.Load(value.X);
+			YFieldEditor.Load(value.Y);
+		}
 	}
 	
 	public event Action<object?>? ValueChanged;
-
-    public void UpdateX(object? x) => UpdateX((double)x);
-    public void UpdateX(double x){
+	
+	public void UpdateX(object? x) => UpdateX((double)x);
+	public void UpdateX(double x){
 		value = new Vector2(x, value.Y);
 	}
-    public void UpdateY(object? y) => UpdateY((double)y);
-    public void UpdateY(double y){
-        value = new Vector2(value.X, y);
-    }
-
-    public void Load(Vector2 value) => Value = value;
-
-    public void Notify<T>(T notification) where T : notnull
-    {
-        INotificationPropagator.Notify(notification, Layout);
-    }
-    public void OnInitialize()
-    {
-
-    }
-
-
+	public void UpdateY(object? y) => UpdateY((double)y);
+	public void UpdateY(double y){
+		value = new Vector2(value.X, y);
+	}
+	
+	public void Load(Vector2 value) => Value = value;
+	
+	public void Notify<T>(T notification) where T : notnull
+	{
+		INotificationPropagator.Notify(notification, Layout);
+	}
 }
 
 [UsedImplicitly, Prefab("Editors/Vector3FieldEditor.toml")]
-public partial class Vector3FieldEditor : INotificationPropagator, IInitialize, IFieldEditor<Vector3>
+public partial class Vector3FieldEditor : INotificationPropagator, IFieldEditor<Vector3>
 {
-    [SerializedReference, ExposeMembersInClass] public HLayoutWithHierarchy Layout { get; set; } = null!;
-    public DoubleFieldEditor? XEditor;
-    public DoubleFieldEditor? YEditor;
-    public DoubleFieldEditor? ZEditor;
-    [DontExpose] public bool HasBeenInitialized { get; set; }
-    [SerializedReference]
-    private DoubleFieldEditor XFieldEditor
-    {
-        get => XEditor!;
-        set
-        {
-            if (XEditor is not null)
-                XEditor.ValueChanged -= UpdateX;
-
-            XEditor = value;
-
-            if (XEditor is not null)
-                XEditor.ValueChanged += UpdateX;
-        }
-    }
-
-    [SerializedReference]
-    private DoubleFieldEditor YFieldEditor
-    {
-        get => YEditor!;
-        set
-        {
-            if (YEditor is not null)
-                YEditor.ValueChanged -= UpdateY;
-
-            YEditor = value;
-
-            if (YEditor is not null)
-                YEditor.ValueChanged += UpdateY;
-        }
-    }
-    [SerializedReference]
-    private DoubleFieldEditor ZFieldEditor
-    {
-        get => ZEditor!;
-        set
-        {
-            if (ZEditor is not null)
-                ZEditor.ValueChanged -= UpdateZ;
-
-            ZEditor = value;
-
-            if (ZEditor is not null)
-                ZEditor.ValueChanged += UpdateZ;
-        }
-    }
-
-    private Vector3 value;
-    public Vector3 Value
-    {
-        get => value;
-        set
-        {
-            this.value = value;
-            XFieldEditor.Load(value.X);
-            YFieldEditor.Load(value.Y);
-            ZFieldEditor.Load(value.Z);
-        }
-    }
-
-    public event Action<object?>? ValueChanged;
-
-    public void UpdateX(object? x) => UpdateX((double)x);
-    public void UpdateX(double x)
-    {
-        value = new Vector3(x, value.Y, value.Z);
+	[SerializedReference, ExposeMembersInClass] public HLayoutWithHierarchy Layout { get; set; } = null!;
+	public DoubleFieldEditor? XEditor;
+	public DoubleFieldEditor? YEditor;
+	public DoubleFieldEditor? ZEditor;
+	[DontExpose] public bool HasBeenInitialized { get; set; }
+	[SerializedReference]
+	private DoubleFieldEditor XFieldEditor
+	{
+		get => XEditor!;
+		set
+		{
+			if (XEditor is not null)
+				XEditor.ValueChanged -= UpdateX;
+			
+			XEditor = value;
+			
+			if (XEditor is not null)
+				XEditor.ValueChanged += UpdateX;
+		}
+	}
+	
+	[SerializedReference]
+	private DoubleFieldEditor YFieldEditor
+	{
+		get => YEditor!;
+		set
+		{
+			if (YEditor is not null)
+				YEditor.ValueChanged -= UpdateY;
+			
+			YEditor = value;
+			
+			if (YEditor is not null)
+				YEditor.ValueChanged += UpdateY;
+		}
+	}
+	[SerializedReference]
+	private DoubleFieldEditor ZFieldEditor
+	{
+		get => ZEditor!;
+		set
+		{
+			if (ZEditor is not null)
+				ZEditor.ValueChanged -= UpdateZ;
+			
+			ZEditor = value;
+			
+			if (ZEditor is not null)
+				ZEditor.ValueChanged += UpdateZ;
+		}
+	}
+	
+	private Vector3 value;
+	public Vector3 Value
+	{
+		get => value;
+		set
+		{
+			this.value = value;
+			XFieldEditor.Load(value.X);
+			YFieldEditor.Load(value.Y);
+			ZFieldEditor.Load(value.Z);
+		}
+	}
+	
+	public event Action<object?>? ValueChanged;
+	
+	public void UpdateX(object? x) => UpdateX((double)x);
+	public void UpdateX(double x)
+	{
+		value = new Vector3(x, value.Y, value.Z);
 		ValueChanged?.Invoke(value);
-    }
-    public void UpdateY(object? y) => UpdateY((double)y);
-    public void UpdateY(double y)
-    {
-        value = new Vector3(value.X, y, value.Z);
-        ValueChanged?.Invoke(value);
-    }
-    public void UpdateZ(object? z) => UpdateZ((double)z);
-    public void UpdateZ(double z)
-    {
-        value = new Vector3(value.X, value.Y, z);
+	}
+	public void UpdateY(object? y) => UpdateY((double)y);
+	public void UpdateY(double y)
+	{
+		value = new Vector3(value.X, y, value.Z);
 		ValueChanged?.Invoke(value);
-    }
-
-    public void Load(Vector3 value) => Value = value;
-
-    public void Notify<T>(T notification) where T : notnull
-    {
-        INotificationPropagator.Notify(notification, Layout);
-    }
-    public void OnInitialize()
-    {
-
-    }
-
-
+	}
+	public void UpdateZ(object? z) => UpdateZ((double)z);
+	public void UpdateZ(double z)
+	{
+		value = new Vector3(value.X, value.Y, z);
+		ValueChanged?.Invoke(value);
+	}
+	
+	public void Load(Vector3 value) => Value = value;
+	
+	public void Notify<T>(T notification) where T : notnull
+	{
+		INotificationPropagator.Notify(notification, Layout);
+	}
 }
