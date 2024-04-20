@@ -276,7 +276,7 @@ public partial class Vector2FieldEditor : INotificationPropagator, IInitialize, 
 			if (XChanged)
                 XFieldEditor.Load(value.X);
             if (YChanged)
-                XFieldEditor.Load(value.Y);
+                YFieldEditor.Load(value.Y);
         }
 	}
 	
@@ -295,7 +295,7 @@ public partial class Vector2FieldEditor : INotificationPropagator, IInitialize, 
 
     public void Notify<T>(T notification) where T : notnull
     {
-        INotificationPropagator.Notify(notification, new object[3] { XEditor, YEditor, Layout });
+        INotificationPropagator.Notify(notification, new object[1] { Layout });
     }
     public void OnInitialize()
     {
@@ -351,12 +351,12 @@ public partial class Vector3FieldEditor : INotificationPropagator, IInitialize, 
         set
         {
             if (ZEditor is not null)
-                ZEditor.ValueChanged -= UpdateY;
+                ZEditor.ValueChanged -= UpdateZ;
 
             ZEditor = value;
 
             if (ZEditor is not null)
-                ZEditor.ValueChanged += UpdateY;
+                ZEditor.ValueChanged += UpdateZ;
         }
     }
 
@@ -375,9 +375,9 @@ public partial class Vector3FieldEditor : INotificationPropagator, IInitialize, 
             if (XChanged)
                 XFieldEditor.Load(value.X);
             if (YChanged)
-                XFieldEditor.Load(value.Y);
+                YFieldEditor.Load(value.Y);
             if (ZChanged)
-                XFieldEditor.Load(value.Z);
+                ZFieldEditor.Load(value.Z);
         }
     }
 
@@ -403,7 +403,7 @@ public partial class Vector3FieldEditor : INotificationPropagator, IInitialize, 
 
     public void Notify<T>(T notification) where T : notnull
     {
-        INotificationPropagator.Notify(notification, new object[4] { XEditor, YEditor, ZEditor, Layout });
+        INotificationPropagator.Notify(notification, new object[1] { Layout });
     }
     public void OnInitialize()
     {
