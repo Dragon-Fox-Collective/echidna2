@@ -6,6 +6,7 @@ using Echidna2.Rendering;
 using Echidna2.Serialization;
 using JetBrains.Annotations;
 using OpenTK.Windowing.GraphicsLibraryFramework;
+using Echidna2.Mathematics;
 
 namespace Echidna2;
 
@@ -215,4 +216,179 @@ public partial class ReferenceFieldEditor : IFieldEditor, INotificationPropagato
 	}
 	
 	public void Load(object? value) => Value = value;
+}
+
+
+[UsedImplicitly, Prefab("Editors/Vector2FieldEditor.toml")]
+public partial class Vector2FieldEditor : INotificationPropagator, IInitialize, IFieldEditor<Vector2>
+{
+    public DoubleFieldEditor? XEditor;
+    public DoubleFieldEditor? YEditor;
+    [DontExpose] public bool HasBeenInitialized { get; set; }
+    [SerializedReference]
+    private DoubleFieldEditor XFieldEditor
+    {
+        get => XEditor!;
+        set
+        {
+            if (XEditor is not null)
+                XEditor.ValueChanged -= UpdateX;
+
+            XEditor = value;
+
+            if (XEditor is not null)
+                XEditor.ValueChanged += UpdateX;
+        }
+    }
+
+	[SerializedReference]
+    private DoubleFieldEditor YFieldEditor
+    {
+        get => YEditor!;
+        set
+        {
+            if (YEditor is not null)
+                YEditor.ValueChanged -= UpdateY;
+
+            YEditor = value;
+
+            if (YEditor is not null)
+                YEditor.ValueChanged += UpdateY;
+        }
+    }
+
+	private Vector2 value;
+	public Vector2 Value
+	{
+		get => value;
+		set
+		{
+			this.value = value;
+			XFieldEditor.Load(value.X);
+            YFieldEditor.Load(value.Y);
+        }
+	}
+	
+	public event Action<object?>? ValueChanged;
+
+    public void UpdateX(object? x) => UpdateX((double)x);
+    public void UpdateX(double x){
+		Value = new Vector2(x, value.Y);
+	}
+    public void UpdateY(object? y) => UpdateY((double)y);
+    public void UpdateY(double y){
+        Value = new Vector2(value.X, y);
+    }
+
+    public void Load(Vector2 value) => Value = value;
+
+    public void Notify<T>(T notification) where T : notnull
+    {
+        INotificationPropagator.Notify(notification, new object[2] { XEditor, YEditor });
+    }
+    public void OnInitialize()
+    {
+
+    }
+
+
+}
+
+[UsedImplicitly, Prefab("Editors/Vector3FieldEditor.toml")]
+public partial class Vector3FieldEditor : INotificationPropagator, IInitialize, IFieldEditor<Vector3>
+{
+    public DoubleFieldEditor? XEditor;
+    public DoubleFieldEditor? YEditor;
+    public DoubleFieldEditor? ZEditor;
+    [DontExpose] public bool HasBeenInitialized { get; set; }
+    [SerializedReference]
+    private DoubleFieldEditor XFieldEditor
+    {
+        get => XEditor!;
+        set
+        {
+            if (XEditor is not null)
+                XEditor.ValueChanged -= UpdateX;
+
+            XEditor = value;
+
+            if (XEditor is not null)
+                XEditor.ValueChanged += UpdateX;
+        }
+    }
+
+    [SerializedReference]
+    private DoubleFieldEditor YFieldEditor
+    {
+        get => YEditor!;
+        set
+        {
+            if (YEditor is not null)
+                YEditor.ValueChanged -= UpdateY;
+
+            YEditor = value;
+
+            if (YEditor is not null)
+                YEditor.ValueChanged += UpdateY;
+        }
+    }
+    [SerializedReference]
+    private DoubleFieldEditor ZFieldEditor
+    {
+        get => ZEditor!;
+        set
+        {
+            if (ZEditor is not null)
+                ZEditor.ValueChanged -= UpdateY;
+
+            ZEditor = value;
+
+            if (ZEditor is not null)
+                ZEditor.ValueChanged += UpdateY;
+        }
+    }
+
+    private Vector3 value;
+    public Vector3 Value
+    {
+        get => value;
+        set
+        {
+            this.value = value;
+            XFieldEditor.Load(value.X);
+            YFieldEditor.Load(value.Y);
+            ZFieldEditor.Load(value.Z);
+        }
+    }
+
+    public event Action<object?>? ValueChanged;
+
+    public void UpdateX(object? x) => UpdateX((double)x);
+    public void UpdateX(double x)
+    {
+        Value = new Vector3(x, value.Y, value.Z);
+    }
+    public void UpdateY(object? y) => UpdateY((double)y);
+    public void UpdateY(double y)
+    {
+        Value = new Vector3(value.X, y, value.Z);
+    }
+    public void UpdateZ(object? z) => UpdateZ((double)z);
+    public void UpdateZ(double z)
+    {
+        Value = new Vector3(value.X, value.Y, z);
+    }
+
+    public void Load(Vector3 value) => Value = value;
+
+    public void Notify<T>(T notification) where T : notnull
+    {
+        INotificationPropagator.Notify(notification, new object[3] { XEditor, YEditor, ZEditor });
+    }
+    public void OnInitialize()
+    {
+
+    }
+
+
 }

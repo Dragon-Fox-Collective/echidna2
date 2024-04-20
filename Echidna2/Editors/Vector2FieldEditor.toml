@@ -1,0 +1,10 @@
+[1]
+Component = "Echidna2.Vector2FieldEditor, Echidna2"
+XFieldEditor = "2"
+YFieldEditor = "3"
+
+[2]
+Prefab = "DoubleFieldEditor.toml"
+
+[3]
+Prefab = "DoubleFieldEditor.toml"
