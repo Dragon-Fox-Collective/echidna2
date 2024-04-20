@@ -7,7 +7,6 @@ using Echidna2.Serialization;
 using JetBrains.Annotations;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 using Echidna2.Mathematics;
-using System;
 
 namespace Echidna2;
 
@@ -151,7 +150,6 @@ public partial class DoubleFieldEditor : INotificationPropagator, IFieldEditor<d
 		set
 		{
 			this.value = value;
-			Console.WriteLine($"{value.ToString()} {value.ToString(CultureInfo.CurrentCulture)}");
 			StringFieldEditor.Load(value.ToString(CultureInfo.CurrentCulture));
 		}
 	}
