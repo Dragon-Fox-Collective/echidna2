@@ -6,6 +6,7 @@ using Echidna2.Rendering;
 using Echidna2.Serialization;
 using JetBrains.Annotations;
 using OpenTK.Windowing.GraphicsLibraryFramework;
+using Echidna2.Mathematics;
 
 namespace Echidna2;
 
@@ -215,4 +216,174 @@ public partial class ReferenceFieldEditor : IFieldEditor, INotificationPropagato
 	}
 	
 	public void Load(object? value) => Value = value;
+}
+
+
+[UsedImplicitly, Prefab("Editors/Vector2FieldEditor.toml")]
+public partial class Vector2FieldEditor : INotificationPropagator, IFieldEditor<Vector2>
+{
+	[SerializedReference, ExposeMembersInClass] public HLayoutWithHierarchy Layout { get; set; } = null!;
+	
+	private DoubleFieldEditor? xFieldEditor;
+	[SerializedReference]
+	public DoubleFieldEditor XFieldEditor
+	{
+		get => xFieldEditor!;
+		set
+		{
+			if (xFieldEditor is not null)
+				xFieldEditor.ValueChanged -= UpdateX;
+			
+			xFieldEditor = value;
+			
+			if (xFieldEditor is not null)
+				xFieldEditor.ValueChanged += UpdateX;
+		}
+	}
+	
+	private DoubleFieldEditor? yFieldEditor;
+	[SerializedReference]
+	public DoubleFieldEditor YFieldEditor
+	{
+		get => yFieldEditor!;
+		set
+		{
+			if (yFieldEditor is not null)
+				yFieldEditor.ValueChanged -= UpdateY;
+			
+			yFieldEditor = value;
+			
+			if (yFieldEditor is not null)
+				yFieldEditor.ValueChanged += UpdateY;
+		}
+	}
+	
+	private Vector2 value;
+	public Vector2 Value
+	{
+		get => value;
+		set
+		{
+			this.value = value;
+			ValueChanged?.Invoke(value);
+			XFieldEditor.Load(value.X);
+			YFieldEditor.Load(value.Y);
+		}
+	}
+	
+	public event Action<object?>? ValueChanged;
+	
+	public void UpdateX(object? x) => UpdateX((double)x!);
+	public void UpdateX(double x){
+		value = new Vector2(x, value.Y);
+	}
+	public void UpdateY(object? y) => UpdateY((double)y!);
+	public void UpdateY(double y){
+		value = new Vector2(value.X, y);
+	}
+	
+	public void Load(Vector2 value) => Value = value;
+	
+	public void Notify<T>(T notification) where T : notnull
+	{
+		INotificationPropagator.Notify(notification, Layout);
+	}
+}
+
+[UsedImplicitly, Prefab("Editors/Vector3FieldEditor.toml")]
+public partial class Vector3FieldEditor : INotificationPropagator, IFieldEditor<Vector3>
+{
+	[SerializedReference, ExposeMembersInClass] public HLayoutWithHierarchy Layout { get; set; } = null!;
+	
+	private DoubleFieldEditor? xFieldEditor;
+	[SerializedReference]
+	public DoubleFieldEditor XFieldEditor
+	{
+		get => xFieldEditor!;
+		set
+		{
+			if (xFieldEditor is not null)
+				xFieldEditor.ValueChanged -= UpdateX;
+			
+			xFieldEditor = value;
+			
+			if (xFieldEditor is not null)
+				xFieldEditor.ValueChanged += UpdateX;
+		}
+	}
+	
+	private DoubleFieldEditor? yFieldEditor;
+	[SerializedReference]
+	public DoubleFieldEditor YFieldEditor
+	{
+		get => yFieldEditor!;
+		set
+		{
+			if (yFieldEditor is not null)
+				yFieldEditor.ValueChanged -= UpdateY;
+			
+			yFieldEditor = value;
+			
+			if (yFieldEditor is not null)
+				yFieldEditor.ValueChanged += UpdateY;
+		}
+	}
+	
+	private DoubleFieldEditor? zFieldEditor;
+	[SerializedReference]
+	public DoubleFieldEditor ZFieldEditor
+	{
+		get => zFieldEditor!;
+		set
+		{
+			if (zFieldEditor is not null)
+				zFieldEditor.ValueChanged -= UpdateZ;
+			
+			zFieldEditor = value;
+			
+			if (zFieldEditor is not null)
+				zFieldEditor.ValueChanged += UpdateZ;
+		}
+	}
+	
+	private Vector3 value;
+	public Vector3 Value
+	{
+		get => value;
+		set
+		{
+			this.value = value;
+			XFieldEditor.Load(value.X);
+			YFieldEditor.Load(value.Y);
+			ZFieldEditor.Load(value.Z);
+		}
+	}
+	
+	public event Action<object?>? ValueChanged;
+	
+	public void UpdateX(object? x) => UpdateX((double)x!);
+	public void UpdateX(double x)
+	{
+		value = new Vector3(x, value.Y, value.Z);
+		ValueChanged?.Invoke(value);
+	}
+	public void UpdateY(object? y) => UpdateY((double)y!);
+	public void UpdateY(double y)
+	{
+		value = new Vector3(value.X, y, value.Z);
+		ValueChanged?.Invoke(value);
+	}
+	public void UpdateZ(object? z) => UpdateZ((double)z!);
+	public void UpdateZ(double z)
+	{
+		value = new Vector3(value.X, value.Y, z);
+		ValueChanged?.Invoke(value);
+	}
+	
+	public void Load(Vector3 value) => Value = value;
+	
+	public void Notify<T>(T notification) where T : notnull
+	{
+		INotificationPropagator.Notify(notification, Layout);
+	}
 }
