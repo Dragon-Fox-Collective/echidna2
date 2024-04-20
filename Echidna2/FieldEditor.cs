@@ -225,38 +225,40 @@ public partial class ReferenceFieldEditor : IFieldEditor, INotificationPropagato
 public partial class Vector2FieldEditor : INotificationPropagator, IFieldEditor<Vector2>
 {
 	[SerializedReference, ExposeMembersInClass] public HLayoutWithHierarchy Layout { get; set; } = null!;
-	public DoubleFieldEditor? XEditor;
-	public DoubleFieldEditor? YEditor;
+	
 	[DontExpose] public bool HasBeenInitialized { get; set; }
+	
+	private DoubleFieldEditor? xFieldEditor;
 	[SerializedReference]
-	private DoubleFieldEditor XFieldEditor
+	public DoubleFieldEditor XFieldEditor
 	{
-		get => XEditor!;
+		get => xFieldEditor!;
 		set
 		{
-			if (XEditor is not null)
-				XEditor.ValueChanged -= UpdateX;
+			if (xFieldEditor is not null)
+				xFieldEditor.ValueChanged -= UpdateX;
 			
-			XEditor = value;
+			xFieldEditor = value;
 			
-			if (XEditor is not null)
-				XEditor.ValueChanged += UpdateX;
+			if (xFieldEditor is not null)
+				xFieldEditor.ValueChanged += UpdateX;
 		}
 	}
 	
+	private DoubleFieldEditor? yFieldEditor;
 	[SerializedReference]
-	private DoubleFieldEditor YFieldEditor
+	public DoubleFieldEditor YFieldEditor
 	{
-		get => YEditor!;
+		get => yFieldEditor!;
 		set
 		{
-			if (YEditor is not null)
-				YEditor.ValueChanged -= UpdateY;
+			if (yFieldEditor is not null)
+				yFieldEditor.ValueChanged -= UpdateY;
 			
-			YEditor = value;
+			yFieldEditor = value;
 			
-			if (YEditor is not null)
-				YEditor.ValueChanged += UpdateY;
+			if (yFieldEditor is not null)
+				yFieldEditor.ValueChanged += UpdateY;
 		}
 	}
 	
@@ -296,54 +298,57 @@ public partial class Vector2FieldEditor : INotificationPropagator, IFieldEditor<
 public partial class Vector3FieldEditor : INotificationPropagator, IFieldEditor<Vector3>
 {
 	[SerializedReference, ExposeMembersInClass] public HLayoutWithHierarchy Layout { get; set; } = null!;
-	public DoubleFieldEditor? XEditor;
-	public DoubleFieldEditor? YEditor;
-	public DoubleFieldEditor? ZEditor;
+	
 	[DontExpose] public bool HasBeenInitialized { get; set; }
+	
+	private DoubleFieldEditor? xFieldEditor;
 	[SerializedReference]
-	private DoubleFieldEditor XFieldEditor
+	public DoubleFieldEditor XFieldEditor
 	{
-		get => XEditor!;
+		get => xFieldEditor!;
 		set
 		{
-			if (XEditor is not null)
-				XEditor.ValueChanged -= UpdateX;
+			if (xFieldEditor is not null)
+				xFieldEditor.ValueChanged -= UpdateX;
 			
-			XEditor = value;
+			xFieldEditor = value;
 			
-			if (XEditor is not null)
-				XEditor.ValueChanged += UpdateX;
+			if (xFieldEditor is not null)
+				xFieldEditor.ValueChanged += UpdateX;
 		}
 	}
 	
+	private DoubleFieldEditor? yFieldEditor;
 	[SerializedReference]
-	private DoubleFieldEditor YFieldEditor
+	public DoubleFieldEditor YFieldEditor
 	{
-		get => YEditor!;
+		get => yFieldEditor!;
 		set
 		{
-			if (YEditor is not null)
-				YEditor.ValueChanged -= UpdateY;
+			if (yFieldEditor is not null)
+				yFieldEditor.ValueChanged -= UpdateY;
 			
-			YEditor = value;
+			yFieldEditor = value;
 			
-			if (YEditor is not null)
-				YEditor.ValueChanged += UpdateY;
+			if (yFieldEditor is not null)
+				yFieldEditor.ValueChanged += UpdateY;
 		}
 	}
+	
+	private DoubleFieldEditor? zFieldEditor;
 	[SerializedReference]
-	private DoubleFieldEditor ZFieldEditor
+	public DoubleFieldEditor ZFieldEditor
 	{
-		get => ZEditor!;
+		get => zFieldEditor!;
 		set
 		{
-			if (ZEditor is not null)
-				ZEditor.ValueChanged -= UpdateZ;
+			if (zFieldEditor is not null)
+				zFieldEditor.ValueChanged -= UpdateZ;
 			
-			ZEditor = value;
+			zFieldEditor = value;
 			
-			if (ZEditor is not null)
-				ZEditor.ValueChanged += UpdateZ;
+			if (zFieldEditor is not null)
+				zFieldEditor.ValueChanged += UpdateZ;
 		}
 	}
 	
