@@ -226,8 +226,6 @@ public partial class Vector2FieldEditor : INotificationPropagator, IFieldEditor<
 {
 	[SerializedReference, ExposeMembersInClass] public HLayoutWithHierarchy Layout { get; set; } = null!;
 	
-	[DontExpose] public bool HasBeenInitialized { get; set; }
-	
 	private DoubleFieldEditor? xFieldEditor;
 	[SerializedReference]
 	public DoubleFieldEditor XFieldEditor
@@ -298,8 +296,6 @@ public partial class Vector2FieldEditor : INotificationPropagator, IFieldEditor<
 public partial class Vector3FieldEditor : INotificationPropagator, IFieldEditor<Vector3>
 {
 	[SerializedReference, ExposeMembersInClass] public HLayoutWithHierarchy Layout { get; set; } = null!;
-	
-	[DontExpose] public bool HasBeenInitialized { get; set; }
 	
 	private DoubleFieldEditor? xFieldEditor;
 	[SerializedReference]
