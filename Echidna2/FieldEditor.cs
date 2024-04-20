@@ -275,11 +275,11 @@ public partial class Vector2FieldEditor : INotificationPropagator, IFieldEditor<
 	
 	public event Action<object?>? ValueChanged;
 	
-	public void UpdateX(object? x) => UpdateX((double)x);
+	public void UpdateX(object? x) => UpdateX((double)x!);
 	public void UpdateX(double x){
 		value = new Vector2(x, value.Y);
 	}
-	public void UpdateY(object? y) => UpdateY((double)y);
+	public void UpdateY(object? y) => UpdateY((double)y!);
 	public void UpdateY(double y){
 		value = new Vector2(value.X, y);
 	}
@@ -362,19 +362,19 @@ public partial class Vector3FieldEditor : INotificationPropagator, IFieldEditor<
 	
 	public event Action<object?>? ValueChanged;
 	
-	public void UpdateX(object? x) => UpdateX((double)x);
+	public void UpdateX(object? x) => UpdateX((double)x!);
 	public void UpdateX(double x)
 	{
 		value = new Vector3(x, value.Y, value.Z);
 		ValueChanged?.Invoke(value);
 	}
-	public void UpdateY(object? y) => UpdateY((double)y);
+	public void UpdateY(object? y) => UpdateY((double)y!);
 	public void UpdateY(double y)
 	{
 		value = new Vector3(value.X, y, value.Z);
 		ValueChanged?.Invoke(value);
 	}
-	public void UpdateZ(object? z) => UpdateZ((double)z);
+	public void UpdateZ(object? z) => UpdateZ((double)z!);
 	public void UpdateZ(double z)
 	{
 		value = new Vector3(value.X, value.Y, z);
