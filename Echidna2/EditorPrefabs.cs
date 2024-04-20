@@ -135,8 +135,10 @@ public partial class Editor : INotificationPropagator, ICanBeLaidOut
 	private Dictionary<Type, Func<IFieldEditor>> editorInstantiators = new()
 	{
 		{ typeof(string), StringFieldEditor.Instantiate },
-		{ typeof(double), DoubleFieldEditor.Instantiate }
-	};
+		{ typeof(double), DoubleFieldEditor.Instantiate },
+        { typeof(Vector2), Vector2FieldEditor.Instantiate },
+		{ typeof(Vector3), Vector3FieldEditor.Instantiate }
+    };
 	
 	public void Notify<T>(T notification) where T : notnull
 	{
