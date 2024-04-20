@@ -164,8 +164,7 @@ public partial class DoubleFieldEditor : INotificationPropagator, IFieldEditor<d
 		if (double.TryParse(stringValue, NumberStyles.Any, CultureInfo.CurrentCulture, out double result))
 		{
 			value = result;
-			if (value != result)
-				ValueChanged?.Invoke(value);
+			ValueChanged?.Invoke(value);
 		}
 		else
 		{
@@ -186,7 +185,7 @@ public partial class ReferenceFieldEditor : IFieldEditor, INotificationPropagato
 	[SerializedReference] public TextRect Text { get; set; } = null!;
 	[SerializedReference] public Button Button { get; set; } = null!;
 	
-	public event Action<object?>? ValueChanged = null;
+	public event Action<object?>? ValueChanged;
 	
 	private object? value = null;
 	public object? Value

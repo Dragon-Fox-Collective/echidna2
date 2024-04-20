@@ -137,7 +137,7 @@ public partial class Editor : INotificationPropagator, ICanBeLaidOut
 		{ typeof(string), StringFieldEditor.Instantiate },
 		{ typeof(double), DoubleFieldEditor.Instantiate },
         { typeof(Vector2), Vector2FieldEditor.Instantiate },
-		{ typeof(Vector3), Vector3FieldEditor.Instantiate }
+		{ typeof(Vector3), Vector3FieldEditor.Instantiate },
     };
 	
 	public void Notify<T>(T notification) where T : notnull
