@@ -7,6 +7,7 @@ using Echidna2.Serialization;
 using JetBrains.Annotations;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 using Echidna2.Mathematics;
+using System;
 
 namespace Echidna2;
 
@@ -150,6 +151,7 @@ public partial class DoubleFieldEditor : INotificationPropagator, IFieldEditor<d
 		set
 		{
 			this.value = value;
+			Console.WriteLine($"{value.ToString()} {value.ToString(CultureInfo.CurrentCulture)}");
 			StringFieldEditor.Load(value.ToString(CultureInfo.CurrentCulture));
 		}
 	}
@@ -161,10 +163,14 @@ public partial class DoubleFieldEditor : INotificationPropagator, IFieldEditor<d
 	public void UpdateValue(object? value) => UpdateValue((string)value!);
 	public void UpdateValue(string stringValue)
 	{
+		
 		if (double.TryParse(stringValue, NumberStyles.Any, CultureInfo.CurrentCulture, out double result))
 		{
-			value = result;
-			ValueChanged?.Invoke(value);
+			if (value != result)
+			{
+                value = result;
+                ValueChanged?.Invoke(value);
+            }
 		}
 		else
 		{
@@ -264,8 +270,14 @@ public partial class Vector2FieldEditor : INotificationPropagator, IInitialize, 
 		set
 		{
 			this.value = value;
-			XFieldEditor.Load(value.X);
-            YFieldEditor.Load(value.Y);
+			var XChanged = this.value.X != value.X;
+			var YChanged = this.value.Y != value.Y;
+            if (XChanged || YChanged)
+				ValueChanged?.Invoke(value);
+			if (XChanged)
+                XFieldEditor.Load(value.X);
+            if (YChanged)
+                XFieldEditor.Load(value.Y);
         }
 	}
 	
@@ -355,9 +367,17 @@ public partial class Vector3FieldEditor : INotificationPropagator, IInitialize, 
         set
         {
             this.value = value;
-            XFieldEditor.Load(value.X);
-            YFieldEditor.Load(value.Y);
-            ZFieldEditor.Load(value.Z);
+            var XChanged = this.value.X != value.X;
+            var YChanged = this.value.Y != value.Y;
+            var ZChanged = this.value.Z != value.Z;
+            if (XChanged || YChanged || ZChanged)
+                ValueChanged?.Invoke(value);
+            if (XChanged)
+                XFieldEditor.Load(value.X);
+            if (YChanged)
+                XFieldEditor.Load(value.Y);
+            if (ZChanged)
+                XFieldEditor.Load(value.Z);
         }
     }
 

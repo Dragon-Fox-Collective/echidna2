@@ -138,7 +138,7 @@ public static class TomlDeserializer
 			}
 			else if (componentTable.Remove("Prefab", out object? prefabPath))
 			{
-				PrefabRoot componentPrefabRoot = Deserialize($"{Path.GetDirectoryName(path)}/{(string)prefabPath}", scriptName);
+				PrefabRoot componentPrefabRoot = Deserialize(Path.Join(Path.GetDirectoryName(path), (string)prefabPath), scriptName);
 				PrefabInstance componentPrefabInstance = new(componentPrefabRoot);
 				prefabRoot.ChildPrefabs.Add(componentPrefabInstance);
 				component = componentPrefabRoot.RootObject;
