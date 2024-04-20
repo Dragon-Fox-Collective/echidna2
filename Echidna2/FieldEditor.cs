@@ -226,6 +226,7 @@ public partial class ReferenceFieldEditor : IFieldEditor, INotificationPropagato
 [UsedImplicitly, Prefab("Editors/Vector2FieldEditor.toml")]
 public partial class Vector2FieldEditor : INotificationPropagator, IInitialize, IFieldEditor<Vector2>
 {
+    [SerializedReference, ExposeMembersInClass] public HLayoutWithHierarchy Layout { get; set; } = null!;
     public DoubleFieldEditor? XEditor;
     public DoubleFieldEditor? YEditor;
     [DontExpose] public bool HasBeenInitialized { get; set; }
@@ -294,7 +295,7 @@ public partial class Vector2FieldEditor : INotificationPropagator, IInitialize, 
 
     public void Notify<T>(T notification) where T : notnull
     {
-        INotificationPropagator.Notify(notification, new object[2] { XEditor, YEditor });
+        INotificationPropagator.Notify(notification, new object[3] { XEditor, YEditor, Layout });
     }
     public void OnInitialize()
     {
@@ -307,6 +308,7 @@ public partial class Vector2FieldEditor : INotificationPropagator, IInitialize, 
 [UsedImplicitly, Prefab("Editors/Vector3FieldEditor.toml")]
 public partial class Vector3FieldEditor : INotificationPropagator, IInitialize, IFieldEditor<Vector3>
 {
+    [SerializedReference, ExposeMembersInClass] public HLayoutWithHierarchy Layout { get; set; } = null!;
     public DoubleFieldEditor? XEditor;
     public DoubleFieldEditor? YEditor;
     public DoubleFieldEditor? ZEditor;
@@ -401,7 +403,7 @@ public partial class Vector3FieldEditor : INotificationPropagator, IInitialize, 
 
     public void Notify<T>(T notification) where T : notnull
     {
-        INotificationPropagator.Notify(notification, new object[3] { XEditor, YEditor, ZEditor });
+        INotificationPropagator.Notify(notification, new object[4] { XEditor, YEditor, ZEditor, Layout });
     }
     public void OnInitialize()
     {

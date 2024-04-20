@@ -1,10 +1,17 @@
 [1]
 Component = "Echidna2.Vector2FieldEditor, Echidna2"
-XFieldEditor = "2"
-YFieldEditor = "3"
+Layout = "2"
+XFieldEditor = "3"
+YFieldEditor = "4"
 
 [2]
-Prefab = "DoubleFieldEditor.toml"
+Prefab = "../Prefabs/HLayoutWithHierarchy.toml"
+Name = "Vector2 Layout"
+Spacing = 0.1
+Children = [ "3", "4" ]
 
 [3]
+Prefab = "DoubleFieldEditor.toml"
+
+[4]
 Prefab = "DoubleFieldEditor.toml"
