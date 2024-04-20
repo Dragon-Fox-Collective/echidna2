@@ -87,7 +87,6 @@ public partial class StringFieldEditor : INotificationPropagator, IInitialize, I
 	{
 		Button.MouseDown += () => IsFocused = true;
 		Button.MouseDownOutside += () => IsFocused = false;
-		Value = "";
 	}
 	
 	public void Notify<T>(T notification) where T : notnull
