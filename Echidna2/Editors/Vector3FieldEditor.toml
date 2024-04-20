@@ -8,8 +8,9 @@ ZFieldEditor = "5"
 [2]
 Prefab = "../Prefabs/HLayoutWithHierarchy.toml"
 Name = "Vector3 Layout"
-Spacing = 0.1
+Spacing = 10
 Children = [ "3", "4", "5" ]
+HorizontalExpand = true
 
 [3]
 Prefab = "DoubleFieldEditor.toml"
