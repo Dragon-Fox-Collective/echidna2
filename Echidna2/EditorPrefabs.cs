@@ -138,7 +138,8 @@ public partial class Editor : INotificationPropagator, ICanBeLaidOut
 		{ typeof(double), DoubleFieldEditor.Instantiate },
         { typeof(Vector2), Vector2FieldEditor.Instantiate },
 		{ typeof(Vector3), Vector3FieldEditor.Instantiate },
-    };
+		{ typeof(Quaternion), QuaternionFieldEditor.Instantiate },
+	};
 	
 	public void Notify<T>(T notification) where T : notnull
 	{

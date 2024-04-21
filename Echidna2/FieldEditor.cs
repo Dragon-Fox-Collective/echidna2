@@ -2,11 +2,11 @@
 using System.Globalization;
 using Echidna2.Core;
 using Echidna2.Gui;
+using Echidna2.Mathematics;
 using Echidna2.Rendering;
 using Echidna2.Serialization;
 using JetBrains.Annotations;
 using OpenTK.Windowing.GraphicsLibraryFramework;
-using Echidna2.Mathematics;
 
 namespace Echidna2;
 
@@ -22,7 +22,7 @@ public interface IFieldEditor
 public interface IFieldEditor<in T> : IFieldEditor
 {
 	public void Load(T value);
-	void IFieldEditor.Load(object? value) => Load((T)value);
+	void IFieldEditor.Load(object? value) => Load((T)value!);
 	// Trying to cast an Action<object> to an Action<T> doesn't work when T is a value type, so don't include ValueChanged
 }
 
@@ -117,10 +117,6 @@ public partial class StringFieldEditor : INotificationPropagator, IInitialize, I
 			BufferValue = tempValue;
 		}
 	}
-	
-	// FIXME: These don't do anything. They're not generated automatically for some reason.
-	public Color Color { get; set; }
-	public void OnNotify(IDraw.Notification notification) { }
 }
 
 [UsedImplicitly, Prefab("Editors/DoubleFieldEditor.toml")]
@@ -265,7 +261,6 @@ public partial class Vector2FieldEditor : INotificationPropagator, IFieldEditor<
 		set
 		{
 			this.value = value;
-			ValueChanged?.Invoke(value);
 			XFieldEditor.Load(value.X);
 			YFieldEditor.Load(value.Y);
 		}
@@ -274,12 +269,16 @@ public partial class Vector2FieldEditor : INotificationPropagator, IFieldEditor<
 	public event Action<object?>? ValueChanged;
 	
 	public void UpdateX(object? x) => UpdateX((double)x!);
-	public void UpdateX(double x){
-		value = new Vector2(x, value.Y);
+	public void UpdateX(double x)
+	{
+		value = value with { X = x };
+		ValueChanged?.Invoke(value);
 	}
 	public void UpdateY(object? y) => UpdateY((double)y!);
-	public void UpdateY(double y){
-		value = new Vector2(value.X, y);
+	public void UpdateY(double y)
+	{
+		value = value with { Y = y };
+		ValueChanged?.Invoke(value);
 	}
 	
 	public void Load(Vector2 value) => Value = value;
@@ -290,14 +289,14 @@ public partial class Vector2FieldEditor : INotificationPropagator, IFieldEditor<
 	}
 }
 
+
 [UsedImplicitly, Prefab("Editors/Vector3FieldEditor.toml")]
 public partial class Vector3FieldEditor : INotificationPropagator, IFieldEditor<Vector3>
 {
 	[SerializedReference, ExposeMembersInClass] public HLayoutWithHierarchy Layout { get; set; } = null!;
 	
 	private DoubleFieldEditor? xFieldEditor;
-	[SerializedReference]
-	public DoubleFieldEditor XFieldEditor
+	[SerializedReference] public DoubleFieldEditor XFieldEditor
 	{
 		get => xFieldEditor!;
 		set
@@ -313,8 +312,7 @@ public partial class Vector3FieldEditor : INotificationPropagator, IFieldEditor<
 	}
 	
 	private DoubleFieldEditor? yFieldEditor;
-	[SerializedReference]
-	public DoubleFieldEditor YFieldEditor
+	[SerializedReference] public DoubleFieldEditor YFieldEditor
 	{
 		get => yFieldEditor!;
 		set
@@ -330,8 +328,7 @@ public partial class Vector3FieldEditor : INotificationPropagator, IFieldEditor<
 	}
 	
 	private DoubleFieldEditor? zFieldEditor;
-	[SerializedReference]
-	public DoubleFieldEditor ZFieldEditor
+	[SerializedReference] public DoubleFieldEditor ZFieldEditor
 	{
 		get => zFieldEditor!;
 		set
@@ -364,19 +361,19 @@ public partial class Vector3FieldEditor : INotificationPropagator, IFieldEditor<
 	public void UpdateX(object? x) => UpdateX((double)x!);
 	public void UpdateX(double x)
 	{
-		value = new Vector3(x, value.Y, value.Z);
+		value = value with { X = x };
 		ValueChanged?.Invoke(value);
 	}
 	public void UpdateY(object? y) => UpdateY((double)y!);
 	public void UpdateY(double y)
 	{
-		value = new Vector3(value.X, y, value.Z);
+		value = value with { Y = y };
 		ValueChanged?.Invoke(value);
 	}
 	public void UpdateZ(object? z) => UpdateZ((double)z!);
 	public void UpdateZ(double z)
 	{
-		value = new Vector3(value.X, value.Y, z);
+		value = value with { Z = z };
 		ValueChanged?.Invoke(value);
 	}
 	
@@ -385,5 +382,53 @@ public partial class Vector3FieldEditor : INotificationPropagator, IFieldEditor<
 	public void Notify<T>(T notification) where T : notnull
 	{
 		INotificationPropagator.Notify(notification, Layout);
+	}
+}
+
+
+[UsedImplicitly, Prefab("Editors/QuaternionFieldEditor.toml")]
+public partial class QuaternionFieldEditor : INotificationPropagator, IFieldEditor<Quaternion>
+{
+	private Vector3FieldEditor? vectorFieldEditor;
+	[SerializedReference, ExposeMembersInClass] public Vector3FieldEditor VectorFieldEditor
+	{
+		get => vectorFieldEditor!;
+		set
+		{
+			if (vectorFieldEditor is not null)
+				vectorFieldEditor.ValueChanged -= UpdateVector;
+			
+			vectorFieldEditor = value;
+			
+			if (vectorFieldEditor is not null)
+				vectorFieldEditor.ValueChanged += UpdateVector;
+		}
+	}
+	
+	private Quaternion value;
+	public Quaternion Value
+	{
+		get => value;
+		set
+		{
+			this.value = value;
+			VectorFieldEditor.Load(value.ToEulerAngles());
+		}
+	}
+	
+	public event Action<object?>? ValueChanged;
+	
+	public void UpdateVector(object? vector) => UpdateVector((Vector3)vector!);
+	public void UpdateVector(Vector3 vector)
+	{
+		value = Quaternion.FromEulerAngles(vector);
+		ValueChanged?.Invoke(value);
+	}
+	
+	public void Load(Quaternion value) => Value = value;
+	
+	public void Notify<T>(T notification) where T : notnull
+	{
+		INotificationPropagator.Notify(notification, VectorFieldEditor);
 	}
 }

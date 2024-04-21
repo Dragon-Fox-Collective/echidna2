@@ -1,4 +1,5 @@
 ﻿using Echidna2.Serialization;
+using JetBrains.Annotations;
 using QuaternionSystem = System.Numerics.Quaternion;
 using QuaternionOpenTK = OpenTK.Mathematics.Quaternion;
 
@@ -31,15 +32,15 @@ public struct Quaternion(double x, double y, double z, double w) : IEquatable<Qu
 	/// <summary>
 	/// Rotates by yaw, then pitch, then roll.
 	/// </summary>
-	public static Quaternion FromEulerAngles(double pitch, double yaw, double roll)
+	public static Quaternion FromEulerAngles(double pitch, double roll, double yaw)
 	{
-		double halfRoll = roll * 0.5;
-		double sinRoll = Math.Sin(halfRoll);
-		double cosRoll = Math.Cos(halfRoll);
-		
 		double halfPitch = pitch * 0.5;
 		double sinPitch = Math.Sin(halfPitch);
 		double cosPitch = Math.Cos(halfPitch);
+		
+		double halfRoll = roll * 0.5;
+		double sinRoll = Math.Sin(halfRoll);
+		double cosRoll = Math.Cos(halfRoll);
 		
 		double halfYaw = yaw * 0.5;
 		double sinYaw = Math.Sin(halfYaw);
@@ -56,6 +57,29 @@ public struct Quaternion(double x, double y, double z, double w) : IEquatable<Qu
 	/// Rotates by roll (y), then pitch (x), then yaw (z).
 	/// </summary>
 	public static Quaternion FromEulerAngles(Vector3 angles) => FromEulerAngles(angles.X, angles.Y, angles.Z);
+	
+	/// <summary>
+	/// Returns a rotation by roll (y), then pitch (x), then yaw (z).
+	/// </summary>
+	[Pure]
+	public Vector3 ToEulerAngles()
+	{
+		Vector3 angles;
+		
+		double sinrCosp = 2 * (W * X + Y * Z);
+		double cosrCosp = 1 - 2 * (X * X + Y * Y);
+		angles.X = Math.Atan2(sinrCosp, cosrCosp);
+		
+		double sinp = Math.Sqrt(1 + 2 * (W * Y - X * Z));
+		double cosp = Math.Sqrt(1 - 2 * (W * Y - X * Z));
+		angles.Y = 2 * Math.Atan2(sinp, cosp) - Math.PI / 2;
+		
+		double sinyCosp = 2 * (W * Z + X * Y);
+		double cosyCosp = 1 - 2 * (Y * Y + Z * Z);
+		angles.Z = Math.Atan2(sinyCosp, cosyCosp);
+		
+		return angles;
+	}
 	
 	public static Quaternion LookToward(Vector3 forward, Vector3 up, Vector3 fallbackUp = default)
 	{
