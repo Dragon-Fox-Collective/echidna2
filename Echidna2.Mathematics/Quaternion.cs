@@ -32,15 +32,15 @@ public struct Quaternion(double x, double y, double z, double w) : IEquatable<Qu
 	/// <summary>
 	/// Rotates by yaw, then pitch, then roll.
 	/// </summary>
-	public static Quaternion FromEulerAngles(double pitch, double yaw, double roll)
+	public static Quaternion FromEulerAngles(double pitch, double roll, double yaw)
 	{
-		double halfRoll = roll * 0.5;
-		double sinRoll = Math.Sin(halfRoll);
-		double cosRoll = Math.Cos(halfRoll);
-		
 		double halfPitch = pitch * 0.5;
 		double sinPitch = Math.Sin(halfPitch);
 		double cosPitch = Math.Cos(halfPitch);
+		
+		double halfRoll = roll * 0.5;
+		double sinRoll = Math.Sin(halfRoll);
+		double cosRoll = Math.Cos(halfRoll);
 		
 		double halfYaw = yaw * 0.5;
 		double sinYaw = Math.Sin(halfYaw);
@@ -77,6 +77,7 @@ public struct Quaternion(double x, double y, double z, double w) : IEquatable<Qu
 		double sinyCosp = 2 * (W * Z + X * Y);
 		double cosyCosp = 1 - 2 * (Y * Y + Z * Z);
 		angles.Z = Math.Atan2(sinyCosp, cosyCosp);
+		
 		return angles;
 	}
 	

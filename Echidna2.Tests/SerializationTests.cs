@@ -6,10 +6,10 @@ using Tomlyn.Model;
 
 namespace Echidna2.SerializationTests;
 
-public class SerializationTests
+public static class SerializationTests
 {
 	[Fact]
-	public void DeserializingComponent_SetsValues()
+	public static void DeserializingComponent_SetsValues()
 	{
 		// Arrange
 		
@@ -21,7 +21,7 @@ public class SerializationTests
 	}
 	
 	[Fact]
-	public void DeserializingComponent_SetsReferences()
+	public static void DeserializingComponent_SetsReferences()
 	{
 		// Arrange
 		
@@ -33,7 +33,7 @@ public class SerializationTests
 	}
 	
 	[Fact]
-	public void ReserializingComponent_WithReferencesOnSubComponent_SetsReferencesOnlyOnSubComponent()
+	public static void ReserializingComponent_WithReferencesOnSubComponent_SetsReferencesOnlyOnSubComponent()
 	{
 		// Arrange
 		

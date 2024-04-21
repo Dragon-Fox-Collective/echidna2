@@ -4,10 +4,10 @@ using OpenTK.Windowing.GraphicsLibraryFramework;
 
 namespace Echidna2.NotificationTests;
 
-public class ButtonNotificationTests
+public static class ButtonNotificationTests
 {
 	[Fact]
-	public void ClickingInButton_ActivatesButton()
+	public static void ClickingInButton_ActivatesButton()
 	{
 		// Arrange
 		ButtonWithTransform button = new();
@@ -23,7 +23,7 @@ public class ButtonNotificationTests
 	}
 	
 	[Fact]
-	public void ClickingInButton_WhenButtonIsVisible_ActivatesButton()
+	public static void ClickingInButton_WhenButtonIsVisible_ActivatesButton()
 	{
 		// Arrange
 		ButtonWithTransform button = new();
@@ -43,7 +43,7 @@ public class ButtonNotificationTests
 	}
 	
 	[Fact]
-	public void ClickingInButton_WhenButtonIsInvisible_DoesntActivateButton()
+	public static void ClickingInButton_WhenButtonIsInvisible_DoesntActivateButton()
 	{
 		// Arrange
 		ButtonWithTransform button = new();
