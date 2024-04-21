@@ -1,0 +1,9 @@
+﻿[0]
+Component = "Echidna2.Prefabs.Editor.AddComponentWindow, Echidna2"
+Window = "1"
+
+[1]
+Prefab = "../Gui/FullRectWindow.toml"
+Margin = 10.0
+LocalSize = { X = 100, Y = 100 }
+Depth = 15

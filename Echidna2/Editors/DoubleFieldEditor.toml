@@ -1,6 +1,0 @@
-﻿[1]
-Component = "Echidna2.DoubleFieldEditor, Echidna2"
-StringFieldEditor = "2"
-
-[2]
-Prefab = "StringFieldEditor.toml"

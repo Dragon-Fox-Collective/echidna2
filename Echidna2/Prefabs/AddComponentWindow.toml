@@ -1,9 +1,0 @@
-﻿[0]
-Component = "Echidna2.AddComponentWindow, Echidna2"
-Window = "1"
-
-[1]
-Prefab = "FullRectWindow.toml"
-Margin = 10.0
-LocalSize = { X = 100, Y = 100 }
-Depth = 15

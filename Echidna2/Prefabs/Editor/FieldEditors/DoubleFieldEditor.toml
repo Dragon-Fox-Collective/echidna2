@@ -1,0 +1,6 @@
+﻿[1]
+Component = "Echidna2.Prefabs.Editor.FieldEditors.DoubleFieldEditor, Echidna2"
+StringFieldEditor = "2"
+
+[2]
+Prefab = "StringFieldEditor.toml"

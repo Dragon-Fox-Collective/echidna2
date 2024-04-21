@@ -1,0 +1,10 @@
+﻿[1]
+Component = "Echidna2.Prefabs.Editor.EditorViewport3D, Echidna2"
+Viewport = "2"
+CameraPivot = "3"
+
+[2]
+Prefab = "Viewport3D.toml"
+
+[3]
+Component = "Echidna2.Rendering3D.Transform3D, Echidna2.Rendering3D"

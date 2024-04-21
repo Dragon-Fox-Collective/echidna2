@@ -1,0 +1,21 @@
+﻿[1]
+Component = "Echidna2.Prefabs.Gui.FullLayoutWithHierarchy, Echidna2.Gui"
+Named = "2"
+RectTransform = "4"
+Layout = "5"
+PrefabChildren = "3"
+
+[2]
+Component = "Echidna2.Core.Named, Echidna2.Core"
+Name = "Full Layout"
+
+[3]
+Component = "Echidna2.Core.Hierarchy, Echidna2.Core"
+
+[4]
+Component = "Echidna2.Gui.RectTransform, Echidna2.Gui"
+
+[5]
+Component = "Echidna2.Gui.FullLayout, Echidna2.Gui"
+RectTransform = "4"
+Hierarchy = "3"
