@@ -53,7 +53,7 @@ namespace Echidna2.SourceGenerators
 			}
 		}
 		
-		private static string GenerateCode(IPropertySymbol symbol)//, PropertyDeclarationSyntax node)
+		private static string GenerateCode(IPropertySymbol symbol)
 		{
 			INamedTypeSymbol classType = symbol.ContainingType;
 			INamedTypeSymbol prefabType = (INamedTypeSymbol)symbol.Type;
@@ -170,7 +170,7 @@ namespace Echidna2.SourceGenerators
 			};
 		}
 	}
-
+	
 	public class SymbolSignatureEqualityComparer : IEqualityComparer<ISymbol>
 	{
 		public static SymbolSignatureEqualityComparer Default { get; } = new();
@@ -178,10 +178,9 @@ namespace Echidna2.SourceGenerators
 		public bool Equals(ISymbol? x, ISymbol? y)
 		{
 			if (x is null || y is null) return x is null && y is null;
-			if (x.Kind != y.Kind) return false;
 			if (x.Name != y.Name) return false;
 			return true;
 		}
-		public int GetHashCode(ISymbol obj) => (obj.Kind, obj.Name).GetHashCode();
+		public int GetHashCode(ISymbol obj) => obj.Name.GetHashCode();
 	}
 }

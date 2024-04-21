@@ -1,4 +1,5 @@
 ﻿using Echidna2.Core;
+using Echidna2.Prefabs.Editor;
 
 namespace Echidna2;
 

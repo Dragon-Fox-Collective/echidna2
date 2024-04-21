@@ -1,5 +1,5 @@
 ﻿[1]
-Component = "Echidna2.Cube, Echidna2"
+Component = "Echidna2.Prefabs.Cube, Echidna2"
 Transform = "2"
 MeshRenderer = "3"
 Named = "4"

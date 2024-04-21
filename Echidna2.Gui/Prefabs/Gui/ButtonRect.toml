@@ -1,0 +1,32 @@
+﻿[1]
+Component = "Echidna2.Prefabs.Gui.ButtonRect, Echidna2.Gui"
+Named = "2"
+RectTransform = "4"
+Layout = "5"
+Rect = "6"
+PrefabChildren = "3"
+Button = "7"
+
+[2]
+Component = "Echidna2.Core.Named, Echidna2.Core"
+Name = "Button Rect"
+
+[3]
+Component = "Echidna2.Core.Hierarchy, Echidna2.Core"
+
+[4]
+Component = "Echidna2.Gui.RectTransform, Echidna2.Gui"
+
+[5]
+Component = "Echidna2.Gui.FullLayout, Echidna2.Gui"
+RectTransform = "4"
+Hierarchy = "3"
+
+[6]
+Component = "Echidna2.Gui.Rect, Echidna2.Gui"
+RectTransform = "4"
+Color = { R = 0.8, G = 0.8, B = 0.8, A = 1.0 }
+
+[7]
+Component = "Echidna2.Gui.Button, Echidna2.Gui"
+RectTransform = "4"

@@ -1,0 +1,6 @@
+﻿[1]
+Component = "Echidna2.Prefabs.Editor.EditorViewportGui, Echidna2"
+Viewport = "2"
+
+[2]
+Prefab = "ViewportGui.toml"

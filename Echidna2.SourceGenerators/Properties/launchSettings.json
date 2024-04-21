@@ -3,7 +3,7 @@
   "profiles": {
     "Generators": {
       "commandName": "DebugRoslynComponent",
-      "targetProject": "../Echidna2.Rendering/Echidna2.Rendering.csproj"
+      "targetProject": "../Echidna2/Echidna2.csproj"
     }
   }
 }

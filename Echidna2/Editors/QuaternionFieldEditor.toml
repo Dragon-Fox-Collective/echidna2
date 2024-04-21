@@ -1,6 +1,0 @@
-[1]
-Component = "Echidna2.QuaternionFieldEditor, Echidna2"
-VectorFieldEditor = "2"
-
-[2]
-Prefab = "Vector3FieldEditor.toml"
