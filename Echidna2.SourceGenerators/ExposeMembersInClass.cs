@@ -83,7 +83,7 @@ namespace Echidna2.SourceGenerators
 			foreach (ISymbol member in FilterOutNotExposedSymbols(GetAllUnimplementedMembers(classType, prefabType)))
 				yield return member;
 			
-			foreach (ISymbol member2 in FilterForExposingSymbols(GetAllUnimplementedMembers(classType, prefabType))
+			foreach (ISymbol member2 in FilterForExposingSymbols(GetAllPublicInstanceMembers(prefabType))
 				         .SelectMany(symbol => GetAllUnimplementedMembersExposeRecursiveIncludingConflicts(classType, (INamedTypeSymbol)SymbolWrapper.Wrap(symbol).Type)))
 				yield return member2;
 		}
@@ -124,14 +124,16 @@ namespace Echidna2.SourceGenerators
 		}
 		
 		
-		public static IEnumerable<ISymbol> GetAllUnimplementedMembers(INamedTypeSymbol classType, INamedTypeSymbol interfaceType) =>
+		public static IEnumerable<ISymbol> GetAllPublicInstanceMembersWithoutSpecialMethods(INamedTypeSymbol interfaceType) =>
 			GetAllPublicInstanceMembers(interfaceType).Where(member =>
 				!member.Name.StartsWith("get_")
 				&& !member.Name.StartsWith("set_")
 				&& !member.Name.StartsWith("add_")
 				&& !member.Name.StartsWith("remove_")
-				&& member.Name != ".ctor"
-				&& !classType.GetMembers(member.Name).Any());
+				&& member.Name != ".ctor");
+		
+		public static IEnumerable<ISymbol> GetAllUnimplementedMembers(INamedTypeSymbol classType, INamedTypeSymbol interfaceType) =>
+			GetAllPublicInstanceMembersWithoutSpecialMethods(interfaceType).Where(member => !classType.GetMembers(member.Name).Any());
 		
 		
 		public static string GetMemberDeclaration(ISymbol member, string propertyName)

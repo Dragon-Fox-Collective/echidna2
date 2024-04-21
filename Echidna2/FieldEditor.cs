@@ -117,10 +117,6 @@ public partial class StringFieldEditor : INotificationPropagator, IInitialize, I
 			BufferValue = tempValue;
 		}
 	}
-	
-	// FIXME: These don't do anything. They're not generated automatically for some reason.
-	public Color Color { get; set; }
-	public void OnNotify(IDraw.Notification notification) { }
 }
 
 [UsedImplicitly, Prefab("Editors/DoubleFieldEditor.toml")]
@@ -265,7 +261,6 @@ public partial class Vector2FieldEditor : INotificationPropagator, IFieldEditor<
 		set
 		{
 			this.value = value;
-			ValueChanged?.Invoke(value);
 			XFieldEditor.Load(value.X);
 			YFieldEditor.Load(value.Y);
 		}
@@ -274,9 +269,17 @@ public partial class Vector2FieldEditor : INotificationPropagator, IFieldEditor<
 	public event Action<object?>? ValueChanged;
 	
 	public void UpdateX(object? x) => UpdateX((double)x!);
-	public void UpdateX(double x) => value = value with { X = x };
+	public void UpdateX(double x)
+	{
+		value = value with { X = x };
+		ValueChanged?.Invoke(value);
+	}
 	public void UpdateY(object? y) => UpdateY((double)y!);
-	public void UpdateY(double y) => value = value with { Y = y };
+	public void UpdateY(double y)
+	{
+		value = value with { Y = y };
+		ValueChanged?.Invoke(value);
+	}
 	
 	public void Load(Vector2 value) => Value = value;
 	
@@ -356,11 +359,23 @@ public partial class Vector3FieldEditor : INotificationPropagator, IFieldEditor<
 	public event Action<object?>? ValueChanged;
 	
 	public void UpdateX(object? x) => UpdateX((double)x!);
-	public void UpdateX(double x) => value = value with { X = x };
+	public void UpdateX(double x)
+	{
+		value = value with { X = x };
+		ValueChanged?.Invoke(value);
+	}
 	public void UpdateY(object? y) => UpdateY((double)y!);
-	public void UpdateY(double y) => value = value with { Y = y };
+	public void UpdateY(double y)
+	{
+		value = value with { Y = y };
+		ValueChanged?.Invoke(value);
+	}
 	public void UpdateZ(object? z) => UpdateZ((double)z!);
-	public void UpdateZ(double z) => value = value with { Z = z };
+	public void UpdateZ(double z)
+	{
+		value = value with { Z = z };
+		ValueChanged?.Invoke(value);
+	}
 	
 	public void Load(Vector3 value) => Value = value;
 	
@@ -382,9 +397,9 @@ public partial class QuaternionFieldEditor : INotificationPropagator, IFieldEdit
 		{
 			if (vectorFieldEditor is not null)
 				vectorFieldEditor.ValueChanged -= UpdateVector;
-
+			
 			vectorFieldEditor = value;
-
+			
 			if (vectorFieldEditor is not null)
 				vectorFieldEditor.ValueChanged += UpdateVector;
 		}
@@ -397,19 +412,23 @@ public partial class QuaternionFieldEditor : INotificationPropagator, IFieldEdit
 		set
 		{
 			this.value = value;
-			vectorFieldEditor.Load(Quaternion.ToEulerAngles(value));
+			VectorFieldEditor.Load(value.ToEulerAngles());
 		}
 	}
 	
 	public event Action<object?>? ValueChanged;
 	
-	public void UpdateVector(object? _value) => UpdateVector((Vector3)_value!);
-	public void UpdateVector(Vector3 _value) => value = Quaternion.FromEulerAngles(_value);
+	public void UpdateVector(object? vector) => UpdateVector((Vector3)vector!);
+	public void UpdateVector(Vector3 vector)
+	{
+		value = Quaternion.FromEulerAngles(vector);
+		ValueChanged?.Invoke(value);
+	}
 	
 	public void Load(Quaternion value) => Value = value;
 	
 	public void Notify<T>(T notification) where T : notnull
 	{
-		INotificationPropagator.Notify(notification, vectorFieldEditor);
+		INotificationPropagator.Notify(notification, VectorFieldEditor);
 	}
 }
