@@ -51,6 +51,27 @@ public struct Quaternion(double x, double y, double z, double w) : IEquatable<Qu
 			sinYaw * cosPitch * cosRoll + cosYaw * sinPitch * sinRoll,
 			cosYaw * cosPitch * cosRoll - sinYaw * sinPitch * sinRoll);
 	}
+
+	/// <summary>
+	/// Converts the given quaternion to euler angles
+	/// </summary>
+	public static Vector3 ToEulerAngles(Quaternion q)
+	{
+		Vector3 angles;
+
+		double sinr_cosp = 2 * (q.W * q.X + q.Y * q.Z);
+		double cosr_cosp = 1 - 2 * (q.X * q.X + q.Y * q.Y);
+		angles.X = Math.Atan2(sinr_cosp, cosr_cosp);
+
+		double sinp = Math.Sqrt(1 + 2 * (q.W * q.Y - q.X * q.Z));
+		double cosp = Math.Sqrt(1 - 2 * (q.W * q.Y - q.X * q.Z));
+		angles.Y = 2 * Math.Atan2(sinp, cosp) - Math.PI / 2;
+
+		double siny_cosp = 2 * (q.W * q.Z + q.X * q.Y);
+		double cosy_cosp = 1 - 2 * (q.Y * q.Y + q.Z * q.Z);
+		angles.Z = Math.Atan2(siny_cosp, cosy_cosp);
+		return angles;
+	}
 	
 	/// <summary>
 	/// Rotates by roll (y), then pitch (x), then yaw (z).

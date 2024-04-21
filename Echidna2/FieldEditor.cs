@@ -2,11 +2,11 @@
 using System.Globalization;
 using Echidna2.Core;
 using Echidna2.Gui;
+using Echidna2.Mathematics;
 using Echidna2.Rendering;
 using Echidna2.Serialization;
 using JetBrains.Annotations;
 using OpenTK.Windowing.GraphicsLibraryFramework;
-using Echidna2.Mathematics;
 
 namespace Echidna2;
 
@@ -27,14 +27,20 @@ public interface IFieldEditor<in T> : IFieldEditor
 }
 
 [UsedImplicitly, Prefab("Editors/StringFieldEditor.toml")]
-public partial class StringFieldEditor : INotificationPropagator, IInitialize, IFieldEditor<string>, ITextInput
+public partial class StringFieldEditor
+	: INotificationPropagator,
+		IInitialize,
+		IFieldEditor<string>,
+		ITextInput
 {
-	[SerializedReference, ExposeMembersInClass] public FullRectWithHierarchy Rect { get; set; } = null!;
+	[SerializedReference, ExposeMembersInClass]  public FullRectWithHierarchy Rect { get; set; } = null!;
+
 	[SerializedReference] public TextRect Text { get; set; } = null!;
+
 	[SerializedReference] public Button Button { get; set; } = null!;
-	
+
 	public event Action<object?>? ValueChanged;
-	
+
 	private string value = "";
 	public string Value
 	{
@@ -46,7 +52,7 @@ public partial class StringFieldEditor : INotificationPropagator, IInitialize, I
 			ValueChanged?.Invoke(value);
 		}
 	}
-	
+
 	private string bufferValue = "";
 	private string BufferValue
 	{
@@ -57,20 +63,21 @@ public partial class StringFieldEditor : INotificationPropagator, IInitialize, I
 			Text.TextString = value;
 		}
 	}
-	
+
 	private int cursorPosition;
-	
+
 	[DontExpose] public bool HasBeenInitialized { get; set; }
-	
+
 	private bool isFocused;
 	public bool IsFocused
 	{
 		get => isFocused;
 		private set
 		{
-			if (value == isFocused) return;
+			if (value == isFocused)
+				return;
 			isFocused = value;
-			
+
 			if (isFocused)
 			{
 				Text.Color = Color.DeepSkyBlue;
@@ -82,24 +89,26 @@ public partial class StringFieldEditor : INotificationPropagator, IInitialize, I
 			}
 		}
 	}
-	
+
 	public void OnInitialize()
 	{
 		Button.MouseDown += () => IsFocused = true;
 		Button.MouseDownOutside += () => IsFocused = false;
 	}
-	
-	public void Notify<T>(T notification) where T : notnull
+
+	public void Notify<T>(T notification)
+		where T : notnull
 	{
 		INotificationPropagator.Notify(notification, Rect, Button);
 	}
-	
+
 	public void Load(string value) => Value = value;
-	
+
 	public void OnTextInput(Keys key, KeyModifiers modifiers)
 	{
-		if (!IsFocused) return;
-		
+		if (!IsFocused)
+			return;
+
 		if (key is Keys.Enter)
 		{
 			Value = BufferValue;
@@ -117,9 +126,10 @@ public partial class StringFieldEditor : INotificationPropagator, IInitialize, I
 			BufferValue = tempValue;
 		}
 	}
-	
+
 	// FIXME: These don't do anything. They're not generated automatically for some reason.
 	public Color Color { get; set; }
+
 	public void OnNotify(IDraw.Notification notification) { }
 }
 
@@ -127,22 +137,22 @@ public partial class StringFieldEditor : INotificationPropagator, IInitialize, I
 public partial class DoubleFieldEditor : INotificationPropagator, IFieldEditor<double>
 {
 	private StringFieldEditor? stringFieldEditor;
-	[SerializedReference, ExposeMembersInClass]
-	public StringFieldEditor StringFieldEditor
+
+	[SerializedReference, ExposeMembersInClass] public StringFieldEditor StringFieldEditor
 	{
 		get => stringFieldEditor!;
 		set
 		{
 			if (stringFieldEditor is not null)
 				stringFieldEditor.ValueChanged -= UpdateValue;
-			
+
 			stringFieldEditor = value;
-			
+
 			if (stringFieldEditor is not null)
 				stringFieldEditor.ValueChanged += UpdateValue;
 		}
 	}
-	
+
 	private double value;
 	public double Value
 	{
@@ -153,15 +163,23 @@ public partial class DoubleFieldEditor : INotificationPropagator, IFieldEditor<d
 			StringFieldEditor.Load(value.ToString(CultureInfo.CurrentCulture));
 		}
 	}
-	
+
 	public event Action<object?>? ValueChanged;
-	
+
 	public void Load(double value) => Value = value;
-	
+
 	public void UpdateValue(object? value) => UpdateValue((string)value!);
+
 	public void UpdateValue(string stringValue)
 	{
-		if (double.TryParse(stringValue, NumberStyles.Any, CultureInfo.CurrentCulture, out double result))
+		if (
+			double.TryParse(
+				stringValue,
+				NumberStyles.Any,
+				CultureInfo.CurrentCulture,
+				out double result
+			)
+		)
 		{
 			value = result;
 			ValueChanged?.Invoke(value);
@@ -171,8 +189,9 @@ public partial class DoubleFieldEditor : INotificationPropagator, IFieldEditor<d
 			StringFieldEditor.Load(value.ToString(CultureInfo.CurrentCulture));
 		}
 	}
-	
-	public void Notify<T>(T notification) where T : notnull
+
+	public void Notify<T>(T notification)
+		where T : notnull
 	{
 		INotificationPropagator.Notify(notification, StringFieldEditor);
 	}
@@ -182,11 +201,13 @@ public partial class DoubleFieldEditor : INotificationPropagator, IFieldEditor<d
 public partial class ReferenceFieldEditor : IFieldEditor, INotificationPropagator, IInitialize
 {
 	[SerializedReference, ExposeMembersInClass] public FullRectWithHierarchy Rect { get; set; } = null!;
+
 	[SerializedReference] public TextRect Text { get; set; } = null!;
+
 	[SerializedReference] public Button Button { get; set; } = null!;
-	
+
 	public event Action<object?>? ValueChanged;
-	
+
 	private object? value = null;
 	public object? Value
 	{
@@ -198,9 +219,9 @@ public partial class ReferenceFieldEditor : IFieldEditor, INotificationPropagato
 			ValueChanged?.Invoke(value);
 		}
 	}
-	
+
 	[DontExpose] public bool HasBeenInitialized { get; set; }
-	
+
 	public void OnInitialize()
 	{
 		Button.MouseDown += () =>
@@ -209,55 +230,55 @@ public partial class ReferenceFieldEditor : IFieldEditor, INotificationPropagato
 			QueueAddChild(window);
 		};
 	}
-	
-	public void Notify<T>(T notification) where T : notnull
+
+	public void Notify<T>(T notification)
+		where T : notnull
 	{
 		INotificationPropagator.Notify(notification, Rect, Button);
 	}
-	
+
 	public void Load(object? value) => Value = value;
 }
-
 
 [UsedImplicitly, Prefab("Editors/Vector2FieldEditor.toml")]
 public partial class Vector2FieldEditor : INotificationPropagator, IFieldEditor<Vector2>
 {
 	[SerializedReference, ExposeMembersInClass] public HLayoutWithHierarchy Layout { get; set; } = null!;
-	
+
 	private DoubleFieldEditor? xFieldEditor;
-	[SerializedReference]
-	public DoubleFieldEditor XFieldEditor
+
+	[SerializedReference] public DoubleFieldEditor XFieldEditor
 	{
 		get => xFieldEditor!;
 		set
 		{
 			if (xFieldEditor is not null)
 				xFieldEditor.ValueChanged -= UpdateX;
-			
+
 			xFieldEditor = value;
-			
+
 			if (xFieldEditor is not null)
 				xFieldEditor.ValueChanged += UpdateX;
 		}
 	}
-	
+
 	private DoubleFieldEditor? yFieldEditor;
-	[SerializedReference]
-	public DoubleFieldEditor YFieldEditor
+
+	[SerializedReference] public DoubleFieldEditor YFieldEditor
 	{
 		get => yFieldEditor!;
 		set
 		{
 			if (yFieldEditor is not null)
 				yFieldEditor.ValueChanged -= UpdateY;
-			
+
 			yFieldEditor = value;
-			
+
 			if (yFieldEditor is not null)
 				yFieldEditor.ValueChanged += UpdateY;
 		}
 	}
-	
+
 	private Vector2 value;
 	public Vector2 Value
 	{
@@ -270,21 +291,21 @@ public partial class Vector2FieldEditor : INotificationPropagator, IFieldEditor<
 			YFieldEditor.Load(value.Y);
 		}
 	}
-	
+
 	public event Action<object?>? ValueChanged;
-	
+
 	public void UpdateX(object? x) => UpdateX((double)x!);
-	public void UpdateX(double x){
-		value = new Vector2(x, value.Y);
-	}
+
+	public void UpdateX(double x) => value = value with { X = x };
+
 	public void UpdateY(object? y) => UpdateY((double)y!);
-	public void UpdateY(double y){
-		value = new Vector2(value.X, y);
-	}
-	
+
+	public void UpdateY(double y) => value = value with { Y = y };
+
 	public void Load(Vector2 value) => Value = value;
-	
-	public void Notify<T>(T notification) where T : notnull
+
+	public void Notify<T>(T notification)
+		where T : notnull
 	{
 		INotificationPropagator.Notify(notification, Layout);
 	}
@@ -294,58 +315,58 @@ public partial class Vector2FieldEditor : INotificationPropagator, IFieldEditor<
 public partial class Vector3FieldEditor : INotificationPropagator, IFieldEditor<Vector3>
 {
 	[SerializedReference, ExposeMembersInClass] public HLayoutWithHierarchy Layout { get; set; } = null!;
-	
+
 	private DoubleFieldEditor? xFieldEditor;
-	[SerializedReference]
-	public DoubleFieldEditor XFieldEditor
+
+	[SerializedReference] public DoubleFieldEditor XFieldEditor
 	{
 		get => xFieldEditor!;
 		set
 		{
 			if (xFieldEditor is not null)
 				xFieldEditor.ValueChanged -= UpdateX;
-			
+
 			xFieldEditor = value;
-			
+
 			if (xFieldEditor is not null)
 				xFieldEditor.ValueChanged += UpdateX;
 		}
 	}
-	
+
 	private DoubleFieldEditor? yFieldEditor;
-	[SerializedReference]
-	public DoubleFieldEditor YFieldEditor
+
+	[SerializedReference] public DoubleFieldEditor YFieldEditor
 	{
 		get => yFieldEditor!;
 		set
 		{
 			if (yFieldEditor is not null)
 				yFieldEditor.ValueChanged -= UpdateY;
-			
+
 			yFieldEditor = value;
-			
+
 			if (yFieldEditor is not null)
 				yFieldEditor.ValueChanged += UpdateY;
 		}
 	}
-	
+
 	private DoubleFieldEditor? zFieldEditor;
-	[SerializedReference]
-	public DoubleFieldEditor ZFieldEditor
+
+	[SerializedReference] public DoubleFieldEditor ZFieldEditor
 	{
 		get => zFieldEditor!;
 		set
 		{
 			if (zFieldEditor is not null)
 				zFieldEditor.ValueChanged -= UpdateZ;
-			
+
 			zFieldEditor = value;
-			
+
 			if (zFieldEditor is not null)
 				zFieldEditor.ValueChanged += UpdateZ;
 		}
 	}
-	
+
 	private Vector3 value;
 	public Vector3 Value
 	{
@@ -356,34 +377,76 @@ public partial class Vector3FieldEditor : INotificationPropagator, IFieldEditor<
 			XFieldEditor.Load(value.X);
 			YFieldEditor.Load(value.Y);
 			ZFieldEditor.Load(value.Z);
+			ValueChanged?.Invoke(value);
 		}
 	}
-	
+
 	public event Action<object?>? ValueChanged;
-	
+
 	public void UpdateX(object? x) => UpdateX((double)x!);
-	public void UpdateX(double x)
-	{
-		value = new Vector3(x, value.Y, value.Z);
-		ValueChanged?.Invoke(value);
-	}
+
+	public void UpdateX(double x) => value = value with { X = x };
+
 	public void UpdateY(object? y) => UpdateY((double)y!);
-	public void UpdateY(double y)
-	{
-		value = new Vector3(value.X, y, value.Z);
-		ValueChanged?.Invoke(value);
-	}
+
+	public void UpdateY(double y) => value = value with { Y = y };
+
 	public void UpdateZ(object? z) => UpdateZ((double)z!);
-	public void UpdateZ(double z)
-	{
-		value = new Vector3(value.X, value.Y, z);
-		ValueChanged?.Invoke(value);
-	}
-	
+
+	public void UpdateZ(double z) => value = value with { Z = z };
+
 	public void Load(Vector3 value) => Value = value;
-	
-	public void Notify<T>(T notification) where T : notnull
+
+	public void Notify<T>(T notification)
+		where T : notnull
 	{
 		INotificationPropagator.Notify(notification, Layout);
 	}
 }
+
+[UsedImplicitly, Prefab("Editors/QuaternionFieldEditor.toml")]
+public partial class QuaternionFieldEditor : INotificationPropagator, IFieldEditor<Quaternion>
+{
+	private Vector3FieldEditor? vectorFieldEditor;
+	
+	[SerializedReference, ExposeMembersInClass] public Vector3FieldEditor VectorFieldEditor
+	{
+		get => vectorFieldEditor!;
+		set
+		{
+			if (vectorFieldEditor is not null)
+				vectorFieldEditor.ValueChanged -= UpdateVector;
+
+			vectorFieldEditor = value;
+
+			if (vectorFieldEditor is not null)
+				vectorFieldEditor.ValueChanged += UpdateVector;
+		}
+	}
+
+	private Quaternion value;
+	public Quaternion Value
+	{
+		get => value;
+		set
+		{
+			this.value = value;
+			vectorFieldEditor.Load(Quaternion.ToEulerAngles(value));
+		}
+	}
+
+	public event Action<object?>? ValueChanged;
+
+	public void UpdateVector(object? _value) => UpdateVector((Vector3)_value!);
+
+	public void UpdateVector(Vector3 _value) => value = Quaternion.FromEulerAngles(_value);
+
+	public void Load(Quaternion value) => Value = value;
+
+	public void Notify<T>(T notification)
+		where T : notnull
+	{
+		INotificationPropagator.Notify(notification, vectorFieldEditor);
+	}
+}
+
