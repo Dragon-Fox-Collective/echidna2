@@ -58,6 +58,9 @@ public struct Quaternion(double x, double y, double z, double w) : IEquatable<Qu
 	/// </summary>
 	public static Quaternion FromEulerAngles(Vector3 angles) => FromEulerAngles(angles.X, angles.Y, angles.Z);
 	
+	/// <summary>
+	/// Returns a rotation by roll (y), then pitch (x), then yaw (z).
+	/// </summary>
 	[Pure]
 	public Vector3 ToEulerAngles()
 	{
