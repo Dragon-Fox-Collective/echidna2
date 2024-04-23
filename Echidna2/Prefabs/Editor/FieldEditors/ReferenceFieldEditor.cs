@@ -14,9 +14,10 @@ public partial class ReferenceFieldEditor : IFieldEditor, INotificationPropagato
 	[SerializedReference] public Button Button { get; set; } = null!;
 	
 	public Type ComponentType = null!; // TODO: remove this and use a constructor of some kind instead
-	public ComponentPanel ComponentPanel = null!;
 	
 	public event Action<object?>? ValueChanged;
+	
+	public event Action<AddComponentWindow>? WindowOpened;
 	
 	private object? value = null;
 	public object? Value
@@ -40,6 +41,7 @@ public partial class ReferenceFieldEditor : IFieldEditor, INotificationPropagato
 			window.ComponentType = ComponentType;
 			window.Field = this;
 			QueueAddChild(window);
+			WindowOpened?.Invoke(window);
 		};
 	}
 	

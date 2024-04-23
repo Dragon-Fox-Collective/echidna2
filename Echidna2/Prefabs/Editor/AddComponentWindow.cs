@@ -7,19 +7,26 @@ using JetBrains.Annotations;
 namespace Echidna2.Prefabs.Editor;
 
 [UsedImplicitly, Prefab("Prefabs/Editor/AddComponentWindow.toml")]
-public partial class AddComponentWindow : INotificationPropagator, IInitialize
+public partial class AddComponentWindow : INotificationPropagator, IInitialize, IEditorInitialize
 {
 	[SerializedReference, ExposeMembersInClass] public FullRectWindow Window { get; set; } = null!;
 	
 	public Type ComponentType = null!;
 	public ReferenceFieldEditor Field = null!;
-	public PrefabRoot? PrefabRoot => Field.ComponentPanel.Editor.PrefabRoot;
+	
+	private Editor editor = null!;
+	public PrefabRoot? PrefabRoot => editor.PrefabRoot;
 	
 	[DontExpose] public bool HasBeenInitialized { get; set; }
 	
 	public void OnInitialize()
 	{
 		Window.CloseWindowRequest += () => Hierarchy.Parent.QueueRemoveChild(this);
+	}
+	
+	public void OnEditorInitialize(Editor editor)
+	{
+		this.editor = editor;
 	}
 	
 	public void Notify<T>(T notification) where T : notnull
