@@ -21,7 +21,12 @@ public partial class FullRectWindow : INotificationPropagator, IInitialize
 	
 	public void OnInitialize()
 	{
-		Button.MouseDownOutside += () => CloseWindowRequest?.Invoke();
+		Button.MouseDownOutside += CloseWindow;
+	}
+	
+	public void CloseWindow()
+	{
+		CloseWindowRequest?.Invoke();
 	}
 	
 	public void Notify<T>(T notification) where T : notnull

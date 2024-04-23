@@ -12,14 +12,22 @@ public class Compilation
 	public static string CompilationBinFolder => $"{CompilationFolder}/bin/Debug/net8.0";
 	public static string CompilationDllPath => $"{CompilationBinFolder}/EchidnaProject.dll";
 	
-	public static void CompileCSProj(string prefabPath)
+	public static void CompileCSProj(params string[] prefabPaths)
 	{
 		RecreateDirectory();
 		CreateCSProj();
-		CreateCSFiles(prefabPath);
+		
+		foreach (string prefabPath in prefabPaths)
+		{
+			CreateCSFiles(prefabPath);
+		}
 		CompileCSProj();
-		Dictionary<string, (bool, Dictionary<string, string>)> serializedEvents = GetSerializedEvents(prefabPath);
-		CreateCSFiles(prefabPath, serializedEvents);
+		
+		foreach (string prefabPath in prefabPaths)
+		{
+			Dictionary<string, (bool, Dictionary<string, string>)> serializedEvents = GetSerializedEvents(prefabPath);
+			CreateCSFiles(prefabPath, serializedEvents);
+		}
 		CompileCSProj();
 	}
 	

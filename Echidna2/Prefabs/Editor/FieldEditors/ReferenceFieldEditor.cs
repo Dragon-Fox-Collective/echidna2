@@ -13,6 +13,9 @@ public partial class ReferenceFieldEditor : IFieldEditor, INotificationPropagato
 	[SerializedReference] public TextRect Text { get; set; } = null!;
 	[SerializedReference] public Button Button { get; set; } = null!;
 	
+	public Type ComponentType = null!; // TODO: remove this and use a constructor of some kind instead
+	public ComponentPanel ComponentPanel = null!;
+	
 	public event Action<object?>? ValueChanged;
 	
 	private object? value = null;
@@ -34,6 +37,8 @@ public partial class ReferenceFieldEditor : IFieldEditor, INotificationPropagato
 		Button.MouseDown += () =>
 		{
 			AddComponentWindow window = AddComponentWindow.Instantiate();
+			window.ComponentType = ComponentType;
+			window.Field = this;
 			QueueAddChild(window);
 		};
 	}

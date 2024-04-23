@@ -15,7 +15,7 @@ public partial class ComponentPanel : INotificationPropagator, IEditorInitialize
 	[SerializedReference] public TextRect NameText { get; set; } = null!;
 	[SerializedReference] public ICanAddChildren Fields { get; set; } = null!;
 	
-	private Editor editor = null!;
+	public Editor Editor { get; private set; } = null!;
 	
 	private object? selectedObject;
 	public object? SelectedObject
@@ -60,8 +60,8 @@ public partial class ComponentPanel : INotificationPropagator, IEditorInitialize
 			
 			IMemberWrapper wrapper = IMemberWrapper.Wrap(member);
 			IFieldEditor? fieldEditor =
-				member.GetCustomAttribute<SerializedValueAttribute>() is not null ? editor.HasRegisteredFieldEditor(wrapper.FieldType) ? editor.InstantiateFieldEditor(wrapper.FieldType) : null :
-				member.GetCustomAttribute<SerializedReferenceAttribute>() is not null ? ReferenceFieldEditor.Instantiate() :
+				member.GetCustomAttribute<SerializedValueAttribute>() is not null ? Editor.HasRegisteredFieldEditor(wrapper.FieldType) ? Editor.InstantiateFieldEditor(wrapper.FieldType) : null :
+				member.GetCustomAttribute<SerializedReferenceAttribute>() is not null ? NewReferenceFieldEditorOfType(wrapper.FieldType) :
 				null;
 			if (fieldEditor is not null)
 			{
@@ -69,15 +69,24 @@ public partial class ComponentPanel : INotificationPropagator, IEditorInitialize
 				fieldEditor.ValueChanged += value =>
 				{
 					wrapper.SetValue(selectedObject, value);
-					editor.PrefabRoot?.RegisterChange(new MemberPath(wrapper, new ComponentPath(selectedObject)));
-					editor.SerializePrefab();
+					Editor.PrefabRoot?.RegisterChange(new MemberPath(wrapper, new ComponentPath(selectedObject)));
+					Editor.SerializePrefab();
 				};
 				layout.AddChild(fieldEditor);
 			}
 		}
+		return;
+		
+		ReferenceFieldEditor NewReferenceFieldEditorOfType(Type type)
+		{
+			ReferenceFieldEditor referenceFieldEditor = ReferenceFieldEditor.Instantiate();
+			referenceFieldEditor.ComponentType = type;
+			referenceFieldEditor.ComponentPanel = this;
+			return referenceFieldEditor;
+		}
 	}
 	
-	public void OnEditorInitialize(Editor editor) => this.editor = editor;
+	public void OnEditorInitialize(Editor editor) => this.Editor = editor;
 	
 	public void Notify<T>(T notification) where T : notnull
 	{

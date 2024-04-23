@@ -8,7 +8,7 @@ using Echidna2.Serialization;
 using OpenTK.Windowing.Desktop;
 
 Console.WriteLine("Hello, World!");
-Compilation.CompileCSProj("Prefabs/Editor/Editor.toml");
+Compilation.CompileCSProj("Prefabs/Editor/Editor.toml", "Prefabs/Editor/AddComponentWindow.toml");
 
 AssemblyLoadContext projectAssemblyLoadContext = new("EchidnaProject");
 using FileStream projectAssemblyFileStream = new(Compilation.CompilationDllPath, FileMode.Open, FileAccess.Read);
