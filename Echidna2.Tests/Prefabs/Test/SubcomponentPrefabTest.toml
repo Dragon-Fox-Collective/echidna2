@@ -1,0 +1,10 @@
+[0]
+Component = "Echidna2.Prefabs.Test.SubcomponentPrefab, Echidna2.Tests"
+Subcomponent = "1"
+
+[1]
+Component = "Echidna2.Prefabs.Test.SubcomponentSubcomponent, Echidna2.Tests"
+Reference = "2"
+
+[2]
+Component = "Echidna2.Prefabs.Test.SubcomponentSubcomponent, Echidna2.Tests"
