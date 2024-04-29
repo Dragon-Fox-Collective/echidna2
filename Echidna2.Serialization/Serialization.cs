@@ -2,6 +2,7 @@
 using System.Reflection;
 using Tomlyn;
 using Tomlyn.Model;
+using TooManyExtensions;
 
 namespace Echidna2.Serialization;
 
@@ -113,8 +114,7 @@ public static class TomlDeserializer
 	
 	public static PrefabRoot Deserialize(string path, string? overridenTypeName = null)
 	{
-		Dictionary<string, object> references = new();
-		List<(string id, object component, TomlTable componentTable)> components = [];
+		Dictionary<string, (object component, TomlTable componentTable)> components = [];
 		
 		PrefabRoot prefabRoot = new();
 		prefabRoot.PrefabPath = path;
@@ -148,21 +148,20 @@ public static class TomlDeserializer
 			
 			RemoveEvents(component, componentTable); // Should've been handled by Compilation
 			
-			references.Add(id, component);
-			components.Add((id, component, componentTable));
+			components.Add(id, (component, componentTable));
 			
 			if (!doneFirstObject)
 				prefabRoot.RootObject = component;
 			doneFirstObject = true;
 		}
 		
-		foreach ((string id, object component, TomlTable componentTable) in components)
-			DeserializeReference(prefabRoot, id, new ComponentPath(component), component, componentTable, valueId => references[valueId]);
+		foreach ((string id, (object component, TomlTable componentTable)) in components)
+			DeserializeReference(prefabRoot, id, new ComponentPath(component), component, componentTable, GetReferenceFrom);
 		
-		foreach ((string id, object component, TomlTable componentTable) in components)
+		foreach ((string id, (object component, TomlTable componentTable)) in components)
 			DeserializeValue(prefabRoot, id, new ComponentPath(component), component, componentTable);
 		
-		foreach ((string id, object _, TomlTable componentTable) in components)
+		foreach ((string id, (object _, TomlTable componentTable)) in components)
 			if (componentTable.Count != 0)
 				Console.WriteLine($"WARN: Unused table {id} {componentTable.ToDelimString()} of prefab leftover");
 		
@@ -170,6 +169,23 @@ public static class TomlDeserializer
 			throw new InvalidOperationException("No objects were deserialized");
 		
 		return prefabRoot;
+		
+		
+		object? GetReferenceFrom(string refPath)
+		{
+			while (true)
+			{
+				if (refPath.IsEmpty()) return null;
+				
+				(string id, string rest) = refPath.SplitOnce('.');
+				(object value, TomlTable valueTable) = components[id];
+				
+				if (rest.IsEmpty()) return value;
+				
+				refPath = (string)rest.Split('.')
+					.Aggregate<string, object>(valueTable, (current, name) => ((TomlTable)current)[name]);
+			}
+		}
 	}
 	
 	private static object DeserializeComponent(string id, string typeName, bool useProjectAssembly)
