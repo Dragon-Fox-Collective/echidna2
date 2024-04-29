@@ -33,6 +33,20 @@ public static class SerializationTests
 	}
 	
 	[Fact]
+	public static void DeserializingComponent_WithDottedPaths_SetsReferences()
+	{
+		// Arrange
+		
+		// Act
+		PrefabRoot prefab = TomlDeserializer.Deserialize(AppContext.BaseDirectory + "Prefabs/Test/SubcomponentDottedPrefabTest.toml");
+		
+		// Assert
+		Assert.NotNull(((SubcomponentPrefab)prefab.RootObject).Subcomponent);
+		Assert.Null(((SubcomponentPrefab)prefab.RootObject).Reference);
+		Assert.Equal(prefab.Components[2], ((SubcomponentPrefab)prefab.RootObject).Subcomponent);
+	}
+	
+	[Fact]
 	public static void ReserializingComponent_WithReferencesOnSubComponent_SetsReferencesOnlyOnSubComponent()
 	{
 		// Arrange
