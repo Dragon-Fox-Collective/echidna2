@@ -66,10 +66,13 @@ public partial class ComponentPanel : INotificationPropagator, IEditorInitialize
 	{
 		Fields.ClearChildren();
 		if (editor.PrefabRoot is null) return;
+		if (selectedObject is null) return;
 		
 		ComponentNameText.TextString = "Favorites";
 		
-		foreach ((object component, MemberInfo member) in editor.PrefabRoot.FavoritedFields)
+		List<object> availableComponents = GetAllComponentsReferencedBy(selectedObject);
+		foreach ((object component, MemberInfo member) in editor.PrefabRoot.FavoritedFields
+			         .Where(zip => availableComponents.Contains(zip.Component)))
 			AddField(member, component);
 	}
 	
@@ -140,12 +143,23 @@ public partial class ComponentPanel : INotificationPropagator, IEditorInitialize
 		favoritesButton.MinimumSize = (40, 40);
 		Components.AddChild(favoritesButton);
 		
-		List<object> thingsToSearch = [selectedObject];
+		foreach (object component in GetAllComponentsReferencedBy(selectedObject))
+		{
+			ButtonRect button = (ButtonRect)TomlDeserializer.Deserialize(AppContext.BaseDirectory + "Prefabs/Editor/ComponentSelectionButton.toml").RootObject;
+			button.Clicked += () => SelectedComponent = component;
+			Components.AddChild(button);
+		}
+	}
+	
+	private static List<object> GetAllComponentsReferencedBy(object component)
+	{
+		List<object> thingsToSearch = [component];
 		List<object> thingsSearched = [];
+		
 		while (!thingsToSearch.IsEmpty())
 		{
 			object thing = thingsToSearch.Pop();
-			
+
 			thingsToSearch.AddRange(
 				thing.GetType().GetMembers()
 					.Where(member => member.GetCustomAttribute<SerializedReferenceAttribute>() is not null)
@@ -154,16 +168,11 @@ public partial class ComponentPanel : INotificationPropagator, IEditorInitialize
 					.Where(nextThing => !thingsSearched.Contains(nextThing) && !thingsToSearch.Contains(nextThing))
 					.Distinct()
 			);
-			
+
 			thingsSearched.AddIfDistinct(thing);
 		}
 		
-		foreach (object component in thingsSearched)
-		{
-			ButtonRect button = (ButtonRect)TomlDeserializer.Deserialize(AppContext.BaseDirectory + "Prefabs/Editor/ComponentSelectionButton.toml").RootObject;
-			button.Clicked += () => SelectedComponent = component;
-			Components.AddChild(button);
-		}
+		return thingsSearched;
 	}
 	
 	public void OnEditorInitialize(Editor editor) => this.editor = editor;

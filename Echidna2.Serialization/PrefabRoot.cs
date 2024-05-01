@@ -9,7 +9,7 @@ public class PrefabRoot : IPrefabChangeRegistry
 	
 	public Dictionary<MemberPath, object> SerializedData = new();
 	
-	public List<(object, MemberInfo)> FavoritedFields = [];
+	public List<(object Component, MemberInfo Field)> FavoritedFields = [];
 	
 	public object RootObject = null!;
 	public string PrefabPath = null!;
