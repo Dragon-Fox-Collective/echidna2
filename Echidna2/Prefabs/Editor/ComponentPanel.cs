@@ -37,7 +37,7 @@ public partial class ComponentPanel : INotificationPropagator, IEditorInitialize
 				PrefabNameText.TextString = "No object selected";
 			}
 			
-			SelectedComponent = selectedObject;
+			SelectedComponent = null;
 			
 			INotificationPropagator.NotificationFinished += RefreshComponents;
 		}
@@ -71,7 +71,7 @@ public partial class ComponentPanel : INotificationPropagator, IEditorInitialize
 		ComponentNameText.TextString = "Favorites";
 		
 		List<object> availableComponents = GetAllComponentsReferencedBy(selectedObject);
-		foreach ((object component, MemberInfo member) in editor.PrefabRoot.FavoritedFields
+		foreach ((object component, MemberInfo member) in editor.PrefabRoot.FavoriteFields
 			         .Where(zip => availableComponents.Contains(zip.Component)))
 			AddField(member, component);
 	}
@@ -125,8 +125,8 @@ public partial class ComponentPanel : INotificationPropagator, IEditorInitialize
 		{
 			if (editor.PrefabRoot is null) return;
 			
-			if (!editor.PrefabRoot.FavoritedFields.Remove((component, member)))
-				editor.PrefabRoot.FavoritedFields.Add((component, member));
+			if (!editor.PrefabRoot.FavoriteFields.Remove((component, member)))
+				editor.PrefabRoot.FavoriteFields.Add((component, member));
 			
 			editor.SerializePrefab();
 		};
