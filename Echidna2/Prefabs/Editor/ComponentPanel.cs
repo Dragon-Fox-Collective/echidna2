@@ -15,6 +15,7 @@ public partial class ComponentPanel : INotificationPropagator, IEditorInitialize
 	[SerializedReference] public TextRect PrefabNameText { get; set; } = null!;
 	[SerializedReference] public TextRect ComponentNameText { get; set; } = null!;
 	[SerializedReference] public ICanAddChildren Fields { get; set; } = null!;
+	[SerializedReference] public ICanAddChildren Components { get; set; } = null!;
 	
 	private Editor editor = null!;
 	
@@ -37,7 +38,12 @@ public partial class ComponentPanel : INotificationPropagator, IEditorInitialize
 				PrefabNameText.TextString = "No object selected";
 				ComponentNameText.TextString = "No component selected";
 			}
-			RefreshFields();
+			
+			INotificationPropagator.NotificationFinished += () =>
+			{
+				RefreshFields();
+				RefreshComponents();
+			};
 		}
 	}
 	
@@ -77,6 +83,37 @@ public partial class ComponentPanel : INotificationPropagator, IEditorInitialize
 				};
 				layout.AddChild(fieldEditor);
 			}
+		}
+	}
+	
+	public void RefreshComponents()
+	{
+		Components.ClearChildren();
+		if (selectedObject is null) return;
+		
+		List<object> thingsToSearch = [selectedObject];
+		List<object> thingsSearched = [];
+		while (!thingsToSearch.IsEmpty())
+		{
+			object thing = thingsToSearch.Pop();
+			
+			thingsToSearch.AddRange(
+				thing.GetType().GetMembers()
+					.Where(member => member.GetCustomAttribute<SerializedReferenceAttribute>() is not null)
+					.Select(member => IMemberWrapper.Wrap(member).GetValue(thing))
+					.WhereNotNull()
+					.Where(nextThing => !thingsSearched.Contains(nextThing) && !thingsToSearch.Contains(nextThing))
+					.Distinct()
+			);
+			
+			thingsSearched.AddIfDistinct(thing);
+		}
+		
+		foreach (object component in thingsSearched)
+		{
+			ButtonRect button = (ButtonRect)TomlDeserializer.Deserialize(AppContext.BaseDirectory + "Prefabs/Editor/ComponentSelectionButton.toml").RootObject;
+			button.Clicked += () => SelectedObject = component;
+			Components.AddChild(button);
 		}
 	}
 	

@@ -1,0 +1,4 @@
+﻿[1]
+Prefab = "../Gui/ButtonRect.toml"
+Name = "Component Selection Button"
+MinimumSize = { X = 25, Y = 25 }

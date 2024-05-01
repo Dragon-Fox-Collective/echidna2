@@ -5,16 +5,18 @@ Rect = "1"
 PrefabNameText = "3"
 ComponentNameText = "4"
 Fields = "5"
+Components = "7"
 
 [1]
 Prefab = "../Gui/FullRectWithHierarchy.toml"
 Name = "Interior Rect"
 Margin = 10.0
-Children = [ "2" ]
+Children = [ "6" ]
 
 [2]
 Prefab = "../Gui/VLayoutWithHierarchy.toml"
 Name = "Interior Layout"
+HorizontalExpand = true
 Children = [ "3", "4", "5" ]
 
 [3]
@@ -32,3 +34,12 @@ MinimumSize = { X = 0.0, Y = 25.0 }
 [5]
 Prefab = "../Gui/VLayoutWithHierarchy.toml"
 Name = "Fields"
+
+[6]
+Prefab = "../Gui/HLayoutWithHierarchy.toml"
+Name = "Horizontal Split"
+Children = [ "2", "7" ]
+
+[7]
+Prefab = "../Gui/VLayoutWithHierarchy.toml"
+Name = "Component List"
