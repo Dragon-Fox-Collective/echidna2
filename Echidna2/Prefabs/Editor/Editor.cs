@@ -62,7 +62,7 @@ public partial class Editor : INotificationPropagator, ICanBeLaidOut
 		INotificationPropagator.Notify(notification, RectLayout, PrefabChildren);
 	}
 	
-	public void OnObjectSelected(object obj)
+	private void OnObjectSelected(object obj)
 	{
 		Console.WriteLine("Selected " + obj);
 		ComponentPanel.SelectedObject = obj;

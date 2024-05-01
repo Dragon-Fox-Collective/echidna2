@@ -24,17 +24,31 @@ public static class TomlSerializer
 		}
 		
 		foreach ((object subcomponent, TomlTable subcomponentTable) in tables)
-			SerializeReference(prefabRoot, new ComponentPath(subcomponent), subcomponentTable, valueId => references[valueId]);
+			SerializeReference(prefabRoot, new ComponentPath(subcomponent), subcomponentTable, GetReferenceTo);
 		
 		foreach ((object subcomponent, TomlTable subcomponentTable) in tables)
 			SerializeValue(prefabRoot, new ComponentPath(subcomponent), subcomponentTable);
 		
 		TomlTable prefabTable = new();
+		
+		TomlArray favoriteFields = [];
+		foreach ((object component, MemberInfo field) in prefabRoot.FavoriteFields)
+		{
+			string componentId = GetReferenceTo(component);
+			favoriteFields.Add($"{componentId}.{field.Name}");
+		}
+		prefabTable.Add("FavoriteFields", favoriteFields);
+		
 		foreach ((string id, TomlTable table) in references.Select(pair => (pair.Value, tables[pair.Key])))
 			prefabTable.Add(id, table);
 		
 		File.WriteAllText(path, Toml.FromModel(prefabTable));
 		return prefabTable;
+		
+		string GetReferenceTo(object component)
+		{
+			return references[component];
+		}
 	}
 	
 	private static string GetPathRelativeTo(string path, string relativeTo)
@@ -122,7 +136,8 @@ public static class TomlDeserializer
 		bool doneFirstObject = false;
 		TomlTable table = Toml.ToModel(File.ReadAllText(path));
 		
-		foreach ((string id, object value) in table)
+		foreach ((string id, object value) in table
+			         .Where(pair => pair.Key.All(char.IsDigit)))
 		{
 			TomlTable componentTable = (TomlTable)value;
 			
@@ -168,6 +183,16 @@ public static class TomlDeserializer
 		if (prefabRoot.RootObject == null)
 			throw new InvalidOperationException("No objects were deserialized");
 		
+		prefabRoot.FavoriteFields = table.TryGetValue("FavoriteFields", out object? fields)
+			? ((TomlArray)fields).Select(refPath =>
+			{
+				(string componentPath, string fieldPath) = ((string)refPath).SplitLast('.');
+				object component = GetReferenceFrom(componentPath);
+				MemberInfo field = component.GetType().GetMember(fieldPath)[0];
+				return (component, field);
+			}).ToList()
+			: [];
+		
 		return prefabRoot;
 		
 		
@@ -177,7 +202,7 @@ public static class TomlDeserializer
 			{
 				if (refPath.IsEmpty()) return null;
 				
-				(string id, string rest) = refPath.SplitOnce('.');
+				(string id, string rest) = refPath.SplitFirst('.');
 				(object value, TomlTable valueTable) = components[id];
 				
 				if (rest.IsEmpty()) return value;

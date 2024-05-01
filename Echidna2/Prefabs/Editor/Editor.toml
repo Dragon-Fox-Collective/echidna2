@@ -43,9 +43,9 @@ Prefab = "../Gui/RectWithHierarchy.toml"
 Name = "Console"
 AnchorPreset = "WideBottom"
 AnchorOffsetTop = 50.0
-Children = [ "5-1" ]
+Children = [ "51" ]
 
-[5-1]
+[51]
 Prefab = "../Gui/RectLayoutWithHierarchy.toml"
 Name = "Play Buttons Position Resetter"
 AnchorPreset = "TopCenter"
