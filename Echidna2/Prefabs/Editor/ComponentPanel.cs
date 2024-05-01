@@ -12,7 +12,8 @@ namespace Echidna2.Prefabs.Editor;
 public partial class ComponentPanel : INotificationPropagator, IEditorInitialize
 {
 	[SerializedReference, ExposeMembersInClass] public FullRectWithHierarchy Rect { get; set; } = null!;
-	[SerializedReference] public TextRect NameText { get; set; } = null!;
+	[SerializedReference] public TextRect PrefabNameText { get; set; } = null!;
+	[SerializedReference] public TextRect ComponentNameText { get; set; } = null!;
 	[SerializedReference] public ICanAddChildren Fields { get; set; } = null!;
 	
 	private Editor editor = null!;
@@ -27,12 +28,14 @@ public partial class ComponentPanel : INotificationPropagator, IEditorInitialize
 			if (selectedObject is not null)
 			{
 				if (selectedObject is INamed named)
-					named.NameChanged += name => NameText.TextString = name;
-				NameText.TextString = INamed.GetName(selectedObject);
+					named.NameChanged += name => PrefabNameText.TextString = name;
+				PrefabNameText.TextString = INamed.GetName(selectedObject);
+				ComponentNameText.TextString = selectedObject.GetType().Name;
 			}
 			else
 			{
-				NameText.TextString = "(no object selected)";
+				PrefabNameText.TextString = "No object selected";
+				ComponentNameText.TextString = "No component selected";
 			}
 			RefreshFields();
 		}
