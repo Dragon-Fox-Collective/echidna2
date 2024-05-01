@@ -50,55 +50,95 @@ public partial class ComponentPanel : INotificationPropagator, IEditorInitialize
 		set
 		{
 			selectedComponent = value;
-			ComponentNameText.TextString = selectedComponent?.GetType().Name ?? "No component selected";
-			
 			INotificationPropagator.NotificationFinished += RefreshFields;
 		}
 	}
 	
 	public void RefreshFields()
 	{
+		if (selectedComponent is null)
+			RefreshFavoritedFields();
+		else
+			RefreshSelectedComponentFields();
+	}
+	
+	private void RefreshFavoritedFields()
+	{
+		Fields.ClearChildren();
+		if (editor.PrefabRoot is null) return;
+		
+		ComponentNameText.TextString = "Favorites";
+		
+		foreach ((object component, MemberInfo member) in editor.PrefabRoot.FavoritedFields)
+			AddField(member, component);
+	}
+	
+	private void RefreshSelectedComponentFields()
+	{
 		Fields.ClearChildren();
 		if (selectedComponent is null) return;
+		
+		ComponentNameText.TextString = selectedComponent.GetType().Name;
 		
 		foreach (MemberInfo member in selectedComponent.GetType()
 			         .GetMembers(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
 			         .Where(member => member.GetCustomAttribute<SerializedValueAttribute>() is not null ||
 			                          member.GetCustomAttribute<SerializedReferenceAttribute>() is not null))
+			AddField(member, selectedComponent);
+	}
+	
+	private void AddField(MemberInfo member, object component)
+	{
+		HLayoutWithHierarchy layout = HLayoutWithHierarchy.Instantiate();
+		Fields.AddChild(layout);
+		
+		TextRect text = TextRect.Instantiate();
+		text.TextString = member.Name;
+		text.LocalScale = (0.5, 0.5);
+		text.MinimumSize = (150, 25);
+		text.Justification = TextJustification.Left;
+		layout.AddChild(text);
+		
+		IMemberWrapper wrapper = IMemberWrapper.Wrap(member);
+		IFieldEditor? fieldEditor =
+			member.GetCustomAttribute<SerializedValueAttribute>() is not null ? editor.HasRegisteredFieldEditor(wrapper.FieldType) ? editor.InstantiateFieldEditor(wrapper.FieldType) : null :
+			member.GetCustomAttribute<SerializedReferenceAttribute>() is not null ? ReferenceFieldEditor.Instantiate() :
+			null;
+		if (fieldEditor is not null)
 		{
-			HLayoutWithHierarchy layout = HLayoutWithHierarchy.Instantiate();
-			Fields.AddChild(layout);
-			
-			TextRect text = TextRect.Instantiate();
-			text.TextString = member.Name;
-			text.LocalScale = (0.5, 0.5);
-			text.MinimumSize = (150, 25);
-			text.Justification = TextJustification.Left;
-			layout.AddChild(text);
-			
-			IMemberWrapper wrapper = IMemberWrapper.Wrap(member);
-			IFieldEditor? fieldEditor =
-				member.GetCustomAttribute<SerializedValueAttribute>() is not null ? editor.HasRegisteredFieldEditor(wrapper.FieldType) ? editor.InstantiateFieldEditor(wrapper.FieldType) : null :
-				member.GetCustomAttribute<SerializedReferenceAttribute>() is not null ? ReferenceFieldEditor.Instantiate() :
-				null;
-			if (fieldEditor is not null)
+			fieldEditor.Load(wrapper.GetValue(component));
+			fieldEditor.ValueChanged += value =>
 			{
-				fieldEditor.Load(wrapper.GetValue(selectedComponent));
-				fieldEditor.ValueChanged += value =>
-				{
-					wrapper.SetValue(selectedComponent, value);
-					editor.PrefabRoot?.RegisterChange(new MemberPath(wrapper, new ComponentPath(selectedComponent)));
-					editor.SerializePrefab();
-				};
-				layout.AddChild(fieldEditor);
-			}
+				wrapper.SetValue(component, value);
+				editor.PrefabRoot?.RegisterChange(new MemberPath(wrapper, new ComponentPath(component)));
+				editor.SerializePrefab();
+			};
+			layout.AddChild(fieldEditor);
 		}
+		
+		ButtonRect favoriteButton = ButtonRect.Instantiate();
+		favoriteButton.MinimumSize = (25, 25);
+		favoriteButton.Clicked += () =>
+		{
+			if (editor.PrefabRoot is null) return;
+			
+			if (!editor.PrefabRoot.FavoritedFields.Remove((component, member)))
+				editor.PrefabRoot.FavoritedFields.Add((component, member));
+			
+			editor.SerializePrefab();
+		};
+		layout.AddChild(favoriteButton);
 	}
 	
 	public void RefreshComponents()
 	{
 		Components.ClearChildren();
 		if (selectedObject is null) return;
+		
+		ButtonRect favoritesButton = (ButtonRect)TomlDeserializer.Deserialize(AppContext.BaseDirectory + "Prefabs/Editor/ComponentSelectionButton.toml").RootObject;
+		favoritesButton.Clicked += () => SelectedComponent = null;
+		favoritesButton.MinimumSize = (40, 40);
+		Components.AddChild(favoritesButton);
 		
 		List<object> thingsToSearch = [selectedObject];
 		List<object> thingsSearched = [];

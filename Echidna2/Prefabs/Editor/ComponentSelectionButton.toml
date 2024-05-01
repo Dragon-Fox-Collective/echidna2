@@ -1,4 +1,5 @@
 ﻿[1]
 Prefab = "../Gui/ButtonRect.toml"
 Name = "Component Selection Button"
-MinimumSize = { X = 25, Y = 25 }
+MinimumSize = { X = 30, Y = 30 }
+HorizontalSizing = "FitCenter"

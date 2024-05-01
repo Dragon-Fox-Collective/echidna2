@@ -1,10 +1,16 @@
-﻿namespace Echidna2.Serialization;
+﻿using System.Reflection;
+
+namespace Echidna2.Serialization;
 
 public class PrefabRoot : IPrefabChangeRegistry
 {
 	public List<PrefabInstance> ChildPrefabs = [];
 	public List<object> Components = [];
+	
 	public Dictionary<MemberPath, object> SerializedData = new();
+	
+	public List<(object, MemberInfo)> FavoritedFields = [];
+	
 	public object RootObject = null!;
 	public string PrefabPath = null!;
 	
