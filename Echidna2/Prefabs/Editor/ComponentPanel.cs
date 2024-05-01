@@ -31,28 +31,37 @@ public partial class ComponentPanel : INotificationPropagator, IEditorInitialize
 				if (selectedObject is INamed named)
 					named.NameChanged += name => PrefabNameText.TextString = name;
 				PrefabNameText.TextString = INamed.GetName(selectedObject);
-				ComponentNameText.TextString = selectedObject.GetType().Name;
 			}
 			else
 			{
 				PrefabNameText.TextString = "No object selected";
-				ComponentNameText.TextString = "No component selected";
 			}
 			
-			INotificationPropagator.NotificationFinished += () =>
-			{
-				RefreshFields();
-				RefreshComponents();
-			};
+			SelectedComponent = selectedObject;
+			
+			INotificationPropagator.NotificationFinished += RefreshComponents;
+		}
+	}
+	
+	private object? selectedComponent;
+	public object? SelectedComponent
+	{
+		get => selectedComponent;
+		set
+		{
+			selectedComponent = value;
+			ComponentNameText.TextString = selectedComponent?.GetType().Name ?? "No component selected";
+			
+			INotificationPropagator.NotificationFinished += RefreshFields;
 		}
 	}
 	
 	public void RefreshFields()
 	{
 		Fields.ClearChildren();
-		if (selectedObject is null) return;
+		if (selectedComponent is null) return;
 		
-		foreach (MemberInfo member in selectedObject.GetType()
+		foreach (MemberInfo member in selectedComponent.GetType()
 			         .GetMembers(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
 			         .Where(member => member.GetCustomAttribute<SerializedValueAttribute>() is not null ||
 			                          member.GetCustomAttribute<SerializedReferenceAttribute>() is not null))
@@ -74,11 +83,11 @@ public partial class ComponentPanel : INotificationPropagator, IEditorInitialize
 				null;
 			if (fieldEditor is not null)
 			{
-				fieldEditor.Load(wrapper.GetValue(selectedObject));
+				fieldEditor.Load(wrapper.GetValue(selectedComponent));
 				fieldEditor.ValueChanged += value =>
 				{
-					wrapper.SetValue(selectedObject, value);
-					editor.PrefabRoot?.RegisterChange(new MemberPath(wrapper, new ComponentPath(selectedObject)));
+					wrapper.SetValue(selectedComponent, value);
+					editor.PrefabRoot?.RegisterChange(new MemberPath(wrapper, new ComponentPath(selectedComponent)));
 					editor.SerializePrefab();
 				};
 				layout.AddChild(fieldEditor);
@@ -112,7 +121,7 @@ public partial class ComponentPanel : INotificationPropagator, IEditorInitialize
 		foreach (object component in thingsSearched)
 		{
 			ButtonRect button = (ButtonRect)TomlDeserializer.Deserialize(AppContext.BaseDirectory + "Prefabs/Editor/ComponentSelectionButton.toml").RootObject;
-			button.Clicked += () => SelectedObject = component;
+			button.Clicked += () => SelectedComponent = component;
 			Components.AddChild(button);
 		}
 	}
