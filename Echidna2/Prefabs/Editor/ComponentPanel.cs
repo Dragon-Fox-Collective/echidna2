@@ -71,8 +71,13 @@ public partial class ComponentPanel : INotificationPropagator, IEditorInitialize
 		ComponentNameText.TextString = "Favorites";
 		
 		List<object> availableComponents = GetAllComponentsReferencedBy(selectedObject);
-		foreach ((object component, MemberInfo member) in editor.PrefabRoot.FavoriteFields
-			         .Where(zip => availableComponents.Contains(zip.Component)))
+		IEnumerable<(object Component, MemberInfo Member)> availableFields = editor.PrefabRoot.FavoriteFields
+			.Where(zip => availableComponents.Contains(zip.Component));
+		
+		if (editor.PrefabRoot.ChildPrefabs.First(prefab => prefab.PrefabRoot.RootObject == selectedObject) is { } selectedPrefab)
+			availableFields = availableFields.Concat(selectedPrefab.PrefabRoot.FavoriteFields);
+		
+		foreach ((object component, MemberInfo member) in availableFields)
 			AddField(member, component);
 	}
 	
