@@ -8,6 +8,7 @@ Button = "4"
 Prefab = "../../Gui/FullRectWithHierarchy.toml"
 HorizontalExpand = true
 Margin = 4.0
+ClipChildren = true
 Children = [ "3" ]
 
 [3]
