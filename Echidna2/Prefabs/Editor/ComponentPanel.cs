@@ -107,7 +107,7 @@ public partial class ComponentPanel : INotificationPropagator, IEditorInitialize
 		TextRect text = TextRect.Instantiate();
 		text.TextString = member.Name;
 		text.LocalScale = (0.5, 0.5);
-		text.MinimumSize = (120, 25);
+		text.MinimumSize = (150, 25);
 		text.Justification = TextJustification.Left;
 		textClipper.AddChild(text);
 		
