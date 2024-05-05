@@ -188,9 +188,16 @@ public static class TomlDeserializer
 			{
 				(string componentPath, string fieldPath) = ((string)refPath).SplitLast('.');
 				object component = GetReferenceFrom(componentPath);
-				MemberInfo field = component.GetType().GetMember(fieldPath)[0];
+				MemberInfo? field = component.GetType().GetMember(fieldPath).FirstOrDefault();
+				if (field == null)
+				{
+					Console.WriteLine($"WARN: Field {refPath} of {path} does not exist");
+					return default;
+				}
 				return (component, field);
-			}).ToList()
+			})
+			.Where(pair => pair != default)
+			.ToList()
 			: [];
 		
 		return prefabRoot;

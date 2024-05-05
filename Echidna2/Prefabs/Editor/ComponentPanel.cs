@@ -100,12 +100,16 @@ public partial class ComponentPanel : INotificationPropagator, IEditorInitialize
 		HLayoutWithHierarchy layout = HLayoutWithHierarchy.Instantiate();
 		Fields.AddChild(layout);
 		
+		FullLayoutWithHierarchy textClipper = FullLayoutWithHierarchy.Instantiate();
+		textClipper.ClipChildren = true;
+		layout.AddChild(textClipper);
+		
 		TextRect text = TextRect.Instantiate();
 		text.TextString = member.Name;
 		text.LocalScale = (0.5, 0.5);
 		text.MinimumSize = (150, 25);
 		text.Justification = TextJustification.Left;
-		layout.AddChild(text);
+		textClipper.AddChild(text);
 		
 		IMemberWrapper wrapper = IMemberWrapper.Wrap(member);
 		IFieldEditor? fieldEditor =

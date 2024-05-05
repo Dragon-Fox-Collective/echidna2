@@ -178,4 +178,4 @@ AnchorOffsetBottom = -10.0
 AnchorOffsetRight = -70.0
 AnchorOffsetLeft = -70.0
 IsSelfVisible = false
-MinimumSize = { X = 300.0, Y = 400.0 }
+MinimumSize = { X = 400.0, Y = 600.0 }
