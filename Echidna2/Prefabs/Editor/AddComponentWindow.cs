@@ -34,6 +34,7 @@ public partial class AddComponentWindow : INotificationPropagator, IInitialize, 
 		INotificationPropagator.Notify(notification, Window);
 	}
 	
+	[UsedImplicitly]
 	public void AddNewComponent()
 	{
 		object component = Activator.CreateInstance(ComponentType)!;
