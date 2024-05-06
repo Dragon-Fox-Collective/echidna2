@@ -12,6 +12,7 @@ Children = [ "4" ]
 
 [2]
 Prefab = "../Gui/ButtonRect.toml"
+Margin = 5.0
 Children = [ "3" ]
 ScriptContent = """
 [SerializedReference] public Echidna2.Prefabs.Editor.AddComponentWindow AddComponentWindow = null!;
@@ -40,6 +41,7 @@ Children  = [ "6", "8" ]
 [6]
 Prefab = "../Gui/ButtonRect.toml"
 HorizontalExpand = true
+Margin = 5.0
 Children = [ "7" ]
 ScriptContent = """
 [SerializedReference] public Echidna2.Prefabs.Gui.FullRectWindow Window = null!;
@@ -55,6 +57,7 @@ LocalScale = { X = 0.5, Y = 0.5 }
 [8]
 Prefab = "../Gui/ButtonRect.toml"
 HorizontalExpand = true
+Margin = 5.0
 Children = [ "9" ]
 ScriptContent = """
 [SerializedReference] public Echidna2.Prefabs.Gui.FullRectWindow Window = null!;
@@ -73,7 +76,9 @@ LocalScale = { X = 0.5, Y = 0.5 }
 [10]
 Prefab = "../Gui/FullRectWithHierarchy.toml"
 VerticalExpand = true
+Margin = 5.0
 Children = [ "11" ]
 
 [11]
 Prefab = "../Gui/VLayoutWithHierarchy.toml"
+Spacing = 5
