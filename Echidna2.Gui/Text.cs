@@ -48,19 +48,21 @@ public class Text : INotificationListener<IDraw.Notification>, IHasText
 		Shader.SetMatrix4("transform", RectTransform.GlobalTransform);
 		Shader.SetColorRgba("color", Color);
 		
-		foreach ((int lineNumber, string line) in text.Split("\n").Enumerate())
-			DrawTextLine(line, lineNumber);
+		string[] lines = text.Split("\n");
+		
+		foreach ((int lineNumber, string line) in lines.Enumerate())
+			DrawTextLine(line, lineNumber, lines.Length);
 	}
 	
-	private void DrawTextLine(string text, int lineNumber)
+	private void DrawTextLine(string line, int lineNumber, int lineCount)
 	{
 		int midLineOffset = 0;
 		
 		Vector2 relativeRectSize = RectTransform.GlobalSize;
 		
 		Vector2 size = (
-			text.Select(c => CascadiaCode.FontResult!.Glyphs[c]).Sum(glyph => glyph.XAdvance),
-			LineHeight);
+			line.Select(c => CascadiaCode.FontResult!.Glyphs[c]).Sum(glyph => glyph.XAdvance),
+			lineCount * LineHeight);
 		
 		Shader.SetMatrix4("distortion", Matrix4.FromTranslation(new Vector3(
 			Justification switch
@@ -80,7 +82,7 @@ public class Text : INotificationListener<IDraw.Notification>, IHasText
 			0)));
 		
 		float xStart = 0;
-		foreach (GlyphInfo glyph in text.Select(c => CascadiaCode.FontResult!.Glyphs[c]))
+		foreach (GlyphInfo glyph in line.Select(c => CascadiaCode.FontResult!.Glyphs[c]))
 		{
 			float x = xStart + glyph.XOffset;
 			float y = -glyph.Height - glyph.YOffset;
