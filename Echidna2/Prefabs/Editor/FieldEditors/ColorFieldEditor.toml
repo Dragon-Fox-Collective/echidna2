@@ -1,14 +1,15 @@
 [1]
-Component = "Echidna2.Prefabs.Editor.FieldEditors.Vector3FieldEditor, Echidna2"
+Component = "Echidna2.Prefabs.Editor.FieldEditors.ColorFieldEditor, Echidna2"
 Layout = "2"
-XFieldEditor = "3"
-YFieldEditor = "4"
-ZFieldEditor = "5"
+RFieldEditor = "3"
+GFieldEditor = "4"
+BFieldEditor = "5"
+AFieldEditor = "6"
 
 [2]
 Prefab = "../../Gui/HLayoutWithHierarchy.toml"
 Name = "Vector3 Layout"
-Children = [ "3", "4", "5" ]
+Children = [ "3", "4", "5", "6" ]
 HorizontalExpand = true
 
 [3]
@@ -18,4 +19,7 @@ Prefab = "DoubleFieldEditor.toml"
 Prefab = "DoubleFieldEditor.toml"
 
 [5]
+Prefab = "DoubleFieldEditor.toml"
+
+[6]
 Prefab = "DoubleFieldEditor.toml"

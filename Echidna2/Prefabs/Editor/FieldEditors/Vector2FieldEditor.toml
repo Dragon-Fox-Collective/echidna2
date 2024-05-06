@@ -7,7 +7,6 @@ YFieldEditor = "4"
 [2]
 Prefab = "../../Gui/HLayoutWithHierarchy.toml"
 Name = "Vector2 Layout"
-Spacing = 10
 Children = [ "3", "4" ]
 HorizontalExpand = true
 

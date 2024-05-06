@@ -1,4 +1,5 @@
-﻿using Echidna2.Core;
+﻿using System.Drawing;
+using Echidna2.Core;
 using Echidna2.Gui;
 using Echidna2.Mathematics;
 using Echidna2.Prefabs.Editor.FieldEditors;
@@ -55,6 +56,7 @@ public partial class Editor : INotificationPropagator, ICanBeLaidOut
 		{ typeof(Vector2), Vector2FieldEditor.Instantiate },
 		{ typeof(Vector3), Vector3FieldEditor.Instantiate },
 		{ typeof(Quaternion), QuaternionFieldEditor.Instantiate },
+		{ typeof(Color), ColorFieldEditor.Instantiate },
 	};
 	
 	public void Notify<T>(T notification) where T : notnull
@@ -62,7 +64,7 @@ public partial class Editor : INotificationPropagator, ICanBeLaidOut
 		INotificationPropagator.Notify(notification, RectLayout, PrefabChildren);
 	}
 	
-	public void OnObjectSelected(object obj)
+	private void OnObjectSelected(object obj)
 	{
 		Console.WriteLine("Selected " + obj);
 		ComponentPanel.SelectedObject = obj;

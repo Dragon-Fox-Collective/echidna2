@@ -1,5 +1,5 @@
 using Echidna2.Rendering;
-using Echidna2.TestPrefabs;
+using Echidna2.Prefabs.Test;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 
 namespace Echidna2.NotificationTests;

@@ -1,7 +1,7 @@
 ﻿using Echidna2.Mathematics;
 using Echidna2.Rendering3D;
 using Echidna2.Serialization;
-using Echidna2.TestPrefabs;
+using Echidna2.Prefabs.Test;
 using Tomlyn.Model;
 
 namespace Echidna2.SerializationTests;
@@ -14,7 +14,7 @@ public static class SerializationTests
 		// Arrange
 		
 		// Act
-		Transform3D transform = (Transform3D)TomlDeserializer.Deserialize(AppContext.BaseDirectory + "Prefabs/TransformTest.toml").RootObject;
+		Transform3D transform = (Transform3D)TomlDeserializer.Deserialize(AppContext.BaseDirectory + "Prefabs/Test/TransformTest.toml").RootObject;
 		
 		// Assert
 		Assert.Equal(new Vector3(0.0, 0.0, 2.5), transform.LocalPosition);
@@ -26,10 +26,24 @@ public static class SerializationTests
 		// Arrange
 		
 		// Act
-		TransformPrefab transform = (TransformPrefab)TomlDeserializer.Deserialize(AppContext.BaseDirectory + "Prefabs/TransformPrefabTest.toml").RootObject;
+		TransformPrefab transform = (TransformPrefab)TomlDeserializer.Deserialize(AppContext.BaseDirectory + "Prefabs/Test/TransformPrefabTest.toml").RootObject;
 		
 		// Assert
 		Assert.NotNull(transform.Transform);
+	}
+	
+	[Fact]
+	public static void DeserializingComponent_WithDottedPaths_SetsReferences()
+	{
+		// Arrange
+		
+		// Act
+		PrefabRoot prefab = TomlDeserializer.Deserialize(AppContext.BaseDirectory + "Prefabs/Test/SubcomponentDottedPrefabTest.toml");
+		
+		// Assert
+		Assert.NotNull(((SubcomponentPrefab)prefab.RootObject).Subcomponent);
+		Assert.Null(((SubcomponentPrefab)prefab.RootObject).Reference);
+		Assert.Equal(prefab.Components[2], ((SubcomponentPrefab)prefab.RootObject).Subcomponent);
 	}
 	
 	[Fact]
@@ -38,8 +52,8 @@ public static class SerializationTests
 		// Arrange
 		
 		// Act
-		PrefabRoot prefab = TomlDeserializer.Deserialize(AppContext.BaseDirectory + "Prefabs/SubcomponentPrefabTest.toml");
-		TomlTable table = TomlSerializer.Serialize(prefab, AppContext.BaseDirectory + "Prefabs/SubcomponentPrefabTest_Result.toml");
+		PrefabRoot prefab = TomlDeserializer.Deserialize(AppContext.BaseDirectory + "Prefabs/Test/SubcomponentPrefabTest.toml");
+		TomlTable table = TomlSerializer.Serialize(prefab, AppContext.BaseDirectory + "Prefabs/Test/SubcomponentPrefabTest_Result.toml");
 		
 		// Assert
 		Assert.False(((TomlTable)table["0"]).ContainsKey("Reference"));

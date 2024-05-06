@@ -1,5 +1,5 @@
 [0]
-Component = "Echidna2.TestPrefabs.TransformPrefab, Echidna2.Tests"
+Component = "Echidna2.Prefabs.Test.TransformPrefab, Echidna2.Tests"
 Transform = "1"
 
 [1]
