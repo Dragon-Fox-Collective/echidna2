@@ -1,5 +1,5 @@
-﻿using System.Reflection;
-using Echidna2.Core;
+﻿using Echidna2.Core;
+using Echidna2.Gui;
 using Echidna2.Prefabs.Editor.FieldEditors;
 using Echidna2.Prefabs.Gui;
 using Echidna2.Serialization;
@@ -26,12 +26,19 @@ public partial class AddComponentWindow : INotificationPropagator, IInitialize, 
 	{
 		Window.CloseWindowRequest += () => Hierarchy.Parent.QueueRemoveChild(this);
 		
-		foreach (object component in ComponentUtils.GetAllComponentsOfType(PrefabRoot.RootObject, ComponentType, true))
+		foreach ((object component, ComponentUtils.ReferencePath? reference) in ComponentUtils.GetAllReferencesToComponentsOfType(PrefabRoot.RootObject, ComponentType, true))
 		{
 			TextRect text = TextRect.Instantiate();
-			text.TextString = INamed.GetName(component);
-			text.MinimumSize = (0, 20);
+			
+			if (reference is null)
+				text.TextString = $"Root {component.GetType().Name}";
+			else if (reference.Component is IHasChildren hasChildren && hasChildren.Children.Contains(component))
+				text.TextString = $"{component.GetType().Name} under\n\t{reference}";
+			else
+				text.TextString = $"{component.GetType().Name} on\n\t{reference}";
+			
 			text.LocalScale = (0.5, 0.5);
+			text.Justification = TextJustification.Left;
 			ComponentList.AddChild(text);
 		}
 	}

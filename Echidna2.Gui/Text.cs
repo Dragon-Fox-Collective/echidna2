@@ -22,6 +22,9 @@ public class Text : INotificationListener<IDraw.Notification>, IHasText
 	
 	[SerializedValue] public string TextString { get; set; } = "";
 	[SerializedValue] public Color Color { get; set; } = Color.White;
+	[SerializedValue] public double LineHeight { get; set; } = 30;
+	
+	public double ScaledLineHeight => LineHeight * RectTransform.LocalScale.Y;
 	
 	[SerializedValue] public TextJustification Justification { get; set; } = TextJustification.Center;
 	[SerializedValue] public TextAlignment Alignment { get; set; } = TextAlignment.Center;
@@ -29,6 +32,8 @@ public class Text : INotificationListener<IDraw.Notification>, IHasText
 	public void OnNotify(IDraw.Notification notification)
 	{
 		if (TextString.Length == 0) return;
+		
+		string text = TextString.Replace("\t", "    ");
 		
 		GL.Disable(EnableCap.CullFace);
 		GL.Enable(EnableCap.Blend);
@@ -40,12 +45,22 @@ public class Text : INotificationListener<IDraw.Notification>, IHasText
 		
 		CascadiaCode.Bind();
 		Shader.SetInt("texture0", 0);
+		Shader.SetMatrix4("transform", RectTransform.GlobalTransform);
+		Shader.SetColorRgba("color", Color);
+		
+		foreach ((int lineNumber, string line) in text.Split("\n").Enumerate())
+			DrawTextLine(line, lineNumber);
+	}
+	
+	private void DrawTextLine(string text, int lineNumber)
+	{
+		int midLineOffset = 0;
 		
 		Vector2 relativeRectSize = RectTransform.GlobalSize;
 		
 		Vector2 size = (
-			TextString.Select(c => CascadiaCode.FontResult!.Glyphs[c]).Sum(glyph => glyph.XAdvance),
-			TextString.Select(c => CascadiaCode.FontResult!.Glyphs[c]).Max(glyph => glyph.Height));
+			text.Select(c => CascadiaCode.FontResult!.Glyphs[c]).Sum(glyph => glyph.XAdvance),
+			LineHeight);
 		
 		Shader.SetMatrix4("distortion", Matrix4.FromTranslation(new Vector3(
 			Justification switch
@@ -61,13 +76,11 @@ public class Text : INotificationListener<IDraw.Notification>, IHasText
 				TextAlignment.Center => -size.Y / 2,
 				TextAlignment.Bottom => -relativeRectSize.Y,
 				_ => throw new IndexOutOfRangeException()
-			} + 5, // TODO: Figure out where the midline is
+			} + midLineOffset - LineHeight * lineNumber,
 			0)));
-		Shader.SetMatrix4("transform", RectTransform.GlobalTransform);
-		Shader.SetColorRgba("color", Color);
 		
 		float xStart = 0;
-		foreach (GlyphInfo glyph in TextString.Select(c => CascadiaCode.FontResult!.Glyphs[c]))
+		foreach (GlyphInfo glyph in text.Select(c => CascadiaCode.FontResult!.Glyphs[c]))
 		{
 			float x = xStart + glyph.XOffset;
 			float y = -glyph.Height - glyph.YOffset;

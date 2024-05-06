@@ -28,7 +28,6 @@ AddComponentWindow.AddNewComponent();
 Prefab = "../Gui/TextRect.toml"
 TextString = "Add New Component"
 LocalScale = { X = 0.5, Y = 0.5 }
-MinimumSize = { X = 0.0, Y = 25.0 }
 
 [4]
 Prefab = "../Gui/VLayoutWithHierarchy.toml"
@@ -52,7 +51,6 @@ Clicked = "Window.CloseWindow();"
 Prefab = "../Gui/TextRect.toml"
 TextString = "Cancel"
 LocalScale = { X = 0.5, Y = 0.5 }
-MinimumSize = { X = 0.0, Y = 25.0 }
 
 [8]
 Prefab = "../Gui/ButtonRect.toml"
@@ -71,7 +69,6 @@ Console.WriteLine("Confirm!");
 Prefab = "../Gui/TextRect.toml"
 TextString = "Confirm"
 LocalScale = { X = 0.5, Y = 0.5 }
-MinimumSize = { X = 0.0, Y = 25.0 }
 
 [10]
 Prefab = "../Gui/FullRectWithHierarchy.toml"

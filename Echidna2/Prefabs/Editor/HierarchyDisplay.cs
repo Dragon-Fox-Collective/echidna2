@@ -57,7 +57,6 @@ public partial class HierarchyDisplay : INotificationPropagator, ICanBeLaidOut
 			named.NameChanged += name => text.TextString = name;
 		text.Justification = TextJustification.Left;
 		text.AnchorPreset = AnchorPreset.Full;
-		text.MinimumSize = (0, 25);
 		text.LocalScale = Vector2.One * 0.5;
 		button.AddChild(text);
 		
