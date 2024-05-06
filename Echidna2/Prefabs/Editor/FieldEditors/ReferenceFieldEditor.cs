@@ -7,7 +7,7 @@ using JetBrains.Annotations;
 namespace Echidna2.Prefabs.Editor.FieldEditors;
 
 [UsedImplicitly, Prefab("Prefabs/Editor/FieldEditors/ReferenceFieldEditor.toml")]
-public partial class ReferenceFieldEditor : IFieldEditor, INotificationPropagator, IInitialize
+public partial class ReferenceFieldEditor : IFieldEditor, INotificationPropagator, IInitialize, IEditorInitialize
 {
 	[SerializedReference, ExposeMembersInClass] public FullRectWithHierarchy Rect { get; set; } = null!;
 	[SerializedReference] public TextRect Text { get; set; } = null!;
@@ -31,6 +31,8 @@ public partial class ReferenceFieldEditor : IFieldEditor, INotificationPropagato
 		}
 	}
 	
+	private Editor editor = null!;
+	
 	[DontExpose] public bool HasBeenInitialized { get; set; }
 	
 	public void OnInitialize()
@@ -40,9 +42,15 @@ public partial class ReferenceFieldEditor : IFieldEditor, INotificationPropagato
 			AddComponentWindow window = AddComponentWindow.Instantiate();
 			window.ComponentType = ComponentType;
 			window.Field = this;
-			QueueAddChild(window);
+			INotificationPropagator.Notify(new IEditorInitialize.Notification(editor), window);
+			editor.QueueAddChild(window);
 			WindowOpened?.Invoke(window);
 		};
+	}
+	
+	public void OnEditorInitialize(Editor editor)
+	{
+		this.editor = editor;
 	}
 	
 	public void Notify<T>(T notification) where T : notnull

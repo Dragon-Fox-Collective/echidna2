@@ -122,7 +122,7 @@ public partial class ComponentPanel : INotificationPropagator, IEditorInitialize
 			fieldEditor.ValueChanged += value =>
 			{
 				wrapper.SetValue(component, value);
-				editor.PrefabRoot?.RegisterChange(new MemberPath(wrapper, new ComponentPath(selectedObject)));
+				editor.PrefabRoot?.RegisterChange(new MemberPath(wrapper, new ComponentPath(component)));
 				editor.SerializePrefab();
 			};
 			layout.AddChild(fieldEditor);
@@ -145,7 +145,7 @@ public partial class ComponentPanel : INotificationPropagator, IEditorInitialize
 		{
 			ReferenceFieldEditor referenceFieldEditor = ReferenceFieldEditor.Instantiate();
 			referenceFieldEditor.ComponentType = type;
-			referenceFieldEditor.WindowOpened += window => INotificationPropagator.Notify(new IEditorInitialize.Notification(editor), window);
+			INotificationPropagator.Notify(new IEditorInitialize.Notification(editor), referenceFieldEditor);
 			return referenceFieldEditor;
 		}
 	}
