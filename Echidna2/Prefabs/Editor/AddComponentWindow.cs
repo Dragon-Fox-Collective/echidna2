@@ -1,4 +1,5 @@
-﻿using Echidna2.Core;
+﻿using System.Drawing;
+using Echidna2.Core;
 using Echidna2.Gui;
 using Echidna2.Prefabs.Editor.FieldEditors;
 using Echidna2.Prefabs.Gui;
@@ -22,13 +23,29 @@ public partial class AddComponentWindow : INotificationPropagator, IInitialize, 
 	
 	[DontExpose] public bool HasBeenInitialized { get; set; }
 	
+	private (object Component, ButtonText Text)? selectedComponent;
+	private (object Component, ButtonText Text)? SelectedComponent
+	{
+		get => selectedComponent;
+		set
+		{
+			if (selectedComponent is not null)
+				selectedComponent.Value.Text.Color = Color.White;
+			
+			selectedComponent = value;
+			
+			if (selectedComponent is not null)
+				selectedComponent.Value.Text.Color = Color.DeepSkyBlue;
+		}
+	}
+	
 	public void OnInitialize()
 	{
 		Window.CloseWindowRequest += () => Hierarchy.Parent.QueueRemoveChild(this);
 		
 		foreach ((object component, ComponentUtils.ReferencePath? reference) in ComponentUtils.GetAllReferencesToComponentsOfType(PrefabRoot.RootObject, ComponentType, true))
 		{
-			TextRect text = TextRect.Instantiate();
+			ButtonText text = ButtonText.Instantiate();
 			
 			if (reference is null)
 				text.TextString = $"Root {component.GetType().Name}";
@@ -39,6 +56,9 @@ public partial class AddComponentWindow : INotificationPropagator, IInitialize, 
 			
 			text.LocalScale = (0.5, 0.5);
 			text.Justification = TextJustification.Left;
+			
+			text.Clicked += () => SelectedComponent = (component, text);
+			
 			ComponentList.AddChild(text);
 		}
 	}
