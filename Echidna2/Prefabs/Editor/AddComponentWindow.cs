@@ -58,6 +58,8 @@ public partial class AddComponentWindow : INotificationPropagator, IInitialize, 
 			text.Justification = TextJustification.Left;
 			
 			text.Clicked += () => SelectedComponent = (component, text);
+			if (component == Field.Value)
+				SelectedComponent = (component, text);
 			
 			ComponentList.AddChild(text);
 		}
