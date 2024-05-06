@@ -26,36 +26,13 @@ public partial class AddComponentWindow : INotificationPropagator, IInitialize, 
 	{
 		Window.CloseWindowRequest += () => Hierarchy.Parent.QueueRemoveChild(this);
 		
-		foreach (object component in GetComponentsRecursive(PrefabRoot.RootObject, ComponentType))
+		foreach (object component in ComponentUtils.GetAllComponentsOfType(PrefabRoot.RootObject, ComponentType))
 		{
 			TextRect text = TextRect.Instantiate();
 			text.TextString = INamed.GetName(component);
 			text.MinimumSize = (0, 20);
 			text.LocalScale = (0.5, 0.5);
 			ComponentList.AddChild(text);
-		}
-	}
-	
-	private IEnumerable<object> GetComponentsRecursive(object component, Type type) => GetComponentsRecursiveIncludingDuplicates(component, type).Distinct();
-	
-	private IEnumerable<object> GetComponentsRecursiveIncludingDuplicates(object component, Type type)
-	{
-		if (component.GetType().IsAssignableTo(type))
-			yield return component;
-		
-		if (component is IHasChildren hasChildren)
-			foreach (object child in hasChildren.Children)
-				foreach (object t in GetComponentsRecursiveIncludingDuplicates(child, type))
-					yield return t;
-		
-		foreach (MemberInfo member in component.GetType()
-			         .GetMembers(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
-			         .Where(member => member.GetCustomAttribute<SerializedReferenceAttribute>() is not null))
-		{
-			object? child = IMemberWrapper.Wrap(member).GetValue(component);
-			if (child is not null)
-				foreach (object t in GetComponentsRecursiveIncludingDuplicates(child, type))
-					yield return t;
 		}
 	}
 	

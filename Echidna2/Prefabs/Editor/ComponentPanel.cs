@@ -70,7 +70,7 @@ public partial class ComponentPanel : INotificationPropagator, IEditorInitialize
 		
 		ComponentNameText.TextString = "Favorites";
 		
-		List<object> availableComponents = GetAllComponentsReferencedBy(selectedObject);
+		List<object> availableComponents = ComponentUtils.GetAllComponents(selectedObject).ToList();
 		IEnumerable<(object Component, MemberInfo Member)> availableFields = editor.PrefabRoot.FavoriteFields
 			.Where(zip => availableComponents.Contains(zip.Component));
 		
@@ -160,36 +160,12 @@ public partial class ComponentPanel : INotificationPropagator, IEditorInitialize
 		favoritesButton.MinimumSize = (40, 40);
 		Components.AddChild(favoritesButton);
 		
-		foreach (object component in GetAllComponentsReferencedBy(selectedObject))
+		foreach (object component in ComponentUtils.GetAllComponents(selectedObject))
 		{
 			ButtonRect button = (ButtonRect)TomlDeserializer.Deserialize(AppContext.BaseDirectory + "Prefabs/Editor/ComponentSelectionButton.toml").RootObject;
 			button.Clicked += () => SelectedComponent = component;
 			Components.AddChild(button);
 		}
-	}
-	
-	private static List<object> GetAllComponentsReferencedBy(object component)
-	{
-		List<object> thingsToSearch = [component];
-		List<object> thingsSearched = [];
-		
-		while (!thingsToSearch.IsEmpty())
-		{
-			object thing = thingsToSearch.Pop();
-
-			thingsToSearch.AddRange(
-				thing.GetType().GetMembers()
-					.Where(member => member.GetCustomAttribute<SerializedReferenceAttribute>() is not null)
-					.Select(member => IMemberWrapper.Wrap(member).GetValue(thing))
-					.WhereNotNull()
-					.Where(nextThing => !thingsSearched.Contains(nextThing) && !thingsToSearch.Contains(nextThing))
-					.Distinct()
-			);
-
-			thingsSearched.AddIfDistinct(thing);
-		}
-		
-		return thingsSearched;
 	}
 	
 	public void OnEditorInitialize(Editor editor) => this.editor = editor;
