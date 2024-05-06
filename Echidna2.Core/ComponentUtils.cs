@@ -5,19 +5,14 @@ namespace Echidna2.Core;
 
 public static class ComponentUtils
 {
-	public static IEnumerable<object> GetAllComponents(object component) => GetAllComponentsOfTypeIncludingDuplicates(component, null).Distinct();
+	public static IEnumerable<object> GetAllComponents(object component, bool searchChildren = false) => GetAllComponentsOfTypeIncludingDuplicates(component, null, searchChildren).Distinct();
 	
-	public static IEnumerable<object> GetAllComponentsOfType(object component, Type type) => GetAllComponentsOfTypeIncludingDuplicates(component, type).Distinct();
+	public static IEnumerable<object> GetAllComponentsOfType(object component, Type type, bool searchChildren = false) => GetAllComponentsOfTypeIncludingDuplicates(component, type, searchChildren).Distinct();
 	
-	private static IEnumerable<object> GetAllComponentsOfTypeIncludingDuplicates(object component, Type? type)
+	private static IEnumerable<object> GetAllComponentsOfTypeIncludingDuplicates(object component, Type? type, bool searchChildren = false)
 	{
 		if (type is null || component.GetType().IsAssignableTo(type))
 			yield return component;
-		
-		if (component is IHasChildren hasChildren)
-			foreach (object child in hasChildren.Children)
-			foreach (object t in GetAllComponentsOfTypeIncludingDuplicates(child, type))
-				yield return t;
 		
 		foreach (MemberInfo member in component.GetType()
 			         .GetMembers(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
@@ -28,5 +23,10 @@ public static class ComponentUtils
 				foreach (object t in GetAllComponentsOfTypeIncludingDuplicates(child, type))
 					yield return t;
 		}
+		
+		if (searchChildren && component is IHasChildren hasChildren)
+			foreach (object child in hasChildren.Children)
+			foreach (object t in GetAllComponentsOfTypeIncludingDuplicates(child, type))
+				yield return t;
 	}
 }

@@ -26,7 +26,7 @@ public partial class AddComponentWindow : INotificationPropagator, IInitialize, 
 	{
 		Window.CloseWindowRequest += () => Hierarchy.Parent.QueueRemoveChild(this);
 		
-		foreach (object component in ComponentUtils.GetAllComponentsOfType(PrefabRoot.RootObject, ComponentType))
+		foreach (object component in ComponentUtils.GetAllComponentsOfType(PrefabRoot.RootObject, ComponentType, true))
 		{
 			TextRect text = TextRect.Instantiate();
 			text.TextString = INamed.GetName(component);
