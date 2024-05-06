@@ -74,7 +74,7 @@ public partial class ComponentPanel : INotificationPropagator, IEditorInitialize
 		IEnumerable<(object Component, MemberInfo Member)> availableFields = editor.PrefabRoot.FavoriteFields
 			.Where(zip => availableComponents.Contains(zip.Component));
 		
-		if (editor.PrefabRoot.ChildPrefabs.First(prefab => prefab.PrefabRoot.RootObject == selectedObject) is { } selectedPrefab)
+		if (editor.PrefabRoot.ChildPrefabs.FirstOrDefault(prefab => prefab.PrefabRoot.RootObject == selectedObject) is { } selectedPrefab)
 			availableFields = availableFields.Concat(selectedPrefab.PrefabRoot.FavoriteFields);
 		
 		foreach ((object component, MemberInfo member) in availableFields)
