@@ -49,8 +49,8 @@ public class FullLayout : RectLayout
 		
 		if (laidOutChildren.Count != 0)
 			RectTransform.MinimumSize = (
-				Math.Max(RectTransform.MinimumSize.X, laidOutChildren.Max(child => child.MinimumSize.X) + LeftMargin + RightMargin),
-				Math.Max(RectTransform.MinimumSize.Y, laidOutChildren.Max(child => child.MinimumSize.Y) + BottomMargin + TopMargin));
+				Math.Max(RectTransform.MinimumSize.X, laidOutChildren.Max(child => child.MinimumSizeToParent.X) + LeftMargin + RightMargin),
+				Math.Max(RectTransform.MinimumSize.Y, laidOutChildren.Max(child => child.MinimumSizeToParent.Y) + BottomMargin + TopMargin));
 		else
 			RectTransform.MinimumSize = (
 				Math.Max(RectTransform.MinimumSize.X, LeftMargin + RightMargin),
@@ -59,7 +59,7 @@ public class FullLayout : RectLayout
 		foreach (RectTransform child in laidOutChildren)
 		{
 			child.LocalPosition = (LeftMargin - RightMargin, BottomMargin - TopMargin);
-			child.LocalSize = interiorSize;
+			child.LocalSize = (interiorSize.X / child.LocalScale.X, interiorSize.Y / child.LocalScale.Y);
 		}
 	}
 }

@@ -29,8 +29,8 @@ public class VerticalLayout : RectLayout
 		
 		if (laidOutChildren.Count != 0)
 			RectTransform.MinimumSize = (
-				laidOutChildren.Max(child => child.MinimumSize.X),
-				laidOutChildren.Sum(child => child.MinimumSize.Y) + Spacing * (laidOutChildren.Count - 1));
+				laidOutChildren.Max(child => child.MinimumSizeToParent.X),
+				laidOutChildren.Sum(child => child.MinimumSizeToParent.Y) + Spacing * (laidOutChildren.Count - 1));
 		else
 			RectTransform.MinimumSize = (0, 0);
 		
@@ -46,16 +46,16 @@ public class VerticalLayout : RectLayout
 		double y = -directionModifier * RectTransform.LocalSize.Y / 2;
 		foreach (RectTransform child in laidOutChildren)
 		{
-			double minimumHeight = child.MinimumSize.Y;
+			double minimumHeight = child.MinimumSizeToParent.Y;
 			double expandHeight = 0;
 			if (child.VerticalExpand && totalExpandWeight > 0)
 				expandHeight += totalExpandHeight * child.VerticalExpandWeight / totalExpandWeight;
 			child.LocalPosition = (
 				child.HorizontalSizing switch {
 					LayoutSizing.Stretch => 0,
-					LayoutSizing.FitBegin => -RectTransform.LocalSize.X / 2 + child.MinimumSize.X / 2,
+					LayoutSizing.FitBegin => -RectTransform.LocalSize.X / 2 + child.MinimumSizeToParent.X / 2,
 					LayoutSizing.FitCenter => 0,
-					LayoutSizing.FitEnd => +RectTransform.LocalSize.X / 2 - child.MinimumSize.X / 2,
+					LayoutSizing.FitEnd => +RectTransform.LocalSize.X / 2 - child.MinimumSizeToParent.X / 2,
 					_ => throw new IndexOutOfRangeException()
 				},
 				y + directionModifier * child.VerticalSizing switch {
@@ -66,7 +66,7 @@ public class VerticalLayout : RectLayout
 					_ => throw new IndexOutOfRangeException()
 				});
 			if (child.VerticalSizing == LayoutSizing.Stretch)
-				child.LocalSize = (child.LocalSize.X, minimumHeight + expandHeight);
+				child.LocalSize = (child.LocalSize.X, (minimumHeight + expandHeight) / child.LocalScale.Y);
 			y += directionModifier * (minimumHeight + expandHeight + Spacing);
 		}
 	}

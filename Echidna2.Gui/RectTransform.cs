@@ -34,7 +34,7 @@ public class RectTransform : IRectTransform
 	public Vector2 GlobalPosition => GlobalTransform.Translation.XY;
 	
 	[SerializedValue] public Vector2 LocalSize { get; set; }
-	public Vector2 GlobalSize => GlobalTransform.InverseTransformDirection(LocalSize);
+	public Vector2 GlobalSize => GlobalTransform.InverseTransformVector(LocalSize);
 	
 	private Vector2 localScale = Vector2.One;
 	[SerializedValue] public Vector2 LocalScale
@@ -73,6 +73,7 @@ public class RectTransform : IRectTransform
 	}
 	
 	[SerializedValue] public Vector2 MinimumSize { get; set; }
+	public Vector2 MinimumSizeToParent => (MinimumSize.X * LocalScale.X, MinimumSize.Y * LocalScale.Y);
 	
 	private AnchorPreset anchorPreset;
 	[SerializedValue] public AnchorPreset AnchorPreset

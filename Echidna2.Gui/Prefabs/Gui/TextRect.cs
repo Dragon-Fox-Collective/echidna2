@@ -49,6 +49,6 @@ public partial class TextRect : INotificationPropagator, ICanBeLaidOut, IInitial
 	
 	private void RecalculateMinimumSize()
 	{
-		MinimumSize = MinimumSize with { Y = ScaledLineHeight * (Text.TextString.Count(c => c == '\n') + 1) };
+		MinimumSize = MinimumSize with { Y = LineHeight * (Text.TextString.Count(c => c == '\n') + 1) };
 	}
 }

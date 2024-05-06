@@ -24,8 +24,6 @@ public class Text : INotificationListener<IDraw.Notification>, IHasText
 	[SerializedValue] public Color Color { get; set; } = Color.White;
 	[SerializedValue] public double LineHeight { get; set; } = 30;
 	
-	public double ScaledLineHeight => LineHeight * RectTransform.LocalScale.Y;
-	
 	[SerializedValue] public TextJustification Justification { get; set; } = TextJustification.Center;
 	[SerializedValue] public TextAlignment Alignment { get; set; } = TextAlignment.Center;
 	
@@ -56,9 +54,7 @@ public class Text : INotificationListener<IDraw.Notification>, IHasText
 	
 	private void DrawTextLine(string line, int lineNumber, int lineCount)
 	{
-		int midLineOffset = 0;
-		
-		Vector2 relativeRectSize = RectTransform.GlobalSize;
+		Vector2 relativeRectSize = RectTransform.LocalSize;
 		
 		Vector2 size = (
 			line.Select(c => CascadiaCode.FontResult!.Glyphs[c]).Sum(glyph => glyph.XAdvance),
@@ -78,7 +74,7 @@ public class Text : INotificationListener<IDraw.Notification>, IHasText
 				TextAlignment.Center => -size.Y / 2,
 				TextAlignment.Bottom => -relativeRectSize.Y,
 				_ => throw new IndexOutOfRangeException()
-			} + midLineOffset - LineHeight * lineNumber,
+			} - LineHeight * lineNumber,
 			0)));
 		
 		float xStart = 0;
