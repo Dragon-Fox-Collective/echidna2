@@ -1,9 +1,9 @@
 ﻿FavoriteFields = ["LocalPosition", "LocalRotation", "LocalScale", "Albedo", "Metallic", "Roughness", "AmbientOcclusion"]
 Components = [
-    { Type = "Echidna2.Rendering3D.Transform3D", Name = "Transform" },
-    { Type = "Echidna2.Rendering3D.PBRMeshRenderer", Name = "MeshRenderer" },
-    { Type = "Echidna2.Core.Named", Name = "Named" },
-    { Type = "Echidna2.Core.Hierarchy", Name = "PrefabChildren" },
+    { Type = "Transform3D", Name = "Transform" },
+    { Type = "PBRMeshRenderer", Name = "MeshRenderer" },
+    { Type = "Named", Name = "Named" },
+    { Type = "Hierarchy", Name = "PrefabChildren" },
 ]
 
 [This]
