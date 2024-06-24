@@ -136,6 +136,14 @@ public static class TomlDeserializer
 		bool doneFirstObject = false;
 		TomlTable table = Toml.ToModel(File.ReadAllText(path));
 		
+		if (table.Remove("This", out object? root))
+		{
+			TomlTable rootTable = (TomlTable)root;
+			prefabRoot.RootObject = DeserializeComponent("This", Path.GetFileNameWithoutExtension(path), true);
+			components.Add("This", (prefabRoot.RootObject, rootTable));
+			doneFirstObject = true;
+		}
+		
 		foreach ((string id, object value) in table
 			         .Where(pair => pair.Key.All(char.IsDigit)))
 		{
@@ -187,7 +195,7 @@ public static class TomlDeserializer
 			? ((TomlArray)fields).Select(refPath =>
 			{
 				(string componentPath, string fieldPath) = ((string)refPath).SplitLast('.');
-				object component = GetReferenceFrom(componentPath);
+				object component = componentPath.IsEmpty() ? prefabRoot.RootObject : GetReferenceFrom(componentPath);
 				MemberInfo? field = component.GetType().GetMember(fieldPath).FirstOrDefault();
 				if (field == null)
 				{
@@ -196,8 +204,8 @@ public static class TomlDeserializer
 				}
 				return (component, field);
 			})
-			.Where(pair => pair != default)
-			.ToList()
+				.Where(pair => pair != default)
+				.ToList()
 			: [];
 		
 		return prefabRoot;

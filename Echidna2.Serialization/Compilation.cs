@@ -12,7 +12,19 @@ public class Compilation
 	public static string CompilationBinFolder => $"{CompilationFolder}/bin/Debug/net8.0";
 	public static string CompilationDllPath => $"{CompilationBinFolder}/EchidnaProject.dll";
 	
-	public static void CompileCSProj(params string[] prefabPaths)
+	private static string CSFileHeader =>
+"""
+using Echidna2;
+using Echidna2.Core;
+using Echidna2.Gui;
+using Echidna2.Rendering;
+using Echidna2.Rendering3D;
+using Echidna2.Serialization;
+using Echidna2.SourceGenerators;
+
+""";
+	
+	public static async Task CompileCSProj(params string[] prefabPaths)
 	{
 		RecreateDirectory();
 		CreateCSProj();
@@ -21,14 +33,14 @@ public class Compilation
 		{
 			CreateCSFiles(prefabPath);
 		}
-		CompileCSProj();
+		await CompileCSProj();
 		
 		foreach (string prefabPath in prefabPaths)
 		{
 			Dictionary<string, (bool, Dictionary<string, string>)> serializedEvents = GetSerializedEvents(prefabPath);
 			CreateCSFiles(prefabPath, serializedEvents);
 		}
-		CompileCSProj();
+		await CompileCSProj();
 	}
 	
 	public static void RecreateDirectory()
@@ -56,11 +68,15 @@ public class Compilation
     </PropertyGroup>
 
     <ItemGroup>
-	    <Reference Include=""Echidna2""><HintPath>..\Echidna2.dll</HintPath></Reference>
-	    <Reference Include=""Echidna2.Core""><HintPath>..\Echidna2.Core.dll</HintPath></Reference>
-	    <Reference Include=""Echidna2.Gui""><HintPath>..\Echidna2.Gui.dll</HintPath></Reference>
-	    <Reference Include=""Echidna2.Rendering""><HintPath>..\Echidna2.Rendering.dll</HintPath></Reference>
-	    <Reference Include=""Echidna2.Serialization""><HintPath>..\Echidna2.Serialization.dll</HintPath></Reference>
+	    <Reference Include=""..\Echidna2.dll"" />
+	    <Reference Include=""..\Echidna2.Core.dll"" />
+	    <Reference Include=""..\Echidna2.Gui.dll"" />
+	    <Reference Include=""..\Echidna2.Mathematics.dll"" />
+	    <Reference Include=""..\Echidna2.Rendering.dll"" />
+	    <Reference Include=""..\Echidna2.Rendering3D.dll"" />
+	    <Reference Include=""..\Echidna2.Serialization.dll"" />
+	    <Reference Include=""..\Echidna2.SourceGenerators.dll"" />
+	    <Analyzer Include=""..\Echidna2.SourceGenerators.dll"" />
     </ItemGroup>
 
 </Project>
@@ -71,7 +87,8 @@ public class Compilation
 	public static void CreateCSFiles(string prefabPath, Dictionary<string, (bool, Dictionary<string, string>)>? serializedEvents = null)
 	{
 		TomlTable table = Toml.ToModel(File.ReadAllText(prefabPath));
-		foreach ((string id, object value) in table)
+		foreach ((string id, object value) in table
+			         .Where(pair => pair.Key.All(char.IsDigit)))
 		{
 			TomlTable valueTable = (TomlTable)value;
 			if (!valueTable.TryGetValue("ScriptContent", out object scriptContent))
@@ -82,13 +99,7 @@ public class Compilation
 			(bool baseTypeIsIInitialize, Dictionary<string, string>? events) = serializedEvents?.GetValueOrDefault(id) ?? (false, null)!;
 			bool shouldAddInitialize = events != null!;
 			
-			string scriptString = "";
-			scriptString += "using Echidna2;\n";
-			scriptString += "using Echidna2.Core;\n";
-			scriptString += "using Echidna2.Gui;\n";
-			scriptString += "using Echidna2.Rendering;\n";
-			scriptString += "using Echidna2.Serialization;\n";
-			scriptString += "\n";
+			string scriptString = CSFileHeader;
 			scriptString += $"public class {className} : {baseType}{(shouldAddInitialize && !baseTypeIsIInitialize ? ", IInitialize" : "")}\n";
 			scriptString += "{\n";
 			
@@ -109,9 +120,35 @@ public class Compilation
 			
 			File.WriteAllText($"{CompilationFolder}/{className}.cs", scriptString);
 		}
+		
+		if (table.TryGetValue("This", out object? _))
+			CreateThisCSFile(prefabPath, (TomlArray)table["Components"]);
 	}
 	
-	public static void CompileCSProj()
+	public static void CreateThisCSFile(string prefabPath, TomlArray components)
+	{
+		string className = Path.GetFileNameWithoutExtension(prefabPath);
+		string scriptString = CSFileHeader;
+		scriptString += $"public partial class {className} : INotificationPropagator\n";
+		scriptString += "{\n";
+		
+		foreach (TomlTable componentTable in components.OfType<TomlTable>())
+			scriptString += $"\t[SerializedReference, ExposeMembersInClass] public {componentTable["Type"]} {componentTable["Name"]} {{ get; set; }} = null!;\n";
+		
+		scriptString += "\n";
+		
+		scriptString += "\tpublic void Notify<T>(T notification) where T : notnull\n";
+		scriptString += "\t{\n";
+		foreach (TomlTable componentTable in components.OfType<TomlTable>())
+			scriptString += $"\t\tINotificationPropagator.Notify(notification, {componentTable["Name"]});\n";
+		scriptString += "\t}\n";
+		
+		scriptString += "}\n";
+		
+		File.WriteAllText($"{CompilationFolder}/{className}.cs", scriptString);
+	}
+	
+	public static async Task CompileCSProj()
 	{
 		Process process = new();
 		process.StartInfo.FileName = "dotnet";
@@ -122,12 +159,17 @@ public class Compilation
 		process.StartInfo.RedirectStandardOutput = true;
 		process.StartInfo.RedirectStandardError = true;
 		process.Start();
-		process.WaitForExit();
-		Console.WriteLine(process.StandardOutput.ReadToEnd());
-		Console.WriteLine(process.StandardError.ReadToEnd());
+		
+		await Task.WhenAny(
+			process.WaitForExitAsync(),
+			DebugProcess(process));
+		
+		await PrintProcessOutput(process);
+		if (process.ExitCode != 0)
+			throw new InvalidOperationException($"Build failed with exit code {process.ExitCode}");
 	}
 	
-	public static void RunCSProj()
+	public static async Task RunCSProj()
 	{
 		Process process = new();
 		process.StartInfo.FileName = "dotnet";
@@ -136,9 +178,31 @@ public class Compilation
 		process.StartInfo.RedirectStandardOutput = true;
 		process.StartInfo.RedirectStandardError = true;
 		process.Start();
-		process.WaitForExit();
-		Console.WriteLine(process.StandardOutput.ReadToEnd());
-		Console.WriteLine(process.StandardError.ReadToEnd());
+		
+		await Task.WhenAny(
+			process.WaitForExitAsync(),
+			DebugProcess(process));
+		
+		await PrintProcessOutput(process);
+		if (process.ExitCode != 0)
+			throw new InvalidOperationException($"Build failed with exit code {process.ExitCode}");
+	}
+	
+	private static async Task PrintProcessOutput(Process process)
+	{
+		Console.Write(await process.StandardOutput.ReadToEndAsync());
+		Console.ForegroundColor = ConsoleColor.Red;
+		Console.Write(await process.StandardError.ReadToEndAsync());
+		Console.ResetColor();
+	}
+	
+	private static async Task DebugProcess(Process process)
+	{
+		while (!process.HasExited)
+		{
+			await PrintProcessOutput(process);
+			await Task.Delay(250);
+		}
 	}
 	
 	public static string GetComponentBaseTypeName(string prefabPath, string id, TomlTable componentTable)
@@ -173,10 +237,10 @@ public class Compilation
 			return GetComponentBaseType(basePrefabPath, baseId, (TomlTable)baseComponentTable, projectAssembly);
 		}
 		
-		if (!componentTable.TryGetValue("Component", out object typeName))
-			throw new InvalidOperationException($"Component table {id} of {prefabPath} does not contain a Component key or Prefab key");
+		if (componentTable.TryGetValue("Component", out object typeName))
+			return Type.GetType((string)typeName) ?? throw new NullReferenceException($"Type {(string)typeName} does not exist");
 		
-		return Type.GetType((string)typeName) ?? throw new NullReferenceException($"Type {(string)typeName} does not exist");
+		throw new InvalidOperationException($"Component table {id} of {prefabPath} does not contain a Component key or Prefab key");
 	}
 	
 	public static Dictionary<string, (bool baseTypeIsIInitialize, Dictionary<string, string> events)> GetSerializedEvents(string prefabPath)
@@ -189,7 +253,8 @@ public class Compilation
 		
 		TomlTable table = Toml.ToModel(File.ReadAllText(prefabPath));
 		Dictionary<string, (bool baseTypeIsIInitialize, Dictionary<string, string> events)> serializedEvents = new();
-		foreach ((string id, object value) in table)
+		foreach ((string id, object value) in table
+			         .Where(pair => pair.Key.All(char.IsDigit)))
 		{
 			TomlTable valueTable = (TomlTable)value;
 			Type baseType = GetComponentBaseType(prefabPath, id, valueTable, assembly);
