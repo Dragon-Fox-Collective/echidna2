@@ -23,19 +23,17 @@ public partial class AddComponentWindow : INotificationPropagator, IInitialize, 
 	
 	[DontExpose] public bool HasBeenInitialized { get; set; }
 	
+	private ButtonText nullText = null!;
+	
 	private (object Component, ButtonText Text)? selectedComponent;
 	private (object Component, ButtonText Text)? SelectedComponent
 	{
 		get => selectedComponent;
 		set
 		{
-			if (selectedComponent is not null)
-				selectedComponent.Value.Text.Color = Color.White;
-			
+			(selectedComponent?.Text ?? nullText).Color = Color.White;
 			selectedComponent = value;
-			
-			if (selectedComponent is not null)
-				selectedComponent.Value.Text.Color = Color.DeepSkyBlue;
+			(selectedComponent?.Text ?? nullText).Color = Color.DeepSkyBlue;
 		}
 	}
 	
@@ -43,12 +41,25 @@ public partial class AddComponentWindow : INotificationPropagator, IInitialize, 
 	{
 		Window.CloseWindowRequest += () => Hierarchy.Parent.QueueRemoveChild(this);
 		
-		foreach ((object component, ComponentUtils.ReferencePath? reference) in ComponentUtils.GetAllReferencesToComponentsOfType(PrefabRoot.RootObject, ComponentType, true))
+		nullText = ButtonText.Instantiate();
+		nullText.TextString = "Default value";
+		nullText.LocalScale = (0.5, 0.5);
+		nullText.Justification = TextJustification.Left;
+		nullText.Clicked += () => SelectedComponent = null;
+		if (Field.Value is null)
+			SelectedComponent = null;
+		
+		foreach ((object component, ComponentUtils.ReferencePath? reference) in ComponentUtils.GetAllReferencesToComponentsOfType(PrefabRoot.RootObject, ComponentType, true)
+			         .Where(pair => PrefabRoot.Components.Contains(pair.Component))
+			         .Concat(PrefabRoot.Components
+				         .Where(component => component.GetType().IsAssignableTo(ComponentType))
+				         .Select(component => (component, (ComponentUtils.ReferencePath?) null)))
+			         .DistinctBy(pair => pair.Item1))
 		{
 			ButtonText text = ButtonText.Instantiate();
 			
 			if (reference is null)
-				text.TextString = $"Root {component.GetType().Name}";
+				text.TextString = $"Unparented {component.GetType().Name}";
 			else if (reference.Component is IHasChildren hasChildren && hasChildren.Children.Contains(component))
 				text.TextString = $"{component.GetType().Name} under\n\t{reference}";
 			else
@@ -63,6 +74,8 @@ public partial class AddComponentWindow : INotificationPropagator, IInitialize, 
 			
 			ComponentList.AddChild(text);
 		}
+		
+		ComponentList.AddChild(nullText);
 	}
 	
 	public void OnEditorInitialize(Editor editor)
@@ -81,5 +94,11 @@ public partial class AddComponentWindow : INotificationPropagator, IInitialize, 
 		object component = Activator.CreateInstance(ComponentType)!;
 		PrefabRoot.Components.Add(component);
 		Field.Value = component;
+	}
+	
+	[UsedImplicitly]
+	public void UseSelectedComponent()
+	{
+		Field.Value = SelectedComponent?.Component ?? throw new NotImplementedException("Figure out how to use a default value");
 	}
 }

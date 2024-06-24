@@ -60,12 +60,14 @@ HorizontalExpand = true
 Margin = 5.0
 Children = [ "9" ]
 ScriptContent = """
+[SerializedReference] public Echidna2.Prefabs.Editor.AddComponentWindow AddComponentWindow = null!;
 [SerializedReference] public Echidna2.Prefabs.Gui.FullRectWindow Window = null!;
 """
+AddComponentWindow = "0"
 Window = "1"
 Clicked = """
 Window.CloseWindow();
-Console.WriteLine("Confirm!");
+AddComponentWindow.UseSelectedComponent();
 """
 
 [9]
