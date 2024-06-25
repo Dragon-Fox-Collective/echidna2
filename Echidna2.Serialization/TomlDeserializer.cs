@@ -61,8 +61,8 @@ public static class TomlDeserializer
 				DeserializeValue(prefabRoot, id, new ComponentPath(component), component, (TomlTable)values);
 		
 		foreach ((string id, (object _, TomlTable componentTable)) in components)
-			if (componentTable.Count != 0)
-				Console.WriteLine($"WARN: Unused table {id} {componentTable.ToDelimString()} of prefab '{path}' leftover");
+			if (componentTable.TryGetValue("Values", out object? values) && ((TomlTable)values).Count != 0)
+				Console.WriteLine($"WARN: Unused table {id} {((TomlTable)values).ToDelimString()} of prefab '{path}' leftover");
 		
 		if (prefabRoot.RootObject == null)
 			throw new InvalidOperationException($"Root object was not deserialized in '{path}'");
@@ -175,20 +175,5 @@ public static class TomlDeserializer
 		}
 		
 		return component;
-	}
-	
-	public static void RemoveEvents(object component, TomlTable componentTable)
-	{
-		List<string> usedValues = [];
-		
-		EventInfo[] members = component.GetType().GetEvents(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
-			.Where(member => member.GetCustomAttribute<SerializedEventAttribute>() != null)
-			.Where(member => componentTable.ContainsKey(member.Name))
-			.ToArray();
-		
-		usedValues.AddRange(members.Select(member => member.Name));
-		
-		foreach (string usedValue in usedValues)
-			componentTable.Remove(usedValue);
 	}
 }
