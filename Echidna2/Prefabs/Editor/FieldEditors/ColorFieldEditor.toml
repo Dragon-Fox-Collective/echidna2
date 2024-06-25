@@ -1,5 +1,50 @@
-[1]
-Component = "Echidna2.Prefabs.Editor.FieldEditors.ColorFieldEditor, Echidna2"
+Components = [
+    { Type = "Echidna2.Prefabs.Gui.HLayoutWithHierarchy", Name = "Layout" },
+]
+Interfaces = [
+    "Echidna2.Prefabs.Editor.FieldEditors.IFieldEditor<Color>",
+]
+Properties = [
+    { PropertyType = "Value", Type = "Color", Name = "Value", SetterContent = """
+_Value = value;
+RFieldEditor.Load(_Value.R / 255.0);
+GFieldEditor.Load(_Value.G / 255.0);
+BFieldEditor.Load(_Value.B / 255.0);
+AFieldEditor.Load(_Value.A / 255.0);
+""" },
+    { PropertyType = "Reference", Type = "Echidna2.Prefabs.Editor.FieldEditors.DoubleFieldEditor", Name = "RFieldEditor" },
+    { PropertyType = "Reference", Type = "Echidna2.Prefabs.Editor.FieldEditors.DoubleFieldEditor", Name = "GFieldEditor" },
+    { PropertyType = "Reference", Type = "Echidna2.Prefabs.Editor.FieldEditors.DoubleFieldEditor", Name = "BFieldEditor" },
+    { PropertyType = "Reference", Type = "Echidna2.Prefabs.Editor.FieldEditors.DoubleFieldEditor", Name = "AFieldEditor" },
+    { PropertyType = "Event", Type = "object?", Name = "ValueChanged" },
+]
+Events = [
+    { EventType = "Reference", Target = "RFieldEditor", Name = "ValueChanged", Args = [{ Name = "r", Type = "object?", CastTo = "double" }], Content = """
+r = Math.Clamp(r, 0.0, 1.0);
+_Value = Color.FromArgb(_Value.A, (int)(r * 255.0), _Value.G, _Value.B);
+ValueChanged?.Invoke(_Value);
+""" },
+    { EventType = "Reference", Target = "GFieldEditor", Name = "ValueChanged", Args = [{ Name = "g", Type = "object?", CastTo = "double" }], Content = """
+g = Math.Clamp(g, 0.0, 1.0);
+_Value = Color.FromArgb(_Value.A, _Value.R, (int)(g * 255.0), _Value.B);
+ValueChanged?.Invoke(_Value);
+""" },
+    { EventType = "Reference", Target = "BFieldEditor", Name = "ValueChanged", Args = [{ Name = "b", Type = "object?", CastTo = "double" }], Content = """
+b = Math.Clamp(b, 0.0, 1.0);
+_Value = Color.FromArgb(_Value.A, _Value.R, _Value.G, (int)(b * 255.0));
+ValueChanged?.Invoke(_Value);
+""" },
+    { EventType = "Reference", Target = "AFieldEditor", Name = "ValueChanged", Args = [{ Name = "a", Type = "object?", CastTo = "double" }], Content = """
+a = Math.Clamp(a, 0.0, 1.0);
+_Value = Color.FromArgb((int)(a * 255.0), _Value.R, _Value.G, _Value.B);
+ValueChanged?.Invoke(_Value);
+""" },
+]
+Functions = [
+    { ReturnType = "void", Name = "Load", Args = [{ Type = "Color", Name = "value" }], Content = "Value = value;" },
+]
+
+[This]
 Layout = "2"
 RFieldEditor = "3"
 GFieldEditor = "4"

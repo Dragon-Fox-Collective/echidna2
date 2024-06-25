@@ -1,18 +1,10 @@
-﻿Fields = [
-    { Type = "Mesh", Name = "Mesh" },
-    { Type = "Shader", Name = "Shader" },
-    { Type = "CubeMap", Name = "CubeMap" },
+﻿Properties = [
+    { PropertyType = "Value", Type = "Mesh", Name = "Mesh" },
+    { PropertyType = "Value", Type = "Shader", Name = "Shader" },
+    { PropertyType = "Value", Type = "CubeMap", Name = "CubeMap" },
 ]
 Events = [
-    "Draw"
-]
-
-[This]
-Mesh = "Cube"
-Shader = "Skybox"
-CubeMap = "Skybox"
-
-OnDraw = """
+    { EventType = "Notification", Name = "Draw", Content = """
 GL.DepthFunc(DepthFunction.Lequal);
 bool cullBackFaces = Mesh.CullBackFaces;
 Mesh.CullBackFaces = false;
@@ -25,4 +17,10 @@ Mesh.Draw();
 
 Mesh.CullBackFaces = cullBackFaces;
 GL.DepthFunc(DepthFunction.Less);
-"""
+""" },
+]
+
+[This]
+Mesh = "Cube"
+Shader = "Skybox"
+CubeMap = "Skybox"

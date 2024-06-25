@@ -56,7 +56,7 @@ public partial class Editor : INotificationPropagator, ICanBeLaidOut
 		{ typeof(Vector2), Vector2FieldEditor.Instantiate },
 		{ typeof(Vector3), Vector3FieldEditor.Instantiate },
 		{ typeof(Quaternion), QuaternionFieldEditor.Instantiate },
-		{ typeof(Color), ColorFieldEditor.Instantiate },
+		{ typeof(Color), Instantiator("Prefabs/Editor/FieldEditors/ColorFieldEditor.toml") },
 	};
 	
 	public void Notify<T>(T notification) where T : notnull
@@ -73,6 +73,7 @@ public partial class Editor : INotificationPropagator, ICanBeLaidOut
 	public void RegisterFieldEditor<TFieldType, TFieldEditor>() where TFieldEditor : IFieldEditor<TFieldType> => editorInstantiators.Add(typeof(TFieldType), TFieldEditor.Instantiate);
 	public IFieldEditor InstantiateFieldEditor(Type type) => editorInstantiators[type]();
 	public bool HasRegisteredFieldEditor(Type type) => editorInstantiators.ContainsKey(type);
+	private static Func<IFieldEditor> Instantiator(string path) => () => (IFieldEditor)TomlDeserializer.Deserialize(AppContext.BaseDirectory + path).RootObject;
 	
 	public void SerializePrefab()
 	{

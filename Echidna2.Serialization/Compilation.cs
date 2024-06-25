@@ -3,10 +3,11 @@ using System.Reflection;
 using System.Runtime.Loader;
 using Tomlyn;
 using Tomlyn.Model;
+using static Echidna2.Serialization.SerializationPredicates;
 
 namespace Echidna2.Serialization;
 
-public class Compilation
+public static class Compilation
 {
 	public static string CompilationFolder => $"{AppContext.BaseDirectory}/.echidna";
 	public static string CompilationBinFolder => $"{CompilationFolder}/bin/Debug/net8.0";
@@ -22,6 +23,7 @@ using Echidna2.Rendering3D;
 using Echidna2.Serialization;
 using Echidna2.SourceGenerators;
 using OpenTK.Graphics.OpenGL4;
+using System.Drawing;
 
 
 """;
@@ -94,7 +96,7 @@ using OpenTK.Graphics.OpenGL4;
 	public static void CreateCSFiles(string prefabPath, Dictionary<string, (bool, Dictionary<string, string>)>? serializedEvents = null)
 	{
 		TomlTable table = Toml.ToModel(File.ReadAllText(prefabPath));
-		foreach ((string id, object value) in table.Where(TomlSerializer.IsValidComponentId))
+		foreach ((string id, object value) in table.Where(IdIsValidComponentId))
 		{
 			TomlTable valueTable = (TomlTable)value;
 			if (!valueTable.TryGetValue("ScriptContent", out object scriptContent))
@@ -134,14 +136,15 @@ using OpenTK.Graphics.OpenGL4;
 	public static void CreateThisCSFile(string prefabPath, TomlTable table, TomlTable thisTable)
 	{
 		List<TomlTable> components = table.TryGetValue("Components", out object? componentsArray) ? ((TomlArray)componentsArray).OfType<TomlTable>().ToList() : [];
-		List<TomlTable> fields = table.TryGetValue("Fields", out object? fieldsArray) ? ((TomlArray)fieldsArray).OfType<TomlTable>().ToList() : [];
-		List<string> events = table.TryGetValue("Events", out object? eventsArray) ? ((TomlArray)eventsArray).OfType<string>().ToList() : [];
+		List<TomlTable> properties = table.TryGetValue("Properties", out object? propertiesArray) ? ((TomlArray)propertiesArray).OfType<TomlTable>().ToList() : [];
+		List<TomlTable> events = table.TryGetValue("Events", out object? eventsArray) ? ((TomlArray)eventsArray).OfType<TomlTable>().ToList() : [];
+		List<TomlTable> functions = table.TryGetValue("Functions", out object? functionsArray) ? ((TomlArray)functionsArray).OfType<TomlTable>().ToList() : [];
+		List<string> interfaces = table.TryGetValue("Interfaces", out object? interfacesArray) ? ((TomlArray)interfacesArray).OfType<string>().ToList() : [];
 		
-		List<string> interfaces = [];
 		if (components.Count != 0)
 			interfaces.Add("INotificationPropagator");
-		foreach (string eventName in events)
-			interfaces.Add($"INotificationListener<I{eventName}.Notification>");
+		foreach (TomlTable @event in events.Where(EventIsNotification))
+			interfaces.Add($"INotificationListener<I{@event["Name"]}.Notification>");
 		
 		string className = Path.GetFileNameWithoutExtension(prefabPath);
 		string scriptString = CSFileHeader;
@@ -165,18 +168,99 @@ using OpenTK.Graphics.OpenGL4;
 			scriptString += "\t}\n\n";
 		}
 		
-		if (fields.Count != 0)
+		foreach (TomlTable property in properties.Where(PropertyIsValue))
 		{
-			foreach (TomlTable fieldTable in fields)
-				scriptString += $"\t[SerializedValue] public {fieldTable["Type"]} {fieldTable["Name"]} {{ get; set; }} = default!;\n";
+			scriptString += $"\tprivate {property["Type"]} _{property["Name"]} = default!;\n";
+			scriptString += $"\t[SerializedValue] public {property["Type"]} {property["Name"]}\n";
+			scriptString += "\t{\n";
+			if (property.TryGetValue("GetterContent", out object? getterContent))
+			{
+				scriptString += "\t\tget\n";
+				scriptString += "\t\t{\n";
+				scriptString += "\t\t\t" + ((string)getterContent).Split("\n").Join("\n\t\t\t") + "\n";
+				scriptString += "\t\t}\n";
+			}
+			else
+				scriptString += $"\t\tget => _{property["Name"]};\n";
+			if (property.TryGetValue("SetterContent", out object? setterContent))
+			{
+				scriptString += "\t\tset\n";
+				scriptString += "\t\t{\n";
+				scriptString += "\t\t\t" + ((string)setterContent).Split("\n").Join("\n\t\t\t") + "\n";
+				scriptString += "\t\t}\n";
+			}
+			else
+				scriptString += $"\t\tset => _{property["Name"]} = value;\n";
+			scriptString += "\t}\n";
 			scriptString += "\n";
 		}
 		
-		foreach (string eventName in events)
+		foreach (TomlTable property in properties.Where(PropertyIsReference))
 		{
-			scriptString += $"\tpublic void OnNotify(I{eventName}.Notification notification)\n";
+			scriptString += $"\tprivate {property["Type"]} _{property["Name"]} = default!;\n";
+			scriptString += $"\t[SerializedReference] public {property["Type"]} {property["Name"]}\n";
 			scriptString += "\t{\n";
-			scriptString += "\t\t" + thisTable["On" + eventName].ToString().Split("\n").Join("\n\t\t") + "\n";
+			scriptString += $"\t\tget => _{property["Name"]};\n";
+			scriptString += "\t\tset\n";
+			scriptString += "\t\t{\n";
+			
+			scriptString += $"\t\t\tif (_{property["Name"]} is not null)\n";
+			scriptString += "\t\t\t{\n";
+			foreach (TomlTable @event in events.Where(EventIsReferenceAndTargets(property)))
+				scriptString += $"\t\t\t\t_{property["Name"]}.{@event["Name"]} -= {@event["Target"]}_{@event["Name"]};\n";
+			scriptString += "\t\t\t}\n";
+			scriptString += "\n";
+			
+			scriptString += $"\t\t\t_{property["Name"]} = value;\n";
+			scriptString += "\n";
+			
+			scriptString += $"\t\t\tif (_{property["Name"]} is not null)\n";
+			scriptString += "\t\t\t{\n";
+			foreach (TomlTable @event in events.Where(EventIsReferenceAndTargets(property)))
+				scriptString += $"\t\t\t\t_{property["Name"]}.{@event["Name"]} += {@event["Target"]}_{@event["Name"]};\n";
+			scriptString += "\t\t\t}\n";
+			
+			scriptString += "\t\t}\n";
+			scriptString += "\t}\n";
+			
+			foreach (TomlTable @event in events.Where(EventIsReferenceAndTargets(property)))
+			{
+				if (((TomlArray)@event["Args"]).OfType<TomlTable>().Any(arg => arg.ContainsKey("CastTo")))
+				{
+					scriptString += $"\tprivate void {@event["Target"]}_{@event["Name"]}({string.Join(", ", ((TomlArray)@event["Args"]).OfType<TomlTable>().Select(arg => $"{arg["Type"]} {arg["Name"]}"))})";
+					scriptString += $" => {@event["Target"]}_{@event["Name"]}({string.Join(", ", ((TomlArray)@event["Args"]).OfType<TomlTable>().Select(arg => arg.TryGetValue("CastTo", out object? castTo) ? $"({castTo}){arg["Name"]}!" : $"{arg["Name"]}"))});\n";
+					scriptString += $"\tprivate void {@event["Target"]}_{@event["Name"]}({string.Join(", ", ((TomlArray)@event["Args"]).OfType<TomlTable>().Select(arg => arg.TryGetValue("CastTo", out object? castTo) ? $"{castTo} {arg["Name"]}" : $"{arg["Type"]} {arg["Name"]}"))})\n";
+				}
+				else
+					scriptString += $"\tprivate void {@event["Target"]}_{@event["Name"]}({string.Join(", ", ((TomlArray)@event["Args"]).OfType<TomlTable>().Select(arg => $"{arg["Type"]} {arg["Name"]}"))})\n";
+				scriptString += "\t{\n";
+				scriptString += "\t\t" + ((string)@event["Content"]).Split("\n").Join("\n\t\t") + "\n";
+				scriptString += "\t}\n";
+			}
+			
+			scriptString += "\n";
+		}
+		
+		foreach (TomlTable property in properties.Where(PropertyIsEvent))
+		{
+			scriptString += $"\tpublic event Action<{property["Type"]}>? {property["Name"]};\n";
+		}
+		scriptString += "\n";
+		
+		foreach (TomlTable @event in events.Where(EventIsNotification))
+		{
+			scriptString += $"\tpublic void OnNotify(I{@event["Name"]}.Notification notification)\n";
+			scriptString += "\t{\n";
+			scriptString += "\t\t" + ((string)@event["Content"]).Split("\n").Join("\n\t\t") + "\n";
+			scriptString += "\t}\n";
+			scriptString += "\n";
+		}
+		
+		foreach (TomlTable function in functions)
+		{
+			scriptString += $"\tpublic void {function["Name"]}({string.Join(", ", ((TomlArray)function["Args"]).OfType<TomlTable>().Select(arg => $"{arg["Type"]} {arg["Name"]}"))})\n";
+			scriptString += "\t{\n";
+			scriptString += "\t\t" + ((string)function["Content"]).Split("\n").Join("\n\t\t") + "\n";
 			scriptString += "\t}\n";
 			scriptString += "\n";
 		}
@@ -283,7 +367,7 @@ using OpenTK.Graphics.OpenGL4;
 			}
 			else
 			{
-				(baseId, baseComponentTable) = baseTable.First(TomlSerializer.IsValidComponentId);
+				(baseId, baseComponentTable) = baseTable.First(IdIsValidComponentId);
 			}
 			return GetComponentBaseType(basePrefabPath, baseId, (TomlTable)baseComponentTable, projectAssembly);
 		}
@@ -304,7 +388,7 @@ using OpenTK.Graphics.OpenGL4;
 		
 		TomlTable table = Toml.ToModel(File.ReadAllText(prefabPath));
 		Dictionary<string, (bool baseTypeIsIInitialize, Dictionary<string, string> events)> serializedEvents = new();
-		foreach ((string id, object value) in table.Where(TomlSerializer.IsValidComponentId))
+		foreach ((string id, object value) in table.Where(IdIsValidComponentId))
 		{
 			TomlTable valueTable = (TomlTable)value;
 			Type baseType = GetComponentBaseType(prefabPath, id, valueTable, assembly);

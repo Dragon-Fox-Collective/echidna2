@@ -3,6 +3,7 @@ using System.Reflection;
 using Tomlyn;
 using Tomlyn.Model;
 using TooManyExtensions;
+using static Echidna2.Serialization.SerializationPredicates;
 
 namespace Echidna2.Serialization;
 
@@ -120,8 +121,6 @@ public static class TomlSerializer
 			}
 		}
 	}
-	
-	public static bool IsValidComponentId(KeyValuePair<string, object> pair) => pair.Key.All(char.IsDigit);
 }
 
 public static class TomlDeserializer
@@ -146,7 +145,7 @@ public static class TomlDeserializer
 			doneFirstObject = true;
 		}
 		
-		foreach ((string id, object value) in table.Where(TomlSerializer.IsValidComponentId))
+		foreach ((string id, object value) in table.Where(IdIsValidComponentId))
 		{
 			TomlTable componentTable = (TomlTable)value;
 			
