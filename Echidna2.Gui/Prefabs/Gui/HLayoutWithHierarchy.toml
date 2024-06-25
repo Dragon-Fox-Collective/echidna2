@@ -1,5 +1,6 @@
-﻿[1]
+﻿[This]
 Component = "Echidna2.Prefabs.Gui.HLayoutWithHierarchy, Echidna2.Gui"
+[This.Values]
 Named = "2"
 RectTransform = "4"
 Layout = "5"
@@ -7,6 +8,7 @@ PrefabChildren = "3"
 
 [2]
 Component = "Echidna2.Core.Named, Echidna2.Core"
+[2.Values]
 Name = "Horizontal Layout"
 
 [3]
@@ -17,5 +19,6 @@ Component = "Echidna2.Gui.RectTransform, Echidna2.Gui"
 
 [5]
 Component = "Echidna2.Gui.HorizontalLayout, Echidna2.Gui"
+[5.Values]
 RectTransform = "4"
 Hierarchy = "3"

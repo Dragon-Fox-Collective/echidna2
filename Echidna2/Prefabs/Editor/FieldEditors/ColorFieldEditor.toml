@@ -1,3 +1,4 @@
+[This]
 Components = [
     { Type = "Echidna2.Prefabs.Gui.HLayoutWithHierarchy", Name = "Layout" },
 ]
@@ -44,7 +45,7 @@ Functions = [
     { ReturnType = "void", Name = "Load", Args = [{ Type = "Color", Name = "value" }], Content = "Value = value;" },
 ]
 
-[This]
+[This.Values]
 Layout = "2"
 RFieldEditor = "3"
 GFieldEditor = "4"

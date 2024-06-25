@@ -1,5 +1,6 @@
-﻿[1]
+﻿[This]
 Component = "Echidna2.Prefabs.Editor.EditorViewport3D, Echidna2"
+[This.Values]
 Viewport = "2"
 CameraPivot = "3"
 

@@ -34,16 +34,8 @@ using System.Drawing;
 		CreateCSProj();
 		
 		foreach (string prefabPath in Directory.EnumerateFiles(prefabRootPath, "*.toml", SearchOption.AllDirectories))
-		{
 			CreateCSFiles(prefabPath);
-		}
-		await CompileCSProj();
 		
-		foreach (string prefabPath in Directory.EnumerateFiles(prefabRootPath, "*.toml", SearchOption.AllDirectories))
-		{
-			Dictionary<string, (bool, Dictionary<string, string>)> serializedEvents = GetSerializedEvents(prefabPath);
-			CreateCSFiles(prefabPath, serializedEvents);
-		}
 		await CompileCSProj();
 	}
 	
@@ -93,47 +85,15 @@ using System.Drawing;
 		File.WriteAllText($"{CompilationFolder}/EchidnaProject.csproj", csprojString);
 	}
 	
-	public static void CreateCSFiles(string prefabPath, Dictionary<string, (bool, Dictionary<string, string>)>? serializedEvents = null)
+	public static void CreateCSFiles(string prefabPath)
 	{
 		TomlTable table = Toml.ToModel(File.ReadAllText(prefabPath));
-		foreach ((string id, object value) in table.Where(IdIsValidComponentId))
-		{
-			TomlTable valueTable = (TomlTable)value;
-			if (!valueTable.TryGetValue("ScriptContent", out object scriptContent))
-				continue;
-			
-			string baseType = GetComponentBaseTypeName(prefabPath, id, valueTable);
-			string className = $"{Path.GetFileNameWithoutExtension(prefabPath)}_{id}";
-			(bool baseTypeIsIInitialize, Dictionary<string, string>? events) = serializedEvents?.GetValueOrDefault(id) ?? (false, null)!;
-			bool shouldAddInitialize = events != null!;
-			
-			string scriptString = CSFileHeader;
-			scriptString += $"public class {className} : {baseType}{(shouldAddInitialize && !baseTypeIsIInitialize ? ", IInitialize" : "")}\n";
-			scriptString += "{\n";
-			
-			scriptString += "\t" + ((string)scriptContent).Split("\n").Join("\n\t").Trim() + "\n";
-			
-			if (shouldAddInitialize)
-			{
-				scriptString += "\n";
-				scriptString += $"\tpublic {(baseTypeIsIInitialize ? "override " : "")}void OnInitialize() {{\n";
-				if (baseTypeIsIInitialize)
-					scriptString += "\t\tbase.OnInitialize();\n";
-				foreach ((string eventName, string eventContent) in events!)
-					scriptString += $"\t\t{eventName} += () => {{ {eventContent} }};\n";
-				scriptString += "\t}\n";
-			}
-			
-			scriptString += "}\n";
-			
-			File.WriteAllText($"{CompilationFolder}/{className}.cs", scriptString);
-		}
-		
-		if (table.TryGetValue("This", out object? thisTable))
-			CreateThisCSFile(prefabPath, table, (TomlTable)thisTable);
+		foreach ((string id, object componentTable) in table)
+			if (ComponentNeedsCustomClass(id, (TomlTable)componentTable))
+				CreateCSFile(prefabPath, id, (TomlTable)componentTable);
 	}
 	
-	public static void CreateThisCSFile(string prefabPath, TomlTable table, TomlTable thisTable)
+	public static void CreateCSFile(string prefabPath, string id, TomlTable table)
 	{
 		List<TomlTable> components = table.TryGetValue("Components", out object? componentsArray) ? ((TomlArray)componentsArray).OfType<TomlTable>().ToList() : [];
 		List<TomlTable> properties = table.TryGetValue("Properties", out object? propertiesArray) ? ((TomlArray)propertiesArray).OfType<TomlTable>().ToList() : [];
@@ -146,7 +106,11 @@ using System.Drawing;
 		foreach (TomlTable @event in events.Where(EventIsNotification))
 			interfaces.Add($"INotificationListener<I{@event["Name"]}.Notification>");
 		
-		string className = Path.GetFileNameWithoutExtension(prefabPath);
+		bool thisIsSubclass = id != "This";
+		string className = thisIsSubclass ? $"{Path.GetFileNameWithoutExtension(prefabPath)}_{id}" : Path.GetFileNameWithoutExtension(prefabPath);
+		if (thisIsSubclass)
+			interfaces.Insert(0, GetComponentBaseTypeName(prefabPath, id, table));
+		
 		string scriptString = CSFileHeader;
 		scriptString += $"public partial class {className}";
 		if (interfaces.Count != 0)
@@ -157,8 +121,55 @@ using System.Drawing;
 		
 		if (components.Count != 0)
 		{
-			foreach (TomlTable componentTable in components)
-				scriptString += $"\t[SerializedReference, ExposeMembersInClass] public {componentTable["Type"]} {componentTable["Name"]} {{ get; set; }} = null!;\n";
+			foreach (TomlTable component in components)
+			{
+				scriptString += $"\tprivate {component["Type"]} _{component["Name"]} = default!;\n";
+				scriptString += $"\t[SerializedReference, ExposeMembersInClass] public {component["Type"]} {component["Name"]}\n";
+				scriptString += "\t{\n";
+				scriptString += $"\t\tget => _{component["Name"]};\n";
+				scriptString += "\t\tset\n";
+				scriptString += "\t\t{\n";
+				
+				scriptString += $"\t\t\tif (_{component["Name"]} is not null)\n";
+				scriptString += $"\t\t\t\tUnsetup_{component["Name"]}();\n";
+				scriptString += "\n";
+				
+				scriptString += $"\t\t\t_{component["Name"]} = value;\n";
+				scriptString += "\n";
+				
+				scriptString += $"\t\t\tif (_{component["Name"]} is not null)\n";
+				scriptString += $"\t\t\t\tSetup_{component["Name"]}();\n";
+				
+				scriptString += "\t\t}\n";
+				scriptString += "\t}\n";
+				
+				scriptString += $"\tprotected virtual void Setup_{component["Name"]}()\n";
+				scriptString += "\t{\n";
+				foreach (TomlTable @event in events.Where(EventIsReferenceAndTargets(component)))
+					scriptString += $"\t\t{component["Name"]}.{@event["Name"]} += {@event["Target"]}_{@event["Name"]};\n";
+				scriptString += "\t}\n";
+				
+				scriptString += $"\tprotected virtual void Unsetup_{component["Name"]}()\n";
+				scriptString += "\t{\n";
+				foreach (TomlTable @event in events.Where(EventIsReferenceAndTargets(component)))
+					scriptString += $"\t\t{component["Name"]}.{@event["Name"]} -= {@event["Target"]}_{@event["Name"]};\n";
+				scriptString += "\t}\n";
+				
+				foreach (TomlTable @event in events.Where(EventIsReferenceAndTargets(component)))
+				{
+					if (((TomlArray)@event["Args"]).OfType<TomlTable>().Any(arg => arg.ContainsKey("CastTo")))
+					{
+						scriptString += $"\tprivate void {@event["Target"]}_{@event["Name"]}({string.Join(", ", ((TomlArray)@event["Args"]).OfType<TomlTable>().Select(arg => $"{arg["Type"]} {arg["Name"]}"))})";
+						scriptString += $" => {@event["Target"]}_{@event["Name"]}({string.Join(", ", ((TomlArray)@event["Args"]).OfType<TomlTable>().Select(arg => arg.TryGetValue("CastTo", out object? castTo) ? $"({castTo}){arg["Name"]}!" : $"{arg["Name"]}"))});\n";
+						scriptString += $"\tprivate void {@event["Target"]}_{@event["Name"]}({string.Join(", ", ((TomlArray)@event["Args"]).OfType<TomlTable>().Select(arg => arg.TryGetValue("CastTo", out object? castTo) ? $"{castTo} {arg["Name"]}" : $"{arg["Type"]} {arg["Name"]}"))})\n";
+					}
+					else
+						scriptString += $"\tprivate void {@event["Target"]}_{@event["Name"]}({string.Join(", ", ((TomlArray)@event["Args"]).OfType<TomlTable>().Select(arg => $"{arg["Type"]} {arg["Name"]}"))})\n";
+					scriptString += "\t{\n";
+					scriptString += "\t\t" + ((string)@event["Content"]).Split("\n").Join("\n\t\t") + "\n";
+					scriptString += "\t}\n";
+				}
+			}
 			scriptString += "\n";
 			
 			scriptString += "\tpublic void Notify<T>(T notification) where T : notnull\n";
@@ -205,22 +216,28 @@ using System.Drawing;
 			scriptString += "\t\t{\n";
 			
 			scriptString += $"\t\t\tif (_{property["Name"]} is not null)\n";
-			scriptString += "\t\t\t{\n";
-			foreach (TomlTable @event in events.Where(EventIsReferenceAndTargets(property)))
-				scriptString += $"\t\t\t\t_{property["Name"]}.{@event["Name"]} -= {@event["Target"]}_{@event["Name"]};\n";
-			scriptString += "\t\t\t}\n";
+			scriptString += $"\t\t\t\tUnsetup_{property["Name"]}();\n";
 			scriptString += "\n";
 			
 			scriptString += $"\t\t\t_{property["Name"]} = value;\n";
 			scriptString += "\n";
 			
 			scriptString += $"\t\t\tif (_{property["Name"]} is not null)\n";
-			scriptString += "\t\t\t{\n";
-			foreach (TomlTable @event in events.Where(EventIsReferenceAndTargets(property)))
-				scriptString += $"\t\t\t\t_{property["Name"]}.{@event["Name"]} += {@event["Target"]}_{@event["Name"]};\n";
-			scriptString += "\t\t\t}\n";
+			scriptString += $"\t\t\t\tSetup_{property["Name"]}();\n";
 			
 			scriptString += "\t\t}\n";
+			scriptString += "\t}\n";
+			
+			scriptString += $"\tprotected virtual void Setup_{property["Name"]}()\n";
+			scriptString += "\t{\n";
+			foreach (TomlTable @event in events.Where(EventIsReferenceAndTargets(property)))
+				scriptString += $"\t\t{@event["Target"]}.{@event["Name"]} += {@event["Target"]}_{@event["Name"]};\n";
+			scriptString += "\t}\n";
+			
+			scriptString += $"\tprotected virtual void Unsetup_{property["Name"]}()\n";
+			scriptString += "\t{\n";
+			foreach (TomlTable @event in events.Where(EventIsReferenceAndTargets(property)))
+				scriptString += $"\t\t{@event["Target"]}.{@event["Name"]} -= {@event["Target"]}_{@event["Name"]};\n";
 			scriptString += "\t}\n";
 			
 			foreach (TomlTable @event in events.Where(EventIsReferenceAndTargets(property)))
@@ -246,6 +263,33 @@ using System.Drawing;
 			scriptString += $"\tpublic event Action<{property["Type"]}>? {property["Name"]};\n";
 		}
 		scriptString += "\n";
+		
+		foreach (TomlTable @event in events.Where(EventIsSelf))
+		{
+			scriptString += $"\tprotected override void Setup_{@event["Target"]}()\n";
+			scriptString += "\t{\n";
+			scriptString += $"\t\tbase.Setup_{@event["Target"]}();\n";
+			scriptString += $"\t\t{@event["Target"]}.{@event["Name"]} += {@event["Target"]}_{@event["Name"]};\n";
+			scriptString += "\t}\n";
+			
+			scriptString += $"\tprotected override void Unsetup_{@event["Target"]}()\n";
+			scriptString += "\t{\n";
+			scriptString += $"\t\tbase.Setup_{@event["Target"]}();\n";
+			scriptString += $"\t\t{@event["Target"]}.{@event["Name"]} -= {@event["Target"]}_{@event["Name"]};\n";
+			scriptString += "\t}\n";
+			
+			if (((TomlArray)@event["Args"]).OfType<TomlTable>().Any(arg => arg.ContainsKey("CastTo")))
+			{
+				scriptString += $"\tprivate void {@event["Target"]}_{@event["Name"]}({string.Join(", ", ((TomlArray)@event["Args"]).OfType<TomlTable>().Select(arg => $"{arg["Type"]} {arg["Name"]}"))})";
+				scriptString += $" => {@event["Target"]}_{@event["Name"]}({string.Join(", ", ((TomlArray)@event["Args"]).OfType<TomlTable>().Select(arg => arg.TryGetValue("CastTo", out object? castTo) ? $"({castTo}){arg["Name"]}!" : $"{arg["Name"]}"))});\n";
+				scriptString += $"\tprivate void {@event["Target"]}_{@event["Name"]}({string.Join(", ", ((TomlArray)@event["Args"]).OfType<TomlTable>().Select(arg => arg.TryGetValue("CastTo", out object? castTo) ? $"{castTo} {arg["Name"]}" : $"{arg["Type"]} {arg["Name"]}"))})\n";
+			}
+			else
+				scriptString += $"\tprivate void {@event["Target"]}_{@event["Name"]}({string.Join(", ", ((TomlArray)@event["Args"]).OfType<TomlTable>().Select(arg => $"{arg["Type"]} {arg["Name"]}"))})\n";
+			scriptString += "\t{\n";
+			scriptString += "\t\t" + ((string)@event["Content"]).Split("\n").Join("\n\t\t") + "\n";
+			scriptString += "\t}\n";
+		}
 		
 		foreach (TomlTable @event in events.Where(EventIsNotification))
 		{
@@ -329,10 +373,6 @@ using System.Drawing;
 	
 	public static string GetComponentBaseTypeName(string prefabPath, string id, TomlTable componentTable)
 	{
-		string className = $"{Path.GetFileNameWithoutExtension(prefabPath)}_{id}";
-		if (File.Exists(className + ".cs"))
-			return className;
-		
 		if (componentTable.TryGetValue("Prefab", out object basePrefab))
 		{
 			string basePrefabPath = $"{Path.GetDirectoryName(prefabPath)}/{(string)basePrefab}";
@@ -340,15 +380,15 @@ using System.Drawing;
 			return GetComponentBaseTypeName(basePrefabPath, baseId, (TomlTable)baseComponentTable);
 		}
 		
-		if (!componentTable.TryGetValue("Component", out object typeName))
-			throw new InvalidOperationException($"Component table {id} of {prefabPath} does not contain a Component key or Prefab key");
+		if (componentTable.TryGetValue("Component", out object typeName))
+			return ((string)typeName).Split(",")[0];
 		
-		return ((string)typeName).Split(",")[0];
+		return Path.GetFileNameWithoutExtension(prefabPath) + (id is null or "This" ? "" : "_" + id);
 	}
 	
 	public static Type GetComponentBaseType(string prefabPath, string? id, TomlTable componentTable, Assembly projectAssembly)
 	{
-		string className = Path.GetFileNameWithoutExtension(prefabPath) + (id is not null ? "_" + id : "");
+		string className = Path.GetFileNameWithoutExtension(prefabPath) + (id is null or "This" ? "" : "_" + id);
 		if (File.Exists($"{CompilationFolder}/{className}.cs"))
 			return projectAssembly.GetType(className) ?? throw new NullReferenceException($"Type {className} has a file but does not exist as a type");
 		
@@ -375,7 +415,7 @@ using System.Drawing;
 		if (componentTable.TryGetValue("Component", out object typeName))
 			return Type.GetType((string)typeName) ?? throw new NullReferenceException($"Type {(string)typeName} does not exist");
 		
-		throw new InvalidOperationException($"Component table {id} of {prefabPath} does not contain a Component key or Prefab key");
+		throw new InvalidOperationException($"Component table '{id}' of '{prefabPath}' does not contain a Component key, Prefab key, or class file ('{className}.cs')");
 	}
 	
 	public static Dictionary<string, (bool baseTypeIsIInitialize, Dictionary<string, string> events)> GetSerializedEvents(string prefabPath)

@@ -1,5 +1,6 @@
-﻿[1]
+﻿[This]
 Component = "Echidna2.Prefabs.Editor.Editor, Echidna2"
+[This.Values]
 Named = "01"
 RectTransform = "02"
 RectLayout = "03"
@@ -11,35 +12,42 @@ PrefabPath = "Prefabs/Some3dScene.toml"
 
 [01]
 Component = "Echidna2.Core.Named, Echidna2.Core"
+[01.Values]
 Name = "Editor"
 
 [02]
 Component = "Echidna2.Gui.RectTransform, Echidna2.Gui"
+[02.Values]
 IsGlobal = true
 AnchorPreset = "Full"
 
 [03]
 Component = "Echidna2.Gui.RectLayout, Echidna2.Gui"
+[03.Values]
 RectTransform = "02"
 Hierarchy = "04"
 
 [04]
 Component = "Echidna2.Core.Hierarchy, Echidna2.Core"
+[04.Values]
 Children = [ "2", "3" ]
 
 [2]
 Prefab = "EditorViewport3D.toml"
+[2.Values]
 Name = "Scene"
 AnchorPreset = "Full"
 
 [3]
 Prefab = "../Gui/RectLayoutWithHierarchy.toml"
+[3.Values]
 Name = "Overlay"
 AnchorPreset = "Full"
 Children = [ "4", "9", "14", "20", "21" ]
 
 [4]
 Prefab = "../Gui/RectWithHierarchy.toml"
+[4.Values]
 Name = "Console"
 AnchorPreset = "WideBottom"
 AnchorOffsetTop = 50.0
@@ -47,12 +55,14 @@ Children = [ "51" ]
 
 [51]
 Prefab = "../Gui/RectLayoutWithHierarchy.toml"
+[51.Values]
 Name = "Play Buttons Position Resetter"
 AnchorPreset = "TopCenter"
 Children = [ "5" ]
 
 [5]
 Prefab = "../Gui/FullRectWithHierarchy.toml"
+[5.Values]
 Name = "Play Buttons"
 AnchorPreset = "Center"
 Margin = 10.0
@@ -60,24 +70,28 @@ Children = [ "6" ]
 
 [6]
 Prefab = "../Gui/HLayoutWithHierarchy.toml"
+[6.Values]
 Name = "Play Buttons Layout"
 Spacing = 10.0
 Children = [ "7", "8" ]
 
 [7]
 Prefab = "../Gui/ButtonRect.toml"
+[7.Values]
 Name = "Play Button"
 MinimumSize = { X = 26.0, Y = 26.0 }
 Color = { R = 0.0, G = 1.0, B = 0.0, A = 1.0 }
 
 [8]
 Prefab = "../Gui/ButtonRect.toml"
+[8.Values]
 Name = "Stop Button"
 MinimumSize = { X = 26.0, Y = 26.0 }
 Color = { R = 1.0, G = 0.0, B = 0.0, A = 1.0 }
 
 [9]
 Prefab = "../Gui/FullRectWithHierarchy.toml"
+[9.Values]
 Name = "Scene Context Buttons"
 AnchorPreset = "TopCenter"
 AnchorOffsetTop = -10.0
@@ -87,30 +101,35 @@ Children = [ "10" ]
 
 [10]
 Prefab = "../Gui/HLayoutWithHierarchy.toml"
+[10.Values]
 Name = "Scene Context Buttons Layout"
 Spacing = 10.0
 Children = [ "11", "12", "13" ]
 
 [11]
 Prefab = "../Gui/ButtonRect.toml"
+[11.Values]
 Name = "3D View Button"
 MinimumSize = { X = 26.0, Y = 26.0 }
 Color = { R = 1.0, G = 0.0, B = 0.0, A = 1.0 }
 
 [12]
 Prefab = "../Gui/ButtonRect.toml"
+[12.Values]
 Name = "2D View Button"
 MinimumSize = { X = 26.0, Y = 26.0 }
 Color = { R = 0.0, G = 0.0, B = 1.0, A = 1.0 }
 
 [13]
 Prefab = "../Gui/ButtonRect.toml"
+[13.Values]
 Name = "Gui View Button"
 MinimumSize = { X = 26.0, Y = 26.0 }
 Color = { R = 0.0, G = 1.0, B = 0.0, A = 1.0 }
 
 [14]
 Prefab = "../Gui/FullRectWithHierarchy.toml"
+[14.Values]
 Name = "Side Panel Buttons"
 AnchorPreset = "TopRight"
 AnchorOffsetTop = -10.0
@@ -122,46 +141,60 @@ Children = [ "15" ]
 
 [15]
 Prefab = "../Gui/VLayoutWithHierarchy.toml"
+[15.Values]
 Name = "Side Panel Buttons Layout"
 Spacing = 10.0
 Children = [ "16", "17", "18", "19" ]
 
 [16]
 Prefab = "../Gui/ButtonRect.toml"
+Properties = [
+    { PropertyType = "Reference", Type = "IVisibility", Name = "Panel" },
+]
+Events = [
+    { EventType = "Self", Target = "Button", Name = "Clicked", Args = [], Content = """
+Panel.ToggleVisibility();
+""" },
+]
+[16.Values]
 Name = "Object Panel Button"
 MinimumSize = { X = 26.0, Y = 26.0 }
 Color = { R = 1.0, G = 0.0, B = 0.0, A = 1.0 }
-ScriptContent = """
-[SerializedReference] public IVisibility Panel = null!;
-"""
 Panel = "20"
-Clicked = "Panel.ToggleVisibility();"
 
 [17]
 Prefab = "../Gui/ButtonRect.toml"
+Properties = [
+    { PropertyType = "Reference", Type = "IVisibility", Name = "Panel" },
+]
+Events = [
+    { EventType = "Self", Target = "Button", Name = "Clicked", Args = [], Content = """
+Panel.ToggleVisibility();
+""" },
+]
+[17.Values]
 Name = "Component Panel Button"
 MinimumSize = { X = 26.0, Y = 26.0 }
 Color = { R = 0.0, G = 0.0, B = 1.0, A = 1.0 }
-ScriptContent = """
-[SerializedReference] public IVisibility Panel = null!;
-"""
 Panel = "21"
-Clicked = "Panel.ToggleVisibility();"
 
 [18]
 Prefab = "../Gui/ButtonRect.toml"
+[18.Values]
 Name = "Material Panel Button"
 MinimumSize = { X = 26.0, Y = 26.0 }
 Color = { R = 0.0, G = 1.0, B = 0.0, A = 1.0 }
 
 [19]
 Prefab = "../Gui/ButtonRect.toml"
+[19.Values]
 Name = "State Machine Panel Button"
 MinimumSize = { X = 26.0, Y = 26.0 }
 Color = { R = 1.0, G = 0.0, B = 1.0, A = 1.0 }
 
 [20]
 Prefab = "ObjectPanel.toml"
+[20.Values]
 AnchorPreset = "TopRight"
 AnchorOffsetTop = -10.0
 AnchorOffsetBottom = -10.0
@@ -172,6 +205,7 @@ MinimumSize = { X = 300.0, Y = 400.0 }
 
 [21]
 Prefab = "ComponentPanel.toml"
+[21.Values]
 AnchorPreset = "TopRight"
 AnchorOffsetTop = -10.0
 AnchorOffsetBottom = -10.0

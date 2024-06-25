@@ -1,5 +1,6 @@
-﻿[1]
+﻿[This]
 Component = "Echidna2.Prefabs.Editor.FieldEditors.DoubleFieldEditor, Echidna2"
+[This.Values]
 StringFieldEditor = "2"
 
 [2]

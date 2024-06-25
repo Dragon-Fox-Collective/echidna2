@@ -1,5 +1,6 @@
-[1]
+[This]
 Component = "Echidna2.Prefabs.Editor.FieldEditors.QuaternionFieldEditor, Echidna2"
+[This.Values]
 VectorFieldEditor = "2"
 
 [2]

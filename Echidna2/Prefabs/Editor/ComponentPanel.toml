@@ -1,5 +1,6 @@
-﻿[0]
+﻿[This]
 Component = "Echidna2.Prefabs.Editor.ComponentPanel, Echidna2"
+[This.Values]
 Name = "Component Panel"
 Rect = "1"
 PrefabNameText = "3"
@@ -9,35 +10,42 @@ Components = "7"
 
 [1]
 Prefab = "../Gui/FullRectWithHierarchy.toml"
+[1.Values]
 Name = "Interior Rect"
 Margin = 10.0
 Children = [ "6" ]
 
 [2]
 Prefab = "../Gui/VLayoutWithHierarchy.toml"
+[2.Values]
 Name = "Interior Layout"
 HorizontalExpand = true
 Children = [ "3", "4", "5" ]
 
 [3]
 Prefab = "../Gui/TextRect.toml"
+[3.Values]
 Name = "Object Name"
 LocalScale = { X = 0.5, Y = 0.5 }
 
 [4]
 Prefab = "../Gui/TextRect.toml"
+[4.Values]
 Name = "Component Class"
 LocalScale = { X = 0.5, Y = 0.5 }
 
 [5]
 Prefab = "../Gui/VLayoutWithHierarchy.toml"
+[5.Values]
 Name = "Fields"
 
 [6]
 Prefab = "../Gui/HLayoutWithHierarchy.toml"
+[6.Values]
 Name = "Horizontal Split"
 Children = [ "2", "7" ]
 
 [7]
 Prefab = "../Gui/VLayoutWithHierarchy.toml"
+[7.Values]
 Name = "Component List"

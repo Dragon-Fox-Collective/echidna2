@@ -16,7 +16,7 @@ public static class TomlSerializer
 		
 		foreach (object subcomponent in prefabRoot.Components.Concat(prefabRoot.ChildPrefabs.Select(prefab => prefab.PrefabRoot.RootObject)))
 		{
-			string id = references.Count.ToString();
+			string id = subcomponent == prefabRoot.RootObject ? "This" : references.Count.ToString();
 			references.Add(subcomponent, id);
 			
 			TomlTable subcomponentTable = new();
@@ -129,29 +129,21 @@ public static class TomlDeserializer
 	
 	public static PrefabRoot Deserialize(string path, string? overridenTypeName = null)
 	{
-		Dictionary<string, (object component, TomlTable componentTable)> components = [];
+		Dictionary<string, (object Component, TomlTable ComponentTable)> components = [];
 		
 		PrefabRoot prefabRoot = new();
 		prefabRoot.PrefabPath = path;
 		
-		bool doneFirstObject = false;
 		TomlTable table = Toml.ToModel(File.ReadAllText(path));
 		
-		if (table.Remove("This", out object? root))
-		{
-			TomlTable rootTable = (TomlTable)root;
-			prefabRoot.RootObject = DeserializeComponent("This", Path.GetFileNameWithoutExtension(path), true);
-			components.Add("This", (prefabRoot.RootObject, rootTable));
-			doneFirstObject = true;
-		}
+		if (!table.ContainsKey("This"))
+			throw new InvalidOperationException($"'This' root object not found in '{path}'");
 		
 		foreach ((string id, object value) in table.Where(IdIsValidComponentId))
 		{
 			TomlTable componentTable = (TomlTable)value;
 			
-			string? scriptName = doneFirstObject ? null : overridenTypeName;
-			if (componentTable.Remove("ScriptContent", out object? _) && overridenTypeName == null)
-				scriptName = $"{Path.GetFileNameWithoutExtension(path)}_{id}";
+			string? scriptName = id == "This" ? overridenTypeName : ComponentNeedsCustomClass(id, componentTable) ? $"{Path.GetFileNameWithoutExtension(path)}_{id}" : null;
 			
 			object component;
 			if (componentTable.Remove("Component", out object? typeName))
@@ -167,29 +159,30 @@ public static class TomlDeserializer
 				component = componentPrefabRoot.RootObject;
 			}
 			else
-				throw new InvalidOperationException("Component table does not contain a Component or Prefab key");
+			{
+				component = DeserializeComponent(id, Path.GetFileNameWithoutExtension(path), true);
+			}
 			
-			RemoveEvents(component, componentTable); // Should've been handled by Compilation
+			if (id == "This")
+				prefabRoot.RootObject = component;
 			
 			components.Add(id, (component, componentTable));
-			
-			if (!doneFirstObject)
-				prefabRoot.RootObject = component;
-			doneFirstObject = true;
 		}
 		
 		foreach ((string id, (object component, TomlTable componentTable)) in components)
-			DeserializeReference(prefabRoot, id, new ComponentPath(component), component, componentTable, GetReferenceFrom);
+			if (componentTable.TryGetValue("Values", out object? values))
+				DeserializeReference(prefabRoot, id, new ComponentPath(component), component, (TomlTable)values, GetReferenceFrom);
 		
 		foreach ((string id, (object component, TomlTable componentTable)) in components)
-			DeserializeValue(prefabRoot, id, new ComponentPath(component), component, componentTable);
+			if (componentTable.TryGetValue("Values", out object? values))
+				DeserializeValue(prefabRoot, id, new ComponentPath(component), component, (TomlTable)values);
 		
 		foreach ((string id, (object _, TomlTable componentTable)) in components)
 			if (componentTable.Count != 0)
-				Console.WriteLine($"WARN: Unused table {id} {componentTable.ToDelimString()} of prefab leftover");
+				Console.WriteLine($"WARN: Unused table {id} {componentTable.ToDelimString()} of prefab '{path}' leftover");
 		
 		if (prefabRoot.RootObject == null)
-			throw new InvalidOperationException("No objects were deserialized");
+			throw new InvalidOperationException($"Root object was not deserialized in '{path}'");
 		
 		prefabRoot.FavoriteFields = table.TryGetValue("FavoriteFields", out object? fields)
 			? ((TomlArray)fields).Select(refPath =>

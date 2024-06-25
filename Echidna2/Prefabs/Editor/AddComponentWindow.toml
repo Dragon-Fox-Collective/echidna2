@@ -1,10 +1,12 @@
-﻿[0]
+﻿[This]
 Component = "Echidna2.Prefabs.Editor.AddComponentWindow, Echidna2"
+[This.Values]
 Window = "1"
 ComponentList = "11"
 
 [1]
 Prefab = "../Gui/FullRectWindow.toml"
+[1.Values]
 Margin = 10.0
 LocalSize = { X = 300, Y = 400 }
 Depth = 15
@@ -12,18 +14,21 @@ Children = [ "4" ]
 
 [2]
 Prefab = "../Gui/ButtonRect.toml"
-Margin = 5.0
-Children = [ "3" ]
-ScriptContent = """
-[SerializedReference] public Echidna2.Prefabs.Editor.AddComponentWindow AddComponentWindow = null!;
-[SerializedReference] public Echidna2.Prefabs.Gui.FullRectWindow Window = null!;
-"""
-AddComponentWindow = "0"
-Window = "1"
-Clicked = """
+Properties = [
+    { PropertyType = "Reference", Type = "Echidna2.Prefabs.Editor.AddComponentWindow", Name = "AddComponentWindow" },
+    { PropertyType = "Reference", Type = "Echidna2.Prefabs.Gui.FullRectWindow", Name = "Window" },
+]
+Events = [
+    { EventType = "Self", Target = "Button", Name = "Clicked", Args = [], Content = """
 Window.CloseWindow();
 AddComponentWindow.AddNewComponent();
-"""
+""" },
+]
+[2.Values]
+Margin = 5.0
+Children = [ "3" ]
+AddComponentWindow = "This"
+Window = "1"
 
 [3]
 Prefab = "../Gui/TextRect.toml"
@@ -40,14 +45,19 @@ Children  = [ "6", "8" ]
 
 [6]
 Prefab = "../Gui/ButtonRect.toml"
+Properties = [
+    { PropertyType = "Reference", Type = "Echidna2.Prefabs.Gui.FullRectWindow", Name = "Window" },
+]
+Events = [
+    { EventType = "Self", Target = "Button", Name = "Clicked", Args = [], Content = """
+Window.CloseWindow();
+""" },
+]
+[6.Values]
 HorizontalExpand = true
 Margin = 5.0
 Children = [ "7" ]
-ScriptContent = """
-[SerializedReference] public Echidna2.Prefabs.Gui.FullRectWindow Window = null!;
-"""
 Window = "1"
-Clicked = "Window.CloseWindow();"
 
 [7]
 Prefab = "../Gui/TextRect.toml"
@@ -56,19 +66,22 @@ LocalScale = { X = 0.5, Y = 0.5 }
 
 [8]
 Prefab = "../Gui/ButtonRect.toml"
+Properties = [
+    { PropertyType = "Reference", Type = "Echidna2.Prefabs.Editor.AddComponentWindow", Name = "AddComponentWindow" },
+    { PropertyType = "Reference", Type = "Echidna2.Prefabs.Gui.FullRectWindow", Name = "Window" },
+]
+Events = [
+    { EventType = "Self", Target = "Button", Name = "Clicked", Args = [], Content = """
+Window.CloseWindow();
+AddComponentWindow.UseSelectedComponent();
+""" },
+]
+[8.Values]
 HorizontalExpand = true
 Margin = 5.0
 Children = [ "9" ]
-ScriptContent = """
-[SerializedReference] public Echidna2.Prefabs.Editor.AddComponentWindow AddComponentWindow = null!;
-[SerializedReference] public Echidna2.Prefabs.Gui.FullRectWindow Window = null!;
-"""
 AddComponentWindow = "0"
 Window = "1"
-Clicked = """
-Window.CloseWindow();
-AddComponentWindow.UseSelectedComponent();
-"""
 
 [9]
 Prefab = "../Gui/TextRect.toml"

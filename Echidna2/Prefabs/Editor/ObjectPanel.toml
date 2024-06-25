@@ -1,14 +1,17 @@
-﻿[0]
+﻿[This]
 Component = "Echidna2.Prefabs.Editor.ObjectPanel, Echidna2"
+[This.Values]
 Name = "Object Panel"
 Rect = "1"
 HierarchyDisplay = "2"
 
 [1]
 Prefab = "../Gui/FullRectWithHierarchy.toml"
+[1.Values]
 Margin = 10.0
 Children = [ "2" ]
 
 [2]
 Prefab = "HierarchyDisplay.toml"
+[2.Values]
 AnchorPreset = "Full"

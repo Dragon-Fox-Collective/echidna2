@@ -1,4 +1,5 @@
-﻿Properties = [
+﻿[This]
+Properties = [
     { PropertyType = "Value", Type = "Mesh", Name = "Mesh" },
     { PropertyType = "Value", Type = "Shader", Name = "Shader" },
     { PropertyType = "Value", Type = "CubeMap", Name = "CubeMap" },
@@ -20,7 +21,7 @@ GL.DepthFunc(DepthFunction.Less);
 """ },
 ]
 
-[This]
+[This.Values]
 Mesh = "Cube"
 Shader = "Skybox"
 CubeMap = "Skybox"

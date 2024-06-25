@@ -1,5 +1,6 @@
-[1]
+[This]
 Component = "Echidna2.Prefabs.Editor.FieldEditors.Vector3FieldEditor, Echidna2"
+[This.Values]
 Layout = "2"
 XFieldEditor = "3"
 YFieldEditor = "4"
@@ -7,6 +8,7 @@ ZFieldEditor = "5"
 
 [2]
 Prefab = "../../Gui/HLayoutWithHierarchy.toml"
+[2.Values]
 Name = "Vector3 Layout"
 Children = [ "3", "4", "5" ]
 HorizontalExpand = true
