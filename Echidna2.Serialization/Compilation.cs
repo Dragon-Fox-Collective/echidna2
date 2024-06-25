@@ -21,6 +21,7 @@ using Echidna2.Rendering;
 using Echidna2.Rendering3D;
 using Echidna2.Serialization;
 using Echidna2.SourceGenerators;
+using OpenTK.Graphics.OpenGL4;
 
 
 """;
@@ -58,30 +59,35 @@ using Echidna2.SourceGenerators;
 	
 	public static void CreateCSProj()
 	{
-		string csprojString = @"
-<Project Sdk=""Microsoft.NET.Sdk"">
+		string csprojString =
+"""
+<Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <TargetFramework>net8.0</TargetFramework>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
-        <DebugType>embedded</DebugType>
-    </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<DebugType>embedded</DebugType>
+	</PropertyGroup>
 
-    <ItemGroup>
-	    <Reference Include=""..\Echidna2.dll"" />
-	    <Reference Include=""..\Echidna2.Core.dll"" />
-	    <Reference Include=""..\Echidna2.Gui.dll"" />
-	    <Reference Include=""..\Echidna2.Mathematics.dll"" />
-	    <Reference Include=""..\Echidna2.Rendering.dll"" />
-	    <Reference Include=""..\Echidna2.Rendering3D.dll"" />
-	    <Reference Include=""..\Echidna2.Serialization.dll"" />
-	    <Reference Include=""..\Echidna2.SourceGenerators.dll"" />
-	    <Analyzer Include=""..\Echidna2.SourceGenerators.dll"" />
-    </ItemGroup>
+	<ItemGroup>
+		<Reference Include="..\Echidna2.dll" />
+		<Reference Include="..\Echidna2.Core.dll" />
+		<Reference Include="..\Echidna2.Gui.dll" />
+		<Reference Include="..\Echidna2.Mathematics.dll" />
+		<Reference Include="..\Echidna2.Rendering.dll" />
+		<Reference Include="..\Echidna2.Rendering3D.dll" />
+		<Reference Include="..\Echidna2.Serialization.dll" />
+		<Reference Include="..\Echidna2.SourceGenerators.dll" />
+		<Analyzer Include="..\Echidna2.SourceGenerators.dll" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="OpenTK" Version="4.8.2" />
+	</ItemGroup>
 
 </Project>
-";
+""";
 		File.WriteAllText($"{CompilationFolder}/EchidnaProject.csproj", csprojString);
 	}
 	
@@ -121,20 +127,27 @@ using Echidna2.SourceGenerators;
 			File.WriteAllText($"{CompilationFolder}/{className}.cs", scriptString);
 		}
 		
-		if (table.TryGetValue("This", out object? _))
-			CreateThisCSFile(prefabPath, table);
+		if (table.TryGetValue("This", out object? thisTable))
+			CreateThisCSFile(prefabPath, table, (TomlTable)thisTable);
 	}
 	
-	public static void CreateThisCSFile(string prefabPath, TomlTable table)
+	public static void CreateThisCSFile(string prefabPath, TomlTable table, TomlTable thisTable)
 	{
 		List<TomlTable> components = table.TryGetValue("Components", out object? componentsArray) ? ((TomlArray)componentsArray).OfType<TomlTable>().ToList() : [];
 		List<TomlTable> fields = table.TryGetValue("Fields", out object? fieldsArray) ? ((TomlArray)fieldsArray).OfType<TomlTable>().ToList() : [];
+		List<string> events = table.TryGetValue("Events", out object? eventsArray) ? ((TomlArray)eventsArray).OfType<string>().ToList() : [];
+		
+		List<string> interfaces = [];
+		if (components.Count != 0)
+			interfaces.Add("INotificationPropagator");
+		foreach (string eventName in events)
+			interfaces.Add($"INotificationListener<I{eventName}.Notification>");
 		
 		string className = Path.GetFileNameWithoutExtension(prefabPath);
 		string scriptString = CSFileHeader;
 		scriptString += $"public partial class {className}";
-		if (components.Count != 0)
-			scriptString += ": INotificationPropagator\n";
+		if (interfaces.Count != 0)
+			scriptString += " : " + string.Join(", ", interfaces) + "\n";
 		else
 			scriptString += "\n";
 		scriptString += "{\n";
@@ -156,6 +169,15 @@ using Echidna2.SourceGenerators;
 		{
 			foreach (TomlTable fieldTable in fields)
 				scriptString += $"\t[SerializedValue] public {fieldTable["Type"]} {fieldTable["Name"]} {{ get; set; }} = default!;\n";
+			scriptString += "\n";
+		}
+		
+		foreach (string eventName in events)
+		{
+			scriptString += $"\tpublic void OnNotify(I{eventName}.Notification notification)\n";
+			scriptString += "\t{\n";
+			scriptString += "\t\t" + thisTable["On" + eventName].ToString().Split("\n").Join("\n\t\t") + "\n";
+			scriptString += "\t}\n";
 			scriptString += "\n";
 		}
 		
