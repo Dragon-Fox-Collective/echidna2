@@ -120,6 +120,8 @@ public static class TomlSerializer
 			}
 		}
 	}
+	
+	public static bool IsValidComponentId(KeyValuePair<string, object> pair) => pair.Key.All(char.IsDigit);
 }
 
 public static class TomlDeserializer
@@ -144,8 +146,7 @@ public static class TomlDeserializer
 			doneFirstObject = true;
 		}
 		
-		foreach ((string id, object value) in table
-			         .Where(pair => pair.Key.All(char.IsDigit)))
+		foreach ((string id, object value) in table.Where(TomlSerializer.IsValidComponentId))
 		{
 			TomlTable componentTable = (TomlTable)value;
 			

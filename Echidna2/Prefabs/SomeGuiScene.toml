@@ -1,5 +1,5 @@
 ﻿[2]
-Prefab = "RectWithHierarchy.toml"
+Prefab = "Gui/RectWithHierarchy.toml"
 Name = "Some Hierarchy"
 AnchorPreset = "Full"
 Color = { R = 0.0, G = 0.5, B = 0.5, A = 1.0 }

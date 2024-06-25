@@ -1,0 +1,28 @@
+﻿Fields = [
+    { Type = "Mesh", Name = "Mesh" },
+    { Type = "Shader", Name = "Shader" },
+    { Type = "CubeMap", Name = "CubeMap" },
+]
+Events = [
+    "Draw"
+]
+
+[This]
+Mesh = "Cube"
+Shader = "Skybox"
+CubeMap = "Skybox"
+
+OnDraw = """
+GL.DepthFunc(DepthFunction.Lequal);
+bool cullBackFaces = Mesh.CullBackFaces;
+Mesh.CullBackFaces = false;
+
+Shader.Bind();
+Shader.SetMatrix4("view", notification.Camera.ViewMatrix);
+Shader.SetMatrix4("projection", notification.Camera.ProjectionMatrix);
+CubeMap.Bind();
+Mesh.Draw();
+
+Mesh.CullBackFaces = cullBackFaces;
+GL.DepthFunc(DepthFunction.Less);
+"""

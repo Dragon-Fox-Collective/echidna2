@@ -13,3 +13,17 @@ public class MeshSerializer : Serializer<string, Mesh>
 		_ => throw new InvalidOperationException($"Mesh type {data} does not exist")
 	};
 }
+
+public class ShaderSerializer : Serializer<string, Shader>
+{
+	public string Serialize(Shader value) => throw new InvalidOperationException("Cannot serialize shader");
+	
+	public Shader Deserialize(Shader? value, string data) => data switch
+	{
+		"Solid" => Shader.Solid,
+		"PBR" => Shader.PBR,
+		"Skybox" => Shader.Skybox,
+		"Quad" => Shader.Quad,
+		_ => throw new InvalidOperationException($"Shader type {data} does not exist")
+	};
+}

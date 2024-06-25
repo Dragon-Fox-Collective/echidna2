@@ -4,11 +4,18 @@ using Echidna2.Core;
 using Echidna2.Gui;
 using Echidna2.Prefabs.Editor;
 using Echidna2.Rendering;
+using Echidna2.Rendering3D;
 using Echidna2.Serialization;
 using OpenTK.Windowing.Desktop;
 
+// :/ cubemap no longer static constructed because nothing references it since the skybox is a toml now
+object staticConstructorLoad;
+staticConstructorLoad = CubeMap.Skybox;
+staticConstructorLoad = Mesh.Cube;
+staticConstructorLoad = Shader.Quad;
+
 Console.WriteLine("Hello, World!");
-Compilation.CompileCSProj("Prefabs/Editor/Editor.toml", "Prefabs/Editor/AddComponentWindow.toml", "Prefabs/Cube.toml").Wait();
+Compilation.CompileCSProj("Prefabs").Wait();
 
 AssemblyLoadContext projectAssemblyLoadContext = new("EchidnaProject");
 using FileStream projectAssemblyFileStream = new(Compilation.CompilationDllPath, FileMode.Open, FileAccess.Read);

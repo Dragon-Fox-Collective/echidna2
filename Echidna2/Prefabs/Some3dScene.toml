@@ -1,6 +1,6 @@
 ﻿[0]
 Component = "Echidna2.Core.Hierarchy, Echidna2.Core"
-Children = [ "1", "2" ]
+Children = [ "1", "2", "3" ]
 
 [1]
 Prefab = "Cube.toml"
@@ -12,3 +12,6 @@ Prefab = "Cube.toml"
 Name = "Some Upper Cube"
 Albedo = { R = 0.5, G = 1.0, B = 0.0, A = 1.0 }
 LocalPosition = { X = 0.0, Y = 0.0, Z = 2.5 }
+
+[3]
+Prefab = "Rendering3D/SkyboxRenderer.toml"

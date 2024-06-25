@@ -22,20 +22,21 @@ using Echidna2.Rendering3D;
 using Echidna2.Serialization;
 using Echidna2.SourceGenerators;
 
+
 """;
 	
-	public static async Task CompileCSProj(params string[] prefabPaths)
+	public static async Task CompileCSProj(string prefabRootPath)
 	{
 		RecreateDirectory();
 		CreateCSProj();
 		
-		foreach (string prefabPath in prefabPaths)
+		foreach (string prefabPath in Directory.EnumerateFiles(prefabRootPath, "*.toml", SearchOption.AllDirectories))
 		{
 			CreateCSFiles(prefabPath);
 		}
 		await CompileCSProj();
 		
-		foreach (string prefabPath in prefabPaths)
+		foreach (string prefabPath in Directory.EnumerateFiles(prefabRootPath, "*.toml", SearchOption.AllDirectories))
 		{
 			Dictionary<string, (bool, Dictionary<string, string>)> serializedEvents = GetSerializedEvents(prefabPath);
 			CreateCSFiles(prefabPath, serializedEvents);
@@ -87,8 +88,7 @@ using Echidna2.SourceGenerators;
 	public static void CreateCSFiles(string prefabPath, Dictionary<string, (bool, Dictionary<string, string>)>? serializedEvents = null)
 	{
 		TomlTable table = Toml.ToModel(File.ReadAllText(prefabPath));
-		foreach ((string id, object value) in table
-			         .Where(pair => pair.Key.All(char.IsDigit)))
+		foreach ((string id, object value) in table.Where(TomlSerializer.IsValidComponentId))
 		{
 			TomlTable valueTable = (TomlTable)value;
 			if (!valueTable.TryGetValue("ScriptContent", out object scriptContent))
@@ -122,26 +122,42 @@ using Echidna2.SourceGenerators;
 		}
 		
 		if (table.TryGetValue("This", out object? _))
-			CreateThisCSFile(prefabPath, (TomlArray)table["Components"]);
+			CreateThisCSFile(prefabPath, table);
 	}
 	
-	public static void CreateThisCSFile(string prefabPath, TomlArray components)
+	public static void CreateThisCSFile(string prefabPath, TomlTable table)
 	{
+		List<TomlTable> components = table.TryGetValue("Components", out object? componentsArray) ? ((TomlArray)componentsArray).OfType<TomlTable>().ToList() : [];
+		List<TomlTable> fields = table.TryGetValue("Fields", out object? fieldsArray) ? ((TomlArray)fieldsArray).OfType<TomlTable>().ToList() : [];
+		
 		string className = Path.GetFileNameWithoutExtension(prefabPath);
 		string scriptString = CSFileHeader;
-		scriptString += $"public partial class {className} : INotificationPropagator\n";
+		scriptString += $"public partial class {className}";
+		if (components.Count != 0)
+			scriptString += ": INotificationPropagator\n";
+		else
+			scriptString += "\n";
 		scriptString += "{\n";
 		
-		foreach (TomlTable componentTable in components.OfType<TomlTable>())
-			scriptString += $"\t[SerializedReference, ExposeMembersInClass] public {componentTable["Type"]} {componentTable["Name"]} {{ get; set; }} = null!;\n";
+		if (components.Count != 0)
+		{
+			foreach (TomlTable componentTable in components)
+				scriptString += $"\t[SerializedReference, ExposeMembersInClass] public {componentTable["Type"]} {componentTable["Name"]} {{ get; set; }} = null!;\n";
+			scriptString += "\n";
+			
+			scriptString += "\tpublic void Notify<T>(T notification) where T : notnull\n";
+			scriptString += "\t{\n";
+			foreach (TomlTable componentTable in components)
+				scriptString += $"\t\tINotificationPropagator.Notify(notification, {componentTable["Name"]});\n";
+			scriptString += "\t}\n\n";
+		}
 		
-		scriptString += "\n";
-		
-		scriptString += "\tpublic void Notify<T>(T notification) where T : notnull\n";
-		scriptString += "\t{\n";
-		foreach (TomlTable componentTable in components.OfType<TomlTable>())
-			scriptString += $"\t\tINotificationPropagator.Notify(notification, {componentTable["Name"]});\n";
-		scriptString += "\t}\n";
+		if (fields.Count != 0)
+		{
+			foreach (TomlTable fieldTable in fields)
+				scriptString += $"\t[SerializedValue] public {fieldTable["Type"]} {fieldTable["Name"]} {{ get; set; }} = default!;\n";
+			scriptString += "\n";
+		}
 		
 		scriptString += "}\n";
 		
@@ -224,16 +240,29 @@ using Echidna2.SourceGenerators;
 		return ((string)typeName).Split(",")[0];
 	}
 	
-	public static Type GetComponentBaseType(string prefabPath, string id, TomlTable componentTable, Assembly projectAssembly)
+	public static Type GetComponentBaseType(string prefabPath, string? id, TomlTable componentTable, Assembly projectAssembly)
 	{
-		string className = $"{Path.GetFileNameWithoutExtension(prefabPath)}_{id}";
-		if (File.Exists(className + ".cs"))
-			return projectAssembly.GetType(className) ?? throw new NullReferenceException($"Type {className} does not exist");
+		string className = Path.GetFileNameWithoutExtension(prefabPath) + (id is not null ? "_" + id : "");
+		if (File.Exists($"{CompilationFolder}/{className}.cs"))
+			return projectAssembly.GetType(className) ?? throw new NullReferenceException($"Type {className} has a file but does not exist as a type");
 		
 		if (componentTable.TryGetValue("Prefab", out object basePrefab))
 		{
 			string basePrefabPath = $"{Path.GetDirectoryName(prefabPath)}/{(string)basePrefab}";
-			(string baseId, object baseComponentTable) = Toml.ToModel(File.ReadAllText(basePrefabPath)).First();
+			if (!File.Exists(basePrefabPath))
+				throw new FileNotFoundException($"Could not fine file '{basePrefabPath}' referenced by prefab '{prefabPath}'");
+			TomlTable baseTable = Toml.ToModel(File.ReadAllText(basePrefabPath));
+			string? baseId;
+			object baseComponentTable;
+			if (baseTable.TryGetValue("This", out object? baseThis))
+			{
+				baseId = null;
+				baseComponentTable = baseThis;
+			}
+			else
+			{
+				(baseId, baseComponentTable) = baseTable.First(TomlSerializer.IsValidComponentId);
+			}
 			return GetComponentBaseType(basePrefabPath, baseId, (TomlTable)baseComponentTable, projectAssembly);
 		}
 		
@@ -253,8 +282,7 @@ using Echidna2.SourceGenerators;
 		
 		TomlTable table = Toml.ToModel(File.ReadAllText(prefabPath));
 		Dictionary<string, (bool baseTypeIsIInitialize, Dictionary<string, string> events)> serializedEvents = new();
-		foreach ((string id, object value) in table
-			         .Where(pair => pair.Key.All(char.IsDigit)))
+		foreach ((string id, object value) in table.Where(TomlSerializer.IsValidComponentId))
 		{
 			TomlTable valueTable = (TomlTable)value;
 			Type baseType = GetComponentBaseType(prefabPath, id, valueTable, assembly);
