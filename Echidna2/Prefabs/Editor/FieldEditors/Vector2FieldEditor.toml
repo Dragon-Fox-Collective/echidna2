@@ -1,5 +1,34 @@
 [This]
-Component = "Echidna2.Prefabs.Editor.FieldEditors.Vector2FieldEditor, Echidna2"
+Components = [
+    { Type = "Echidna2.Prefabs.Gui.HLayoutWithHierarchy", Name = "Layout" },
+]
+Interfaces = [
+    "Echidna2.Prefabs.Editor.FieldEditors.IFieldEditor<Vector2>",
+]
+Properties = [
+    { PropertyType = "Value", Type = "Vector2", Name = "Value", SetterContent = """
+_Value = value;
+XFieldEditor.Load(value.X);
+YFieldEditor.Load(value.Y);
+""" },
+    { PropertyType = "Reference", Type = "DoubleFieldEditor", Name = "XFieldEditor" },
+    { PropertyType = "Reference", Type = "DoubleFieldEditor", Name = "YFieldEditor" },
+    { PropertyType = "Event", Type = "object?", Name = "ValueChanged" },
+]
+Events = [
+    { EventType = "Reference", Target = "XFieldEditor", Name = "ValueChanged", Args = [{ Name = "x", Type = "object?", CastTo = "double" }], Content = """
+_Value = _Value with { X = x };
+ValueChanged?.Invoke(Value);
+""" },
+    { EventType = "Reference", Target = "YFieldEditor", Name = "ValueChanged", Args = [{ Name = "y", Type = "object?", CastTo = "double" }], Content = """
+_Value = _Value with { Y = y };
+ValueChanged?.Invoke(Value);
+""" },
+]
+Functions = [
+    { ReturnType = "void", Name = "Load", Args = [{ Type = "Vector2", Name = "value" }], Content = "Value = value;" },
+]
+
 [This.Values]
 Layout = "2"
 XFieldEditor = "3"

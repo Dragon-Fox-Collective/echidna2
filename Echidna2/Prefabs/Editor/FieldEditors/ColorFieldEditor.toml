@@ -13,10 +13,10 @@ GFieldEditor.Load(_Value.G / 255.0);
 BFieldEditor.Load(_Value.B / 255.0);
 AFieldEditor.Load(_Value.A / 255.0);
 """ },
-    { PropertyType = "Reference", Type = "Echidna2.Prefabs.Editor.FieldEditors.DoubleFieldEditor", Name = "RFieldEditor" },
-    { PropertyType = "Reference", Type = "Echidna2.Prefabs.Editor.FieldEditors.DoubleFieldEditor", Name = "GFieldEditor" },
-    { PropertyType = "Reference", Type = "Echidna2.Prefabs.Editor.FieldEditors.DoubleFieldEditor", Name = "BFieldEditor" },
-    { PropertyType = "Reference", Type = "Echidna2.Prefabs.Editor.FieldEditors.DoubleFieldEditor", Name = "AFieldEditor" },
+    { PropertyType = "Reference", Type = "DoubleFieldEditor", Name = "RFieldEditor" },
+    { PropertyType = "Reference", Type = "DoubleFieldEditor", Name = "GFieldEditor" },
+    { PropertyType = "Reference", Type = "DoubleFieldEditor", Name = "BFieldEditor" },
+    { PropertyType = "Reference", Type = "DoubleFieldEditor", Name = "AFieldEditor" },
     { PropertyType = "Event", Type = "object?", Name = "ValueChanged" },
 ]
 Events = [

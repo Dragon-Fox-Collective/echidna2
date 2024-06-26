@@ -51,11 +51,11 @@ public partial class Editor : INotificationPropagator, ICanBeLaidOut
 	
 	private Dictionary<Type, Func<IFieldEditor>> editorInstantiators = new()
 	{
-		{ typeof(string), StringFieldEditor.Instantiate },
-		{ typeof(double), DoubleFieldEditor.Instantiate },
-		{ typeof(Vector2), Vector2FieldEditor.Instantiate },
-		{ typeof(Vector3), Vector3FieldEditor.Instantiate },
-		{ typeof(Quaternion), QuaternionFieldEditor.Instantiate },
+		{ typeof(string), Instantiator("Prefabs/Editor/FieldEditors/StringFieldEditor.toml") },
+		{ typeof(double), Instantiator("Prefabs/Editor/FieldEditors/DoubleFieldEditor.toml") },
+		{ typeof(Vector2), Instantiator("Prefabs/Editor/FieldEditors/Vector2FieldEditor.toml") },
+		{ typeof(Vector3), Instantiator("Prefabs/Editor/FieldEditors/Vector3FieldEditor.toml") },
+		{ typeof(Quaternion), Instantiator("Prefabs/Editor/FieldEditors/QuaternionFieldEditor.toml") },
 		{ typeof(Color), Instantiator("Prefabs/Editor/FieldEditors/ColorFieldEditor.toml") },
 	};
 	

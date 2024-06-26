@@ -1,5 +1,34 @@
 ﻿[This]
-Component = "Echidna2.Prefabs.Editor.FieldEditors.DoubleFieldEditor, Echidna2"
+Components = [
+    { Type = "Echidna2.Prefabs.Editor.FieldEditors.StringFieldEditor", Name = "StringFieldEditor" },
+]
+Interfaces = [
+    "Echidna2.Prefabs.Editor.FieldEditors.IFieldEditor<double>",
+]
+Properties = [
+    { PropertyType = "Value", Type = "double", Name = "Value", SetterContent = """
+_Value = value;
+StringFieldEditor.Load(value.ToString(CultureInfo.CurrentCulture));
+""" },
+    { PropertyType = "Event", Type = "object?", Name = "ValueChanged" },
+]
+Events = [
+    { EventType = "Reference", Target = "StringFieldEditor", Name = "ValueChanged", Args = [{ Name = "stringValue", Type = "object?", CastTo = "string" }], Content = """
+if (double.TryParse(stringValue, NumberStyles.Any, CultureInfo.CurrentCulture, out double result))
+{
+    _Value = result;
+    ValueChanged?.Invoke(Value);
+}
+else
+{
+    StringFieldEditor.Load(Value.ToString(CultureInfo.CurrentCulture));
+}
+""" },
+]
+Functions = [
+    { ReturnType = "void", Name = "Load", Args = [{ Type = "double", Name = "value" }], Content = "Value = value;" },
+]
+
 [This.Values]
 StringFieldEditor = "2"
 

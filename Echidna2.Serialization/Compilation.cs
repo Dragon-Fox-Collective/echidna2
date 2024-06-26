@@ -18,12 +18,14 @@ public static class Compilation
 using Echidna2;
 using Echidna2.Core;
 using Echidna2.Gui;
+using Echidna2.Mathematics;
 using Echidna2.Rendering;
 using Echidna2.Rendering3D;
 using Echidna2.Serialization;
 using Echidna2.SourceGenerators;
 using OpenTK.Graphics.OpenGL4;
 using System.Drawing;
+using System.Globalization;
 
 
 """;

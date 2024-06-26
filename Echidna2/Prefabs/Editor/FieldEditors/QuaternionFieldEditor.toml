@@ -1,5 +1,27 @@
 [This]
-Component = "Echidna2.Prefabs.Editor.FieldEditors.QuaternionFieldEditor, Echidna2"
+Components = [
+    { Type = "Vector3FieldEditor", Name = "VectorFieldEditor" },
+]
+Interfaces = [
+    "Echidna2.Prefabs.Editor.FieldEditors.IFieldEditor<Quaternion>",
+]
+Properties = [
+    { PropertyType = "Value", Type = "Quaternion", Name = "Value", SetterContent = """
+_Value = value;
+VectorFieldEditor.Load(value.ToEulerAngles());
+""" },
+    { PropertyType = "Event", Type = "object?", Name = "ValueChanged" },
+]
+Events = [
+    { EventType = "Reference", Target = "VectorFieldEditor", Name = "ValueChanged", Args = [{ Name = "vector", Type = "object?", CastTo = "Vector3" }], Content = """
+_Value = Quaternion.FromEulerAngles(vector);
+ValueChanged?.Invoke(Value);
+""" },
+]
+Functions = [
+    { ReturnType = "void", Name = "Load", Args = [{ Type = "Quaternion", Name = "value" }], Content = "Value = value;" },
+]
+
 [This.Values]
 VectorFieldEditor = "2"
 
