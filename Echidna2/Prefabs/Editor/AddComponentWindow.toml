@@ -80,7 +80,7 @@ AddComponentWindow.UseSelectedComponent();
 HorizontalExpand = true
 Margin = 5.0
 Children = [ "9" ]
-AddComponentWindow = "0"
+AddComponentWindow = "This"
 Window = "1"
 
 [9]

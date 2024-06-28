@@ -24,6 +24,7 @@ using Echidna2.Rendering3D;
 using Echidna2.Serialization;
 using Echidna2.SourceGenerators;
 using OpenTK.Graphics.OpenGL4;
+using OpenTK.Windowing.GraphicsLibraryFramework;
 using System.Drawing;
 using System.Globalization;
 
@@ -126,7 +127,7 @@ using System.Globalization;
 			foreach (TomlTable component in components)
 			{
 				scriptString += $"\tprivate {component["Type"]} _{component["Name"]} = default!;\n";
-				scriptString += $"\t[SerializedReference, ExposeMembersInClass] public {component["Type"]} {component["Name"]}\n";
+				scriptString += $"\t[SerializedReference{(!component.TryGetValue("ExposeProperties", out object? expose) || (bool)expose ? ", ExposeMembersInClass" : "")}] public {component["Type"]} {component["Name"]}\n";
 				scriptString += "\t{\n";
 				scriptString += $"\t\tget => _{component["Name"]};\n";
 				scriptString += "\t\tset\n";
@@ -174,11 +175,13 @@ using System.Globalization;
 			}
 			scriptString += "\n";
 			
-			scriptString += "\tpublic void Notify<T>(T notification) where T : notnull\n";
-			scriptString += "\t{\n";
-			foreach (TomlTable componentTable in components)
-				scriptString += $"\t\tINotificationPropagator.Notify(notification, {componentTable["Name"]});\n";
-			scriptString += "\t}\n\n";
+			if (components.Count != 0)
+			{
+				scriptString += "\tpublic void Notify<T>(T notification) where T : notnull\n";
+				scriptString += "\t{\n";
+				scriptString += $"\t\tINotificationPropagator.Notify(notification, {string.Join(", ", components.Select(component => component["Name"]))});\n";
+				scriptString += "\t}\n\n";
+			}
 		}
 		
 		foreach (TomlTable property in properties.Where(PropertyIsValue))

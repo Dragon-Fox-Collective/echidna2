@@ -1,5 +1,73 @@
 ﻿[This]
-Component = "Echidna2.Prefabs.Editor.FieldEditors.StringFieldEditor, Echidna2"
+Components = [
+    { Type = "Echidna2.Prefabs.Gui.FullRectWithHierarchy", Name = "Rect" },
+    { Type = "Button", Name = "Button", ExposeProperties = false },
+]
+Interfaces = [
+    "Echidna2.Prefabs.Editor.FieldEditors.IFieldEditor<string>",
+]
+Properties = [
+    { PropertyType = "Reference", Type = "Echidna2.Prefabs.Gui.TextRect", Name = "Text" },
+    { PropertyType = "Value", Type = "string", Name = "Value", SetterContent = """
+_Value = value;
+BufferValue = value;
+ValueChanged?.Invoke(value);
+""" },
+    { PropertyType = "Value", Type = "string", Name = "BufferValue", SetterContent = """
+_BufferValue = value;
+Text.TextString = value;
+""" },
+    { PropertyType = "Value", Type = "bool", Name = "IsFocused", SetterContent = """
+if (value == IsFocused) return;
+_IsFocused = value;
+
+if (IsFocused)
+{
+    Text.Color = Color.DeepSkyBlue;
+    CursorPosition = Value.Length;
+}
+else
+{
+    Text.Color = Color.White;
+}
+""" },
+    { PropertyType = "Value", Type = "int", Name = "CursorPosition" },
+    { PropertyType = "Event", Type = "object?", Name = "ValueChanged" },
+]
+Events = [
+    { EventType = "Notification", Name = "TextInput", Content = """
+if (!IsFocused) return;
+
+if (notification.Key is Keys.Enter)
+{
+    Value = BufferValue;
+    IsFocused = false;
+}
+else if (notification.Key is Keys.Escape)
+{
+    BufferValue = Value;
+    IsFocused = false;
+}
+else
+{
+    string tempBufferValue = BufferValue;
+    int tempCursorPosition = CursorPosition;
+    notification.Key.ManipulateText(notification.Modifiers, ref tempBufferValue, ref tempCursorPosition);
+    BufferValue = tempBufferValue;
+    CursorPosition = tempCursorPosition;
+}
+""" },
+    { EventType = "Reference", Target = "Button", Name = "MouseDown", Args = [], Content = """
+IsFocused = true;
+""" },
+    { EventType = "Reference", Target = "Button", Name = "MouseDownOutside", Args = [], Content = """
+IsFocused = false;
+""" },
+]
+Functions = [
+    { ReturnType = "void", Name = "Load", Args = [{ Type = "string", Name = "value" }], Content = "Value = value;" },
+]
+
 [This.Values]
 Rect = "2"
 Text = "3"

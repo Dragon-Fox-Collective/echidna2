@@ -1,6 +1,6 @@
 ﻿[This]
 Components = [
-    { Type = "Echidna2.Prefabs.Editor.FieldEditors.StringFieldEditor", Name = "StringFieldEditor" },
+    { Type = "StringFieldEditor", Name = "StringFieldEditor" },
 ]
 Interfaces = [
     "Echidna2.Prefabs.Editor.FieldEditors.IFieldEditor<double>",
