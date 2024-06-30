@@ -110,11 +110,15 @@ using System.Globalization;
 			interfaces.Add($"INotificationListener<I{@event["Name"]}.Notification>");
 		
 		bool thisIsSubclass = id != "This";
-		string className = thisIsSubclass ? $"{Path.GetFileNameWithoutExtension(prefabPath)}_{id}" : Path.GetFileNameWithoutExtension(prefabPath);
+		string className = GetPrefabClassName(prefabPath, id);
 		if (thisIsSubclass)
 			interfaces.Insert(0, GetComponentBaseTypeName(prefabPath, id, table));
 		
 		string scriptString = CSFileHeader;
+		
+		scriptString += $"namespace {GetPrefabClassNamespace(prefabPath)};\n";
+		scriptString += "\n";
+		
 		scriptString += $"public partial class {className}";
 		if (interfaces.Count != 0)
 			scriptString += " : " + string.Join(", ", interfaces) + "\n";
@@ -316,8 +320,16 @@ using System.Globalization;
 		
 		scriptString += "}\n";
 		
-		File.WriteAllText($"{CompilationFolder}/{className}.cs", scriptString);
+		string classPath = GetPrefabClassPath(prefabPath, id);
+		Directory.CreateDirectory(Path.GetDirectoryName(classPath));
+		File.WriteAllText(classPath, scriptString);
 	}
+	
+	public static string GetPrefabClassPath(string prefabPath, string id) => $"{CompilationFolder}/{Path.GetDirectoryName(prefabPath)}/{GetPrefabClassName(prefabPath, id)}.cs";
+	
+	public static string GetPrefabClassName(string prefabPath, string id) => id is not "This" ? $"{Path.GetFileNameWithoutExtension(prefabPath)}_{id}" : Path.GetFileNameWithoutExtension(prefabPath);
+	
+	public static string GetPrefabClassNamespace(string prefabPath) => Path.GetDirectoryName(prefabPath).Replace('/', '.').Replace('\\', '.');
 	
 	public static async Task CompileCSProj()
 	{

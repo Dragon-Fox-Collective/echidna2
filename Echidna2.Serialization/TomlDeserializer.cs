@@ -106,13 +106,13 @@ public static class TomlDeserializer
 	
 	private static object DeserializeComponent(string id, string typeName, bool useProjectAssembly)
 	{
-		Type? type = useProjectAssembly ? ProjectAssembly.GetType(typeName) : Type.GetType(typeName);
+		Type? type = useProjectAssembly ? ProjectAssembly.DefinedTypes.FirstOrDefault(type => type.Name == typeName) : Type.GetType(typeName);
 		if (type == null)
-			throw new InvalidOperationException($"Type {typeName} of id {id} does not exist");
+			throw new InvalidOperationException($"Type '{typeName}' of id '{id}' does not exist");
 		
 		ConstructorInfo? constructor = type.GetConstructor([]);
 		if (constructor == null)
-			throw new InvalidOperationException($"Type {type} of id {id} does not have a parameterless constructor");
+			throw new InvalidOperationException($"Type '{type}' of id '{id}' does not have a parameterless constructor");
 		
 		return constructor.Invoke([]);
 	}

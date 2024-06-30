@@ -54,7 +54,7 @@ AFieldEditor = "6"
 
 [2]
 Prefab = "../../Gui/HLayoutWithHierarchy.toml"
-Name = "Vector3 Layout"
+Name = "Color Layout"
 Children = [ "3", "4", "5", "6" ]
 HorizontalExpand = true
 
