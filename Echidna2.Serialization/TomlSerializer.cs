@@ -30,16 +30,16 @@ public static class TomlSerializer
 		
 		TomlTable prefabTable = new();
 		
+		foreach ((string id, TomlTable table) in references.Select(pair => (pair.Value, tables[pair.Key])))
+			prefabTable.Add(id, table);
+		
 		TomlArray favoriteFields = [];
 		foreach ((object component, MemberInfo field) in prefabRoot.FavoriteFields)
 		{
 			string componentId = GetReferenceTo(component);
 			favoriteFields.Add($"{componentId}.{field.Name}");
 		}
-		prefabTable.Add("FavoriteFields", favoriteFields);
-		
-		foreach ((string id, TomlTable table) in references.Select(pair => (pair.Value, tables[pair.Key])))
-			prefabTable.Add(id, table);
+		tables[prefabRoot.RootObject].Add("FavoriteFields", favoriteFields);
 		
 		File.WriteAllText(path, Toml.FromModel(prefabTable));
 		return prefabTable;
