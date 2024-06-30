@@ -98,6 +98,7 @@ public partial class ComponentPanel : INotificationPropagator, IEditorInitialize
 	private void AddField(MemberInfo member, object component)
 	{
 		HLayoutWithHierarchy layout = HLayoutWithHierarchy.Instantiate();
+		layout.Name = member.Name + " Field Layout";
 		Fields.AddChild(layout);
 		
 		FullLayoutWithHierarchy textClipper = FullLayoutWithHierarchy.Instantiate();
