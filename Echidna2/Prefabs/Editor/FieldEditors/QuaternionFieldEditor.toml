@@ -6,7 +6,7 @@ Interfaces = [
     "Echidna2.Prefabs.Editor.FieldEditors.IFieldEditor<Quaternion>",
 ]
 Properties = [
-    { PropertyType = "Value", Type = "Quaternion", Name = "Value", SetterContent = """
+    { PropertyType = "Public", Type = "Quaternion", Name = "Value", SetterContent = """
 _Value = value;
 VectorFieldEditor.Load(value.ToEulerAngles());
 """ },

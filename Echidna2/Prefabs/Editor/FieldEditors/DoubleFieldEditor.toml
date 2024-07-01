@@ -6,7 +6,7 @@ Interfaces = [
     "Echidna2.Prefabs.Editor.FieldEditors.IFieldEditor<double>",
 ]
 Properties = [
-    { PropertyType = "Value", Type = "double", Name = "Value", SetterContent = """
+    { PropertyType = "Public", Type = "double", Name = "Value", SetterContent = """
 _Value = value;
 StringFieldEditor.Load(value.ToString(CultureInfo.CurrentCulture));
 """ },

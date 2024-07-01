@@ -22,7 +22,7 @@ using FileStream projectAssemblyFileStream = new(Compilation.CompilationDllPath,
 TomlDeserializer.ProjectAssembly = projectAssemblyLoadContext.LoadFromStream(projectAssemblyFileStream);
 
 
-Editor root = (Editor)TomlDeserializer.Deserialize(AppContext.BaseDirectory + "Prefabs/Editor/Editor.toml").RootObject;
+Editor root = (Editor)Editor.Instantiate("Prefabs/Editor/Editor.toml");
 root.Notify(new IEditorInitialize.Notification(root));
 
 PrefabRoot prefab = TomlDeserializer.Deserialize(AppContext.BaseDirectory + root.PrefabPath);

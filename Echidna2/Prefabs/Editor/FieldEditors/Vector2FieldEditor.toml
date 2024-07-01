@@ -6,7 +6,7 @@ Interfaces = [
     "Echidna2.Prefabs.Editor.FieldEditors.IFieldEditor<Vector2>",
 ]
 Properties = [
-    { PropertyType = "Value", Type = "Vector2", Name = "Value", SetterContent = """
+    { PropertyType = "Public", Type = "Vector2", Name = "Value", SetterContent = """
 _Value = value;
 XFieldEditor.Load(value.X);
 YFieldEditor.Load(value.Y);

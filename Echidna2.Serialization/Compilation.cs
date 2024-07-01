@@ -27,6 +27,7 @@ using OpenTK.Graphics.OpenGL4;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 using System.Drawing;
 using System.Globalization;
+using System.Reflection;
 
 
 """;
@@ -267,6 +268,60 @@ using System.Globalization;
 			scriptString += "\n";
 		}
 		
+		foreach (TomlTable property in properties.Where(PropertyIsPublic))
+		{
+			scriptString += $"\tprivate {property["Type"]} _{property["Name"]} = default!;\n";
+			scriptString += $"\tpublic {property["Type"]} {property["Name"]}\n";
+			scriptString += "\t{\n";
+			if (property.TryGetValue("GetterContent", out object? getterContent))
+			{
+				scriptString += "\t\tget\n";
+				scriptString += "\t\t{\n";
+				scriptString += "\t\t\t" + ((string)getterContent).Split("\n").Join("\n\t\t\t") + "\n";
+				scriptString += "\t\t}\n";
+			}
+			else
+				scriptString += $"\t\tget => _{property["Name"]};\n";
+			if (property.TryGetValue("SetterContent", out object? setterContent))
+			{
+				scriptString += "\t\tset\n";
+				scriptString += "\t\t{\n";
+				scriptString += "\t\t\t" + ((string)setterContent).Split("\n").Join("\n\t\t\t") + "\n";
+				scriptString += "\t\t}\n";
+			}
+			else
+				scriptString += $"\t\tset => _{property["Name"]} = value;\n";
+			scriptString += "\t}\n";
+			scriptString += "\n";
+		}
+		
+		foreach (TomlTable property in properties.Where(PropertyIsPrivate))
+		{
+			scriptString += $"\tprivate {property["Type"]} _{property["Name"]} = default!;\n";
+			scriptString += $"\tprivate {property["Type"]} {property["Name"]}\n";
+			scriptString += "\t{\n";
+			if (property.TryGetValue("GetterContent", out object? getterContent))
+			{
+				scriptString += "\t\tget\n";
+				scriptString += "\t\t{\n";
+				scriptString += "\t\t\t" + ((string)getterContent).Split("\n").Join("\n\t\t\t") + "\n";
+				scriptString += "\t\t}\n";
+			}
+			else
+				scriptString += $"\t\tget => _{property["Name"]};\n";
+			if (property.TryGetValue("SetterContent", out object? setterContent))
+			{
+				scriptString += "\t\tset\n";
+				scriptString += "\t\t{\n";
+				scriptString += "\t\t\t" + ((string)setterContent).Split("\n").Join("\n\t\t\t") + "\n";
+				scriptString += "\t\t}\n";
+			}
+			else
+				scriptString += $"\t\tset => _{property["Name"]} = value;\n";
+			scriptString += "\t}\n";
+			scriptString += "\n";
+		}
+		
 		foreach (TomlTable property in properties.Where(PropertyIsEvent))
 		{
 			scriptString += $"\tpublic event Action<{property["Type"]}>? {property["Name"]};\n";
@@ -311,7 +366,14 @@ using System.Globalization;
 		
 		foreach (TomlTable function in functions)
 		{
-			scriptString += $"\tpublic void {function["Name"]}({string.Join(", ", ((TomlArray)function["Args"]).OfType<TomlTable>().Select(arg => $"{arg["Type"]} {arg["Name"]}"))})\n";
+			scriptString += "\t";
+			
+			if (!function.TryGetValue("Type", out object? type) || (string)type == "Public")
+				scriptString += "public";
+			else if ((string)type == "Private")
+				scriptString += "private";
+			
+			scriptString += $" void {function["Name"]}({string.Join(", ", ((TomlArray)function["Args"]).OfType<TomlTable>().Select(arg => $"{arg["Type"]} {arg["Name"]}"))})\n";
 			scriptString += "\t{\n";
 			scriptString += "\t\t" + ((string)function["Content"]).Split("\n").Join("\n\t\t") + "\n";
 			scriptString += "\t}\n";

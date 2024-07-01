@@ -16,7 +16,7 @@ public partial class Editor : INotificationPropagator, ICanBeLaidOut
 	[SerializedReference, ExposeMembersInClass] public RectLayout RectLayout { get; set; } = null!;
 	[SerializedReference, ExposeMembersInClass] public Hierarchy PrefabChildren { get; set; } = null!;
 	[SerializedReference] public Viewport Viewport { get; set; } = null!;
-	[SerializedReference] public ComponentPanel ComponentPanel { get; set; } = null!;
+	[SerializedReference] public object ComponentPanel { get; set; } = null!;
 	[SerializedValue] public string PrefabPath { get; set; } = "";
 	
 	private ObjectPanel? objectPanel;
@@ -67,13 +67,14 @@ public partial class Editor : INotificationPropagator, ICanBeLaidOut
 	private void OnObjectSelected(object obj)
 	{
 		Console.WriteLine("Selected " + obj);
-		ComponentPanel.SelectedObject = obj;
+		ComponentPanel.GetType().GetMethod("set_SelectedObject").Invoke(ComponentPanel, [obj]); // lol. lmao even. revert to an acutal assignment asap
 	}
 	
 	public void RegisterFieldEditor<TFieldType, TFieldEditor>() where TFieldEditor : IFieldEditor<TFieldType> => editorInstantiators.Add(typeof(TFieldType), TFieldEditor.Instantiate);
 	public IFieldEditor InstantiateFieldEditor(Type type) => editorInstantiators[type]();
 	public bool HasRegisteredFieldEditor(Type type) => editorInstantiators.ContainsKey(type);
-	private static Func<IFieldEditor> Instantiator(string path) => () => (IFieldEditor)TomlDeserializer.Deserialize(AppContext.BaseDirectory + path).RootObject;
+	private static Func<IFieldEditor> Instantiator(string path) => () => (IFieldEditor)Instantiate(path);
+	public static object Instantiate(string path) => TomlDeserializer.Deserialize(AppContext.BaseDirectory + path).RootObject;
 	
 	public void SerializePrefab()
 	{

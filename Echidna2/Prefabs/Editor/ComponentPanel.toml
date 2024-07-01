@@ -1,5 +1,148 @@
 ﻿[This]
-Component = "Echidna2.Prefabs.Editor.ComponentPanel, Echidna2"
+Components = [
+    { Type = "Echidna2.Prefabs.Gui.FullRectWithHierarchy", Name = "Rect" },
+]
+Properties = [
+    { PropertyType = "Reference", Type = "Echidna2.Prefabs.Gui.TextRect", Name = "PrefabNameText" },
+    { PropertyType = "Reference", Type = "Echidna2.Prefabs.Gui.TextRect", Name = "ComponentNameText" },
+    { PropertyType = "Reference", Type = "ICanAddChildren", Name = "Fields" },
+    { PropertyType = "Reference", Type = "ICanAddChildren", Name = "Components" },
+    { PropertyType = "Private", Type = "Echidna2.Prefabs.Editor.Editor", Name = "Editor" },
+    { PropertyType = "Public", Type = "object?", Name = "SelectedObject", SetterContent = """
+_SelectedObject = value;
+if (SelectedObject is not null)
+{
+    if (SelectedObject is INamed named)
+        named.NameChanged += name => PrefabNameText.TextString = name;
+    PrefabNameText.TextString = INamed.GetName(SelectedObject);
+}
+else
+{
+    PrefabNameText.TextString = "No object selected";
+}
+
+SelectedComponent = null;
+
+INotificationPropagator.NotificationFinished += RefreshComponents;
+""" },
+    { PropertyType = "Public", Type = "object?", Name = "SelectedComponent", SetterContent = """
+_SelectedComponent = value;
+INotificationPropagator.NotificationFinished += RefreshFields;
+""" },
+]
+Events = [
+    { EventType = "Notification", Name = "EditorInitialize", Content = """
+Editor = notification.Editor;
+""" },
+]
+Functions = [
+    { ReturnType = "void", Name = "RefreshFields", Args = [], Content = """
+if (SelectedComponent is null)
+    RefreshFavoritedFields();
+else
+    RefreshSelectedComponentFields();
+""" },
+    { Type = "Private", ReturnType = "void", Name = "RefreshFavoritedFields", Args = [], Content = """
+Fields.ClearChildren();
+if (Editor.PrefabRoot is null) return;
+if (SelectedObject is null) return;
+
+ComponentNameText.TextString = "Favorites";
+
+List<object> availableComponents = ComponentUtils.GetAllComponents(SelectedObject).ToList();
+IEnumerable<(object Component, MemberInfo Member)> availableFields = Editor.PrefabRoot.FavoriteFields
+    .Where(zip => availableComponents.Contains(zip.Component));
+
+if (Editor.PrefabRoot.ChildPrefabs.FirstOrDefault(prefab => prefab.PrefabRoot.RootObject == SelectedObject) is { } selectedPrefab)
+    availableFields = availableFields.Concat(selectedPrefab.PrefabRoot.FavoriteFields);
+
+foreach ((object component, MemberInfo member) in availableFields)
+    AddField(member, component);
+""" },
+    { Type = "Private", ReturnType = "void", Name = "RefreshSelectedComponentFields", Args = [], Content = """
+Fields.ClearChildren();
+if (SelectedComponent is null) return;
+
+ComponentNameText.TextString = SelectedComponent.GetType().Name;
+
+foreach (MemberInfo member in SelectedComponent.GetType()
+             .GetMembers(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
+             .Where(member => member.GetCustomAttribute<SerializedValueAttribute>() is not null ||
+                              member.GetCustomAttribute<SerializedReferenceAttribute>() is not null))
+    AddField(member, SelectedComponent);
+""" },
+    { Type = "Private", ReturnType = "void", Name = "AddField", Args = [{ Type = "MemberInfo", Name = "member" }, { Type = "object", Name = "component" }], Content = """
+Echidna2.Prefabs.Gui.HLayoutWithHierarchy layout = Echidna2.Prefabs.Gui.HLayoutWithHierarchy.Instantiate();
+layout.Name = member.Name + " Field Layout";
+Fields.AddChild(layout);
+
+Echidna2.Prefabs.Gui.FullLayoutWithHierarchy textClipper = Echidna2.Prefabs.Gui.FullLayoutWithHierarchy.Instantiate();
+textClipper.ClipChildren = true;
+layout.AddChild(textClipper);
+
+Echidna2.Prefabs.Gui.TextRect text = Echidna2.Prefabs.Gui.TextRect.Instantiate();
+text.TextString = member.Name;
+text.LocalScale = (0.5, 0.5);
+text.MinimumSize = (300, 0);
+text.Justification = TextJustification.Left;
+textClipper.AddChild(text);
+
+IMemberWrapper wrapper = IMemberWrapper.Wrap(member);
+Echidna2.Prefabs.Editor.FieldEditors.IFieldEditor? fieldEditor =
+    member.GetCustomAttribute<SerializedValueAttribute>() is not null ? Editor.HasRegisteredFieldEditor(wrapper.FieldType) ? Editor.InstantiateFieldEditor(wrapper.FieldType) : null :
+    member.GetCustomAttribute<SerializedReferenceAttribute>() is not null ? NewReferenceFieldEditorOfType(wrapper.FieldType) :
+    null;
+if (fieldEditor is not null)
+{
+    fieldEditor.Load(wrapper.GetValue(component));
+    fieldEditor.ValueChanged += value =>
+    {
+        wrapper.SetValue(component, value);
+        Editor.PrefabRoot?.RegisterChange(new MemberPath(wrapper, new ComponentPath(component)));
+        Editor.SerializePrefab();
+    };
+    layout.AddChild(fieldEditor);
+}
+
+Echidna2.Prefabs.Gui.ButtonRect favoriteButton = Echidna2.Prefabs.Gui.ButtonRect.Instantiate();
+favoriteButton.MinimumSize = (25, 25);
+favoriteButton.Clicked += () =>
+{
+    if (Editor.PrefabRoot is null) return;
+    
+    if (!Editor.PrefabRoot.FavoriteFields.Remove((component, member)))
+        Editor.PrefabRoot.FavoriteFields.Add((component, member));
+    
+    Editor.SerializePrefab();
+};
+layout.AddChild(favoriteButton);
+
+FieldEditors.ReferenceFieldEditor NewReferenceFieldEditorOfType(Type type)
+{
+    FieldEditors.ReferenceFieldEditor referenceFieldEditor = (FieldEditors.ReferenceFieldEditor)Echidna2.Prefabs.Editor.Editor.Instantiate("Prefabs/Editor/FieldEditors/ReferenceFieldEditor.toml");
+    referenceFieldEditor.ComponentType = type;
+    INotificationPropagator.Notify(new IEditorInitialize.Notification(Editor), referenceFieldEditor);
+    return referenceFieldEditor;
+}
+""" },
+    { ReturnType = "void", Name = "RefreshComponents", Args = [], Content = """
+Components.ClearChildren();
+if (SelectedObject is null) return;
+
+Echidna2.Prefabs.Gui.ButtonRect favoritesButton = (Echidna2.Prefabs.Gui.ButtonRect)Echidna2.Prefabs.Editor.Editor.Instantiate("Prefabs/Editor/ComponentSelectionButton.toml");
+favoritesButton.Clicked += () => SelectedComponent = null;
+favoritesButton.MinimumSize = (40, 40);
+Components.AddChild(favoritesButton);
+
+foreach (object component in ComponentUtils.GetAllComponents(SelectedObject))
+{
+    Echidna2.Prefabs.Gui.ButtonRect button = (Echidna2.Prefabs.Gui.ButtonRect)Echidna2.Prefabs.Editor.Editor.Instantiate("Prefabs/Editor/ComponentSelectionButton.toml");
+    button.Clicked += () => SelectedComponent = component;
+    Components.AddChild(button);
+}
+""" },
+]
+
 [This.Values]
 Name = "Component Panel"
 Rect = "1"

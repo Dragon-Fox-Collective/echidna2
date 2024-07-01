@@ -13,6 +13,8 @@ public static class SerializationPredicates
 	
 	public static bool PropertyIsValue(TomlTable property) => (string)property["PropertyType"] == "Value";
 	public static bool PropertyIsReference(TomlTable property) => (string)property["PropertyType"] == "Reference";
+	public static bool PropertyIsPrivate(TomlTable property) => (string)property["PropertyType"] == "Private";
+	public static bool PropertyIsPublic(TomlTable property) => (string)property["PropertyType"] == "Public";
 	public static bool PropertyIsEvent(TomlTable property) => (string)property["PropertyType"] == "Event";
 	
 	public static bool ComponentNeedsCustomClass(string id, TomlTable component) => id is "This" ? !component.Keys.Any(key => key is "Component" or "Prefab") : component.Keys.Any(key => key is "Components" or "Properties" or "Events" or "Functions" or "Interfaces");

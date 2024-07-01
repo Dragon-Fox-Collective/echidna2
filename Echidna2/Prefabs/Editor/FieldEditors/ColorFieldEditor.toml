@@ -6,7 +6,7 @@ Interfaces = [
     "Echidna2.Prefabs.Editor.FieldEditors.IFieldEditor<Color>",
 ]
 Properties = [
-    { PropertyType = "Value", Type = "Color", Name = "Value", SetterContent = """
+    { PropertyType = "Public", Type = "Color", Name = "Value", SetterContent = """
 _Value = value;
 RFieldEditor.Load(_Value.R / 255.0);
 GFieldEditor.Load(_Value.G / 255.0);
