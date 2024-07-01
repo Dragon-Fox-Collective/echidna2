@@ -1,4 +1,6 @@
-﻿[This]
+﻿Using = ["Echidna2.Rendering", "Echidna2.Rendering3D", "OpenTK.Graphics.OpenGL4"]
+
+[This]
 Properties = [
     { PropertyType = "Value", Type = "Mesh", Name = "Mesh" },
     { PropertyType = "Value", Type = "Shader", Name = "Shader" },

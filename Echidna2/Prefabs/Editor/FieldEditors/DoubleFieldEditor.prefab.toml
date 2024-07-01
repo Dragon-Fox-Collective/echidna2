@@ -1,9 +1,11 @@
-﻿[This]
+﻿Using = ["Echidna2.Prefabs.Editor.FieldEditors", "System.Globalization"]
+
+[This]
 Components = [
     { Type = "StringFieldEditor", Name = "StringFieldEditor" },
 ]
 Interfaces = [
-    "Echidna2.Prefabs.Editor.FieldEditors.IFieldEditor<double>",
+    "IFieldEditor<double>",
 ]
 Properties = [
     { PropertyType = "Public", Type = "double", Name = "Value", SetterContent = """

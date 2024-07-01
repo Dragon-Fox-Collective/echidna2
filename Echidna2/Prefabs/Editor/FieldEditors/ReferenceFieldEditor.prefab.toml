@@ -1,13 +1,15 @@
-﻿[This]
+﻿Using = ["Echidna2", "Echidna2.Prefabs.Gui", "Echidna2.Gui", "Echidna2.Prefabs.Editor.FieldEditors"]
+
+[This]
 Components = [
-    { Type = "Echidna2.Prefabs.Gui.FullRectWithHierarchy", Name = "Rect" },
+    { Type = "FullRectWithHierarchy", Name = "Rect" },
     { Type = "Button", Name = "Button", ExposeProperties = false },
 ]
 Interfaces = [
-    "Echidna2.Prefabs.Editor.FieldEditors.IFieldEditor",
+    "IFieldEditor",
 ]
 Properties = [
-    { PropertyType = "Reference", Type = "Echidna2.Prefabs.Gui.TextRect", Name = "Text" },
+    { PropertyType = "Reference", Type = "TextRect", Name = "Text" },
     { PropertyType = "Public", Type = "object?", Name = "Value", SetterContent = """
 _Value = value;
 Text.TextString = INamed.GetName(value) ?? "null";

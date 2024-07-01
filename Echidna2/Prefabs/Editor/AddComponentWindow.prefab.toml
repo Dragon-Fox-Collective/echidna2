@@ -1,6 +1,8 @@
-﻿[This]
+﻿Using = ["Echidna2", "Echidna2.Prefabs.Gui", "Echidna2.Gui"]
+
+[This]
 Components = [
-    { Type = "Echidna2.Prefabs.Gui.FullRectWindow", Name = "Window" },
+    { Type = "FullRectWindow", Name = "Window" },
 ]
 Properties = [
     { PropertyType = "Reference", Type = "ICanAddChildren", Name = "ComponentList" },
@@ -8,9 +10,9 @@ Properties = [
     { PropertyType = "Public", Type = "FieldEditors.ReferenceFieldEditor", Name = "Field" },
     { PropertyType = "Private", Type = "Echidna2.Prefabs.Editor.Editor", Name = "Editor" },
     { PropertyType = "Private", Type = "bool", Name = "HasBeenInitialized" },
-    { PropertyType = "Private", Type = "Echidna2.Prefabs.Gui.ButtonText", Name = "NullText" },
+    { PropertyType = "Private", Type = "ButtonText", Name = "NullText" },
     { PropertyType = "Public", Type = "PrefabRoot?", Name = "PrefabRoot", GetterContent = "return Editor.PrefabRoot;", HasSetter = false },
-    { PropertyType = "Private", Type = "(object Component, Echidna2.Prefabs.Gui.ButtonText Text)?", Name = "SelectedComponent", SetterComponent = """
+    { PropertyType = "Private", Type = "(object Component, ButtonText Text)?", Name = "SelectedComponent", SetterComponent = """
 (SelectedComponent?.Text ?? NullText).Color = Color.White;
 _SelectedComponent = value;
 (SelectedComponent?.Text ?? NullText).Color = Color.DeepSkyBlue;
@@ -23,7 +25,7 @@ Editor = notification.Editor;
     { EventType = "Notification", Name = "Initialize", Content = """
 if (HasBeenInitialized) return;
 
-NullText = (Echidna2.Prefabs.Gui.ButtonText)Echidna2.Prefabs.Editor.Editor.Instantiate("Prefabs/Gui/ButtonText");
+NullText = (ButtonText)Echidna2.Prefabs.Editor.Editor.Instantiate("Prefabs/Gui/ButtonText");
 NullText.TextString = "Default value";
 NullText.LocalScale = (0.5, 0.5);
 NullText.Justification = TextJustification.Left;
@@ -38,7 +40,7 @@ foreach ((object component, ComponentUtils.ReferencePath? reference) in Componen
                  .Select(component => (component, (ComponentUtils.ReferencePath?) null)))
              .DistinctBy(pair => pair.Item1))
 {
-    Echidna2.Prefabs.Gui.ButtonText text = (Echidna2.Prefabs.Gui.ButtonText)Echidna2.Prefabs.Editor.Editor.Instantiate("Prefabs/Gui/ButtonText");
+    ButtonText text = (ButtonText)Echidna2.Prefabs.Editor.Editor.Instantiate("Prefabs/Gui/ButtonText");
     
     if (reference is null)
         text.TextString = $"Unparented {component.GetType().Name}";
@@ -90,7 +92,7 @@ Children = [ "4" ]
 Prefab = "../Gui/ButtonRect"
 Properties = [
     { PropertyType = "Reference", Type = "AddComponentWindow", Name = "AddComponentWindow" },
-    { PropertyType = "Reference", Type = "Echidna2.Prefabs.Gui.FullRectWindow", Name = "Window" },
+    { PropertyType = "Reference", Type = "FullRectWindow", Name = "Window" },
 ]
 Events = [
     { EventType = "Self", Target = "Button", Name = "Clicked", Args = [], Content = """
@@ -120,7 +122,7 @@ Children  = [ "6", "8" ]
 [6]
 Prefab = "../Gui/ButtonRect"
 Properties = [
-    { PropertyType = "Reference", Type = "Echidna2.Prefabs.Gui.FullRectWindow", Name = "Window" },
+    { PropertyType = "Reference", Type = "FullRectWindow", Name = "Window" },
 ]
 Events = [
     { EventType = "Self", Target = "Button", Name = "Clicked", Args = [], Content = """
@@ -142,7 +144,7 @@ LocalScale = { X = 0.5, Y = 0.5 }
 Prefab = "../Gui/ButtonRect"
 Properties = [
     { PropertyType = "Reference", Type = "AddComponentWindow", Name = "AddComponentWindow" },
-    { PropertyType = "Reference", Type = "Echidna2.Prefabs.Gui.FullRectWindow", Name = "Window" },
+    { PropertyType = "Reference", Type = "FullRectWindow", Name = "Window" },
 ]
 Events = [
     { EventType = "Self", Target = "Button", Name = "Clicked", Args = [], Content = """

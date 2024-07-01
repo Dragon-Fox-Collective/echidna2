@@ -1,10 +1,12 @@
-﻿[This]
+﻿Using = ["Echidna2", "Echidna2.Prefabs.Gui", "System.Reflection", "Echidna2.Gui"]
+
+[This]
 Components = [
-    { Type = "Echidna2.Prefabs.Gui.FullRectWithHierarchy", Name = "Rect" },
+    { Type = "FullRectWithHierarchy", Name = "Rect" },
 ]
 Properties = [
-    { PropertyType = "Reference", Type = "Echidna2.Prefabs.Gui.TextRect", Name = "PrefabNameText" },
-    { PropertyType = "Reference", Type = "Echidna2.Prefabs.Gui.TextRect", Name = "ComponentNameText" },
+    { PropertyType = "Reference", Type = "TextRect", Name = "PrefabNameText" },
+    { PropertyType = "Reference", Type = "TextRect", Name = "ComponentNameText" },
     { PropertyType = "Reference", Type = "ICanAddChildren", Name = "Fields" },
     { PropertyType = "Reference", Type = "ICanAddChildren", Name = "Components" },
     { PropertyType = "Private", Type = "Echidna2.Prefabs.Editor.Editor", Name = "Editor" },
@@ -72,15 +74,15 @@ foreach (MemberInfo member in SelectedComponent.GetType()
     AddField(member, SelectedComponent);
 """ },
     { Type = "Private", ReturnType = "void", Name = "AddField", Args = [{ Type = "MemberInfo", Name = "member" }, { Type = "object", Name = "component" }], Content = """
-Echidna2.Prefabs.Gui.HLayoutWithHierarchy layout = (Echidna2.Prefabs.Gui.HLayoutWithHierarchy)Echidna2.Prefabs.Editor.Editor.Instantiate("Prefabs/Gui/HLayoutWithHierarchy");
+HLayoutWithHierarchy layout = (HLayoutWithHierarchy)Echidna2.Prefabs.Editor.Editor.Instantiate("Prefabs/Gui/HLayoutWithHierarchy");
 layout.Name = member.Name + " Field Layout";
 Fields.AddChild(layout);
 
-Echidna2.Prefabs.Gui.FullLayoutWithHierarchy textClipper = (Echidna2.Prefabs.Gui.FullLayoutWithHierarchy)Echidna2.Prefabs.Editor.Editor.Instantiate("Prefabs/Gui/FullLayoutWithHierarchy");
+FullLayoutWithHierarchy textClipper = (FullLayoutWithHierarchy)Echidna2.Prefabs.Editor.Editor.Instantiate("Prefabs/Gui/FullLayoutWithHierarchy");
 textClipper.ClipChildren = true;
 layout.AddChild(textClipper);
 
-Echidna2.Prefabs.Gui.TextRect text = (Echidna2.Prefabs.Gui.TextRect)Echidna2.Prefabs.Editor.Editor.Instantiate("Prefabs/Gui/TextRect");
+TextRect text = (TextRect)Echidna2.Prefabs.Editor.Editor.Instantiate("Prefabs/Gui/TextRect");
 text.TextString = member.Name;
 text.LocalScale = (0.5, 0.5);
 text.MinimumSize = (300, 0);
@@ -104,7 +106,7 @@ if (fieldEditor is not null)
     layout.AddChild(fieldEditor);
 }
 
-Echidna2.Prefabs.Gui.ButtonRect favoriteButton = (Echidna2.Prefabs.Gui.ButtonRect)Echidna2.Prefabs.Editor.Editor.Instantiate("Prefabs/Gui/ButtonRect");
+ButtonRect favoriteButton = (ButtonRect)Echidna2.Prefabs.Editor.Editor.Instantiate("Prefabs/Gui/ButtonRect");
 favoriteButton.MinimumSize = (25, 25);
 favoriteButton.Clicked += () =>
 {
@@ -129,14 +131,14 @@ FieldEditors.ReferenceFieldEditor NewReferenceFieldEditorOfType(Type type)
 Components.ClearChildren();
 if (SelectedObject is null) return;
 
-Echidna2.Prefabs.Gui.ButtonRect favoritesButton = (Echidna2.Prefabs.Gui.ButtonRect)Echidna2.Prefabs.Editor.Editor.Instantiate("Prefabs/Editor/ComponentSelectionButton");
+ButtonRect favoritesButton = (ButtonRect)Echidna2.Prefabs.Editor.Editor.Instantiate("Prefabs/Editor/ComponentSelectionButton");
 favoritesButton.Clicked += () => SelectedComponent = null;
 favoritesButton.MinimumSize = (40, 40);
 Components.AddChild(favoritesButton);
 
 foreach (object component in ComponentUtils.GetAllComponents(SelectedObject))
 {
-    Echidna2.Prefabs.Gui.ButtonRect button = (Echidna2.Prefabs.Gui.ButtonRect)Echidna2.Prefabs.Editor.Editor.Instantiate("Prefabs/Editor/ComponentSelectionButton");
+    ButtonRect button = (ButtonRect)Echidna2.Prefabs.Editor.Editor.Instantiate("Prefabs/Editor/ComponentSelectionButton");
     button.Clicked += () => SelectedComponent = component;
     Components.AddChild(button);
 }

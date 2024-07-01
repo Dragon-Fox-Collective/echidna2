@@ -1,5 +1,7 @@
-﻿[This]
+﻿Using = ["Echidna2.Rendering3D"]
 FavoriteFields = ["LocalPosition", "LocalRotation", "LocalScale", "Albedo", "Metallic", "Roughness", "AmbientOcclusion"]
+
+[This]
 Components = [
     { Type = "Transform3D", Name = "Transform" },
     { Type = "PBRMeshRenderer", Name = "MeshRenderer" },

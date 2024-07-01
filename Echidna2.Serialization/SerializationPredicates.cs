@@ -4,7 +4,7 @@ namespace Echidna2.Serialization;
 
 public static class SerializationPredicates
 {
-	public static bool IdIsValidComponentId(KeyValuePair<string, object> pair) => true; // pair.Key.All(char.IsDigit);
+	public static bool IdIsValidComponentId(KeyValuePair<string, object> pair) => pair.Key is "This" || pair.Key.All(char.IsDigit);
 	
 	public static bool EventIsNotification(TomlTable @event) => (string)@event["EventType"] == "Notification";
 	public static bool EventIsSelf(TomlTable @event) => (string)@event["EventType"] == "Self";
@@ -17,5 +17,6 @@ public static class SerializationPredicates
 	public static bool PropertyIsPublic(TomlTable property) => (string)property["PropertyType"] == "Public";
 	public static bool PropertyIsEvent(TomlTable property) => (string)property["PropertyType"] == "Event";
 	
+	public static bool ComponentHasValidIdAndNeedsCustomClass(KeyValuePair<string, object> pair) => IdIsValidComponentId(pair) && ComponentNeedsCustomClass(pair.Key, (TomlTable)pair.Value);
 	public static bool ComponentNeedsCustomClass(string id, TomlTable component) => id is "This" ? !component.Keys.Any(key => key is "Component" or "Prefab") : component.Keys.Any(key => key is "Components" or "Properties" or "Events" or "Functions" or "Interfaces");
 }

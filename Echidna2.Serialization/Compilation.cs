@@ -1,6 +1,4 @@
 ﻿using System.Diagnostics;
-using System.Reflection;
-using System.Runtime.Loader;
 using Tomlyn;
 using Tomlyn.Model;
 using static Echidna2.Serialization.SerializationPredicates;
@@ -13,32 +11,13 @@ public static class Compilation
 	public static string CompilationBinFolder => $"{CompilationFolder}/bin/Debug/net8.0";
 	public static string CompilationDllPath => $"{CompilationBinFolder}/EchidnaProject.dll";
 	
-	private static string CSFileHeader =>
-"""
-using Echidna2;
-using Echidna2.Core;
-using Echidna2.Gui;
-using Echidna2.Mathematics;
-using Echidna2.Rendering;
-using Echidna2.Rendering3D;
-using Echidna2.Serialization;
-using Echidna2.SourceGenerators;
-using OpenTK.Graphics.OpenGL4;
-using OpenTK.Windowing.GraphicsLibraryFramework;
-using System.Drawing;
-using System.Globalization;
-using System.Reflection;
-
-
-""";
-	
-	public static async Task CompileCSProj(string prefabRootPath)
+	public static async Task Compile()
 	{
 		RecreateDirectory();
 		CreateCSProj();
 		
-		foreach (string prefabPath in Directory.EnumerateFiles(prefabRootPath, "*.prefab.toml", SearchOption.AllDirectories))
-			CreateCSFiles(prefabPath);
+		foreach (string prefabPath in Directory.EnumerateFiles(".", "*.prefab.toml", SearchOption.AllDirectories))
+			CreateCSFile(prefabPath[2..]); // Get rid of "./"
 		
 		await CompileCSProj();
 	}
@@ -89,15 +68,33 @@ using System.Reflection;
 		File.WriteAllText($"{CompilationFolder}/EchidnaProject.csproj", csprojString);
 	}
 	
-	public static void CreateCSFiles(string prefabPath)
+	public static void CreateCSFile(string prefabPath)
 	{
 		TomlTable table = Toml.ToModel(File.ReadAllText(prefabPath));
-		foreach ((string id, object componentTable) in table)
-			if (ComponentNeedsCustomClass(id, (TomlTable)componentTable))
-				CreateCSFile(prefabPath, id, (TomlTable)componentTable);
+		if (!table.Any(ComponentHasValidIdAndNeedsCustomClass)) return;
+		
+		string scriptString = "";
+		
+		List<string> usings = table.TryGetValue("Using", out object? usingsArray) ? ((TomlArray)usingsArray).OfType<string>().ToList() : [];
+		usings.Add("Echidna2.Core");
+		usings.Add("Echidna2.Mathematics");
+		usings.Add("Echidna2.Serialization");
+		foreach (string @using in usings)
+			scriptString += $"using {@using};\n";
+		scriptString += "\n";
+		
+		scriptString += $"namespace {GetPrefabClassNamespace(prefabPath)};\n";
+		scriptString += "\n";
+		
+		foreach ((string id, object componentTable) in table.Where(ComponentHasValidIdAndNeedsCustomClass))
+			scriptString += CreateCSClass(prefabPath, id, (TomlTable)componentTable) + "\n";
+		
+		string classPath = GetPrefabClassPath(prefabPath, "This");
+		Directory.CreateDirectory(Path.GetDirectoryName(classPath));
+		File.WriteAllText(classPath, scriptString);
 	}
 	
-	public static void CreateCSFile(string prefabPath, string id, TomlTable table)
+	public static string CreateCSClass(string prefabPath, string id, TomlTable table)
 	{
 		List<TomlTable> components = table.TryGetValue("Components", out object? componentsArray) ? ((TomlArray)componentsArray).OfType<TomlTable>().ToList() : [];
 		List<TomlTable> properties = table.TryGetValue("Properties", out object? propertiesArray) ? ((TomlArray)propertiesArray).OfType<TomlTable>().ToList() : [];
@@ -115,10 +112,7 @@ using System.Reflection;
 		if (thisIsSubclass)
 			interfaces.Insert(0, GetComponentBaseTypeName(prefabPath, id, table));
 		
-		string scriptString = CSFileHeader;
-		
-		scriptString += $"namespace {GetPrefabClassNamespace(prefabPath)};\n";
-		scriptString += "\n";
+		string scriptString = "";
 		
 		scriptString += $"public partial class {className}";
 		if (interfaces.Count != 0)
@@ -382,9 +376,7 @@ using System.Reflection;
 		
 		scriptString += "}\n";
 		
-		string classPath = GetPrefabClassPath(prefabPath, id);
-		Directory.CreateDirectory(Path.GetDirectoryName(classPath));
-		File.WriteAllText(classPath, scriptString);
+		return scriptString;
 	}
 	
 	public static string GetPrefabClassPath(string prefabPath, string id) => $"{CompilationFolder}/{Path.GetDirectoryName(prefabPath)}/{GetPrefabClassName(prefabPath, id)}.cs";

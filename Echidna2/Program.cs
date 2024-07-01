@@ -15,7 +15,7 @@ staticConstructorLoad = Mesh.Cube;
 staticConstructorLoad = Shader.Quad;
 
 Console.WriteLine("Hello, World!");
-Compilation.CompileCSProj("Prefabs").Wait();
+Compilation.Compile().Wait();
 
 AssemblyLoadContext projectAssemblyLoadContext = new("EchidnaProject");
 using FileStream projectAssemblyFileStream = new(Compilation.CompilationDllPath, FileMode.Open, FileAccess.Read);
@@ -38,7 +38,7 @@ Window window = new(new GameWindow(
 	{
 		ClientSize = (1280, 720),
 		Title = "Echidna Engine",
-		Icon = Window.CreateWindowIcon(AppContext.BaseDirectory +  "Assets/Echidna.png"),
+		Icon = Window.CreateWindowIcon(AppContext.BaseDirectory + "/Assets/Echidna.png"),
 	}
 ))
 {

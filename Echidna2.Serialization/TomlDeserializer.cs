@@ -67,7 +67,7 @@ public static class TomlDeserializer
 		if (prefabRoot.RootObject == null)
 			throw new InvalidOperationException($"Root object was not deserialized in '{path}'");
 		
-		prefabRoot.FavoriteFields = ((TomlTable)table["This"]).TryGetValue("FavoriteFields", out object? fields)
+		prefabRoot.FavoriteFields = table.TryGetValue("FavoriteFields", out object? fields)
 			? ((TomlArray)fields).Select(refPath =>
 			{
 				(string componentPath, string fieldPath) = ((string)refPath).SplitLast('.');

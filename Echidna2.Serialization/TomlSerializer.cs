@@ -39,7 +39,7 @@ public static class TomlSerializer
 			string componentId = GetReferenceTo(component);
 			favoriteFields.Add($"{componentId}.{field.Name}");
 		}
-		tables[prefabRoot.RootObject].Add("FavoriteFields", favoriteFields);
+		prefabTable.Add("FavoriteFields", favoriteFields);
 		
 		File.WriteAllText(path, Toml.FromModel(prefabTable));
 		return prefabTable;

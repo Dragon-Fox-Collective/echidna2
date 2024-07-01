@@ -65,7 +65,7 @@ public partial class Editor : INotificationPropagator, ICanBeLaidOut
 	private void OnObjectSelected(object obj)
 	{
 		Console.WriteLine("Selected " + obj);
-		ComponentPanel.GetType().GetMethod("set_SelectedObject").Invoke(ComponentPanel, [obj]); // lol. lmao even. revert to an acutal assignment asap
+		ComponentPanel.GetType().GetMethod("set_SelectedObject").Invoke(ComponentPanel, [obj]); // FIXME: lol. lmao even. revert to an acutal assignment asap
 	}
 	
 	public void RegisterFieldEditor<TFieldType, TFieldEditor>() where TFieldEditor : IFieldEditor<TFieldType> => editorInstantiators.Add(typeof(TFieldType), TFieldEditor.Instantiate);

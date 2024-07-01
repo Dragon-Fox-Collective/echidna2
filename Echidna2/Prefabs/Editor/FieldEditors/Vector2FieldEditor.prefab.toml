@@ -1,9 +1,11 @@
+Using = ["Echidna2.Prefabs.Gui", "Echidna2.Prefabs.Editor.FieldEditors"]
+
 [This]
 Components = [
-    { Type = "Echidna2.Prefabs.Gui.HLayoutWithHierarchy", Name = "Layout" },
+    { Type = "HLayoutWithHierarchy", Name = "Layout" },
 ]
 Interfaces = [
-    "Echidna2.Prefabs.Editor.FieldEditors.IFieldEditor<Vector2>",
+    "IFieldEditor<Vector2>",
 ]
 Properties = [
     { PropertyType = "Public", Type = "Vector2", Name = "Value", SetterContent = """
