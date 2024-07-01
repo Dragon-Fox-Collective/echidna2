@@ -1,5 +1,5 @@
 ﻿[This]
-Prefab = "Gui/RectWithHierarchy.toml"
+Prefab = "Gui/RectWithHierarchy"
 [This.Values]
 Name = "Some Hierarchy"
 AnchorPreset = "Full"

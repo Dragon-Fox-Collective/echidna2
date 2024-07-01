@@ -3,11 +3,9 @@ using Echidna2.Gui;
 using Echidna2.Mathematics;
 using Echidna2.Prefabs.Gui;
 using Echidna2.Serialization;
-using JetBrains.Annotations;
 
 namespace Echidna2.Prefabs.Editor;
 
-[UsedImplicitly, Prefab("Prefabs/Editor/HierarchyDisplay.toml")]
 public partial class HierarchyDisplay : INotificationPropagator, ICanBeLaidOut
 {
 	[SerializedReference, ExposeMembersInClass] public Named Named { get; set; } = null!;
@@ -36,22 +34,22 @@ public partial class HierarchyDisplay : INotificationPropagator, ICanBeLaidOut
 	
 	private FullLayoutWithHierarchy BoxOfHierarchy(object obj)
 	{
-		FullLayoutWithHierarchy box = FullLayoutWithHierarchy.Instantiate();
+		FullLayoutWithHierarchy box = (FullLayoutWithHierarchy)Editor.Instantiate("Prefabs/Gui/FullLayoutWithHierarchy");
 		box.Name = $"Box for {obj}";
 		box.AnchorPreset = AnchorPreset.Full;
 		box.LeftMargin = 10;
-		VLayoutWithHierarchy layout = VLayoutWithHierarchy.Instantiate();
+		VLayoutWithHierarchy layout = (VLayoutWithHierarchy)Editor.Instantiate("Prefabs/Gui/VLayoutWithHierarchy");
 		layout.Name = $"Layout for box for {obj}";
 		layout.AnchorPreset = AnchorPreset.Full;
 		box.AddChild(layout);
 		
-		ButtonRect button = ButtonRect.Instantiate();
+		ButtonRect button = (ButtonRect)Editor.Instantiate("Prefabs/Gui/ButtonRect");
 		button.AnchorPreset = AnchorPreset.Full;
 		button.Margin = 5;
 		button.MouseUp += () => ItemSelected?.Invoke(obj);
 		layout.AddChild(button);
 		
-		TextRect text = TextRect.Instantiate();
+		TextRect text = (TextRect)Editor.Instantiate("Prefabs/Gui/TextRect");
 		text.TextString = INamed.GetName(obj);
 		if (obj is INamed named)
 			named.NameChanged += name => text.TextString = name;

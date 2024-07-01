@@ -4,12 +4,10 @@ using Echidna2.Mathematics;
 using Echidna2.Rendering;
 using Echidna2.Rendering3D;
 using Echidna2.Serialization;
-using JetBrains.Annotations;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 
 namespace Echidna2.Prefabs.Editor;
 
-[UsedImplicitly, Prefab("Prefabs/EditorViewport3D.toml")]
 public partial class EditorViewport3D : INotificationPropagator, IUpdate, IMouseDown, IMouseMoved, IMouseUp, IMouseWheelScrolled, IKeyDown, IKeyUp
 {
 	[SerializedReference, ExposeMembersInClass] public Viewport3D Viewport { get; set; } = null!;

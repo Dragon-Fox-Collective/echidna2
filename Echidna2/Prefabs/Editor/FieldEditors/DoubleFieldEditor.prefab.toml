@@ -33,4 +33,4 @@ Functions = [
 StringFieldEditor = "2"
 
 [2]
-Prefab = "StringFieldEditor.toml"
+Prefab = "StringFieldEditor"

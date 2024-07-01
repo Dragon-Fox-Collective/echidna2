@@ -23,7 +23,7 @@ Editor = notification.Editor;
     { EventType = "Notification", Name = "Initialize", Content = """
 if (HasBeenInitialized) return;
 
-NullText = Echidna2.Prefabs.Gui.ButtonText.Instantiate();
+NullText = (Echidna2.Prefabs.Gui.ButtonText)Echidna2.Prefabs.Editor.Editor.Instantiate("Prefabs/Gui/ButtonText");
 NullText.TextString = "Default value";
 NullText.LocalScale = (0.5, 0.5);
 NullText.Justification = TextJustification.Left;
@@ -38,7 +38,7 @@ foreach ((object component, ComponentUtils.ReferencePath? reference) in Componen
                  .Select(component => (component, (ComponentUtils.ReferencePath?) null)))
              .DistinctBy(pair => pair.Item1))
 {
-    Echidna2.Prefabs.Gui.ButtonText text = Echidna2.Prefabs.Gui.ButtonText.Instantiate();
+    Echidna2.Prefabs.Gui.ButtonText text = (Echidna2.Prefabs.Gui.ButtonText)Echidna2.Prefabs.Editor.Editor.Instantiate("Prefabs/Gui/ButtonText");
     
     if (reference is null)
         text.TextString = $"Unparented {component.GetType().Name}";
@@ -79,7 +79,7 @@ Window = "1"
 ComponentList = "11"
 
 [1]
-Prefab = "../Gui/FullRectWindow.toml"
+Prefab = "../Gui/FullRectWindow"
 [1.Values]
 Margin = 10.0
 LocalSize = { X = 300, Y = 400 }
@@ -87,7 +87,7 @@ Depth = 15
 Children = [ "4" ]
 
 [2]
-Prefab = "../Gui/ButtonRect.toml"
+Prefab = "../Gui/ButtonRect"
 Properties = [
     { PropertyType = "Reference", Type = "AddComponentWindow", Name = "AddComponentWindow" },
     { PropertyType = "Reference", Type = "Echidna2.Prefabs.Gui.FullRectWindow", Name = "Window" },
@@ -105,20 +105,20 @@ AddComponentWindow = "This"
 Window = "1"
 
 [3]
-Prefab = "../Gui/TextRect.toml"
+Prefab = "../Gui/TextRect"
 TextString = "Add New Component"
 LocalScale = { X = 0.5, Y = 0.5 }
 
 [4]
-Prefab = "../Gui/VLayoutWithHierarchy.toml"
+Prefab = "../Gui/VLayoutWithHierarchy"
 Children = [ "10", "2", "5" ]
 
 [5]
-Prefab = "../Gui/HLayoutWithHierarchy.toml"
+Prefab = "../Gui/HLayoutWithHierarchy"
 Children  = [ "6", "8" ]
 
 [6]
-Prefab = "../Gui/ButtonRect.toml"
+Prefab = "../Gui/ButtonRect"
 Properties = [
     { PropertyType = "Reference", Type = "Echidna2.Prefabs.Gui.FullRectWindow", Name = "Window" },
 ]
@@ -134,12 +134,12 @@ Children = [ "7" ]
 Window = "1"
 
 [7]
-Prefab = "../Gui/TextRect.toml"
+Prefab = "../Gui/TextRect"
 TextString = "Cancel"
 LocalScale = { X = 0.5, Y = 0.5 }
 
 [8]
-Prefab = "../Gui/ButtonRect.toml"
+Prefab = "../Gui/ButtonRect"
 Properties = [
     { PropertyType = "Reference", Type = "AddComponentWindow", Name = "AddComponentWindow" },
     { PropertyType = "Reference", Type = "Echidna2.Prefabs.Gui.FullRectWindow", Name = "Window" },
@@ -158,16 +158,16 @@ AddComponentWindow = "This"
 Window = "1"
 
 [9]
-Prefab = "../Gui/TextRect.toml"
+Prefab = "../Gui/TextRect"
 TextString = "Confirm"
 LocalScale = { X = 0.5, Y = 0.5 }
 
 [10]
-Prefab = "../Gui/FullRectWithHierarchy.toml"
+Prefab = "../Gui/FullRectWithHierarchy"
 VerticalExpand = true
 Margin = 5.0
 Children = [ "11" ]
 
 [11]
-Prefab = "../Gui/VLayoutWithHierarchy.toml"
+Prefab = "../Gui/VLayoutWithHierarchy"
 Spacing = 5

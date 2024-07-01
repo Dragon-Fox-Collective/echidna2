@@ -4,11 +4,9 @@ using Echidna2.Gui;
 using Echidna2.Mathematics;
 using Echidna2.Prefabs.Editor.FieldEditors;
 using Echidna2.Serialization;
-using JetBrains.Annotations;
 
 namespace Echidna2.Prefabs.Editor;
 
-[UsedImplicitly, Prefab("Prefabs/Editor/Editor.toml")]
 public partial class Editor : INotificationPropagator, ICanBeLaidOut
 {
 	[SerializedReference, ExposeMembersInClass] public Named Named { get; set; } = null!;
@@ -51,12 +49,12 @@ public partial class Editor : INotificationPropagator, ICanBeLaidOut
 	
 	private Dictionary<Type, Func<IFieldEditor>> editorInstantiators = new()
 	{
-		{ typeof(string), Instantiator("Prefabs/Editor/FieldEditors/StringFieldEditor.toml") },
-		{ typeof(double), Instantiator("Prefabs/Editor/FieldEditors/DoubleFieldEditor.toml") },
-		{ typeof(Vector2), Instantiator("Prefabs/Editor/FieldEditors/Vector2FieldEditor.toml") },
-		{ typeof(Vector3), Instantiator("Prefabs/Editor/FieldEditors/Vector3FieldEditor.toml") },
-		{ typeof(Quaternion), Instantiator("Prefabs/Editor/FieldEditors/QuaternionFieldEditor.toml") },
-		{ typeof(Color), Instantiator("Prefabs/Editor/FieldEditors/ColorFieldEditor.toml") },
+		{ typeof(string), Instantiator("Prefabs/Editor/FieldEditors/StringFieldEditor") },
+		{ typeof(double), Instantiator("Prefabs/Editor/FieldEditors/DoubleFieldEditor") },
+		{ typeof(Vector2), Instantiator("Prefabs/Editor/FieldEditors/Vector2FieldEditor") },
+		{ typeof(Vector3), Instantiator("Prefabs/Editor/FieldEditors/Vector3FieldEditor") },
+		{ typeof(Quaternion), Instantiator("Prefabs/Editor/FieldEditors/QuaternionFieldEditor") },
+		{ typeof(Color), Instantiator("Prefabs/Editor/FieldEditors/ColorFieldEditor") },
 	};
 	
 	public void Notify<T>(T notification) where T : notnull
@@ -74,7 +72,7 @@ public partial class Editor : INotificationPropagator, ICanBeLaidOut
 	public IFieldEditor InstantiateFieldEditor(Type type) => editorInstantiators[type]();
 	public bool HasRegisteredFieldEditor(Type type) => editorInstantiators.ContainsKey(type);
 	private static Func<IFieldEditor> Instantiator(string path) => () => (IFieldEditor)Instantiate(path);
-	public static object Instantiate(string path) => TomlDeserializer.Deserialize(AppContext.BaseDirectory + path).RootObject;
+	public static object Instantiate(string path) => TomlDeserializer.Deserialize(AppContext.BaseDirectory + path + ".prefab.toml").RootObject;
 	
 	public void SerializePrefab()
 	{

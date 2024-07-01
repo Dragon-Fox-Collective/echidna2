@@ -6,12 +6,12 @@ Rect = "1"
 HierarchyDisplay = "2"
 
 [1]
-Prefab = "../Gui/FullRectWithHierarchy.toml"
+Prefab = "../Gui/FullRectWithHierarchy"
 [1.Values]
 Margin = 10.0
 Children = [ "2" ]
 
 [2]
-Prefab = "HierarchyDisplay.toml"
+Prefab = "HierarchyDisplay"
 [2.Values]
 AnchorPreset = "Full"

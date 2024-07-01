@@ -4,14 +4,12 @@ using Echidna2.Mathematics;
 using Echidna2.Rendering;
 using Echidna2.Rendering3D;
 using Echidna2.Serialization;
-using JetBrains.Annotations;
 using OpenTK.Graphics.OpenGL4;
 
 namespace Echidna2.Prefabs.Editor;
 
 public interface Viewport : ICanAddChildren;
 
-[UsedImplicitly, Prefab("Prefabs/Editor/ViewportGui.toml")]
 public partial class ViewportGui : Viewport, INotificationPropagator, ICanBeLaidOut, INotificationListener<IDraw.Notification>, IUpdate
 {
 	[SerializedReference, ExposeMembersInClass] public Named Named { get; set; } = null!;
@@ -48,7 +46,6 @@ public partial class ViewportGui : Viewport, INotificationPropagator, ICanBeLaid
 	}
 }
 
-[UsedImplicitly, Prefab("Prefabs/Viewport3D.toml")]
 public partial class Viewport3D : Viewport, INotificationPropagator, ICanBeLaidOut, INotificationListener<IDraw.Notification>, IUpdate
 {
 	[SerializedReference, ExposeMembersInClass] public Named Named { get; set; } = null!;

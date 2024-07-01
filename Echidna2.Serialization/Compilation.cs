@@ -37,7 +37,7 @@ using System.Reflection;
 		RecreateDirectory();
 		CreateCSProj();
 		
-		foreach (string prefabPath in Directory.EnumerateFiles(prefabRootPath, "*.toml", SearchOption.AllDirectories))
+		foreach (string prefabPath in Directory.EnumerateFiles(prefabRootPath, "*.prefab.toml", SearchOption.AllDirectories))
 			CreateCSFiles(prefabPath);
 		
 		await CompileCSProj();
@@ -389,7 +389,9 @@ using System.Reflection;
 	
 	public static string GetPrefabClassPath(string prefabPath, string id) => $"{CompilationFolder}/{Path.GetDirectoryName(prefabPath)}/{GetPrefabClassName(prefabPath, id)}.cs";
 	
-	public static string GetPrefabClassName(string prefabPath, string id) => id is not "This" ? $"{Path.GetFileNameWithoutExtension(prefabPath)}_{id}" : Path.GetFileNameWithoutExtension(prefabPath);
+	public static string GetPrefabClassName(string prefabPath, string id) => id is not "This" ? $"{GetPrefabFileNameWithoutExtension(prefabPath)}_{id}" : GetPrefabFileNameWithoutExtension(prefabPath);
+	
+	public static string GetPrefabFileNameWithoutExtension(string prefabPath) => prefabPath.EndsWith(".prefab.toml") ? Path.GetFileNameWithoutExtension(Path.GetFileNameWithoutExtension(prefabPath)) : throw new InvalidOperationException($"'{prefabPath}' is not a prefab file");
 	
 	public static string GetPrefabClassNamespace(string prefabPath) => Path.GetDirectoryName(prefabPath).Replace('/', '.').Replace('\\', '.');
 	
@@ -454,7 +456,7 @@ using System.Reflection;
 	{
 		if (componentTable.TryGetValue("Prefab", out object basePrefab))
 		{
-			string basePrefabPath = $"{Path.GetDirectoryName(prefabPath)}/{(string)basePrefab}";
+			string basePrefabPath = $"{Path.GetDirectoryName(prefabPath)}/{(string)basePrefab}.prefab.toml";
 			(string baseId, object baseComponentTable) = Toml.ToModel(File.ReadAllText(basePrefabPath)).First();
 			return GetComponentBaseTypeName(basePrefabPath, baseId, (TomlTable)baseComponentTable);
 		}
@@ -462,65 +464,6 @@ using System.Reflection;
 		if (componentTable.TryGetValue("Component", out object typeName))
 			return ((string)typeName).Split(",")[0];
 		
-		return Path.GetFileNameWithoutExtension(prefabPath) + (id is null or "This" ? "" : "_" + id);
-	}
-	
-	public static Type GetComponentBaseType(string prefabPath, string? id, TomlTable componentTable, Assembly projectAssembly)
-	{
-		string className = Path.GetFileNameWithoutExtension(prefabPath) + (id is null or "This" ? "" : "_" + id);
-		if (File.Exists($"{CompilationFolder}/{className}.cs"))
-			return projectAssembly.GetType(className) ?? throw new NullReferenceException($"Type {className} has a file but does not exist as a type");
-		
-		if (componentTable.TryGetValue("Prefab", out object basePrefab))
-		{
-			string basePrefabPath = $"{Path.GetDirectoryName(prefabPath)}/{(string)basePrefab}";
-			if (!File.Exists(basePrefabPath))
-				throw new FileNotFoundException($"Could not fine file '{basePrefabPath}' referenced by prefab '{prefabPath}'");
-			TomlTable baseTable = Toml.ToModel(File.ReadAllText(basePrefabPath));
-			string? baseId;
-			object baseComponentTable;
-			if (baseTable.TryGetValue("This", out object? baseThis))
-			{
-				baseId = null;
-				baseComponentTable = baseThis;
-			}
-			else
-			{
-				(baseId, baseComponentTable) = baseTable.First(IdIsValidComponentId);
-			}
-			return GetComponentBaseType(basePrefabPath, baseId, (TomlTable)baseComponentTable, projectAssembly);
-		}
-		
-		if (componentTable.TryGetValue("Component", out object typeName))
-			return Type.GetType((string)typeName) ?? throw new NullReferenceException($"Type {(string)typeName} does not exist");
-		
-		throw new InvalidOperationException($"Component table '{id}' of '{prefabPath}' does not contain a Component key, Prefab key, or class file ('{className}.cs')");
-	}
-	
-	public static Dictionary<string, (bool baseTypeIsIInitialize, Dictionary<string, string> events)> GetSerializedEvents(string prefabPath)
-	{
-		AssemblyLoadContext assemblyLoadContext = new("EchidnaProject", true);
-		// AssemblyName assemblyName = new("EchidnaProject");
-		// AssemblyDependencyResolver resolver = new(CompilationDllPath);
-		using FileStream fileStream = new(CompilationDllPath, FileMode.Open, FileAccess.Read);
-		Assembly assembly = assemblyLoadContext.LoadFromStream(fileStream);
-		
-		TomlTable table = Toml.ToModel(File.ReadAllText(prefabPath));
-		Dictionary<string, (bool baseTypeIsIInitialize, Dictionary<string, string> events)> serializedEvents = new();
-		foreach ((string id, object value) in table.Where(IdIsValidComponentId))
-		{
-			TomlTable valueTable = (TomlTable)value;
-			Type baseType = GetComponentBaseType(prefabPath, id, valueTable, assembly);
-			Dictionary<string, string> events = baseType
-				.GetEvents()
-				.Where(@event => @event.GetCustomAttributes<SerializedEventAttribute>().Any())
-				.Where(@event => valueTable.ContainsKey(@event.Name))
-				.ToDictionary(@event => @event.Name, @event => (string)valueTable[@event.Name]);
-			if (events.Count != 0)
-				serializedEvents.Add(id, (baseType.GetInterface("IInitialize") != null, events));
-		}
-		
-		assemblyLoadContext.Unload();
-		return serializedEvents;
+		return GetPrefabFileNameWithoutExtension(prefabPath) + (id is null or "This" ? "" : "_" + id);
 	}
 }

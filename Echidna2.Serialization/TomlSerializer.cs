@@ -55,7 +55,9 @@ public static class TomlSerializer
 		Uri pathUri = new(path);
 		Uri relativeToUri = new(relativeTo);
 		Uri relativeUri = relativeToUri.MakeRelativeUri(pathUri);
-		return Uri.UnescapeDataString(relativeUri.ToString());
+		string relativePath = Uri.UnescapeDataString(relativeUri.ToString());
+		string relativePathWithoutExt = Path.Join(Path.GetDirectoryName(relativePath), Compilation.GetPrefabFileNameWithoutExtension(relativePath));
+		return relativePathWithoutExt;
 	}
 	
 	private static void SerializeComponentType(PrefabRoot prefabRoot, IMemberPath path, object component, TomlTable table, string relativeTo)

@@ -42,17 +42,17 @@ YFieldEditor = "4"
 ZFieldEditor = "5"
 
 [2]
-Prefab = "../../Gui/HLayoutWithHierarchy.toml"
+Prefab = "../../Gui/HLayoutWithHierarchy"
 [2.Values]
 Name = "Vector3 Layout"
 Children = [ "3", "4", "5" ]
 HorizontalExpand = true
 
 [3]
-Prefab = "DoubleFieldEditor.toml"
+Prefab = "DoubleFieldEditor"
 
 [4]
-Prefab = "DoubleFieldEditor.toml"
+Prefab = "DoubleFieldEditor"
 
 [5]
-Prefab = "DoubleFieldEditor.toml"
+Prefab = "DoubleFieldEditor"

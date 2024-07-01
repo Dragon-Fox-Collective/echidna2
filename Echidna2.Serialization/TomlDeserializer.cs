@@ -26,7 +26,7 @@ public static class TomlDeserializer
 		{
 			TomlTable componentTable = (TomlTable)value;
 			
-			string? scriptName = id == "This" ? overridenTypeName : ComponentNeedsCustomClass(id, componentTable) ? $"{Path.GetFileNameWithoutExtension(path)}_{id}" : null;
+			string? scriptName = id == "This" ? overridenTypeName : ComponentNeedsCustomClass(id, componentTable) ? $"{Compilation.GetPrefabFileNameWithoutExtension(path)}_{id}" : null;
 			
 			object component;
 			if (componentTable.Remove("Component", out object? typeName))
@@ -36,14 +36,14 @@ public static class TomlDeserializer
 			}
 			else if (componentTable.Remove("Prefab", out object? prefabPath))
 			{
-				PrefabRoot componentPrefabRoot = Deserialize(Path.Join(Path.GetDirectoryName(path), (string)prefabPath), scriptName);
+				PrefabRoot componentPrefabRoot = Deserialize(Path.Join(Path.GetDirectoryName(path), (string)prefabPath + ".prefab.toml"), scriptName);
 				PrefabInstance componentPrefabInstance = new(componentPrefabRoot);
 				prefabRoot.ChildPrefabs.Add(componentPrefabInstance);
 				component = componentPrefabRoot.RootObject;
 			}
 			else
 			{
-				component = DeserializeComponent(id, Path.GetFileNameWithoutExtension(path), true);
+				component = DeserializeComponent(id, Compilation.GetPrefabFileNameWithoutExtension(path), true);
 			}
 			
 			if (id == "This")

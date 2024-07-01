@@ -26,4 +26,4 @@ Functions = [
 VectorFieldEditor = "2"
 
 [2]
-Prefab = "Vector3FieldEditor.toml"
+Prefab = "Vector3FieldEditor"

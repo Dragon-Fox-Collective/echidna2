@@ -1,11 +1,9 @@
 ﻿using Echidna2.Core;
 using Echidna2.Prefabs.Gui;
 using Echidna2.Serialization;
-using JetBrains.Annotations;
 
 namespace Echidna2.Prefabs.Editor;
 
-[UsedImplicitly, Prefab("Prefabs/Editor/ObjectPanel.toml")]
 public partial class ObjectPanel : INotificationPropagator
 {
 	[SerializedReference, ExposeMembersInClass] public FullRectWithHierarchy Rect { get; set; } = null!;

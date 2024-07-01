@@ -2,11 +2,9 @@
 using Echidna2.Core;
 using Echidna2.Gui;
 using Echidna2.Serialization;
-using JetBrains.Annotations;
 
 namespace Echidna2.Prefabs.Gui;
 
-[UsedImplicitly, Prefab("Prefabs/Gui/ButtonRect.toml")]
 public partial class ButtonRect : INotificationPropagator, IInitialize, ICanBeLaidOut
 {
 	[SerializedReference, ExposeMembersInClass] public Named Named { get; set; } = null!;
