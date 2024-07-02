@@ -13,7 +13,7 @@ public interface IHasText
 	public string TextString { get; set; }
 }
 
-public class Text : INotificationListener<IDraw.Notification>, IHasText
+public class Text : INotificationListener<Draw_Notification>, IHasText
 {
 	public static readonly Font CascadiaCode = new("Assets/CascadiaCode.ttf");
 	private static readonly Shader Shader = new(ShaderNodeUtil.MainVertexShader, File.ReadAllText("Assets/font.frag"));
@@ -27,7 +27,7 @@ public class Text : INotificationListener<IDraw.Notification>, IHasText
 	[SerializedValue] public TextJustification Justification { get; set; } = TextJustification.Center;
 	[SerializedValue] public TextAlignment Alignment { get; set; } = TextAlignment.Center;
 	
-	public void OnNotify(IDraw.Notification notification)
+	public void OnNotify(Draw_Notification notification)
 	{
 		if (TextString.Length == 0) return;
 		

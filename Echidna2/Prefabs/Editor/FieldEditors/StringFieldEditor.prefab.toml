@@ -1,4 +1,4 @@
-﻿Using = ["Echidna2.Prefabs.Gui", "Echidna2.Gui", "Echidna2.Rendering", "Echidna2.Prefabs.Editor.FieldEditors", "System.Drawing", "OpenTK.Windowing.GraphicsLibraryFramework"]
+﻿Using = ["Echidna2.Prefabs.Gui", "Echidna2.Gui", "Echidna2.Rendering", "System.Drawing", "OpenTK.Windowing.GraphicsLibraryFramework"]
 
 [This]
 Components = [

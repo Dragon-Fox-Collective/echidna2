@@ -1,7 +1,99 @@
-﻿Using = ["Echidna2.Rendering"]
+﻿Using = ["Echidna2.Gui", "System.Drawing", "OpenTK.Windowing.Desktop", "Echidna2.Rendering", "Echidna2.Rendering3D", "Echidna2.Prefabs.Editor", "Prefabs.Editor.FieldEditors", "Notifications.Editor"]
 
 [This]
-Component = "Echidna2.Prefabs.Editor.Editor, Echidna2"
+Components = [
+    { Type = "Named", Name = "Named" },
+    { Type = "RectTransform", Name = "RectTransform" },
+    { Type = "RectLayout", Name = "RectLayout" },
+    { Type = "Hierarchy", Name = "PrefabChildren" },
+]
+Interfaces = [
+    "ICanBeLaidOut",
+]
+Properties = [
+    { PropertyType = "Reference", Type = "Viewport", Name = "Viewport" },
+    { PropertyType = "Reference", Type = "object", Name = "ComponentPanel" },
+    { PropertyType = "Reference", Type = "ObjectPanel", Name = "ObjectPanel" },
+    { PropertyType = "Value", Type = "string", Name = "PrefabPath" },
+    { PropertyType = "Public", Type = "PrefabRoot", Name = "PrefabRoot", SetterContent = """
+Viewport.ClearChildren();
+_PrefabRoot = value;
+ObjectPanel.PrefabRoot = value;
+if (PrefabRoot is not null)
+    Viewport.AddChild(PrefabRoot.RootObject);
+""" },
+    { PropertyType = "Private", Type = "Dictionary<Type, Func<IFieldEditor>>", Name = "EditorInstantiators" },
+    { PropertyType = "Private", Type = "bool", Name = "HasBeenInitialized" },
+]
+Events = [
+    { EventType = "Reference", Target = "ObjectPanel", Name = "ItemSelected", Function = "OnObjectSelected" },
+    { EventType = "Notification", Name = "Initialize", Content = """
+EditorInstantiators = new Dictionary<Type, Func<IFieldEditor>>()
+{
+    { typeof(string), Instantiator("Prefabs/Editor/FieldEditors/StringFieldEditor") },
+    { typeof(double), Instantiator("Prefabs/Editor/FieldEditors/DoubleFieldEditor") },
+    { typeof(Vector2), Instantiator("Prefabs/Editor/FieldEditors/Vector2FieldEditor") },
+    { typeof(Vector3), Instantiator("Prefabs/Editor/FieldEditors/Vector3FieldEditor") },
+    { typeof(Quaternion), Instantiator("Prefabs/Editor/FieldEditors/QuaternionFieldEditor") },
+    { typeof(Color), Instantiator("Prefabs/Editor/FieldEditors/ColorFieldEditor") },
+};
+""" },
+]
+Functions = [
+    { ReturnType = "void", Name = "OnObjectSelected", Args = [{ Type = "object", Name = "obj" }], Content = """
+Console.WriteLine("Selected " + obj);
+ComponentPanel.GetType().GetMethod("set_SelectedObject").Invoke(ComponentPanel, [obj]); // FIXME: lol. lmao even. revert to an acutal assignment asap
+""" },
+    { ReturnType = "IFieldEditor", Name = "InstantiateFieldEditor", Args = [{ Type = "Type", Name = "type" }], Content = "return EditorInstantiators[type]();" },
+    { ReturnType = "bool", Name = "HasRegisteredFieldEditor", Args = [{ Type = "Type", Name = "type" }], Content = "return EditorInstantiators.ContainsKey(type);" },
+    { FunctionType = "Private", Static = true, ReturnType = "Func<IFieldEditor>", Name = "Instantiator", Args = [{ Type = "string", Name = "path" }], Content = "return () => (IFieldEditor)Instantiate(path);" },
+    { Static = true, ReturnType = "object", Name = "Instantiate", Args = [{ Type = "string", Name = "path" }], Content = "return TomlDeserializer.Deserialize(AppContext.BaseDirectory + path + \".prefab.toml\").RootObject;" },
+    { ReturnType = "void", Name = "SerializePrefab", Args = [], Content = """
+if (PrefabRoot is null) return;
+TomlSerializer.Serialize(PrefabRoot, AppContext.BaseDirectory + PrefabPath);
+""" },
+    { Static = true, ReturnType = "void", Name = "OpenNewWindow", Args = [], Content = """
+// :/ cubemap no longer static constructed because nothing references it since the skybox is a toml now
+object staticConstructorLoad;
+staticConstructorLoad = CubeMap.Skybox;
+staticConstructorLoad = Mesh.Cube;
+staticConstructorLoad = Shader.Quad;
+
+
+Editor root = (Editor)TomlDeserializer.Instantiate("Prefabs/Editor/Editor");
+root.Notify(new EditorInitialize_Notification(root));
+
+PrefabRoot prefab = TomlDeserializer.Deserialize(AppContext.BaseDirectory + root.PrefabPath);
+TomlSerializer.Serialize(prefab, AppContext.BaseDirectory + root.PrefabPath);
+prefab = TomlDeserializer.Deserialize(AppContext.BaseDirectory + root.PrefabPath);
+
+root.PrefabRoot = prefab;
+IHasChildren.PrintTree(root);
+
+Window window = new(new GameWindow(
+	new GameWindowSettings(),
+	new NativeWindowSettings
+	{
+		ClientSize = (1280, 720),
+		Title = "Echidna Engine",
+		Icon = Window.CreateWindowIcon(AppContext.BaseDirectory + "/Assets/Echidna.png"),
+	}
+))
+{
+	Camera = new GuiCamera
+	{
+		World = root,
+	}
+};
+window.Resize += size =>
+{
+	root.LocalSize = size;
+	window.Camera.Size = size;
+};
+window.Run();
+""" },
+]
+
 [This.Values]
 Named = "01"
 RectTransform = "02"

@@ -1,4 +1,4 @@
-﻿Using = ["Echidna2.Prefabs.Editor.FieldEditors", "System.Globalization"]
+﻿Using = ["System.Globalization"]
 
 [This]
 Components = [

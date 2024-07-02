@@ -55,6 +55,3 @@ public class SerializedReferenceAttribute(Type? serializerType = null) : Attribu
 		return serializer = DefaultReferenceSerializer;
 	}
 }
-
-[AttributeUsage(AttributeTargets.Event)]
-public class SerializedEventAttribute : Attribute;

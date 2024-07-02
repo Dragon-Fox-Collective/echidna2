@@ -1,4 +1,4 @@
-﻿Using = ["Echidna2", "Echidna2.Prefabs.Gui", "Echidna2.Gui", "Echidna2.Prefabs.Editor.FieldEditors"]
+﻿Using = ["Notifications.Editor", "Echidna2.Prefabs.Gui", "Echidna2.Gui"]
 
 [This]
 Components = [
@@ -16,7 +16,7 @@ Text.TextString = INamed.GetName(value) ?? "null";
 ValueChanged?.Invoke(value);
 """ },
     { PropertyType = "Public", Type = "Type", Name = "ComponentType" },
-    { PropertyType = "Private", Type = "Echidna2.Prefabs.Editor.Editor", Name = "Editor" },
+    { PropertyType = "Private", Type = "Editor", Name = "Editor" },
     { PropertyType = "Event", Type = "object?", Name = "ValueChanged" },
     { PropertyType = "Event", Type = "AddComponentWindow", Name = "WindowOpened" },
 ]
@@ -25,10 +25,10 @@ Events = [
 Editor = notification.Editor;
 """ },
     { EventType = "Reference", Target = "Button", Name = "MouseDown", Args = [], Content = """
-AddComponentWindow window = (AddComponentWindow)Echidna2.Prefabs.Editor.Editor.Instantiate("Prefabs/Editor/AddComponentWindow");
+AddComponentWindow window = (AddComponentWindow)TomlDeserializer.Instantiate("Prefabs/Editor/AddComponentWindow");
 window.ComponentType = ComponentType;
 window.Field = this;
-INotificationPropagator.Notify(new IEditorInitialize.Notification(Editor), window);
+INotificationPropagator.Notify(new EditorInitialize_Notification(Editor), window);
 Editor.QueueAddChild(window);
 WindowOpened?.Invoke(window);
 """ },

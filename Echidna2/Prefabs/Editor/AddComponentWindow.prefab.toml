@@ -1,4 +1,4 @@
-﻿Using = ["Echidna2", "Echidna2.Prefabs.Gui", "Echidna2.Gui"]
+﻿Using = ["Notifications.Editor", "Echidna2.Prefabs.Gui", "Echidna2.Gui"]
 
 [This]
 Components = [
@@ -8,7 +8,7 @@ Properties = [
     { PropertyType = "Reference", Type = "ICanAddChildren", Name = "ComponentList" },
     { PropertyType = "Public", Type = "Type", Name = "ComponentType" },
     { PropertyType = "Public", Type = "FieldEditors.ReferenceFieldEditor", Name = "Field" },
-    { PropertyType = "Private", Type = "Echidna2.Prefabs.Editor.Editor", Name = "Editor" },
+    { PropertyType = "Private", Type = "Editor", Name = "Editor" },
     { PropertyType = "Private", Type = "bool", Name = "HasBeenInitialized" },
     { PropertyType = "Private", Type = "ButtonText", Name = "NullText" },
     { PropertyType = "Public", Type = "PrefabRoot?", Name = "PrefabRoot", GetterContent = "return Editor.PrefabRoot;", HasSetter = false },
@@ -25,7 +25,7 @@ Editor = notification.Editor;
     { EventType = "Notification", Name = "Initialize", Content = """
 if (HasBeenInitialized) return;
 
-NullText = (ButtonText)Echidna2.Prefabs.Editor.Editor.Instantiate("Prefabs/Gui/ButtonText");
+NullText = (ButtonText)TomlDeserializer.Instantiate("Prefabs/Gui/ButtonText");
 NullText.TextString = "Default value";
 NullText.LocalScale = (0.5, 0.5);
 NullText.Justification = TextJustification.Left;
@@ -40,7 +40,7 @@ foreach ((object component, ComponentUtils.ReferencePath? reference) in Componen
                  .Select(component => (component, (ComponentUtils.ReferencePath?) null)))
              .DistinctBy(pair => pair.Item1))
 {
-    ButtonText text = (ButtonText)Echidna2.Prefabs.Editor.Editor.Instantiate("Prefabs/Gui/ButtonText");
+    ButtonText text = (ButtonText)TomlDeserializer.Instantiate("Prefabs/Gui/ButtonText");
     
     if (reference is null)
         text.TextString = $"Unparented {component.GetType().Name}";

@@ -1,5 +1,3 @@
-Using = ["Echidna2.Prefabs.Editor.FieldEditors"]
-
 [This]
 Components = [
     { Type = "Vector3FieldEditor", Name = "VectorFieldEditor" },

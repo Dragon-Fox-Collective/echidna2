@@ -31,7 +31,7 @@ public class Hierarchy : INotificationPropagator, IHasChildren, ICanAddChildren,
 	
 	public void Notify<T>(T notification) where T : notnull
 	{
-		if (notification is IAddedToHierarchy.Notification addedToHierarchy)
+		if (notification is AddedToHierarchy_Notification addedToHierarchy)
 		{
 			Parent = addedToHierarchy.Parent;
 			return;
@@ -46,8 +46,8 @@ public class Hierarchy : INotificationPropagator, IHasChildren, ICanAddChildren,
 	{
 		children.Add(child);
 		if (HasBeenInitialized)
-			INotificationPropagator.Notify(new IInitialize.Notification(), child);
-		INotificationPropagator.Notify(new IAddedToHierarchy.Notification(this), child);
+			INotificationPropagator.Notify(new Initialize_Notification(), child);
+		INotificationPropagator.Notify(new AddedToHierarchy_Notification(this), child);
 		ChildAdded?.Invoke(child);
 	}
 	

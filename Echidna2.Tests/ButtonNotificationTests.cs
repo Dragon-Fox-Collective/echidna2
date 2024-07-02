@@ -15,8 +15,8 @@ public static class ButtonNotificationTests
 		button.Clicked += () => buttonClicked = true;
 		
 		// Act
-		button.Notify(new IMouseDown.Notification(MouseButton.Left, (0, 0), (0, 0, 0)));
-		button.Notify(new IMouseUp.Notification(MouseButton.Left, (0, 0), (0, 0, 0)));
+		button.Notify(new MouseDown_Notification(MouseButton.Left, (0, 0), (0, 0, 0)));
+		button.Notify(new MouseUp_Notification(MouseButton.Left, (0, 0), (0, 0, 0)));
 		
 		// Assert
 		Assert.True(buttonClicked, "Button wasn't clicked");
@@ -35,8 +35,8 @@ public static class ButtonNotificationTests
 		visibilityLayer.AddChild(button);
 		
 		// Act
-		visibilityLayer.Notify(new IMouseDown.Notification(MouseButton.Left, (0, 0), (0, 0, 0)));
-		visibilityLayer.Notify(new IMouseUp.Notification(MouseButton.Left, (0, 0), (0, 0, 0)));
+		visibilityLayer.Notify(new MouseDown_Notification(MouseButton.Left, (0, 0), (0, 0, 0)));
+		visibilityLayer.Notify(new MouseUp_Notification(MouseButton.Left, (0, 0), (0, 0, 0)));
 		
 		// Assert
 		Assert.True(buttonClicked, "Button wasn't clicked");
@@ -55,8 +55,8 @@ public static class ButtonNotificationTests
 		visibilityLayer.AddChild(button);
 		
 		// Act
-		visibilityLayer.Notify(new IMouseDown.Notification(MouseButton.Left, (0, 0), (0, 0, 0)));
-		visibilityLayer.Notify(new IMouseUp.Notification(MouseButton.Left, (0, 0), (0, 0, 0)));
+		visibilityLayer.Notify(new MouseDown_Notification(MouseButton.Left, (0, 0), (0, 0, 0)));
+		visibilityLayer.Notify(new MouseUp_Notification(MouseButton.Left, (0, 0), (0, 0, 0)));
 		
 		// Assert
 		Assert.False(buttonClicked, "Button was clicked");

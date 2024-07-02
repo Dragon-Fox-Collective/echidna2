@@ -17,7 +17,13 @@ public static class Compilation
 		CreateCSProj();
 		
 		foreach (string prefabPath in Directory.EnumerateFiles(".", "*.prefab.toml", SearchOption.AllDirectories))
-			CreateCSFile(prefabPath[2..]); // Get rid of "./"
+			CreateCSPrefabFile(prefabPath[2..]); // Get rid of "./"
+		
+		foreach (string prefabPath in Directory.EnumerateFiles(".", "*.interface.toml", SearchOption.AllDirectories))
+			CreateCSInterfaceFile(prefabPath[2..]); // Get rid of "./"
+		
+		foreach (string prefabPath in Directory.EnumerateFiles(".", "*.notification.toml", SearchOption.AllDirectories))
+			CreateCSNotificationFile(prefabPath[2..]); // Get rid of "./"
 		
 		await CompileCSProj();
 	}
@@ -61,6 +67,7 @@ public static class Compilation
 
 	<ItemGroup>
 		<PackageReference Include="OpenTK" Version="4.8.2" />
+		<PackageReference Include="Tomlyn" Version="0.17.0" />
 	</ItemGroup>
 
 </Project>
@@ -68,7 +75,7 @@ public static class Compilation
 		File.WriteAllText($"{CompilationFolder}/EchidnaProject.csproj", csprojString);
 	}
 	
-	public static void CreateCSFile(string prefabPath)
+	public static void CreateCSPrefabFile(string prefabPath)
 	{
 		TomlTable table = Toml.ToModel(File.ReadAllText(prefabPath));
 		if (!table.Any(ComponentHasValidIdAndNeedsCustomClass)) return;
@@ -89,7 +96,7 @@ public static class Compilation
 		foreach ((string id, object componentTable) in table.Where(ComponentHasValidIdAndNeedsCustomClass))
 			scriptString += CreateCSClass(prefabPath, id, (TomlTable)componentTable) + "\n";
 		
-		string classPath = GetPrefabClassPath(prefabPath, "This");
+		string classPath = GetPrefabClassPath(prefabPath);
 		Directory.CreateDirectory(Path.GetDirectoryName(classPath));
 		File.WriteAllText(classPath, scriptString);
 	}
@@ -105,7 +112,7 @@ public static class Compilation
 		if (components.Count != 0)
 			interfaces.Add("INotificationPropagator");
 		foreach (TomlTable @event in events.Where(EventIsNotification))
-			interfaces.Add($"INotificationListener<I{@event["Name"]}.Notification>");
+			interfaces.Add($"INotificationListener<{@event["Name"]}_Notification>");
 		
 		bool thisIsSubclass = id != "This";
 		string className = GetPrefabClassName(prefabPath, id);
@@ -235,16 +242,16 @@ public static class Compilation
 			scriptString += $"\tprotected virtual void Setup_{property["Name"]}()\n";
 			scriptString += "\t{\n";
 			foreach (TomlTable @event in events.Where(EventIsReferenceAndTargets(property)))
-				scriptString += $"\t\t{@event["Target"]}.{@event["Name"]} += {@event["Target"]}_{@event["Name"]};\n";
+				scriptString += $"\t\t{@event["Target"]}.{@event["Name"]} += {(@event.TryGetValue("Function", out object? eventFunction) ? (string)eventFunction : $"{@event["Target"]}_{@event["Name"]}")};\n";
 			scriptString += "\t}\n";
 			
 			scriptString += $"\tprotected virtual void Unsetup_{property["Name"]}()\n";
 			scriptString += "\t{\n";
 			foreach (TomlTable @event in events.Where(EventIsReferenceAndTargets(property)))
-				scriptString += $"\t\t{@event["Target"]}.{@event["Name"]} -= {@event["Target"]}_{@event["Name"]};\n";
+				scriptString += $"\t\t{@event["Target"]}.{@event["Name"]} -= {(@event.TryGetValue("Function", out object? eventFunction) ? (string)eventFunction : $"{@event["Target"]}_{@event["Name"]}")};\n";
 			scriptString += "\t}\n";
 			
-			foreach (TomlTable @event in events.Where(EventIsReferenceAndTargets(property)))
+			foreach (TomlTable @event in events.Where(EventIsReferenceAndTargets(property)).Where(@event => !@event.ContainsKey("Function")))
 			{
 				if (((TomlArray)@event["Args"]).OfType<TomlTable>().Any(arg => arg.ContainsKey("CastTo")))
 				{
@@ -351,7 +358,7 @@ public static class Compilation
 		
 		foreach (TomlTable @event in events.Where(EventIsNotification))
 		{
-			scriptString += $"\tpublic void OnNotify(I{@event["Name"]}.Notification notification)\n";
+			scriptString += $"\tpublic void OnNotify({@event["Name"]}_Notification notification)\n";
 			scriptString += "\t{\n";
 			scriptString += "\t\t" + ((string)@event["Content"]).Split("\n").Join("\n\t\t") + "\n";
 			scriptString += "\t}\n";
@@ -362,12 +369,15 @@ public static class Compilation
 		{
 			scriptString += "\t";
 			
-			if (!function.TryGetValue("Type", out object? type) || (string)type == "Public")
-				scriptString += "public";
+			if (!function.TryGetValue("FunctionType", out object? type) || (string)type == "Public")
+				scriptString += "public ";
 			else if ((string)type == "Private")
-				scriptString += "private";
+				scriptString += "private ";
 			
-			scriptString += $" void {function["Name"]}({string.Join(", ", ((TomlArray)function["Args"]).OfType<TomlTable>().Select(arg => $"{arg["Type"]} {arg["Name"]}"))})\n";
+			if (function.TryGetValue("Static", out object @static) && (bool)@static)
+				scriptString += "static ";
+			
+			scriptString += $"{function["ReturnType"]} {function["Name"]}({string.Join(", ", ((TomlArray)function["Args"]).OfType<TomlTable>().Select(arg => $"{arg["Type"]} {arg["Name"]}"))})\n";
 			scriptString += "\t{\n";
 			scriptString += "\t\t" + ((string)function["Content"]).Split("\n").Join("\n\t\t") + "\n";
 			scriptString += "\t}\n";
@@ -379,11 +389,156 @@ public static class Compilation
 		return scriptString;
 	}
 	
-	public static string GetPrefabClassPath(string prefabPath, string id) => $"{CompilationFolder}/{Path.GetDirectoryName(prefabPath)}/{GetPrefabClassName(prefabPath, id)}.cs";
+	public static void CreateCSInterfaceFile(string prefabPath)
+	{
+		TomlTable table = Toml.ToModel(File.ReadAllText(prefabPath));
+		
+		List<string> usings = table.TryGetValue("Using", out object? usingsArray) ? ((TomlArray)usingsArray).OfType<string>().ToList() : [];
+		List<TomlTable> generics = table.TryGetValue("Generics", out object? genericsArray) ? ((TomlArray)genericsArray).OfType<TomlTable>().ToList() : [];
+		List<TomlTable> properties = table.TryGetValue("Properties", out object? propertiesArray) ? ((TomlArray)propertiesArray).OfType<TomlTable>().ToList() : [];
+		List<TomlTable> functions = table.TryGetValue("Functions", out object? functionsArray) ? ((TomlArray)functionsArray).OfType<TomlTable>().ToList() : [];
+		bool genericsInSeparateInterface = table.TryGetValue("GenericsInSeparateInterface", out object? genericsInSeparateInterfaceValue) && (bool)genericsInSeparateInterfaceValue;
+		bool dontExpose = table.TryGetValue("Expose", out object? exposeBool) && !(bool)exposeBool;
+		
+		string className = GetPrefabClassName(prefabPath);
+		
+		string scriptString = "";
+		
+		usings.Add("Echidna2.Core");
+		usings.Add("Echidna2.Mathematics");
+		usings.Add("Echidna2.Serialization");
+		foreach (string @using in usings)
+			scriptString += $"using {@using};\n";
+		scriptString += "\n";
+		
+		scriptString += $"namespace {GetPrefabClassNamespace(prefabPath)};\n";
+		scriptString += "\n";
+		
+		if (dontExpose)
+			scriptString += "[DontExpose]\n";
+		
+		scriptString += $"public interface {className}";
+		if (generics.Count != 0 && !genericsInSeparateInterface)
+			scriptString += $"<{string.Join(", ", generics.Select(generic => (generic.TryGetValue("GenericType", out object? genericType) ? genericType + " " : "") + generic["Name"]))}>";
+		scriptString += "\n";
+		scriptString += "{\n";
+		
+		foreach (TomlTable property in properties.Where(PropertyIsValue))
+		{
+			scriptString += $"\t[SerializedValue] {property["Type"]} {property["Name"]} {{ get; set; }}\n";
+			scriptString += "\n";
+		}
+		
+		foreach (TomlTable property in properties.Where(PropertyIsReference))
+		{
+			scriptString += $"\t[SerializedReference] {property["Type"]} {property["Name"]} {{ get; set; }}\n";
+			scriptString += "\n";
+		}
+		
+		foreach (TomlTable property in properties.Where(PropertyIsPublic))
+		{
+			scriptString += $"\t{property["Type"]} {property["Name"]} {{ get; set; }}\n";
+			scriptString += "\n";
+		}
+		
+		foreach (TomlTable property in properties.Where(PropertyIsEvent))
+		{
+			scriptString += $"\tevent Action<{property["Type"]}>? {property["Name"]};\n";
+			scriptString += "\n";
+		}
+		
+		foreach (TomlTable function in functions)
+		{
+			scriptString += "\t";
+			
+			if (function.TryGetValue("Static", out object @static) && (bool)@static)
+				scriptString += "static ";
+			
+			scriptString += $"{function["ReturnType"]} {function["Name"]}({string.Join(", ", ((TomlArray)function["Args"]).OfType<TomlTable>().Select(arg => $"{arg["Type"]} {arg["Name"]}"))});\n";
+			scriptString += "\n";
+		}
+		
+		scriptString += "}\n";
+		scriptString += "\n";
+		
+		if (genericsInSeparateInterface)
+		{
+			if (dontExpose)
+				scriptString += "[DontExpose]\n";
+			
+			scriptString += $"public interface {className}";
+			scriptString += $"<{string.Join(", ", generics.Select(generic => (generic.TryGetValue("GenericType", out object? genericType) ? genericType + " " : "") + generic["Name"]))}>";
+			scriptString += $" : {className}";
+			scriptString += "\n";
+			scriptString += "{\n";
+			
+			foreach (TomlTable function in functions.Where(function => function.TryGetValue("Args", out object? functionArgs) && ((TomlArray)functionArgs).Any(arg => ((TomlTable)arg).ContainsKey("CastTo"))))
+			{
+				scriptString += "\t";
+				
+				if (function.TryGetValue("Static", out object @static) && (bool)@static)
+					scriptString += "static ";
+				
+				scriptString += $"{function["ReturnType"]} {function["Name"]}({string.Join(", ", ((TomlArray)function["Args"]).OfType<TomlTable>().Select(arg => arg.TryGetValue("CastTo", out object? argCastTo) ? $"{argCastTo} {arg["Name"]}" : $"{arg["Type"]} {arg["Name"]}"))});\n";
+				scriptString += $"\t{function["ReturnType"]} {className}.{function["Name"]}({string.Join(", ", ((TomlArray)function["Args"]).OfType<TomlTable>().Select(arg => $"{arg["Type"]} {arg["Name"]}"))}) => {function["Name"]}({string.Join(", ", ((TomlArray)function["Args"]).OfType<TomlTable>().Select(arg => arg.TryGetValue("CastTo", out object? argCastTo) ? $"({argCastTo}){arg["Name"]}!" : $"{arg["Name"]}"))});\n";
+				scriptString += "\n";
+			}
+			
+			scriptString += "}\n";
+			scriptString += "\n";
+		}
+		
+		string classPath = GetPrefabClassPath(prefabPath);
+		Directory.CreateDirectory(Path.GetDirectoryName(classPath));
+		File.WriteAllText(classPath, scriptString);
+	}
 	
-	public static string GetPrefabClassName(string prefabPath, string id) => id is not "This" ? $"{GetPrefabFileNameWithoutExtension(prefabPath)}_{id}" : GetPrefabFileNameWithoutExtension(prefabPath);
+	public static void CreateCSNotificationFile(string prefabPath)
+	{
+		TomlTable table = Toml.ToModel(File.ReadAllText(prefabPath));
+		
+		List<string> usings = table.TryGetValue("Using", out object? usingsArray) ? ((TomlArray)usingsArray).OfType<string>().ToList() : [];
+		List<TomlTable> args = table.TryGetValue("Args", out object? argsArray) ? ((TomlArray)argsArray).OfType<TomlTable>().ToList() : [];
+		List<TomlTable> generics = table.TryGetValue("Generics", out object? genericsArray) ? ((TomlArray)genericsArray).OfType<TomlTable>().ToList() : [];
+		
+		usings.Add("Echidna2.Core");
+		usings.Add("Echidna2.Mathematics");
+		usings.Add("Echidna2.Serialization");
+		
+		string className = GetPrefabClassName(prefabPath) + "_Notification";
+		
+		string scriptString = "";
+		
+		foreach (string @using in usings)
+			scriptString += $"using {@using};\n";
+		scriptString += "\n";
+		
+		scriptString += $"namespace {GetPrefabClassNamespace(prefabPath)};\n";
+		scriptString += "\n";
+		
+		scriptString += $"public class {className}";
+		if (generics.Count != 0)
+			scriptString += $"<{string.Join(", ", generics.Select(generic => (generic.TryGetValue("GenericType", out object? genericType) ? genericType + " " : "") + generic["Name"]))}>";
+		if (args.Count != 0)
+			scriptString += $"({string.Join(", ", args.Select(arg => $"{arg["Type"]} _{arg["Name"]}"))})";
+		scriptString += "\n";
+		scriptString += "{\n";
+		
+		foreach (TomlTable arg in args)
+			scriptString += $"\tpublic {arg["Type"]} {arg["Name"]} => _{arg["Name"]};\n";
+		
+		scriptString += "}\n";
+		
+		string classPath = GetPrefabClassPath(prefabPath);
+		Directory.CreateDirectory(Path.GetDirectoryName(classPath));
+		File.WriteAllText(classPath, scriptString);
+	}
 	
-	public static string GetPrefabFileNameWithoutExtension(string prefabPath) => prefabPath.EndsWith(".prefab.toml") ? Path.GetFileNameWithoutExtension(Path.GetFileNameWithoutExtension(prefabPath)) : throw new InvalidOperationException($"'{prefabPath}' is not a prefab file");
+	public static string GetPrefabClassPath(string prefabPath, string? id = null) => $"{CompilationFolder}/{Path.GetDirectoryName(prefabPath)}/{GetPrefabClassName(prefabPath, id)}.cs";
+	
+	public static string GetPrefabClassName(string prefabPath, string? id = null) => id is not null and not "This" ? $"{GetPrefabFileNameWithoutExtension(prefabPath)}_{id}" : GetPrefabFileNameWithoutExtension(prefabPath);
+	
+	public static string GetPrefabFileNameWithoutExtension(string prefabPath) => Path.GetFileNameWithoutExtension(Path.GetFileNameWithoutExtension(prefabPath));
 	
 	public static string GetPrefabClassNamespace(string prefabPath) => Path.GetDirectoryName(prefabPath).Replace('/', '.').Replace('\\', '.');
 	

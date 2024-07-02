@@ -1,4 +1,4 @@
-Using = ["System.Drawing", "Echidna2.Prefabs.Gui", "Echidna2.Prefabs.Editor.FieldEditors"]
+Using = ["System.Drawing", "Echidna2.Prefabs.Gui"]
 
 [This]
 Components = [

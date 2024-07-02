@@ -176,4 +176,6 @@ public static class TomlDeserializer
 		
 		return component;
 	}
+	
+	public static object Instantiate(string path) => Deserialize(AppContext.BaseDirectory + path + ".prefab.toml").RootObject;
 }

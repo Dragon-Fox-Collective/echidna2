@@ -5,7 +5,7 @@ using Echidna2.Serialization;
 
 namespace Echidna2.Gui;
 
-public class RectLayout : INotificationHook<IUpdate.Notification>, INotificationHook<IDraw.Notification>
+public class RectLayout : INotificationHook<Update_Notification>, INotificationHook<Draw_Notification>
 {
 	[SerializedValue] public bool ClipChildren;
 	
@@ -57,7 +57,7 @@ public class RectLayout : INotificationHook<IUpdate.Notification>, INotification
 		}
 	}
 	
-	public virtual void OnPreNotify(IUpdate.Notification notification)
+	public virtual void OnPreNotify(Update_Notification notification)
 	{
 		foreach (ICanBeLaidOut child in ChildrenThatCanBeLaidOut)
 		{
@@ -73,16 +73,16 @@ public class RectLayout : INotificationHook<IUpdate.Notification>, INotification
 			// Console.WriteLine($"{(child as INamed)?.Name ?? "No name"} {childRect.AnchorPreset} {left} {right} {bottom} {top} {childRect.MinimumSize} {childRect.LocalSize} {childRect.LocalPosition} {childRect.Depth}");
 		}
 	}
-	public virtual void OnPostNotify(IUpdate.Notification notification)
+	public virtual void OnPostNotify(Update_Notification notification)
 	{
 		
 	}
-	public virtual void OnPostPropagate(IUpdate.Notification notification)
+	public virtual void OnPostPropagate(Update_Notification notification)
 	{
 		
 	}
 	
-	public void OnPreNotify(IDraw.Notification notification)
+	public void OnPreNotify(Draw_Notification notification)
 	{
 		if (ClipChildren)
 		{
@@ -91,11 +91,11 @@ public class RectLayout : INotificationHook<IUpdate.Notification>, INotification
 			ScissorStack.PushScissor(screenPosition.X - screenSize.X / 2, screenPosition.Y - screenSize.Y / 2, screenSize.X, screenSize.Y);
 		}
 	}
-	public void OnPostNotify(IDraw.Notification notification)
+	public void OnPostNotify(Draw_Notification notification)
 	{
 		
 	}
-	public void OnPostPropagate(IDraw.Notification notification)
+	public void OnPostPropagate(Draw_Notification notification)
 	{
 		if (ClipChildren)
 			ScissorStack.PopScissor();

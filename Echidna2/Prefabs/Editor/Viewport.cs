@@ -10,7 +10,7 @@ namespace Echidna2.Prefabs.Editor;
 
 public interface Viewport : ICanAddChildren;
 
-public partial class ViewportGui : Viewport, INotificationPropagator, ICanBeLaidOut, INotificationListener<IDraw.Notification>, IUpdate
+public partial class ViewportGui : Viewport, INotificationPropagator, ICanBeLaidOut, INotificationListener<Draw_Notification>, IUpdate
 {
 	[SerializedReference, ExposeMembersInClass] public Named Named { get; set; } = null!;
 	[SerializedReference, ExposeMembersInClass] public RectTransform RectTransform { get; set; } = null!;
@@ -24,11 +24,11 @@ public partial class ViewportGui : Viewport, INotificationPropagator, ICanBeLaid
 	
 	public void Notify<T>(T notification) where T : notnull
 	{
-		if (notification is not IDraw.Notification)
+		if (notification is not Draw_Notification)
 			INotificationPropagator.Notify(notification, Hierarchy, RenderTarget, GuiRectLayout);
 	}
 	
-	public void OnNotify(IDraw.Notification notification)
+	public void OnNotify(Draw_Notification notification)
 	{
 		Shader.Bind();
 		Shader.SetMatrix4("view", notification.Camera.ViewMatrix);
@@ -46,7 +46,7 @@ public partial class ViewportGui : Viewport, INotificationPropagator, ICanBeLaid
 	}
 }
 
-public partial class Viewport3D : Viewport, INotificationPropagator, ICanBeLaidOut, INotificationListener<IDraw.Notification>, IUpdate
+public partial class Viewport3D : Viewport, INotificationPropagator, ICanBeLaidOut, INotificationListener<Draw_Notification>, IUpdate
 {
 	[SerializedReference, ExposeMembersInClass] public Named Named { get; set; } = null!;
 	[SerializedReference, ExposeMembersInClass] public RectTransform RectTransform { get; set; } = null!;
@@ -58,11 +58,11 @@ public partial class Viewport3D : Viewport, INotificationPropagator, ICanBeLaidO
 	
 	public void Notify<T>(T notification) where T : notnull
 	{
-		if (notification is not IDraw.Notification)
+		if (notification is not Draw_Notification)
 			INotificationPropagator.Notify(notification, Hierarchy, RenderTarget);
 	}
 	
-	public void OnNotify(IDraw.Notification notification)
+	public void OnNotify(Draw_Notification notification)
 	{
 		Shader.Bind();
 		Shader.SetMatrix4("view", notification.Camera.ViewMatrix);

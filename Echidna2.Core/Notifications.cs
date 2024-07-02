@@ -71,12 +71,12 @@ public interface INotificationPropagator
 	}
 }
 
+public class Initialize_Notification;
 [DontExpose]
-public interface IInitialize : INotificationListener<IInitialize.Notification>
+public interface IInitialize : INotificationListener<Initialize_Notification>
 {
-	public class Notification;
 	public bool HasBeenInitialized { get; set; }
-	void INotificationListener<Notification>.OnNotify(Notification notification)
+	void INotificationListener<Initialize_Notification>.OnNotify(Initialize_Notification notification)
 	{
 		if (HasBeenInitialized)	return;
 		HasBeenInitialized = true;
@@ -85,40 +85,40 @@ public interface IInitialize : INotificationListener<IInitialize.Notification>
 	public void OnInitialize();
 }
 
+public class PreUpdate_Notification;
 [DontExpose]
-public interface IPreUpdate : INotificationListener<IPreUpdate.Notification>
+public interface IPreUpdate : INotificationListener<PreUpdate_Notification>
 {
-	public class Notification;
-	void INotificationListener<Notification>.OnNotify(Notification notification) => OnPreUpdate();
+	void INotificationListener<PreUpdate_Notification>.OnNotify(PreUpdate_Notification notification) => OnPreUpdate();
 	public void OnPreUpdate();
 }
 
-[DontExpose]
-public interface IUpdate : INotificationListener<IUpdate.Notification>
+public class Update_Notification(double deltaTime)
 {
-	public class Notification(double deltaTime)
-	{
-		public double DeltaTime { get; } = deltaTime;
-	}
-	void INotificationListener<Notification>.OnNotify(Notification notification) => OnUpdate(notification.DeltaTime);
+	public double DeltaTime { get; } = deltaTime;
+}
+[DontExpose]
+public interface IUpdate : INotificationListener<Update_Notification>
+{
+	void INotificationListener<Update_Notification>.OnNotify(Update_Notification notification) => OnUpdate(notification.DeltaTime);
 	public void OnUpdate(double deltaTime);
 }
 
+public class PostUpdate_Notification;
 [DontExpose]
-public interface IPostUpdate : INotificationListener<IPostUpdate.Notification>
+public interface IPostUpdate : INotificationListener<PostUpdate_Notification>
 {
-	public class Notification;
-	void INotificationListener<Notification>.OnNotify(Notification notification) => OnPostUpdate();
+	void INotificationListener<PostUpdate_Notification>.OnNotify(PostUpdate_Notification notification) => OnPostUpdate();
 	public void OnPostUpdate();
 }
 
-[DontExpose]
-public interface IAddedToHierarchy : INotificationListener<IAddedToHierarchy.Notification>
+public class AddedToHierarchy_Notification(Hierarchy parent)
 {
-	public class Notification(Hierarchy parent)
-	{
-		public Hierarchy Parent { get; } = parent;
-	}
-	void INotificationListener<Notification>.OnNotify(Notification notification) => OnAddedToHierarchy(notification.Parent);
+	public Hierarchy Parent { get; } = parent;
+}
+[DontExpose]
+public interface IAddedToHierarchy : INotificationListener<AddedToHierarchy_Notification>
+{
+	void INotificationListener<AddedToHierarchy_Notification>.OnNotify(AddedToHierarchy_Notification notification) => OnAddedToHierarchy(notification.Parent);
 	public void OnAddedToHierarchy(Hierarchy parent);
 }

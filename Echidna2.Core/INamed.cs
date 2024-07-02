@@ -31,5 +31,5 @@ public class Named : INamed
 			NameChanged?.Invoke(value);
 		}
 	}
-	[SerializedEvent] public event Action<string>? NameChanged;
+	public event Action<string>? NameChanged;
 }

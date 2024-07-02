@@ -6,7 +6,7 @@ using Echidna2.Serialization;
 
 namespace Echidna2.Rendering3D;
 
-public class PBRMeshRenderer : INotificationListener<IDraw.Notification>
+public class PBRMeshRenderer : INotificationListener<Draw_Notification>
 {
 	[SerializedReference] public Transform3D? Transform;
 	
@@ -18,7 +18,7 @@ public class PBRMeshRenderer : INotificationListener<IDraw.Notification>
 	[SerializedValue] public double Roughness { get; set; } = 0.25;
 	[SerializedValue] public double AmbientOcclusion { get; set; } = 1.0;
 	
-	public void OnNotify(IDraw.Notification notification)
+	public void OnNotify(Draw_Notification notification)
 	{
 		Shader.Bind();
 		Shader.SetMatrix4("view", notification.Camera.ViewMatrix);

@@ -12,7 +12,7 @@ public interface IButton
 
 public class Button : IButton, IMouseDown, IMouseUp, IMouseMoved
 {
-	[SerializedEvent] public event Action? Clicked;
+	public event Action? Clicked;
 	public event Action? Dragged;
 	public event Action? MouseDown;
 	public event Action? MouseDownOutside;

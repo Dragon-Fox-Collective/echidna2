@@ -1,0 +1,2 @@
+﻿Generics = [{ Name = "T" }]
+Args = [{ Type = "T", Name = "Notification" }]

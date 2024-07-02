@@ -46,30 +46,30 @@ public class Window
 		GL.ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		GL.Enable(EnableCap.DepthTest);
 		GL.Enable(EnableCap.DepthClamp);
-		Camera?.Notify(new IInitialize.Notification());
+		Camera?.Notify(new Initialize_Notification());
 	}
 	
 	private void OnDispose()
 	{
-		Camera?.Notify(new IDispose.Notification());
+		Camera?.Notify(new Dispose_Notification());
 	}
 	
 	private void OnUpdate(double deltaTime)
 	{
-		Camera?.Notify(new IPreUpdate.Notification());
-		Camera?.Notify(new IUpdate.Notification(deltaTime));
-		Camera?.Notify(new IPostUpdate.Notification());
+		Camera?.Notify(new PreUpdate_Notification());
+		Camera?.Notify(new Update_Notification(deltaTime));
+		Camera?.Notify(new PostUpdate_Notification());
 	}
 	
 	private void OnDraw()
 	{
 		if (Camera is null) return;
-		Camera.Notify(new IDrawPass.Notification());
+		Camera.Notify(new DrawPass_Notification());
 		GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
 		GL.Viewport(0, 0, (int)Camera.Size.X, (int)Camera.Size.Y);
 		GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit | ClearBufferMask.StencilBufferBit);
 		PostProcessing?.BeginRender();
-		Camera.Notify(new IDraw.Notification(Camera));
+		Camera.Notify(new Draw_Notification(Camera));
 		PostProcessing?.EndRender();
 		PostProcessing?.Render();
 		GameWindow.SwapBuffers();
@@ -78,34 +78,34 @@ public class Window
 	private void OnMouseMoved(Vector2 position, Vector2 delta)
 	{
 		mousePosition = position;
-		Camera?.Notify(new IMouseMoved.Notification(mousePosition, delta, Camera.ScreenToGlobal(mousePosition)));
+		Camera?.Notify(new MouseMoved_Notification(mousePosition, delta, Camera.ScreenToGlobal(mousePosition)));
 	}
 	
 	private void OnMouseDown(MouseButton button)
 	{
-		Camera?.Notify(new IMouseDown.Notification(button, mousePosition, Camera.ScreenToGlobal(mousePosition)));
+		Camera?.Notify(new MouseDown_Notification(button, mousePosition, Camera.ScreenToGlobal(mousePosition)));
 	}
 	
 	private void OnMouseUp(MouseButton button)
 	{
-		Camera?.Notify(new IMouseUp.Notification(button, mousePosition, Camera.ScreenToGlobal(mousePosition)));
+		Camera?.Notify(new MouseUp_Notification(button, mousePosition, Camera.ScreenToGlobal(mousePosition)));
 	}
 	
 	private void OnMouseWheel(Vector2 offset)
 	{
-		Camera?.Notify(new IMouseWheelScrolled.Notification(offset, mousePosition, Camera.ScreenToGlobal(mousePosition)));
+		Camera?.Notify(new MouseWheelScrolled_Notification(offset, mousePosition, Camera.ScreenToGlobal(mousePosition)));
 	}
 	
 	private void OnKeyDown(Keys key, KeyModifiers modifiers, bool isRepeat)
 	{
 		if (!isRepeat)
-			Camera?.Notify(new IKeyDown.Notification(key));
-		Camera?.Notify(new ITextInput.Notification(key, modifiers));
+			Camera?.Notify(new KeyDown_Notification(key));
+		Camera?.Notify(new TextInput_Notification(key, modifiers));
 	}
 	
 	private void OnKeyUp(Keys key)
 	{
-		Camera?.Notify(new IKeyUp.Notification(key));
+		Camera?.Notify(new KeyUp_Notification(key));
 	}
 	
 	private void OnResize(Vector2i size)

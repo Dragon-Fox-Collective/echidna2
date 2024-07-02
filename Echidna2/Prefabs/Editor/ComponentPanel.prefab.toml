@@ -1,4 +1,4 @@
-﻿Using = ["Echidna2", "Echidna2.Prefabs.Gui", "System.Reflection", "Echidna2.Gui"]
+﻿Using = ["Notifications.Editor", "Echidna2.Prefabs.Gui", "System.Reflection", "Echidna2.Gui", "Prefabs.Editor.FieldEditors"]
 
 [This]
 Components = [
@@ -9,7 +9,7 @@ Properties = [
     { PropertyType = "Reference", Type = "TextRect", Name = "ComponentNameText" },
     { PropertyType = "Reference", Type = "ICanAddChildren", Name = "Fields" },
     { PropertyType = "Reference", Type = "ICanAddChildren", Name = "Components" },
-    { PropertyType = "Private", Type = "Echidna2.Prefabs.Editor.Editor", Name = "Editor" },
+    { PropertyType = "Private", Type = "Editor", Name = "Editor" },
     { PropertyType = "Public", Type = "object?", Name = "SelectedObject", SetterContent = """
 _SelectedObject = value;
 if (SelectedObject is not null)
@@ -44,7 +44,7 @@ if (SelectedComponent is null)
 else
     RefreshSelectedComponentFields();
 """ },
-    { Type = "Private", ReturnType = "void", Name = "RefreshFavoritedFields", Args = [], Content = """
+    { FunctionType = "Private", ReturnType = "void", Name = "RefreshFavoritedFields", Args = [], Content = """
 Fields.ClearChildren();
 if (Editor.PrefabRoot is null) return;
 if (SelectedObject is null) return;
@@ -61,7 +61,7 @@ if (Editor.PrefabRoot.ChildPrefabs.FirstOrDefault(prefab => prefab.PrefabRoot.Ro
 foreach ((object component, MemberInfo member) in availableFields)
     AddField(member, component);
 """ },
-    { Type = "Private", ReturnType = "void", Name = "RefreshSelectedComponentFields", Args = [], Content = """
+    { FunctionType = "Private", ReturnType = "void", Name = "RefreshSelectedComponentFields", Args = [], Content = """
 Fields.ClearChildren();
 if (SelectedComponent is null) return;
 
@@ -73,16 +73,16 @@ foreach (MemberInfo member in SelectedComponent.GetType()
                               member.GetCustomAttribute<SerializedReferenceAttribute>() is not null))
     AddField(member, SelectedComponent);
 """ },
-    { Type = "Private", ReturnType = "void", Name = "AddField", Args = [{ Type = "MemberInfo", Name = "member" }, { Type = "object", Name = "component" }], Content = """
-HLayoutWithHierarchy layout = (HLayoutWithHierarchy)Echidna2.Prefabs.Editor.Editor.Instantiate("Prefabs/Gui/HLayoutWithHierarchy");
+    { FunctionType = "Private", ReturnType = "void", Name = "AddField", Args = [{ Type = "MemberInfo", Name = "member" }, { Type = "object", Name = "component" }], Content = """
+HLayoutWithHierarchy layout = (HLayoutWithHierarchy)TomlDeserializer.Instantiate("Prefabs/Gui/HLayoutWithHierarchy");
 layout.Name = member.Name + " Field Layout";
 Fields.AddChild(layout);
 
-FullLayoutWithHierarchy textClipper = (FullLayoutWithHierarchy)Echidna2.Prefabs.Editor.Editor.Instantiate("Prefabs/Gui/FullLayoutWithHierarchy");
+FullLayoutWithHierarchy textClipper = (FullLayoutWithHierarchy)TomlDeserializer.Instantiate("Prefabs/Gui/FullLayoutWithHierarchy");
 textClipper.ClipChildren = true;
 layout.AddChild(textClipper);
 
-TextRect text = (TextRect)Echidna2.Prefabs.Editor.Editor.Instantiate("Prefabs/Gui/TextRect");
+TextRect text = (TextRect)TomlDeserializer.Instantiate("Prefabs/Gui/TextRect");
 text.TextString = member.Name;
 text.LocalScale = (0.5, 0.5);
 text.MinimumSize = (300, 0);
@@ -90,7 +90,7 @@ text.Justification = TextJustification.Left;
 textClipper.AddChild(text);
 
 IMemberWrapper wrapper = IMemberWrapper.Wrap(member);
-Echidna2.Prefabs.Editor.FieldEditors.IFieldEditor? fieldEditor =
+IFieldEditor? fieldEditor =
     member.GetCustomAttribute<SerializedValueAttribute>() is not null ? Editor.HasRegisteredFieldEditor(wrapper.FieldType) ? Editor.InstantiateFieldEditor(wrapper.FieldType) : null :
     member.GetCustomAttribute<SerializedReferenceAttribute>() is not null ? NewReferenceFieldEditorOfType(wrapper.FieldType) :
     null;
@@ -106,7 +106,7 @@ if (fieldEditor is not null)
     layout.AddChild(fieldEditor);
 }
 
-ButtonRect favoriteButton = (ButtonRect)Echidna2.Prefabs.Editor.Editor.Instantiate("Prefabs/Gui/ButtonRect");
+ButtonRect favoriteButton = (ButtonRect)TomlDeserializer.Instantiate("Prefabs/Gui/ButtonRect");
 favoriteButton.MinimumSize = (25, 25);
 favoriteButton.Clicked += () =>
 {
@@ -121,9 +121,9 @@ layout.AddChild(favoriteButton);
 
 FieldEditors.ReferenceFieldEditor NewReferenceFieldEditorOfType(Type type)
 {
-    FieldEditors.ReferenceFieldEditor referenceFieldEditor = (FieldEditors.ReferenceFieldEditor)Echidna2.Prefabs.Editor.Editor.Instantiate("Prefabs/Editor/FieldEditors/ReferenceFieldEditor");
+    FieldEditors.ReferenceFieldEditor referenceFieldEditor = (FieldEditors.ReferenceFieldEditor)TomlDeserializer.Instantiate("Prefabs/Editor/FieldEditors/ReferenceFieldEditor");
     referenceFieldEditor.ComponentType = type;
-    INotificationPropagator.Notify(new IEditorInitialize.Notification(Editor), referenceFieldEditor);
+    INotificationPropagator.Notify(new EditorInitialize_Notification(Editor), referenceFieldEditor);
     return referenceFieldEditor;
 }
 """ },
@@ -131,14 +131,14 @@ FieldEditors.ReferenceFieldEditor NewReferenceFieldEditorOfType(Type type)
 Components.ClearChildren();
 if (SelectedObject is null) return;
 
-ButtonRect favoritesButton = (ButtonRect)Echidna2.Prefabs.Editor.Editor.Instantiate("Prefabs/Editor/ComponentSelectionButton");
+ButtonRect favoritesButton = (ButtonRect)TomlDeserializer.Instantiate("Prefabs/Editor/ComponentSelectionButton");
 favoritesButton.Clicked += () => SelectedComponent = null;
 favoritesButton.MinimumSize = (40, 40);
 Components.AddChild(favoritesButton);
 
 foreach (object component in ComponentUtils.GetAllComponents(SelectedObject))
 {
-    ButtonRect button = (ButtonRect)Echidna2.Prefabs.Editor.Editor.Instantiate("Prefabs/Editor/ComponentSelectionButton");
+    ButtonRect button = (ButtonRect)TomlDeserializer.Instantiate("Prefabs/Editor/ComponentSelectionButton");
     button.Clicked += () => SelectedComponent = component;
     Components.AddChild(button);
 }

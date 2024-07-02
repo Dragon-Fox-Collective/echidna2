@@ -17,8 +17,8 @@ public partial class EditorViewportGui : INotificationPropagator, IMouseDown, IM
 	
 	public void Notify<T>(T notification) where T : notnull
 	{
-		if (notification is IMouseDown.Notification || notification is IMouseMoved.Notification || notification is IMouseUp.Notification)
-			INotificationPropagator.Notify(new EditorNotification<T>(notification), Viewport);
+		if (notification is MouseDown_Notification || notification is MouseMoved_Notification || notification is MouseUp_Notification)
+			INotificationPropagator.Notify(Activator.CreateInstance(TomlDeserializer.ProjectAssembly.GetType("Notifications.Editor.EditorNotification_Notification`1").MakeGenericType(typeof(T)), notification), Viewport);
 		else
 			INotificationPropagator.Notify(notification, Viewport);
 	}

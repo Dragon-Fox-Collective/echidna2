@@ -34,22 +34,22 @@ public partial class HierarchyDisplay : INotificationPropagator, ICanBeLaidOut
 	
 	private FullLayoutWithHierarchy BoxOfHierarchy(object obj)
 	{
-		FullLayoutWithHierarchy box = (FullLayoutWithHierarchy)Editor.Instantiate("Prefabs/Gui/FullLayoutWithHierarchy");
+		FullLayoutWithHierarchy box = (FullLayoutWithHierarchy)TomlDeserializer.Instantiate("Prefabs/Gui/FullLayoutWithHierarchy");
 		box.Name = $"Box for {obj}";
 		box.AnchorPreset = AnchorPreset.Full;
 		box.LeftMargin = 10;
-		VLayoutWithHierarchy layout = (VLayoutWithHierarchy)Editor.Instantiate("Prefabs/Gui/VLayoutWithHierarchy");
+		VLayoutWithHierarchy layout = (VLayoutWithHierarchy)TomlDeserializer.Instantiate("Prefabs/Gui/VLayoutWithHierarchy");
 		layout.Name = $"Layout for box for {obj}";
 		layout.AnchorPreset = AnchorPreset.Full;
 		box.AddChild(layout);
 		
-		ButtonRect button = (ButtonRect)Editor.Instantiate("Prefabs/Gui/ButtonRect");
+		ButtonRect button = (ButtonRect)TomlDeserializer.Instantiate("Prefabs/Gui/ButtonRect");
 		button.AnchorPreset = AnchorPreset.Full;
 		button.Margin = 5;
 		button.MouseUp += () => ItemSelected?.Invoke(obj);
 		layout.AddChild(button);
 		
-		TextRect text = (TextRect)Editor.Instantiate("Prefabs/Gui/TextRect");
+		TextRect text = (TextRect)TomlDeserializer.Instantiate("Prefabs/Gui/TextRect");
 		text.TextString = INamed.GetName(obj);
 		if (obj is INamed named)
 			named.NameChanged += name => text.TextString = name;
