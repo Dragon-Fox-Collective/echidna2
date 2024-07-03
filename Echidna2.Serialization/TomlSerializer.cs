@@ -94,7 +94,7 @@ public partial class Project
 				IMemberWrapper wrapper = memberPath.Wrapper;
 				SerializedValueAttribute? attribute = wrapper.Member.GetCustomAttribute<SerializedValueAttribute>();
 				if (attribute is null) continue;
-				Serializer serializer = attribute.GetSerializer(wrapper.FieldType, null, null, null);
+				Serializer serializer = attribute.GetSerializer(wrapper.FieldType, null);
 				table.Add(wrapper.Name, serializer.Serialize(value));
 			}
 		}
@@ -106,7 +106,7 @@ public partial class Project
 				IMemberWrapper wrapper = memberPath.Wrapper;
 				SerializedValueAttribute? attribute = wrapper.Member.GetCustomAttribute<SerializedValueAttribute>();
 				if (attribute is null) continue;
-				Serializer serializer = attribute.GetSerializer(wrapper.FieldType, null, null, null);
+				Serializer serializer = attribute.GetSerializer(wrapper.FieldType, null);
 				table.Add(wrapper.Name, serializer.Serialize(value));
 			}
 		}

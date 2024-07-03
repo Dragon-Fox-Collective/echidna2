@@ -20,7 +20,7 @@ public class SerializedValueAttribute(Type? serializerType = null) : Attribute
 	
 	private Serializer? serializer = (Serializer)serializerType?.GetConstructor([])!.Invoke([])!;
 	
-	public Serializer GetSerializer(Type type, Func<TomlTable, object> subcomponentDeserializer, string fieldName, string componentId)
+	public Serializer GetSerializer(Type type, Func<TomlTable, object> subcomponentDeserializer)
 	{
 		if (serializer is not null)
 			return serializer;
@@ -34,7 +34,7 @@ public class SerializedValueAttribute(Type? serializerType = null) : Attribute
 		if (type
 		    .GetMembers(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
 		    .Any(member => member.GetCustomAttribute<SerializedValueAttribute>() is not null))
-			return new SubComponentSerializer(subcomponentDeserializer, fieldName, componentId);
+			return new SubComponentSerializer(subcomponentDeserializer);
 		
 		throw new InvalidOperationException($"No serializer found for type {type}");
 	}

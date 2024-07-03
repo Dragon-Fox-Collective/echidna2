@@ -37,7 +37,7 @@ public class NumberSerializer<T> : Serializer
 	public object Deserialize(object? value, object data) => (T)Convert.ChangeType(data, typeof(T), CultureInfo.InvariantCulture);
 }
 
-public class SubComponentSerializer(Func<TomlTable, object> deserializeValue, string fieldName, string componentId) : Serializer<TomlTable, object>
+public class SubComponentSerializer(Func<TomlTable, object> deserializeValue) : Serializer<TomlTable, object>
 {
 	public TomlTable Serialize(object value)
 	{
@@ -49,7 +49,7 @@ public class SubComponentSerializer(Func<TomlTable, object> deserializeValue, st
 		{
 			IMemberWrapper wrapper = IMemberWrapper.Wrap(member);
 			SerializedValueAttribute attribute = wrapper.Member.GetCustomAttribute<SerializedValueAttribute>()!;
-			Serializer serializer = attribute.GetSerializer(wrapper.FieldType, null, null, null);
+			Serializer serializer = attribute.GetSerializer(wrapper.FieldType, null);
 			table.Add(wrapper.Name, serializer.Serialize(wrapper.GetValue(value)!));
 		}
 		
