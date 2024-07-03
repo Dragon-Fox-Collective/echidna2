@@ -134,7 +134,8 @@ favoritesButton.Clicked += () => SelectedComponent = null;
 favoritesButton.MinimumSize = (40, 40);
 Components.AddChild(favoritesButton);
 
-foreach (object component in ComponentUtils.GetAllComponents(SelectedObject))
+foreach (object component in ComponentUtils.GetAllComponents(SelectedObject)
+    .Where(component => Editor.PrefabRoot.Components.Contains(component)))
 {
     ButtonRect button = Project.Instantiate<ButtonRect>("Prefabs.Editor.ComponentSelectionButton");
     button.Clicked += () => SelectedComponent = component;
