@@ -1,16 +1,14 @@
 ﻿Using = ["Echidna2.Gui", "System.Drawing", "OpenTK.Windowing.Desktop", "Echidna2.Rendering", "Echidna2.Rendering3D", "Echidna2.Prefabs.Editor", "Prefabs.Editor.FieldEditors", "Notifications.Editor"]
 
 [This]
-Components = [
-    { Type = "Named", Name = "Named" },
-    { Type = "RectTransform", Name = "RectTransform" },
-    { Type = "RectLayout", Name = "RectLayout" },
-    { Type = "Hierarchy", Name = "PrefabChildren" },
-]
 Interfaces = [
     "ICanBeLaidOut",
 ]
 Properties = [
+    { PropertyType = "Component", Type = "Named", Name = "Named" },
+    { PropertyType = "Component", Type = "RectTransform", Name = "RectTransform" },
+    { PropertyType = "Component", Type = "RectLayout", Name = "RectLayout" },
+    { PropertyType = "Component", Type = "Hierarchy", Name = "PrefabChildren" },
     { PropertyType = "Reference", Type = "Viewport", Name = "Viewport" },
     { PropertyType = "Reference", Type = "object", Name = "ComponentPanel" },
     { PropertyType = "Reference", Type = "ObjectPanel", Name = "ObjectPanel" },

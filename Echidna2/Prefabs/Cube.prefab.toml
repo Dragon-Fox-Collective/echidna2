@@ -2,11 +2,11 @@
 FavoriteFields = ["LocalPosition", "LocalRotation", "LocalScale", "Albedo", "Metallic", "Roughness", "AmbientOcclusion"]
 
 [This]
-Components = [
-    { Type = "Transform3D", Name = "Transform" },
-    { Type = "PBRMeshRenderer", Name = "MeshRenderer" },
-    { Type = "Named", Name = "Named" },
-    { Type = "Hierarchy", Name = "PrefabChildren" },
+Properties = [
+    { PropertyType = "Component", Type = "Transform3D", Name = "Transform" },
+    { PropertyType = "Component", Type = "PBRMeshRenderer", Name = "MeshRenderer" },
+    { PropertyType = "Component", Type = "Named", Name = "Named" },
+    { PropertyType = "Component", Type = "Hierarchy", Name = "PrefabChildren" },
 ]
 
 [This.Values]

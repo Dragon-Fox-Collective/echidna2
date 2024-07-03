@@ -1,14 +1,12 @@
 ﻿Using = ["Echidna2.Prefabs.Gui", "Echidna2.Gui", "Echidna2.Rendering", "System.Drawing", "OpenTK.Windowing.GraphicsLibraryFramework"]
 
 [This]
-Components = [
-    { Type = "FullRectWithHierarchy", Name = "Rect" },
-    { Type = "Button", Name = "Button", ExposeProperties = false },
-]
 Interfaces = [
     "IFieldEditor<string>",
 ]
 Properties = [
+    { PropertyType = "Component", Type = "FullRectWithHierarchy", Name = "Rect" },
+    { PropertyType = "Component", Type = "Button", Name = "Button", ExposeProperties = false },
     { PropertyType = "Reference", Type = "TextRect", Name = "Text" },
     { PropertyType = "Public", Type = "string", Name = "Value", SetterContent = """
 _Value = value;

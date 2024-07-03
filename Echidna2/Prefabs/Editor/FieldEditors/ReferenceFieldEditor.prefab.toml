@@ -1,14 +1,12 @@
 ﻿Using = ["Notifications.Editor", "Echidna2.Prefabs.Gui", "Echidna2.Gui"]
 
 [This]
-Components = [
-    { Type = "FullRectWithHierarchy", Name = "Rect" },
-    { Type = "Button", Name = "Button", ExposeProperties = false },
-]
 Interfaces = [
     "IFieldEditor",
 ]
 Properties = [
+    { PropertyType = "Component", Type = "FullRectWithHierarchy", Name = "Rect" },
+    { PropertyType = "Component", Type = "Button", Name = "Button", ExposeProperties = false },
     { PropertyType = "Reference", Type = "TextRect", Name = "Text" },
     { PropertyType = "Public", Type = "object?", Name = "Value", SetterContent = """
 _Value = value;

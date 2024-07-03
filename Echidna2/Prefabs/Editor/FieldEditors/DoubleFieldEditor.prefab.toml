@@ -1,13 +1,11 @@
 ﻿Using = ["System.Globalization"]
 
 [This]
-Components = [
-    { Type = "StringFieldEditor", Name = "StringFieldEditor" },
-]
 Interfaces = [
     "IFieldEditor<double>",
 ]
 Properties = [
+    { PropertyType = "Component", Type = "StringFieldEditor", Name = "StringFieldEditor" },
     { PropertyType = "Public", Type = "double", Name = "Value", SetterContent = """
 _Value = value;
 StringFieldEditor.Load(value.ToString(CultureInfo.CurrentCulture));

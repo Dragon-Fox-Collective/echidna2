@@ -1,7 +1,6 @@
 ﻿using System.Reflection;
 using Tomlyn;
 using Tomlyn.Model;
-using TooManyExtensions;
 using static Echidna2.Serialization.SerializationPredicates;
 
 namespace Echidna2.Serialization;

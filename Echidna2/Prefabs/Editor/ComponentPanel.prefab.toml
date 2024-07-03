@@ -1,10 +1,8 @@
 ﻿Using = ["Notifications.Editor", "Echidna2.Prefabs.Gui", "System.Reflection", "Echidna2.Gui", "Prefabs.Editor.FieldEditors"]
 
 [This]
-Components = [
-    { Type = "FullRectWithHierarchy", Name = "Rect" },
-]
 Properties = [
+    { PropertyType = "Component", Type = "FullRectWithHierarchy", Name = "Rect" },
     { PropertyType = "Reference", Type = "TextRect", Name = "PrefabNameText" },
     { PropertyType = "Reference", Type = "TextRect", Name = "ComponentNameText" },
     { PropertyType = "Reference", Type = "ICanAddChildren", Name = "Fields" },

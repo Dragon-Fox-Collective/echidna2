@@ -1,11 +1,9 @@
 [This]
-Components = [
-    { Type = "Vector3FieldEditor", Name = "VectorFieldEditor" },
-]
 Interfaces = [
     "IFieldEditor<Quaternion>",
 ]
 Properties = [
+    { PropertyType = "Component", Type = "Vector3FieldEditor", Name = "VectorFieldEditor" },
     { PropertyType = "Public", Type = "Quaternion", Name = "Value", SetterContent = """
 _Value = value;
 VectorFieldEditor.Load(value.ToEulerAngles());

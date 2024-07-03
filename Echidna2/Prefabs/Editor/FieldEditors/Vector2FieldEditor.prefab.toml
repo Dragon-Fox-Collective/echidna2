@@ -1,13 +1,11 @@
 Using = ["Echidna2.Prefabs.Gui"]
 
 [This]
-Components = [
-    { Type = "HLayoutWithHierarchy", Name = "Layout" },
-]
 Interfaces = [
     "IFieldEditor<Vector2>",
 ]
 Properties = [
+    { PropertyType = "Component", Type = "HLayoutWithHierarchy", Name = "Layout" },
     { PropertyType = "Public", Type = "Vector2", Name = "Value", SetterContent = """
 _Value = value;
 XFieldEditor.Load(value.X);

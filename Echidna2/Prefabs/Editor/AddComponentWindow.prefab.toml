@@ -1,10 +1,8 @@
 ﻿Using = ["Notifications.Editor", "Echidna2.Prefabs.Gui", "Echidna2.Gui"]
 
 [This]
-Components = [
-    { Type = "FullRectWindow", Name = "Window" },
-]
 Properties = [
+    { PropertyType = "Component", Type = "FullRectWindow", Name = "Window" },
     { PropertyType = "Reference", Type = "ICanAddChildren", Name = "ComponentList" },
     { PropertyType = "Public", Type = "Type", Name = "ComponentType" },
     { PropertyType = "Public", Type = "FieldEditors.ReferenceFieldEditor", Name = "Field" },

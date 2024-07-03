@@ -1,13 +1,11 @@
 Using = ["System.Drawing", "Echidna2.Prefabs.Gui"]
 
 [This]
-Components = [
-    { Type = "HLayoutWithHierarchy", Name = "Layout" },
-]
 Interfaces = [
     "IFieldEditor<Color>",
 ]
 Properties = [
+    { PropertyType = "Component", Type = "HLayoutWithHierarchy", Name = "Layout" },
     { PropertyType = "Public", Type = "Color", Name = "Value", SetterContent = """
 _Value = value;
 RFieldEditor.Load(_Value.R / 255.0);
