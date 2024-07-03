@@ -23,7 +23,7 @@ Editor = notification.Editor;
     { EventType = "Notification", Name = "Initialize", Content = """
 if (HasBeenInitialized) return;
 
-NullText = (ButtonText)TomlDeserializer.Instantiate("Prefabs/Gui/ButtonText");
+NullText = Project.Instantiate<ButtonText>("Prefabs.Gui.ButtonText");
 NullText.TextString = "Default value";
 NullText.LocalScale = (0.5, 0.5);
 NullText.Justification = TextJustification.Left;
@@ -38,7 +38,7 @@ foreach ((object component, ComponentUtils.ReferencePath? reference) in Componen
                  .Select(component => (component, (ComponentUtils.ReferencePath?) null)))
              .DistinctBy(pair => pair.Item1))
 {
-    ButtonText text = (ButtonText)TomlDeserializer.Instantiate("Prefabs/Gui/ButtonText");
+    ButtonText text = Project.Instantiate<ButtonText>("Prefabs.Gui.ButtonText");
     
     if (reference is null)
         text.TextString = $"Unparented {component.GetType().Name}";
@@ -79,7 +79,7 @@ Window = "1"
 ComponentList = "11"
 
 [1]
-Prefab = "../Gui/FullRectWindow"
+Prefab = "Prefabs.Gui.FullRectWindow"
 [1.Values]
 Margin = 10.0
 LocalSize = { X = 300, Y = 400 }
@@ -87,7 +87,7 @@ Depth = 15
 Children = [ "4" ]
 
 [2]
-Prefab = "../Gui/ButtonRect"
+Prefab = "Prefabs.Gui.ButtonRect"
 Properties = [
     { PropertyType = "Reference", Type = "AddComponentWindow", Name = "AddComponentWindow" },
     { PropertyType = "Reference", Type = "FullRectWindow", Name = "Window" },
@@ -105,20 +105,20 @@ AddComponentWindow = "This"
 Window = "1"
 
 [3]
-Prefab = "../Gui/TextRect"
+Prefab = "Prefabs.Gui.TextRect"
 TextString = "Add New Component"
 LocalScale = { X = 0.5, Y = 0.5 }
 
 [4]
-Prefab = "../Gui/VLayoutWithHierarchy"
+Prefab = "Prefabs.Gui.VLayoutWithHierarchy"
 Children = [ "10", "2", "5" ]
 
 [5]
-Prefab = "../Gui/HLayoutWithHierarchy"
+Prefab = "Prefabs.Gui.HLayoutWithHierarchy"
 Children  = [ "6", "8" ]
 
 [6]
-Prefab = "../Gui/ButtonRect"
+Prefab = "Prefabs.Gui.ButtonRect"
 Properties = [
     { PropertyType = "Reference", Type = "FullRectWindow", Name = "Window" },
 ]
@@ -134,12 +134,12 @@ Children = [ "7" ]
 Window = "1"
 
 [7]
-Prefab = "../Gui/TextRect"
+Prefab = "Prefabs.Gui.TextRect"
 TextString = "Cancel"
 LocalScale = { X = 0.5, Y = 0.5 }
 
 [8]
-Prefab = "../Gui/ButtonRect"
+Prefab = "Prefabs.Gui.ButtonRect"
 Properties = [
     { PropertyType = "Reference", Type = "AddComponentWindow", Name = "AddComponentWindow" },
     { PropertyType = "Reference", Type = "FullRectWindow", Name = "Window" },
@@ -158,16 +158,16 @@ AddComponentWindow = "This"
 Window = "1"
 
 [9]
-Prefab = "../Gui/TextRect"
+Prefab = "Prefabs.Gui.TextRect"
 TextString = "Confirm"
 LocalScale = { X = 0.5, Y = 0.5 }
 
 [10]
-Prefab = "../Gui/FullRectWithHierarchy"
+Prefab = "Prefabs.Gui.FullRectWithHierarchy"
 VerticalExpand = true
 Margin = 5.0
 Children = [ "11" ]
 
 [11]
-Prefab = "../Gui/VLayoutWithHierarchy"
+Prefab = "Prefabs.Gui.VLayoutWithHierarchy"
 Spacing = 5

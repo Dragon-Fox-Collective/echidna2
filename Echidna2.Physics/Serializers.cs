@@ -32,18 +32,13 @@ public class BodyShapeSerializer : Serializer<TomlTable, BodyShape>
 	public BodyShape Deserialize(BodyShape? value, TomlTable data)
 	{
 		string type = (string)data["Type"];
-		data.Remove("Type");
 		switch (type)
 		{
 			case "Sphere":
 				BodyShape sphereShape = BodyShape.Of(new Sphere((float)(double)data["Radius"]));
-				data.Remove("Radius");
 				return sphereShape;
 			case "Box":
 				BodyShape boxShape = BodyShape.Of(new Box((float)(double)data["Width"], (float)(double)data["Length"], (float)(double)data["Height"]));
-				data.Remove("Width");
-				data.Remove("Length");
-				data.Remove("Height");
 				return boxShape;
 			default:
 				throw new InvalidOperationException($"Shape type {type} does not exist");
@@ -84,8 +79,6 @@ public class BodyInertiaSerializer : Serializer<TomlTable, BodyInertia>
 				ZZ = (float)(double)inertiaTensorTable["ZZ"],
 			}
 		};
-		data.Remove("InverseInertiaTensor");
-		data.Remove("InverseMass");
 		return bodyInertia;
 	}
 }

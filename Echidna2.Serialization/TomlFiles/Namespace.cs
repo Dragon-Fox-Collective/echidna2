@@ -13,4 +13,6 @@ public class Namespace
 	{
 		return $"namespace {Value};\n\n";
 	}
+	
+	public override string ToString() => Value;
 }

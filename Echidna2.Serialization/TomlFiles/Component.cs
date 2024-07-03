@@ -6,6 +6,7 @@ public class Component
 {
 	public string Id = "";
 	public ComponentSource Source = new NoSource();
+	public bool IsRoot => Id == "This";
 	public bool IsSubclass => Id != "This";
 	public string ClassName = "";
 	public List<string> Interfaces = [];
@@ -13,6 +14,7 @@ public class Component
 	public IEnumerable<Property> Components => Properties.Where(property => property.PropertyType == PropertyType.Component);
 	public List<EventListener> EventsListeners = [];
 	public List<Function> Functions = [];
+	public Dictionary<string, object> Values = [];
 	
 	public bool NeedsCustomClass => IsSubclass
 		? Components.Any() || Properties.Count != 0 || EventsListeners.Count != 0 || Functions.Count != 0 || Interfaces.Count > 1
@@ -31,6 +33,7 @@ public class Component
 		component.EventsListeners = table.GetList<TomlTable>("Events").Select(EventListener.FromToml).ToList();
 		component.Properties = table.GetList<TomlTable>("Properties").Select(propTable => Property.FromToml(propTable, component.EventsListeners)).ToList();
 		component.Functions = table.GetList<TomlTable>("Functions").Select(Function.FromToml).ToList();
+		component.Values = table.GetDict("Values");
 		
 		if (component.Components.Any())
 			component.Interfaces.Add("INotificationPropagator");
@@ -73,6 +76,8 @@ public class Component
 		scriptString += "\n";
 		return scriptString;
 	}
+	
+	public override string ToString() => $"{Source} {ClassName}";
 }
 
 public class ComponentSource;
@@ -82,9 +87,13 @@ public class NoSource : ComponentSource;
 public class PrefabSource(string path) : ComponentSource
 {
 	public string Path = path;
+	
+	public override string ToString() => Path.Split(".").Last();
 }
 
 public class TypeSource(string type) : ComponentSource
 {
 	public string Type = type;
+	
+	public override string ToString() => Type.Split(",").First().Split(".").Last();
 }

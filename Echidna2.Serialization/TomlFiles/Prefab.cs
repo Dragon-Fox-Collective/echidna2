@@ -6,9 +6,13 @@ namespace Echidna2.Serialization.TomlFiles;
 
 public class Prefab
 {
+	public string Path => $"{DottedPath.Replace(".", "/")}.prefab.toml";
+	public string DottedPath => $"{Namespace.Value}.{ThisComponent.ClassName}";
 	public Usings Usings = new();
 	public Namespace Namespace = new();
 	public List<Component> Components = [];
+	public Component ThisComponent => Components.First(c => c.IsRoot);
+	public List<string> FavoriteFields = [];
 	
 	public bool NeedsCustomClass => Components.Any(c => c.NeedsCustomClass);
 	
@@ -21,6 +25,7 @@ public class Prefab
 		prefab.Components = [];
 		foreach ((string id, object componentTable) in table.Where(IdIsValidComponentId))
 			prefab.Components.Add(Component.FromToml(prefabPath, id, (TomlTable)componentTable));
+		prefab.FavoriteFields = table.GetList<string>("FavoriteFields");
 		return prefab;
 	}
 	
@@ -32,4 +37,6 @@ public class Prefab
 		scriptString += Components.Select(component => component.StringifyCS()).Join();
 		return scriptString;
 	}
+	
+	public override string ToString() => Path;
 }

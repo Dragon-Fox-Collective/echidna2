@@ -56,13 +56,7 @@ public class SubComponentSerializer(Func<TomlTable, object> deserializeValue, st
 		return table;
 	}
 	
-	public object Deserialize(object? value, TomlTable data)
-	{
-		object deserializedValue = deserializeValue(data);
-		if (data.Count != 0)
-			Console.WriteLine($"WARN: Unused table {fieldName} {data.ToDelimString()} of {componentId} leftover");
-		return deserializedValue;
-	}
+	public object Deserialize(object? value, TomlTable data) => deserializeValue(data);
 }
 
 public class ColorSerializer : Serializer<TomlTable, Color>
@@ -84,10 +78,6 @@ public class ColorSerializer : Serializer<TomlTable, Color>
 			(int)((double)data["R"] * 255),
 			(int)((double)data["G"] * 255),
 			(int)((double)data["B"] * 255));
-		data.Remove("A");
-		data.Remove("R");
-		data.Remove("G");
-		data.Remove("B");
 		return color;
 	}
 }

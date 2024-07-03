@@ -1,8 +1,8 @@
 ﻿using System.Diagnostics;
+using System.Runtime.Loader;
 using Echidna2.Serialization.TomlFiles;
 using Tomlyn;
 using Tomlyn.Model;
-using static Echidna2.Serialization.SerializationPredicates;
 
 namespace Echidna2.Serialization;
 
@@ -12,21 +12,29 @@ public static class Compilation
 	public static string CompilationBinFolder => $"{CompilationFolder}/bin/Debug/net8.0";
 	public static string CompilationDllPath => $"{CompilationBinFolder}/EchidnaProject.dll";
 	
-	public static async Task Compile()
+	public static async Task<Project> Compile()
 	{
 		RecreateDirectory();
 		CreateCSProj();
 		
+		Project project = new();
+		
 		foreach (string prefabPath in Directory.EnumerateFiles(".", "*.prefab.toml", SearchOption.AllDirectories))
-			CreateCSPrefabFile(prefabPath[2..]); // Get rid of "./"
+			project.AddPrefab(CreateCSPrefabFile(prefabPath[2..]));
 		
 		foreach (string prefabPath in Directory.EnumerateFiles(".", "*.interface.toml", SearchOption.AllDirectories))
-			CreateCSInterfaceFile(prefabPath[2..]); // Get rid of "./"
+			project.AddInterface(CreateCSInterfaceFile(prefabPath[2..]));
 		
 		foreach (string prefabPath in Directory.EnumerateFiles(".", "*.notification.toml", SearchOption.AllDirectories))
-			CreateCSNotificationFile(prefabPath[2..]); // Get rid of "./"
+			project.AddNotification(CreateCSNotificationFile(prefabPath[2..]));
 		
 		await CompileCSProj();
+		
+		AssemblyLoadContext projectAssemblyLoadContext = new("EchidnaProject");
+		await using FileStream projectAssemblyFileStream = new(CompilationDllPath, FileMode.Open, FileAccess.Read);
+		project.Assembly = projectAssemblyLoadContext.LoadFromStream(projectAssemblyFileStream);
+		
+		return project;
 	}
 	
 	public static void RecreateDirectory()
@@ -76,29 +84,32 @@ public static class Compilation
 		File.WriteAllText($"{CompilationFolder}/EchidnaProject.csproj", csprojString);
 	}
 	
-	public static void CreateCSPrefabFile(string prefabPath)
+	public static Prefab CreateCSPrefabFile(string prefabPath)
 	{
 		Prefab prefab = Prefab.FromToml(prefabPath);
-		if (!prefab.NeedsCustomClass) return;
+		if (!prefab.NeedsCustomClass) return prefab;
 		string classPath = GetPrefabClassPath(prefabPath);
 		Directory.CreateDirectory(Path.GetDirectoryName(classPath));
 		File.WriteAllText(classPath, prefab.StringifyCS());
+		return prefab;
 	}
 	
-	public static void CreateCSInterfaceFile(string prefabPath)
+	public static Interface CreateCSInterfaceFile(string prefabPath)
 	{
 		Interface @interface = Interface.FromToml(prefabPath);
 		string classPath = GetPrefabClassPath(prefabPath);
 		Directory.CreateDirectory(Path.GetDirectoryName(classPath));
 		File.WriteAllText(classPath, @interface.StringifyCS());
+		return @interface;
 	}
 	
-	public static void CreateCSNotificationFile(string prefabPath)
+	public static Notification CreateCSNotificationFile(string prefabPath)
 	{
 		Notification notification = Notification.FromToml(prefabPath);
 		string classPath = GetPrefabClassPath(prefabPath);
 		Directory.CreateDirectory(Path.GetDirectoryName(classPath));
 		File.WriteAllText(classPath, notification.StringifyCS());
+		return notification;
 	}
 	
 	public static string GetPrefabClassPath(string prefabPath, string? id = null) => $"{CompilationFolder}/{Path.GetDirectoryName(prefabPath)}/{GetPrefabClassName(prefabPath, id)}.cs";
@@ -170,7 +181,7 @@ public static class Compilation
 	{
 		if (componentTable.TryGetValue("Prefab", out object basePrefab))
 		{
-			string basePrefabPath = $"{Path.GetDirectoryName(prefabPath)}/{(string)basePrefab}.prefab.toml";
+			string basePrefabPath = $"{((string)basePrefab).Replace(".", "/")}.prefab.toml";
 			TomlTable baseComponentTable = (TomlTable)Toml.ToModel(File.ReadAllText(basePrefabPath))["This"];
 			return GetComponentBaseTypeName(basePrefabPath, "This", baseComponentTable);
 		}

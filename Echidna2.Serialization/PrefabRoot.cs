@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using Echidna2.Serialization.TomlFiles;
 
 namespace Echidna2.Serialization;
 
@@ -12,7 +13,7 @@ public class PrefabRoot : IPrefabChangeRegistry
 	public List<(object Component, MemberInfo Field)> FavoriteFields = [];
 	
 	public object RootObject = null!;
-	public string PrefabPath = null!;
+	public Prefab Prefab = null!;
 	
 	public PrefabInstance? GetPrefabInstance(IMemberPath path)
 	{

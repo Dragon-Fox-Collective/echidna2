@@ -53,20 +53,20 @@ BFieldEditor = "5"
 AFieldEditor = "6"
 
 [2]
-Prefab = "../../Gui/HLayoutWithHierarchy"
+Prefab = "Prefabs.Gui.HLayoutWithHierarchy"
 [2.Values]
 Name = "Color Layout"
 Children = [ "3", "4", "5", "6" ]
 HorizontalExpand = true
 
 [3]
-Prefab = "DoubleFieldEditor"
+Prefab = "Prefabs.Editor.FieldEditors.DoubleFieldEditor"
 
 [4]
-Prefab = "DoubleFieldEditor"
+Prefab = "Prefabs.Editor.FieldEditors.DoubleFieldEditor"
 
 [5]
-Prefab = "DoubleFieldEditor"
+Prefab = "Prefabs.Editor.FieldEditors.DoubleFieldEditor"
 
 [6]
-Prefab = "DoubleFieldEditor"
+Prefab = "Prefabs.Editor.FieldEditors.DoubleFieldEditor"

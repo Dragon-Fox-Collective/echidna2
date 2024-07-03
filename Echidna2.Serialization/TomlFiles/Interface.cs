@@ -5,6 +5,8 @@ namespace Echidna2.Serialization.TomlFiles;
 
 public class Interface
 {
+	public string Path => $"{DottedPath.Replace(".", "/")}.prefab.toml";
+	public string DottedPath => $"{Namespace.Value}.{ClassName}";
 	public Usings Usings = new();
 	public Namespace Namespace = new();
 	public bool DontExpose = false;

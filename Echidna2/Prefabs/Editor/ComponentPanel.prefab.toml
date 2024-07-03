@@ -72,15 +72,15 @@ foreach (MemberInfo member in SelectedComponent.GetType()
     AddField(member, SelectedComponent);
 """ },
     { FunctionType = "Private", ReturnType = "void", Name = "AddField", Args = [{ Type = "MemberInfo", Name = "member" }, { Type = "object", Name = "component" }], Content = """
-HLayoutWithHierarchy layout = (HLayoutWithHierarchy)TomlDeserializer.Instantiate("Prefabs/Gui/HLayoutWithHierarchy");
+HLayoutWithHierarchy layout = Project.Instantiate<HLayoutWithHierarchy>("Prefabs.Gui.HLayoutWithHierarchy");
 layout.Name = member.Name + " Field Layout";
 Fields.AddChild(layout);
 
-FullLayoutWithHierarchy textClipper = (FullLayoutWithHierarchy)TomlDeserializer.Instantiate("Prefabs/Gui/FullLayoutWithHierarchy");
+FullLayoutWithHierarchy textClipper = Project.Instantiate<FullLayoutWithHierarchy>("Prefabs.Gui.FullLayoutWithHierarchy");
 textClipper.ClipChildren = true;
 layout.AddChild(textClipper);
 
-TextRect text = (TextRect)TomlDeserializer.Instantiate("Prefabs/Gui/TextRect");
+TextRect text = Project.Instantiate<TextRect>("Prefabs.Gui.TextRect");
 text.TextString = member.Name;
 text.LocalScale = (0.5, 0.5);
 text.MinimumSize = (300, 0);
@@ -104,7 +104,7 @@ if (fieldEditor is not null)
     layout.AddChild(fieldEditor);
 }
 
-ButtonRect favoriteButton = (ButtonRect)TomlDeserializer.Instantiate("Prefabs/Gui/ButtonRect");
+ButtonRect favoriteButton = Project.Instantiate<ButtonRect>("Prefabs.Gui.ButtonRect");
 favoriteButton.MinimumSize = (25, 25);
 favoriteButton.Clicked += () =>
 {
@@ -119,7 +119,7 @@ layout.AddChild(favoriteButton);
 
 FieldEditors.ReferenceFieldEditor NewReferenceFieldEditorOfType(Type type)
 {
-    FieldEditors.ReferenceFieldEditor referenceFieldEditor = (FieldEditors.ReferenceFieldEditor)TomlDeserializer.Instantiate("Prefabs/Editor/FieldEditors/ReferenceFieldEditor");
+    FieldEditors.ReferenceFieldEditor referenceFieldEditor = Project.Instantiate<FieldEditors.ReferenceFieldEditor>("Prefabs.Editor.FieldEditors.ReferenceFieldEditor");
     referenceFieldEditor.ComponentType = type;
     INotificationPropagator.Notify(new EditorInitialize_Notification(Editor), referenceFieldEditor);
     return referenceFieldEditor;
@@ -129,14 +129,14 @@ FieldEditors.ReferenceFieldEditor NewReferenceFieldEditorOfType(Type type)
 Components.ClearChildren();
 if (SelectedObject is null) return;
 
-ButtonRect favoritesButton = (ButtonRect)TomlDeserializer.Instantiate("Prefabs/Editor/ComponentSelectionButton");
+ButtonRect favoritesButton = Project.Instantiate<ButtonRect>("Prefabs.Editor.ComponentSelectionButton");
 favoritesButton.Clicked += () => SelectedComponent = null;
 favoritesButton.MinimumSize = (40, 40);
 Components.AddChild(favoritesButton);
 
 foreach (object component in ComponentUtils.GetAllComponents(SelectedObject))
 {
-    ButtonRect button = (ButtonRect)TomlDeserializer.Instantiate("Prefabs/Editor/ComponentSelectionButton");
+    ButtonRect button = Project.Instantiate<ButtonRect>("Prefabs.Editor.ComponentSelectionButton");
     button.Clicked += () => SelectedComponent = component;
     Components.AddChild(button);
 }
@@ -152,43 +152,43 @@ Fields = "5"
 Components = "7"
 
 [1]
-Prefab = "../Gui/FullRectWithHierarchy"
+Prefab = "Prefabs.Gui.FullRectWithHierarchy"
 [1.Values]
 Name = "Interior Rect"
 Margin = 10.0
 Children = [ "6" ]
 
 [2]
-Prefab = "../Gui/VLayoutWithHierarchy"
+Prefab = "Prefabs.Gui.VLayoutWithHierarchy"
 [2.Values]
 Name = "Interior Layout"
 HorizontalExpand = true
 Children = [ "3", "4", "5" ]
 
 [3]
-Prefab = "../Gui/TextRect"
+Prefab = "Prefabs.Gui.TextRect"
 [3.Values]
 Name = "Object Name"
 LocalScale = { X = 0.5, Y = 0.5 }
 
 [4]
-Prefab = "../Gui/TextRect"
+Prefab = "Prefabs.Gui.TextRect"
 [4.Values]
 Name = "Component Class"
 LocalScale = { X = 0.5, Y = 0.5 }
 
 [5]
-Prefab = "../Gui/VLayoutWithHierarchy"
+Prefab = "Prefabs.Gui.VLayoutWithHierarchy"
 [5.Values]
 Name = "Fields"
 
 [6]
-Prefab = "../Gui/HLayoutWithHierarchy"
+Prefab = "Prefabs.Gui.HLayoutWithHierarchy"
 [6.Values]
 Name = "Horizontal Split"
 Children = [ "2", "7" ]
 
 [7]
-Prefab = "../Gui/VLayoutWithHierarchy"
+Prefab = "Prefabs.Gui.VLayoutWithHierarchy"
 [7.Values]
 Name = "Component List"

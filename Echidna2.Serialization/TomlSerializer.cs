@@ -4,9 +4,9 @@ using Tomlyn.Model;
 
 namespace Echidna2.Serialization;
 
-public static class TomlSerializer
+public partial class Project
 {
-	public static TomlTable Serialize(PrefabRoot prefabRoot, string path)
+	public TomlTable Serialize2(PrefabRoot prefabRoot)
 	{
 		Dictionary<object, string> references = new();
 		Dictionary<object, TomlTable> tables = new();
@@ -17,7 +17,7 @@ public static class TomlSerializer
 			references.Add(subcomponent, id);
 			
 			TomlTable subcomponentTable = new();
-			SerializeComponentType(prefabRoot, new ComponentPath(subcomponent), subcomponent, subcomponentTable, path);
+			SerializeComponentType(prefabRoot, new ComponentPath(subcomponent), subcomponent, subcomponentTable);
 			subcomponentTable.Add("Values", new TomlTable());
 			tables.Add(subcomponent, subcomponentTable);
 		}
@@ -41,7 +41,7 @@ public static class TomlSerializer
 		}
 		prefabTable.Add("FavoriteFields", favoriteFields);
 		
-		File.WriteAllText(path, Toml.FromModel(prefabTable));
+		File.WriteAllText(prefabRoot.Prefab.Path, Toml.FromModel(prefabTable));
 		return prefabTable;
 		
 		string GetReferenceTo(object component)
@@ -50,25 +50,15 @@ public static class TomlSerializer
 		}
 	}
 	
-	private static string GetPathRelativeTo(string path, string relativeTo)
-	{
-		Uri pathUri = new(path);
-		Uri relativeToUri = new(relativeTo);
-		Uri relativeUri = relativeToUri.MakeRelativeUri(pathUri);
-		string relativePath = Uri.UnescapeDataString(relativeUri.ToString());
-		string relativePathWithoutExt = Path.Join(Path.GetDirectoryName(relativePath), Compilation.GetPrefabFileNameWithoutExtension(relativePath));
-		return relativePathWithoutExt;
-	}
-	
-	private static void SerializeComponentType(PrefabRoot prefabRoot, IMemberPath path, object component, TomlTable table, string relativeTo)
+	private void SerializeComponentType(PrefabRoot prefabRoot, IMemberPath path, object component, TomlTable table)
 	{
 		if (prefabRoot.GetPrefabInstance(path) is { } componentPrefabInstance)
-			table.Add("Prefab", GetPathRelativeTo(componentPrefabInstance.PrefabRoot.PrefabPath, relativeTo));
+			table.Add("Prefab", componentPrefabInstance.PrefabRoot.Prefab.DottedPath);
 		else
 			table.Add("Component", component.GetType().AssemblyQualifiedName!.Split(',')[..2].Join(","));
 	}
 	
-	private static void SerializeReference(PrefabRoot prefabRoot, IMemberPath path, TomlTable table, Func<object, string> getReferenceTo)
+	private void SerializeReference(PrefabRoot prefabRoot, IMemberPath path, TomlTable table, Func<object, string> getReferenceTo)
 	{
 		if (prefabRoot.GetPrefabInstance(path) is { } componentPrefabInstance)
 		{
@@ -95,7 +85,7 @@ public static class TomlSerializer
 		}
 	}
 	
-	private static void SerializeValue(PrefabRoot prefabRoot, IMemberPath path, TomlTable table)
+	private void SerializeValue(PrefabRoot prefabRoot, IMemberPath path, TomlTable table)
 	{
 		if (prefabRoot.GetPrefabInstance(path) is { } componentPrefabInstance)
 		{
@@ -121,4 +111,6 @@ public static class TomlSerializer
 			}
 		}
 	}
+	
+	public static TomlTable Serialize(PrefabRoot prefabRoot) => Singleton!.Serialize2(prefabRoot);
 }

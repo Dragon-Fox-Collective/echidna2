@@ -5,7 +5,7 @@ TextRect = "2"
 Button = "3"
 
 [2]
-Prefab = "TextRect"
+Prefab = "Prefabs.Gui.TextRect"
 
 [3]
 Component = "Echidna2.Gui.Button, Echidna2.Gui"

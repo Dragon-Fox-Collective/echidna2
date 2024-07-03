@@ -14,7 +14,7 @@ public static class SerializationTests
 		// Arrange
 		
 		// Act
-		Transform3D transform = (Transform3D)TomlDeserializer.Deserialize(AppContext.BaseDirectory + "Prefabs/Test/TransformTest.toml").RootObject;
+		Transform3D transform = Project.Instantiate<Transform3D>(AppContext.BaseDirectory + "Prefabs.Test.TransformTest");
 		
 		// Assert
 		Assert.Equal(new Vector3(0.0, 0.0, 2.5), transform.LocalPosition);
@@ -26,7 +26,7 @@ public static class SerializationTests
 		// Arrange
 		
 		// Act
-		TransformPrefab transform = (TransformPrefab)TomlDeserializer.Deserialize(AppContext.BaseDirectory + "Prefabs/Test/TransformPrefabTest.toml").RootObject;
+		TransformPrefab transform = Project.Instantiate<TransformPrefab>(AppContext.BaseDirectory + "Prefabs.Test.TransformPrefabTest");
 		
 		// Assert
 		Assert.NotNull(transform.Transform);
@@ -38,7 +38,7 @@ public static class SerializationTests
 		// Arrange
 		
 		// Act
-		PrefabRoot prefab = TomlDeserializer.Deserialize(AppContext.BaseDirectory + "Prefabs/Test/SubcomponentDottedPrefabTest.toml");
+		PrefabRoot prefab = Project.Deserialize(AppContext.BaseDirectory + "Prefabs.Test.SubcomponentDottedPrefabTest");
 		
 		// Assert
 		Assert.NotNull(((SubcomponentPrefab)prefab.RootObject).Subcomponent);
@@ -52,8 +52,8 @@ public static class SerializationTests
 		// Arrange
 		
 		// Act
-		PrefabRoot prefab = TomlDeserializer.Deserialize(AppContext.BaseDirectory + "Prefabs/Test/SubcomponentPrefabTest.toml");
-		TomlTable table = TomlSerializer.Serialize(prefab, AppContext.BaseDirectory + "Prefabs/Test/SubcomponentPrefabTest_Result.toml");
+		PrefabRoot prefab = Project.Deserialize(AppContext.BaseDirectory + "Prefabs.Test.SubcomponentPrefabTest");
+		TomlTable table = Project.Serialize(prefab);
 		
 		// Assert
 		Assert.False(((TomlTable)table["0"]).ContainsKey("Reference"));

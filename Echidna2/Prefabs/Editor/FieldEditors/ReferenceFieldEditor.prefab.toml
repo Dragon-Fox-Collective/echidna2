@@ -23,7 +23,7 @@ Events = [
 Editor = notification.Editor;
 """ },
     { EventType = "Reference", Target = "Button", Name = "MouseDown", Args = [], Content = """
-AddComponentWindow window = (AddComponentWindow)TomlDeserializer.Instantiate("Prefabs/Editor/AddComponentWindow");
+AddComponentWindow window = Project.Instantiate<AddComponentWindow>("Prefabs.Editor.AddComponentWindow");
 window.ComponentType = ComponentType;
 window.Field = this;
 INotificationPropagator.Notify(new EditorInitialize_Notification(Editor), window);
@@ -41,7 +41,7 @@ Text = "3"
 Button = "4"
 
 [2]
-Prefab = "../../Gui/FullRectWithHierarchy"
+Prefab = "Prefabs.Gui.FullRectWithHierarchy"
 [2.Values]
 HorizontalExpand = true
 Margin = 4.0
@@ -49,7 +49,7 @@ ClipChildren = true
 Children = [ "3" ]
 
 [3]
-Prefab = "../../Gui/TextRect"
+Prefab = "Prefabs.Gui.TextRect"
 [3.Values]
 Justification = "Left"
 LocalScale = { X = 0.5, Y = 0.5 }

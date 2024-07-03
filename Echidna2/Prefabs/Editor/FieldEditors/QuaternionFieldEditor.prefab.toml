@@ -24,4 +24,4 @@ Functions = [
 VectorFieldEditor = "2"
 
 [2]
-Prefab = "Vector3FieldEditor"
+Prefab = "Prefabs.Editor.FieldEditors.Vector3FieldEditor"

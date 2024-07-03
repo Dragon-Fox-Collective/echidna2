@@ -28,12 +28,12 @@ Events = [
     { EventType = "Notification", Name = "Initialize", Content = """
 EditorInstantiators = new Dictionary<Type, Func<IFieldEditor>>()
 {
-    { typeof(string), Instantiator("Prefabs/Editor/FieldEditors/StringFieldEditor") },
-    { typeof(double), Instantiator("Prefabs/Editor/FieldEditors/DoubleFieldEditor") },
-    { typeof(Vector2), Instantiator("Prefabs/Editor/FieldEditors/Vector2FieldEditor") },
-    { typeof(Vector3), Instantiator("Prefabs/Editor/FieldEditors/Vector3FieldEditor") },
-    { typeof(Quaternion), Instantiator("Prefabs/Editor/FieldEditors/QuaternionFieldEditor") },
-    { typeof(Color), Instantiator("Prefabs/Editor/FieldEditors/ColorFieldEditor") },
+    { typeof(string), Instantiator("Prefabs.Editor.FieldEditors.StringFieldEditor") },
+    { typeof(double), Instantiator("Prefabs.Editor.FieldEditors.DoubleFieldEditor") },
+    { typeof(Vector2), Instantiator("Prefabs.Editor.FieldEditors.Vector2FieldEditor") },
+    { typeof(Vector3), Instantiator("Prefabs.Editor.FieldEditors.Vector3FieldEditor") },
+    { typeof(Quaternion), Instantiator("Prefabs.Editor.FieldEditors.QuaternionFieldEditor") },
+    { typeof(Color), Instantiator("Prefabs.Editor.FieldEditors.ColorFieldEditor") },
 };
 """ },
 ]
@@ -44,11 +44,10 @@ ComponentPanel.GetType().GetMethod("set_SelectedObject").Invoke(ComponentPanel, 
 """ },
     { ReturnType = "IFieldEditor", Name = "InstantiateFieldEditor", Args = [{ Type = "Type", Name = "type" }], Content = "return EditorInstantiators[type]();" },
     { ReturnType = "bool", Name = "HasRegisteredFieldEditor", Args = [{ Type = "Type", Name = "type" }], Content = "return EditorInstantiators.ContainsKey(type);" },
-    { FunctionType = "Private", Static = true, ReturnType = "Func<IFieldEditor>", Name = "Instantiator", Args = [{ Type = "string", Name = "path" }], Content = "return () => (IFieldEditor)Instantiate(path);" },
-    { Static = true, ReturnType = "object", Name = "Instantiate", Args = [{ Type = "string", Name = "path" }], Content = "return TomlDeserializer.Deserialize(AppContext.BaseDirectory + path + \".prefab.toml\").RootObject;" },
+    { FunctionType = "Private", Static = true, ReturnType = "Func<IFieldEditor>", Name = "Instantiator", Args = [{ Type = "string", Name = "path" }], Content = "return () => Project.Instantiate<IFieldEditor>(path);" },
     { ReturnType = "void", Name = "SerializePrefab", Args = [], Content = """
 if (PrefabRoot is null) return;
-TomlSerializer.Serialize(PrefabRoot, AppContext.BaseDirectory + PrefabPath);
+Project.Serialize(PrefabRoot);
 """ },
     { Static = true, ReturnType = "void", Name = "OpenNewWindow", Args = [], Content = """
 // :/ cubemap no longer static constructed because nothing references it since the skybox is a toml now
@@ -58,12 +57,12 @@ staticConstructorLoad = Mesh.Cube;
 staticConstructorLoad = Shader.Quad;
 
 
-Editor root = (Editor)TomlDeserializer.Instantiate("Prefabs/Editor/Editor");
+Editor root = Project.Instantiate<Editor>("Prefabs.Editor.Editor");
 root.Notify(new EditorInitialize_Notification(root));
 
-PrefabRoot prefab = TomlDeserializer.Deserialize(AppContext.BaseDirectory + root.PrefabPath);
-TomlSerializer.Serialize(prefab, AppContext.BaseDirectory + root.PrefabPath);
-prefab = TomlDeserializer.Deserialize(AppContext.BaseDirectory + root.PrefabPath);
+PrefabRoot prefab = Project.Deserialize(root.PrefabPath);
+Project.Serialize(prefab);
+prefab = Project.Deserialize(root.PrefabPath);
 
 root.PrefabRoot = prefab;
 IHasChildren.PrintTree(root);
@@ -100,7 +99,7 @@ PrefabChildren = "04"
 Viewport = "2"
 ObjectPanel = "20"
 ComponentPanel = "21"
-PrefabPath = "Prefabs/Some3dScene.prefab.toml"
+PrefabPath = "Prefabs.Some3dScene"
 
 [01]
 Component = "Echidna2.Core.Named, Echidna2.Core"
@@ -125,20 +124,20 @@ Component = "Echidna2.Core.Hierarchy, Echidna2.Core"
 Children = [ "2", "3" ]
 
 [2]
-Prefab = "EditorViewport3D"
+Prefab = "Prefabs.Editor.EditorViewport3D"
 [2.Values]
 Name = "Scene"
 AnchorPreset = "Full"
 
 [3]
-Prefab = "../Gui/RectLayoutWithHierarchy"
+Prefab = "Prefabs.Gui.RectLayoutWithHierarchy"
 [3.Values]
 Name = "Overlay"
 AnchorPreset = "Full"
 Children = [ "4", "9", "14", "20", "21" ]
 
 [4]
-Prefab = "../Gui/RectWithHierarchy"
+Prefab = "Prefabs.Gui.RectWithHierarchy"
 [4.Values]
 Name = "Console"
 AnchorPreset = "WideBottom"
@@ -146,14 +145,14 @@ AnchorOffsetTop = 50.0
 Children = [ "51" ]
 
 [51]
-Prefab = "../Gui/RectLayoutWithHierarchy"
+Prefab = "Prefabs.Gui.RectLayoutWithHierarchy"
 [51.Values]
 Name = "Play Buttons Position Resetter"
 AnchorPreset = "TopCenter"
 Children = [ "5" ]
 
 [5]
-Prefab = "../Gui/FullRectWithHierarchy"
+Prefab = "Prefabs.Gui.FullRectWithHierarchy"
 [5.Values]
 Name = "Play Buttons"
 AnchorPreset = "Center"
@@ -161,28 +160,28 @@ Margin = 10.0
 Children = [ "6" ]
 
 [6]
-Prefab = "../Gui/HLayoutWithHierarchy"
+Prefab = "Prefabs.Gui.HLayoutWithHierarchy"
 [6.Values]
 Name = "Play Buttons Layout"
 Spacing = 10.0
 Children = [ "7", "8" ]
 
 [7]
-Prefab = "../Gui/ButtonRect"
+Prefab = "Prefabs.Gui.ButtonRect"
 [7.Values]
 Name = "Play Button"
 MinimumSize = { X = 26.0, Y = 26.0 }
 Color = { R = 0.0, G = 1.0, B = 0.0, A = 1.0 }
 
 [8]
-Prefab = "../Gui/ButtonRect"
+Prefab = "Prefabs.Gui.ButtonRect"
 [8.Values]
 Name = "Stop Button"
 MinimumSize = { X = 26.0, Y = 26.0 }
 Color = { R = 1.0, G = 0.0, B = 0.0, A = 1.0 }
 
 [9]
-Prefab = "../Gui/FullRectWithHierarchy"
+Prefab = "Prefabs.Gui.FullRectWithHierarchy"
 [9.Values]
 Name = "Scene Context Buttons"
 AnchorPreset = "TopCenter"
@@ -192,35 +191,35 @@ Margin = 10.0
 Children = [ "10" ]
 
 [10]
-Prefab = "../Gui/HLayoutWithHierarchy"
+Prefab = "Prefabs.Gui.HLayoutWithHierarchy"
 [10.Values]
 Name = "Scene Context Buttons Layout"
 Spacing = 10.0
 Children = [ "11", "12", "13" ]
 
 [11]
-Prefab = "../Gui/ButtonRect"
+Prefab = "Prefabs.Gui.ButtonRect"
 [11.Values]
 Name = "3D View Button"
 MinimumSize = { X = 26.0, Y = 26.0 }
 Color = { R = 1.0, G = 0.0, B = 0.0, A = 1.0 }
 
 [12]
-Prefab = "../Gui/ButtonRect"
+Prefab = "Prefabs.Gui.ButtonRect"
 [12.Values]
 Name = "2D View Button"
 MinimumSize = { X = 26.0, Y = 26.0 }
 Color = { R = 0.0, G = 0.0, B = 1.0, A = 1.0 }
 
 [13]
-Prefab = "../Gui/ButtonRect"
+Prefab = "Prefabs.Gui.ButtonRect"
 [13.Values]
 Name = "Gui View Button"
 MinimumSize = { X = 26.0, Y = 26.0 }
 Color = { R = 0.0, G = 1.0, B = 0.0, A = 1.0 }
 
 [14]
-Prefab = "../Gui/FullRectWithHierarchy"
+Prefab = "Prefabs.Gui.FullRectWithHierarchy"
 [14.Values]
 Name = "Side Panel Buttons"
 AnchorPreset = "TopRight"
@@ -232,14 +231,14 @@ Margin = 10.0
 Children = [ "15" ]
 
 [15]
-Prefab = "../Gui/VLayoutWithHierarchy"
+Prefab = "Prefabs.Gui.VLayoutWithHierarchy"
 [15.Values]
 Name = "Side Panel Buttons Layout"
 Spacing = 10.0
 Children = [ "16", "17", "18", "19" ]
 
 [16]
-Prefab = "../Gui/ButtonRect"
+Prefab = "Prefabs.Gui.ButtonRect"
 Properties = [
     { PropertyType = "Reference", Type = "IVisibility", Name = "Panel" },
 ]
@@ -255,7 +254,7 @@ Color = { R = 1.0, G = 0.0, B = 0.0, A = 1.0 }
 Panel = "20"
 
 [17]
-Prefab = "../Gui/ButtonRect"
+Prefab = "Prefabs.Gui.ButtonRect"
 Properties = [
     { PropertyType = "Reference", Type = "IVisibility", Name = "Panel" },
 ]
@@ -271,21 +270,21 @@ Color = { R = 0.0, G = 0.0, B = 1.0, A = 1.0 }
 Panel = "21"
 
 [18]
-Prefab = "../Gui/ButtonRect"
+Prefab = "Prefabs.Gui.ButtonRect"
 [18.Values]
 Name = "Material Panel Button"
 MinimumSize = { X = 26.0, Y = 26.0 }
 Color = { R = 0.0, G = 1.0, B = 0.0, A = 1.0 }
 
 [19]
-Prefab = "../Gui/ButtonRect"
+Prefab = "Prefabs.Gui.ButtonRect"
 [19.Values]
 Name = "State Machine Panel Button"
 MinimumSize = { X = 26.0, Y = 26.0 }
 Color = { R = 1.0, G = 0.0, B = 1.0, A = 1.0 }
 
 [20]
-Prefab = "ObjectPanel"
+Prefab = "Prefabs.Editor.ObjectPanel"
 [20.Values]
 AnchorPreset = "TopRight"
 AnchorOffsetTop = -10.0
@@ -296,7 +295,7 @@ IsSelfVisible = false
 MinimumSize = { X = 300.0, Y = 400.0 }
 
 [21]
-Prefab = "ComponentPanel"
+Prefab = "Prefabs.Editor.ComponentPanel"
 [21.Values]
 AnchorPreset = "TopRight"
 AnchorOffsetTop = -10.0
