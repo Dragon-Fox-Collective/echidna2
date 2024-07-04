@@ -15,6 +15,11 @@ public class Property
 	public bool HasCustomSetter => !SetterContent.IsEmpty();
 	public string SetterContent = "";
 	
+	public bool HasCustomAdder => !AdderContent.IsEmpty();
+	public string AdderContent = "";
+	public bool HasCustomRemover => !RemoverContent.IsEmpty();
+	public string RemoverContent = "";
+	
 	public static Property FromToml(TomlTable table, IEnumerable<EventListener> eventListeners)
 	{
 		Property property = new();
@@ -25,6 +30,8 @@ public class Property
 		property.EventListeners = eventListeners.Where(eventListener => eventListener.EventType == EventType.Reference && eventListener.Target == property.Name).ToList();
 		property.GetterContent = table.GetString("GetterContent");
 		property.SetterContent = table.GetString("SetterContent");
+		property.AdderContent = table.GetString("AdderContent");
+		property.RemoverContent = table.GetString("RemoverContent");
 		return property;
 	}
 	
@@ -83,7 +90,33 @@ public class Property
 	}
 	private string StringifyCSEvent()
 	{
-		return $"\tpublic event Action<{Type}>? {Name};\n";
+		string scriptString = "";
+		scriptString += $"\tpublic event Action<{Type}>? {Name}";
+		if (HasCustomAdder || HasCustomRemover)
+		{
+			scriptString += "\n";
+			scriptString += "\t{\n";
+			if (HasCustomAdder)
+			{
+				scriptString += "\t\tadd\n";
+				scriptString += "\t\t{\n";
+				scriptString += "\t\t\t" + AdderContent.Indent().Indent().Indent() + "\n";
+				scriptString += "\t\t}\n";
+			}
+			if (HasCustomRemover)
+			{
+				scriptString += "\t\tremove\n";
+				scriptString += "\t\t{\n";
+				scriptString += "\t\t\t" + RemoverContent.Indent().Indent().Indent() + "\n";
+				scriptString += "\t\t}\n";
+			}
+			scriptString += "\t}\n";
+		}
+		else
+		{
+			scriptString += ";\n";
+		}
+		return scriptString;
 	}
 
 	private string StringifyCSReferenceGetterAndSetter()

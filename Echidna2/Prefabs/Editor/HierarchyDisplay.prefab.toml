@@ -1,5 +1,59 @@
-﻿[This]
-Component = "Echidna2.Prefabs.Editor.HierarchyDisplay, Echidna2"
+﻿Using = ["Notifications.Editor", "Echidna2.Gui", "Echidna2.Prefabs.Gui"]
+
+[This]
+Interfaces = ["ICanBeLaidOut"]
+Properties = [
+    { PropertyType = "Component", Type = "Named", Name = "Named" },
+    { PropertyType = "Component", Type = "RectTransform", Name = "RectTransform" },
+    { PropertyType = "Component", Type = "FullLayout", Name = "Layout" },
+    { PropertyType = "Component", Type = "Hierarchy", Name = "DisplayElements", ExposeProperties = false },
+    { PropertyType = "Public", Type = "PrefabRoot?", Name = "HierarchyToDisplay", SetterContent = """
+DisplayElements.ClearChildren();
+_HierarchyToDisplay = value;
+if (HierarchyToDisplay is not null)
+{
+    FullLayoutWithHierarchy box = BoxOfHierarchy(HierarchyToDisplay, HierarchyToDisplay.RootObject);
+    box.LeftMargin = 0;
+    DisplayElements.AddChild(box);
+}
+""" },
+    { PropertyType = "Event", Type = "object", Name = "ItemSelected" },
+]
+Functions = [
+    { FunctionType = "Private", ReturnType = "FullLayoutWithHierarchy", Name = "BoxOfHierarchy", Args = [{ Type = "PrefabRoot", Name = "root" }, { Type = "object", Name = "obj" }], Content = """
+FullLayoutWithHierarchy box = Project.Instantiate<FullLayoutWithHierarchy>("Prefabs.Gui.FullLayoutWithHierarchy");
+box.Name = $"Box for {obj}";
+box.AnchorPreset = AnchorPreset.Full;
+box.LeftMargin = 10;
+VLayoutWithHierarchy layout = Project.Instantiate<VLayoutWithHierarchy>("Prefabs.Gui.VLayoutWithHierarchy");
+layout.Name = $"Layout for box for {obj}";
+layout.AnchorPreset = AnchorPreset.Full;
+box.AddChild(layout);
+
+ButtonRect button = Project.Instantiate<ButtonRect>("Prefabs.Gui.ButtonRect");
+button.AnchorPreset = AnchorPreset.Full;
+button.Margin = 5;
+button.MouseUp += () => ItemSelected?.Invoke(obj);
+layout.AddChild(button);
+
+TextRect text = Project.Instantiate<TextRect>("Prefabs.Gui.TextRect");
+text.TextString = INamed.GetName(obj);
+if (obj is INamed named)
+    named.NameChanged += name => text.TextString = name;
+text.Justification = TextJustification.Left;
+text.AnchorPreset = AnchorPreset.Full;
+text.LocalScale = Vector2.One * 0.5;
+button.AddChild(text);
+
+if (obj is IHasChildren hasChildren)
+    foreach (object child in hasChildren.Children
+            .Where(child => root.Components.Contains(child) || root.ChildPrefabs.Any(childPrefab => childPrefab.PrefabRoot.RootObject == child)))
+        layout.AddChild(BoxOfHierarchy(root, child));
+
+return box;
+""" },
+]
+
 [This.Values]
 Named = "2"
 RectTransform = "4"

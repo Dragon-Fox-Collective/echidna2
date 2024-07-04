@@ -155,7 +155,6 @@ Components = "7"
 [1]
 Prefab = "Prefabs.Gui.FullRectWithHierarchy"
 [1.Values]
-Name = "Interior Rect"
 Margin = 10.0
 Children = [ "6" ]
 

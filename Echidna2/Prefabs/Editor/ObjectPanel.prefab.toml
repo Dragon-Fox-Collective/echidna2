@@ -1,5 +1,16 @@
-﻿[This]
-Component = "Echidna2.Prefabs.Editor.ObjectPanel, Echidna2"
+﻿Using = ["Echidna2.Prefabs.Gui"]
+
+[This]
+Properties = [
+    { PropertyType = "Component", Type = "FullRectWithHierarchy", Name = "Rect" },
+    { PropertyType = "Reference", Type = "HierarchyDisplay", Name = "HierarchyDisplay" },
+    { PropertyType = "Public", Type = "PrefabRoot?", Name = "PrefabRoot", SetterContent = """
+_PrefabRoot = value;
+HierarchyDisplay.HierarchyToDisplay = PrefabRoot;
+""" },
+    { PropertyType = "Event", Type = "object", Name = "ItemSelected", AdderContent = "HierarchyDisplay.ItemSelected += value;", RemoverContent = "HierarchyDisplay.ItemSelected -= value;" },
+]
+
 [This.Values]
 Name = "Object Panel"
 Rect = "1"

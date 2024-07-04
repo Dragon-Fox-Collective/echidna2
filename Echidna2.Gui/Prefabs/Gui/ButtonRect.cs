@@ -13,7 +13,7 @@ public partial class ButtonRect : INotificationPropagator, IInitialize, ICanBeLa
 	[SerializedReference, ExposeMembersInClass] public Rect Rect { get; set; } = null!;
 	[SerializedReference, ExposeMembersInClass] public Hierarchy PrefabChildren { get; set; } = null!;
 	
-	private Button _Button = default!;
+	private Button? _Button = default!;
 	[SerializedReference, ExposeMembersInClass] public Button Button
 	{
 		get => _Button;

@@ -118,7 +118,9 @@ public static class Compilation
 	
 	public static string GetPrefabFileNameWithoutExtension(string prefabPath) => Path.GetFileNameWithoutExtension(Path.GetFileNameWithoutExtension(prefabPath));
 	
-	public static string GetPrefabClassNamespace(string prefabPath) => Path.GetDirectoryName(prefabPath).Replace('/', '.').Replace('\\', '.');
+	public static string GetPrefabClassNamespace(string prefabPath) => Path.GetDirectoryName(prefabPath).Replace('/', '.').Replace('\\', '.').Trim('.');
+	
+	public static string GetPrefabClassDottedPath(string prefabPath) => $"{GetPrefabClassNamespace(prefabPath)}.{GetPrefabClassName(prefabPath)}";
 	
 	public static async Task CompileCSProj()
 	{

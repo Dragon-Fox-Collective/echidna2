@@ -1,0 +1,60 @@
+﻿Using = ["Notifications.Editor", "Echidna2.Prefabs.Gui", "Echidna2.Gui"]
+
+[This]
+Properties = [
+    { PropertyType = "Component", Type = "FullRectWithHierarchy", Name = "Rect" },
+    { PropertyType = "Reference", Type = "VLayoutWithHierarchy", Name = "Files" },
+    { PropertyType = "Private", Type = "Editor", Name = "Editor" },
+]
+Events = [
+    { EventType = "Notification", Name = "Initialize", Content = """
+AddDirectory(".");
+""" },
+    { EventType = "Notification", Name = "EditorInitialize", Content = """
+Editor = notification.Editor;
+""" },
+]
+Functions = [
+    { FunctionType = "Private", ReturnType = "void", Name = "AddDirectory", Args = [{ Type = "string", Name = "directoryPath" }], Content = """
+string lastDirectory = null!;
+foreach (string filePath in Directory.GetFiles(directoryPath, "*.prefab.toml", SearchOption.AllDirectories))
+{
+    if (Path.GetDirectoryName(filePath) != lastDirectory)
+    {
+        lastDirectory = Path.GetDirectoryName(filePath);
+        TextRect text = Project.Instantiate<TextRect>("Prefabs.Gui.TextRect");
+        text.TextString = lastDirectory[2..];
+        text.Justification = TextJustification.Left;
+        text.AnchorPreset = AnchorPreset.Full;
+        text.LocalScale = Vector2.One * 0.5;
+        Files.AddChild(text);
+    }
+    
+    ButtonRect button = Project.Instantiate<ButtonRect>("Prefabs.Gui.ButtonRect");
+    button.AnchorPreset = AnchorPreset.Full;
+    button.Margin = 5;
+    button.Clicked += () => Editor.PrefabRoot = Project.Deserialize(Compilation.GetPrefabClassDottedPath(filePath));
+    Files.AddChild(button);
+    
+    TextRect buttonText = Project.Instantiate<TextRect>("Prefabs.Gui.TextRect");
+    buttonText.TextString = Path.GetFileNameWithoutExtension(filePath);
+    buttonText.Justification = TextJustification.Left;
+    buttonText.AnchorPreset = AnchorPreset.Full;
+    buttonText.LocalScale = Vector2.One * 0.5;
+    button.AddChild(buttonText);
+}
+""" },
+]
+[This.Values]
+Name = "Asset Browser Panel"
+Rect = "1"
+Files = "2"
+
+[1]
+Prefab = "Prefabs.Gui.FullRectWithHierarchy"
+[1.Values]
+Margin = 10.0
+Children = [ "2" ]
+
+[2]
+Prefab = "Prefabs.Gui.VLayoutWithHierarchy"

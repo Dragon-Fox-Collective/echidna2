@@ -12,7 +12,7 @@ Properties = [
     { PropertyType = "Reference", Type = "Viewport", Name = "Viewport" },
     { PropertyType = "Reference", Type = "object", Name = "ComponentPanel" },
     { PropertyType = "Reference", Type = "ObjectPanel", Name = "ObjectPanel" },
-    { PropertyType = "Value", Type = "string", Name = "PrefabPath" },
+    { PropertyType = "Value", Type = "string", Name = "InitialPrefabPath" },
     { PropertyType = "Public", Type = "PrefabRoot", Name = "PrefabRoot", SetterContent = """
 Viewport.ClearChildren();
 _PrefabRoot = value;
@@ -60,9 +60,9 @@ staticConstructorLoad = Shader.Quad;
 Editor root = Project.Instantiate<Editor>("Prefabs.Editor.Editor");
 root.Notify(new EditorInitialize_Notification(root));
 
-PrefabRoot prefab = Project.Deserialize(root.PrefabPath);
+PrefabRoot prefab = Project.Deserialize(root.InitialPrefabPath);
 Project.Serialize(prefab);
-prefab = Project.Deserialize(root.PrefabPath);
+prefab = Project.Deserialize(root.InitialPrefabPath);
 
 root.PrefabRoot = prefab;
 IHasChildren.PrintTree(root);
@@ -99,7 +99,7 @@ PrefabChildren = "04"
 Viewport = "2"
 ObjectPanel = "20"
 ComponentPanel = "21"
-PrefabPath = "Prefabs.Some3dScene"
+InitialPrefabPath = "Prefabs.Some3dScene"
 
 [01]
 Component = "Echidna2.Core.Named, Echidna2.Core"
@@ -134,7 +134,7 @@ Prefab = "Prefabs.Gui.RectLayoutWithHierarchy"
 [3.Values]
 Name = "Overlay"
 AnchorPreset = "Full"
-Children = [ "4", "9", "14", "20", "21" ]
+Children = [ "4", "9", "14", "20", "21", "22" ]
 
 [4]
 Prefab = "Prefabs.Gui.RectWithHierarchy"
@@ -271,10 +271,19 @@ Panel = "21"
 
 [18]
 Prefab = "Prefabs.Gui.ButtonRect"
+Properties = [
+    { PropertyType = "Reference", Type = "IVisibility", Name = "Panel" },
+]
+Events = [
+    { EventType = "Self", Target = "Button", Name = "Clicked", Args = [], Content = """
+Panel.ToggleVisibility();
+""" },
+]
 [18.Values]
 Name = "Material Panel Button"
 MinimumSize = { X = 26.0, Y = 26.0 }
 Color = { R = 0.0, G = 1.0, B = 0.0, A = 1.0 }
+Panel = "22"
 
 [19]
 Prefab = "Prefabs.Gui.ButtonRect"
@@ -304,3 +313,14 @@ AnchorOffsetRight = -70.0
 AnchorOffsetLeft = -70.0
 IsSelfVisible = false
 MinimumSize = { X = 400.0, Y = 600.0 }
+
+[22]
+Prefab = "Prefabs.Editor.AssetBrowserPanel"
+[22.Values]
+AnchorPreset = "TopRight"
+AnchorOffsetTop = -10.0
+AnchorOffsetBottom = -10.0
+AnchorOffsetRight = -70.0
+AnchorOffsetLeft = -70.0
+IsSelfVisible = false
+MinimumSize = { X = 300.0, Y = 400.0 }
