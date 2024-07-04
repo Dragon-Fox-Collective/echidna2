@@ -46,8 +46,7 @@ text.LocalScale = Vector2.One * 0.5;
 button.AddChild(text);
 
 if (obj is IHasChildren hasChildren)
-    foreach (object child in hasChildren.Children
-            .Where(child => root.Components.Contains(child) || root.ChildPrefabs.Any(childPrefab => childPrefab.PrefabRoot.RootObject == child)))
+    foreach (object child in hasChildren.Children.Where(root.Owns))
         layout.AddChild(BoxOfHierarchy(root, child));
 
 return box;

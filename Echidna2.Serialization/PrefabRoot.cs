@@ -31,6 +31,8 @@ public class PrefabRoot : IPrefabChangeRegistry
 	}
 	
 	public void RegisterChangeInSelf(MemberPath path) => SerializedData[path] = path.Value;
+	
+	public bool Owns(object component) => Components.Contains(component) || ChildPrefabs.Any(child => child.PrefabRoot.RootObject == component);
 }
 
 public class PrefabInstance(PrefabRoot prefabRoot) : IPrefabChangeRegistry
