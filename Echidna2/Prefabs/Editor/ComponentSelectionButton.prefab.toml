@@ -1,0 +1,6 @@
+﻿[This]
+Prefab = "Prefabs.Gui.ButtonRect"
+[This.Values]
+Name = "Component Selection Button"
+MinimumSize = { X = 30, Y = 30 }
+HorizontalSizing = "FitCenter"

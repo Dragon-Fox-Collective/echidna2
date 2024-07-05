@@ -1,0 +1,11 @@
+﻿Expose = false
+GenericsInSeparateInterface = true
+Generics = [
+    { GenericType = "in", Name = "T" },
+]
+Properties = [
+    { PropertyType = "Event", Type = "object?", Name = "ValueChanged" },
+]
+Functions = [
+    { ReturnType = "void", Name = "Load", Args = [{ Type = "object?", Name = "value", CastTo = "T" }] },
+]

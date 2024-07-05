@@ -32,7 +32,7 @@ public class FullLayout : RectLayout
 		set => verticalMargin = BottomMargin = TopMargin = value;
 	}
 	
-	public override void OnPreNotify(IUpdate.Notification notification)
+	public override void OnPreNotify(Update_Notification notification)
 	{
 		List<RectTransform> laidOutChildren = ChildrenThatCanBeLaidOut.Select(child => child.RectTransform).ToList();
 		

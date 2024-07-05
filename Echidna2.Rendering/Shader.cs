@@ -1,5 +1,6 @@
 ﻿using System.Drawing;
 using Echidna2.Mathematics;
+using Echidna2.Serialization;
 using OpenTK.Graphics.OpenGL4;
 using Vector4 = OpenTK.Mathematics.Vector4;
 
@@ -7,6 +8,8 @@ namespace Echidna2.Rendering;
 
 public class Shader(string vertexSource, string fragmentSource)
 {
+	static Shader() => SerializedValueAttribute.AddDefaultSerializer(typeof(Shader), new ShaderSerializer());
+	
 	public static readonly Shader Solid = new(ShaderNodeUtil.MainVertexShader, File.ReadAllText($"{AppContext.BaseDirectory}/Assets/solid.frag"));
 	public static readonly Shader PBR = new(ShaderNodeUtil.MainVertexShader, File.ReadAllText($"{AppContext.BaseDirectory}/Assets/pbr.frag"));
 	public static readonly Shader Skybox = new(ShaderNodeUtil.SkyboxVertexShader, File.ReadAllText($"{AppContext.BaseDirectory}/Assets/cubemap.frag"));

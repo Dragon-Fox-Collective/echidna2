@@ -3,12 +3,10 @@ using Echidna2.Gui;
 using Echidna2.Mathematics;
 using Echidna2.Rendering;
 using Echidna2.Serialization;
-using JetBrains.Annotations;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 
 namespace Echidna2.Prefabs.Editor;
 
-[UsedImplicitly, Prefab("Prefabs/Editor/EditorViewportGui.toml")]
 public partial class EditorViewportGui : INotificationPropagator, IMouseDown, IMouseMoved, IMouseUp, IMouseWheelScrolled
 {
 	[SerializedReference, ExposeMembersInClass] public ViewportGui Viewport { get; set; } = null!;
@@ -19,8 +17,8 @@ public partial class EditorViewportGui : INotificationPropagator, IMouseDown, IM
 	
 	public void Notify<T>(T notification) where T : notnull
 	{
-		if (notification is IMouseDown.Notification || notification is IMouseMoved.Notification || notification is IMouseUp.Notification)
-			INotificationPropagator.Notify(new EditorNotification<T>(notification), Viewport);
+		if (notification is MouseDown_Notification || notification is MouseMoved_Notification || notification is MouseUp_Notification)
+			INotificationPropagator.Notify(Activator.CreateInstance(Project.Singleton.Assembly.GetType("Notifications.Editor.EditorNotification_Notification`1").MakeGenericType(typeof(T)), notification), Viewport);
 		else
 			INotificationPropagator.Notify(notification, Viewport);
 	}
@@ -48,9 +46,9 @@ public partial class EditorViewportGui : INotificationPropagator, IMouseDown, IM
 		{
 			double zoomAmount = 1 + Math.Abs(offset.Y) * ZoomFactor;
 			if (offset.Y > 0)
-				Camera.Zoom *= zoomAmount;
-			else
 				Camera.Zoom /= zoomAmount;
+			else
+				Camera.Zoom *= zoomAmount;
 		}
 	}
 }

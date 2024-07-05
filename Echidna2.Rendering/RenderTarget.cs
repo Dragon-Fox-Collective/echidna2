@@ -5,7 +5,7 @@ using OpenTK.Graphics.OpenGL4;
 
 namespace Echidna2.Rendering;
 
-public class RenderTarget : IInitialize, INotificationHook<IDrawPass.Notification>, IDispose
+public class RenderTarget : IInitialize, INotificationHook<DrawPass_Notification>, IDispose
 {
 	private int colorTexture;
 	private int depthTexture;
@@ -60,15 +60,15 @@ public class RenderTarget : IInitialize, INotificationHook<IDrawPass.Notificatio
 		GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
 	}
 	
-	public void OnPreNotify(IDrawPass.Notification notification)
+	public void OnPreNotify(DrawPass_Notification notification)
 	{
 		
 	}
-	public void OnPostNotify(IDrawPass.Notification notification)
+	public void OnPostNotify(DrawPass_Notification notification)
 	{
 		
 	}
-	public void OnPostPropagate(IDrawPass.Notification notification)
+	public void OnPostPropagate(DrawPass_Notification notification)
 	{
 		if (currentSize != Camera.Size)
 		{
@@ -79,7 +79,7 @@ public class RenderTarget : IInitialize, INotificationHook<IDrawPass.Notificatio
 		GL.BindFramebuffer(FramebufferTarget.Framebuffer, frameBufferObject);
 		GL.Viewport(0, 0, (int)Camera.Size.X, (int)Camera.Size.Y);
 		GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit | ClearBufferMask.StencilBufferBit);
-		Camera.Notify(new IDraw.Notification(Camera));
+		Camera.Notify(new Draw_Notification(Camera));
 	}
 	
 	public void OnDispose()

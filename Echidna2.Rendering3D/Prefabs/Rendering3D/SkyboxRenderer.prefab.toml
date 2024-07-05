@@ -1,0 +1,29 @@
+﻿Using = ["Echidna2.Rendering", "Echidna2.Rendering3D", "OpenTK.Graphics.OpenGL4"]
+
+[This]
+Properties = [
+    { PropertyType = "Value", Type = "Mesh", Name = "Mesh" },
+    { PropertyType = "Value", Type = "Shader", Name = "Shader" },
+    { PropertyType = "Value", Type = "CubeMap", Name = "CubeMap" },
+]
+Events = [
+    { EventType = "Notification", Name = "Draw", Content = """
+GL.DepthFunc(DepthFunction.Lequal);
+bool cullBackFaces = Mesh.CullBackFaces;
+Mesh.CullBackFaces = false;
+
+Shader.Bind();
+Shader.SetMatrix4("view", notification.Camera.ViewMatrix);
+Shader.SetMatrix4("projection", notification.Camera.ProjectionMatrix);
+CubeMap.Bind();
+Mesh.Draw();
+
+Mesh.CullBackFaces = cullBackFaces;
+GL.DepthFunc(DepthFunction.Less);
+""" },
+]
+
+[This.Values]
+Mesh = "Cube"
+Shader = "Skybox"
+CubeMap = "Skybox"

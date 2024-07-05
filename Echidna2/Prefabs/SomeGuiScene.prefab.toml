@@ -1,0 +1,7 @@
+﻿[This]
+Prefab = "Prefabs.Gui.RectWithHierarchy"
+[This.Values]
+Name = "Some Hierarchy"
+AnchorPreset = "Full"
+Color = { R = 0.0, G = 0.5, B = 0.5, A = 1.0 }
+Children = [ ]

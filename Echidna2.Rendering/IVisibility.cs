@@ -17,11 +17,11 @@ public static class IVisibilityExtensions
 }
 
 public class Visibility : IVisibility,
-	INotificationPredicate<IDraw.Notification>,
-	INotificationPredicate<IParentVisibilityChanged.Notification>,
-	INotificationPredicate<IMouseDown.Notification>,
-	INotificationPredicate<IMouseUp.Notification>,
-	INotificationPredicate<IMouseMoved.Notification>
+	INotificationPredicate<Draw_Notification>,
+	INotificationPredicate<ParentVisibilityChanged_Notification>,
+	INotificationPredicate<MouseDown_Notification>,
+	INotificationPredicate<MouseUp_Notification>,
+	INotificationPredicate<MouseMoved_Notification>
 {
 	[SerializedReference] public INotificationPropagator NotificationPropagator = null!;
 	
@@ -36,28 +36,28 @@ public class Visibility : IVisibility,
 			bool wasVisible = IsVisible;
 			isSelfVisible = value;
 			if (wasVisible != IsVisible)
-				NotificationPropagator.Notify(new IParentVisibilityChanged.Notification(IsVisible));
+				NotificationPropagator.Notify(new ParentVisibilityChanged_Notification(IsVisible));
 		}
 	}
 	
-	public bool ShouldNotificationPropagate(IDraw.Notification notification) => IsVisible;
-	public bool ShouldNotificationPropagate(IMouseDown.Notification notification) => IsVisible;
-	public bool ShouldNotificationPropagate(IMouseUp.Notification notification) => IsVisible;
-	public bool ShouldNotificationPropagate(IMouseMoved.Notification notification) => IsVisible;
+	public bool ShouldNotificationPropagate(Draw_Notification notification) => IsVisible;
+	public bool ShouldNotificationPropagate(MouseDown_Notification notification) => IsVisible;
+	public bool ShouldNotificationPropagate(MouseUp_Notification notification) => IsVisible;
+	public bool ShouldNotificationPropagate(MouseMoved_Notification notification) => IsVisible;
 	
-	public bool ShouldNotificationPropagate(IParentVisibilityChanged.Notification notification)
+	public bool ShouldNotificationPropagate(ParentVisibilityChanged_Notification notification)
 	{
 		isParentVisible = notification.Visible;
 		return isSelfVisible;
 	}
 }
 
-public interface IParentVisibilityChanged : INotificationListener<IParentVisibilityChanged.Notification>
+public class ParentVisibilityChanged_Notification(bool visible)
 {
-	public class Notification(bool visible)
-	{
-		public bool Visible { get; } = visible;
-	}
-	void INotificationListener<Notification>.OnNotify(Notification notification) => OnParentVisibilityChanged(notification.Visible);
+	public bool Visible { get; } = visible;
+}
+public interface IParentVisibilityChanged : INotificationListener<ParentVisibilityChanged_Notification>
+{
+	void INotificationListener<ParentVisibilityChanged_Notification>.OnNotify(ParentVisibilityChanged_Notification notification) => OnParentVisibilityChanged(notification.Visible);
 	public void OnParentVisibilityChanged(bool visible);
 }

@@ -4,113 +4,113 @@ using OpenTK.Windowing.GraphicsLibraryFramework;
 
 namespace Echidna2.Rendering;
 
-[DontExpose]
-public interface IDraw : INotificationListener<IDraw.Notification>
+public class Draw_Notification(Camera camera)
 {
-	public class Notification(Camera camera)
-	{
-		public Camera Camera { get; } = camera;
-	}
-	void INotificationListener<Notification>.OnNotify(Notification notification) => OnDraw();
+	public Camera Camera { get; } = camera;
+}
+[DontExpose]
+public interface IDraw : INotificationListener<Draw_Notification>
+{
+	void INotificationListener<Draw_Notification>.OnNotify(Draw_Notification notification) => OnDraw();
 	public void OnDraw();
 }
 
-[DontExpose]
-public interface IMouseMoved : INotificationListener<IMouseMoved.Notification>
+public class MouseMoved_Notification(Vector2 position, Vector2 delta, Vector3 globalPosition)
 {
-	public class Notification(Vector2 position, Vector2 delta, Vector3 globalPosition)
-	{
-		public Vector2 Position { get; } = position;
-		public Vector2 Delta { get; } = delta;
-		public Vector3 GlobalPosition { get; } = globalPosition;
-	}
-	void INotificationListener<Notification>.OnNotify(Notification notification) => OnMouseMoved(notification.Position, notification.Delta, notification.GlobalPosition);
+	public Vector2 Position { get; } = position;
+	public Vector2 Delta { get; } = delta;
+	public Vector3 GlobalPosition { get; } = globalPosition;
+}
+[DontExpose]
+public interface IMouseMoved : INotificationListener<MouseMoved_Notification>
+{
+	void INotificationListener<MouseMoved_Notification>.OnNotify(MouseMoved_Notification notification) => OnMouseMoved(notification.Position, notification.Delta, notification.GlobalPosition);
 	public void OnMouseMoved(Vector2 position, Vector2 delta, Vector3 globalPosition);
 }
 
-[DontExpose]
-public interface IMouseDown : INotificationListener<IMouseDown.Notification>
+public class MouseDown_Notification(MouseButton button, Vector2 position, Vector3 globalPosition)
 {
-	public class Notification(MouseButton button, Vector2 position, Vector3 globalPosition)
-	{
-		public MouseButton Button { get; } = button;
-		public Vector2 Position { get; } = position;
-		public Vector3 GlobalPosition { get; } = globalPosition;
-	}
-	void INotificationListener<Notification>.OnNotify(Notification notification) => OnMouseDown(notification.Button, notification.Position, notification.GlobalPosition);
+	public MouseButton Button { get; } = button;
+	public Vector2 Position { get; } = position;
+	public Vector3 GlobalPosition { get; } = globalPosition;
+}
+[DontExpose]
+public interface IMouseDown : INotificationListener<MouseDown_Notification>
+{
+	void INotificationListener<MouseDown_Notification>.OnNotify(MouseDown_Notification notification) => OnMouseDown(notification.Button, notification.Position, notification.GlobalPosition);
 	public void OnMouseDown(MouseButton button, Vector2 position, Vector3 globalPosition);
 }
 
-[DontExpose]
-public interface IMouseUp : INotificationListener<IMouseUp.Notification>
+public class MouseUp_Notification(MouseButton button, Vector2 position, Vector3 globalPosition)
 {
-	public class Notification(MouseButton button, Vector2 position, Vector3 globalPosition)
-	{
-		public MouseButton Button { get; } = button;
-		public Vector2 Position { get; } = position;
-		public Vector3 GlobalPosition { get; } = globalPosition;
-	}
-	void INotificationListener<Notification>.OnNotify(Notification notification) => OnMouseUp(notification.Button, notification.Position, notification.GlobalPosition);
+	public MouseButton Button { get; } = button;
+	public Vector2 Position { get; } = position;
+	public Vector3 GlobalPosition { get; } = globalPosition;
+}
+[DontExpose]
+public interface IMouseUp : INotificationListener<MouseUp_Notification>
+{
+	void INotificationListener<MouseUp_Notification>.OnNotify(MouseUp_Notification notification) => OnMouseUp(notification.Button, notification.Position, notification.GlobalPosition);
 	public void OnMouseUp(MouseButton button, Vector2 position, Vector3 globalPosition);
 }
 
-[DontExpose]
-public interface IMouseWheelScrolled : INotificationListener<IMouseWheelScrolled.Notification>
+public class MouseWheelScrolled_Notification(Vector2 offset, Vector2 position, Vector3 globalPosition)
 {
-	public class Notification(Vector2 offset, Vector2 position, Vector3 globalPosition)
-	{
-		public Vector2 Offset { get; } = offset;
-		public Vector2 Position { get; } = position;
-		public Vector3 GlobalPosition { get; } = globalPosition;
-	}
-	void INotificationListener<Notification>.OnNotify(Notification notification) => OnMouseWheelScrolled(notification.Offset, notification.Position, notification.GlobalPosition);
+	public Vector2 Offset { get; } = offset;
+	public Vector2 Position { get; } = position;
+	public Vector3 GlobalPosition { get; } = globalPosition;
+}
+[DontExpose]
+public interface IMouseWheelScrolled : INotificationListener<MouseWheelScrolled_Notification>
+{
+	void INotificationListener<MouseWheelScrolled_Notification>.OnNotify(MouseWheelScrolled_Notification notification) => OnMouseWheelScrolled(notification.Offset, notification.Position, notification.GlobalPosition);
 	public void OnMouseWheelScrolled(Vector2 offset, Vector2 position, Vector3 globalPosition);
 }
 
-[DontExpose]
-public interface IKeyDown : INotificationListener<IKeyDown.Notification>
+public class KeyDown_Notification(Keys key)
 {
-	public class Notification(Keys key)
-	{
-		public Keys Key { get; } = key;
-	}
-	void INotificationListener<Notification>.OnNotify(Notification notification) => OnKeyDown(notification.Key);
+	public Keys Key { get; } = key;
+}
+[DontExpose]
+public interface IKeyDown : INotificationListener<KeyDown_Notification>
+{
+	void INotificationListener<KeyDown_Notification>.OnNotify(KeyDown_Notification notification) => OnKeyDown(notification.Key);
 	public void OnKeyDown(Keys key);
 }
 
-[DontExpose]
-public interface IKeyUp : INotificationListener<IKeyUp.Notification>
+public class KeyUp_Notification(Keys key)
 {
-	public class Notification(Keys key)
-	{
-		public Keys Key { get; } = key;
-	}
-	void INotificationListener<Notification>.OnNotify(Notification notification) => OnKeyUp(notification.Key);
+	public Keys Key { get; } = key;
+}
+[DontExpose]
+public interface IKeyUp : INotificationListener<KeyUp_Notification>
+{
+	void INotificationListener<KeyUp_Notification>.OnNotify(KeyUp_Notification notification) => OnKeyUp(notification.Key);
 	public void OnKeyUp(Keys key);
 }
 
-[DontExpose]
-public interface ITextInput : INotificationListener<ITextInput.Notification>
+public class TextInput_Notification(Keys key, KeyModifiers modifiers)
 {
-	public class Notification(Keys key, KeyModifiers modifiers)
-	{
-		public Keys Key { get; } = key;
-		public KeyModifiers Modifiers { get; } = modifiers;
-	}
-	void INotificationListener<Notification>.OnNotify(Notification notification) => OnTextInput(notification.Key, notification.Modifiers);
+	public Keys Key { get; } = key;
+	public KeyModifiers Modifiers { get; } = modifiers;
+}
+[DontExpose]
+public interface ITextInput : INotificationListener<TextInput_Notification>
+{
+	void INotificationListener<TextInput_Notification>.OnNotify(TextInput_Notification notification) => OnTextInput(notification.Key, notification.Modifiers);
 	public void OnTextInput(Keys key, KeyModifiers modifiers);
 }
 
-public interface IDispose : INotificationListener<IDispose.Notification>
+public class Dispose_Notification;
+public interface IDispose : INotificationListener<Dispose_Notification>
 {
-	public class Notification;
-	void INotificationListener<Notification>.OnNotify(Notification notification) => OnDispose();
+	void INotificationListener<Dispose_Notification>.OnNotify(Dispose_Notification notification) => OnDispose();
 	public void OnDispose();
 }
 
-public interface IDrawPass : INotificationListener<IDrawPass.Notification>
+public class DrawPass_Notification;
+public interface IDrawPass : INotificationListener<DrawPass_Notification>
 {
-	public class Notification;
-	void INotificationListener<Notification>.OnNotify(Notification notification) => OnDrawPass();
+	void INotificationListener<DrawPass_Notification>.OnNotify(DrawPass_Notification notification) => OnDrawPass();
 	public void OnDrawPass();
 }

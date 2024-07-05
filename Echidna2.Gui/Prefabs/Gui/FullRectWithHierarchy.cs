@@ -2,11 +2,9 @@
 using Echidna2.Gui;
 using Echidna2.Rendering;
 using Echidna2.Serialization;
-using JetBrains.Annotations;
 
 namespace Echidna2.Prefabs.Gui;
 
-[UsedImplicitly, Prefab("Prefabs/Gui/FullRectWithHierarchy.toml")]
 public partial class FullRectWithHierarchy : INotificationPropagator, ICanBeLaidOut
 {
 	[SerializedReference, ExposeMembersInClass] public Named Named { get; set; } = null!;

@@ -1,34 +1,40 @@
 ﻿using System.Diagnostics;
-using System.Reflection;
 using System.Runtime.Loader;
+using Echidna2.Serialization.TomlFiles;
 using Tomlyn;
 using Tomlyn.Model;
 
 namespace Echidna2.Serialization;
 
-public class Compilation
+public static class Compilation
 {
 	public static string CompilationFolder => $"{AppContext.BaseDirectory}/.echidna";
 	public static string CompilationBinFolder => $"{CompilationFolder}/bin/Debug/net8.0";
 	public static string CompilationDllPath => $"{CompilationBinFolder}/EchidnaProject.dll";
 	
-	public static void CompileCSProj(params string[] prefabPaths)
+	public static async Task<Project> Compile()
 	{
 		RecreateDirectory();
 		CreateCSProj();
 		
-		foreach (string prefabPath in prefabPaths)
-		{
-			CreateCSFiles(prefabPath);
-		}
-		CompileCSProj();
+		Project project = new();
 		
-		foreach (string prefabPath in prefabPaths)
-		{
-			Dictionary<string, (bool, Dictionary<string, string>)> serializedEvents = GetSerializedEvents(prefabPath);
-			CreateCSFiles(prefabPath, serializedEvents);
-		}
-		CompileCSProj();
+		foreach (string prefabPath in Directory.EnumerateFiles(".", "*.prefab.toml", SearchOption.AllDirectories))
+			project.AddPrefab(CreateCSPrefabFile(prefabPath[2..]));
+		
+		foreach (string prefabPath in Directory.EnumerateFiles(".", "*.interface.toml", SearchOption.AllDirectories))
+			project.AddInterface(CreateCSInterfaceFile(prefabPath[2..]));
+		
+		foreach (string prefabPath in Directory.EnumerateFiles(".", "*.notification.toml", SearchOption.AllDirectories))
+			project.AddNotification(CreateCSNotificationFile(prefabPath[2..]));
+		
+		await CompileCSProj();
+		
+		AssemblyLoadContext projectAssemblyLoadContext = new("EchidnaProject");
+		await using FileStream projectAssemblyFileStream = new(CompilationDllPath, FileMode.Open, FileAccess.Read);
+		project.Assembly = projectAssemblyLoadContext.LoadFromStream(projectAssemblyFileStream);
+		
+		return project;
 	}
 	
 	public static void RecreateDirectory()
@@ -45,73 +51,78 @@ public class Compilation
 	
 	public static void CreateCSProj()
 	{
-		string csprojString = @"
-<Project Sdk=""Microsoft.NET.Sdk"">
+		string csprojString =
+"""
+<Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <TargetFramework>net8.0</TargetFramework>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
-        <DebugType>embedded</DebugType>
-    </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<DebugType>embedded</DebugType>
+	</PropertyGroup>
 
-    <ItemGroup>
-	    <Reference Include=""Echidna2""><HintPath>..\Echidna2.dll</HintPath></Reference>
-	    <Reference Include=""Echidna2.Core""><HintPath>..\Echidna2.Core.dll</HintPath></Reference>
-	    <Reference Include=""Echidna2.Gui""><HintPath>..\Echidna2.Gui.dll</HintPath></Reference>
-	    <Reference Include=""Echidna2.Rendering""><HintPath>..\Echidna2.Rendering.dll</HintPath></Reference>
-	    <Reference Include=""Echidna2.Serialization""><HintPath>..\Echidna2.Serialization.dll</HintPath></Reference>
-    </ItemGroup>
+	<ItemGroup>
+		<Reference Include="..\Echidna2.dll" />
+		<Reference Include="..\Echidna2.Core.dll" />
+		<Reference Include="..\Echidna2.Gui.dll" />
+		<Reference Include="..\Echidna2.Mathematics.dll" />
+		<Reference Include="..\Echidna2.Rendering.dll" />
+		<Reference Include="..\Echidna2.Rendering3D.dll" />
+		<Reference Include="..\Echidna2.Serialization.dll" />
+		<Reference Include="..\Echidna2.SourceGenerators.dll" />
+		<Analyzer Include="..\Echidna2.SourceGenerators.dll" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="OpenTK" Version="4.8.2" />
+		<PackageReference Include="Tomlyn" Version="0.17.0" />
+	</ItemGroup>
 
 </Project>
-";
+""";
 		File.WriteAllText($"{CompilationFolder}/EchidnaProject.csproj", csprojString);
 	}
 	
-	public static void CreateCSFiles(string prefabPath, Dictionary<string, (bool, Dictionary<string, string>)>? serializedEvents = null)
+	public static Prefab CreateCSPrefabFile(string prefabPath)
 	{
-		TomlTable table = Toml.ToModel(File.ReadAllText(prefabPath));
-		foreach ((string id, object value) in table)
-		{
-			TomlTable valueTable = (TomlTable)value;
-			if (!valueTable.TryGetValue("ScriptContent", out object scriptContent))
-				continue;
-			
-			string baseType = GetComponentBaseTypeName(prefabPath, id, valueTable);
-			string className = $"{Path.GetFileNameWithoutExtension(prefabPath)}_{id}";
-			(bool baseTypeIsIInitialize, Dictionary<string, string>? events) = serializedEvents?.GetValueOrDefault(id) ?? (false, null)!;
-			bool shouldAddInitialize = events != null!;
-			
-			string scriptString = "";
-			scriptString += "using Echidna2;\n";
-			scriptString += "using Echidna2.Core;\n";
-			scriptString += "using Echidna2.Gui;\n";
-			scriptString += "using Echidna2.Rendering;\n";
-			scriptString += "using Echidna2.Serialization;\n";
-			scriptString += "\n";
-			scriptString += $"public class {className} : {baseType}{(shouldAddInitialize && !baseTypeIsIInitialize ? ", IInitialize" : "")}\n";
-			scriptString += "{\n";
-			
-			scriptString += "\t" + ((string)scriptContent).Split("\n").Join("\n\t").Trim() + "\n";
-			
-			if (shouldAddInitialize)
-			{
-				scriptString += "\n";
-				scriptString += $"\tpublic {(baseTypeIsIInitialize ? "override " : "")}void OnInitialize() {{\n";
-				if (baseTypeIsIInitialize)
-					scriptString += "\t\tbase.OnInitialize();\n";
-				foreach ((string eventName, string eventContent) in events!)
-					scriptString += $"\t\t{eventName} += () => {{ {eventContent} }};\n";
-				scriptString += "\t}\n";
-			}
-			
-			scriptString += "}\n";
-			
-			File.WriteAllText($"{CompilationFolder}/{className}.cs", scriptString);
-		}
+		Prefab prefab = Prefab.FromToml(prefabPath);
+		if (!prefab.NeedsCustomClass) return prefab;
+		string classPath = GetPrefabClassPath(prefabPath);
+		Directory.CreateDirectory(Path.GetDirectoryName(classPath));
+		File.WriteAllText(classPath, prefab.StringifyCS());
+		return prefab;
 	}
 	
-	public static void CompileCSProj()
+	public static Interface CreateCSInterfaceFile(string prefabPath)
+	{
+		Interface @interface = Interface.FromToml(prefabPath);
+		string classPath = GetPrefabClassPath(prefabPath);
+		Directory.CreateDirectory(Path.GetDirectoryName(classPath));
+		File.WriteAllText(classPath, @interface.StringifyCS());
+		return @interface;
+	}
+	
+	public static Notification CreateCSNotificationFile(string prefabPath)
+	{
+		Notification notification = Notification.FromToml(prefabPath);
+		string classPath = GetPrefabClassPath(prefabPath);
+		Directory.CreateDirectory(Path.GetDirectoryName(classPath));
+		File.WriteAllText(classPath, notification.StringifyCS());
+		return notification;
+	}
+	
+	public static string GetPrefabClassPath(string prefabPath, string? id = null) => $"{CompilationFolder}/{Path.GetDirectoryName(prefabPath)}/{GetPrefabClassName(prefabPath, id)}.cs";
+	
+	public static string GetPrefabClassName(string prefabPath, string? id = null) => id is not null and not "This" ? $"{GetPrefabFileNameWithoutExtension(prefabPath)}_{id}" : GetPrefabFileNameWithoutExtension(prefabPath);
+	
+	public static string GetPrefabFileNameWithoutExtension(string prefabPath) => Path.GetFileNameWithoutExtension(Path.GetFileNameWithoutExtension(prefabPath));
+	
+	public static string GetPrefabClassNamespace(string prefabPath) => Path.GetDirectoryName(prefabPath).Replace('/', '.').Replace('\\', '.').Trim('.');
+	
+	public static string GetPrefabClassDottedPath(string prefabPath) => $"{GetPrefabClassNamespace(prefabPath)}.{GetPrefabClassName(prefabPath)}";
+	
+	public static async Task CompileCSProj()
 	{
 		Process process = new();
 		process.StartInfo.FileName = "dotnet";
@@ -122,12 +133,17 @@ public class Compilation
 		process.StartInfo.RedirectStandardOutput = true;
 		process.StartInfo.RedirectStandardError = true;
 		process.Start();
-		process.WaitForExit();
-		Console.WriteLine(process.StandardOutput.ReadToEnd());
-		Console.WriteLine(process.StandardError.ReadToEnd());
+		
+		await Task.WhenAny(
+			process.WaitForExitAsync(),
+			DebugProcess(process));
+		
+		await PrintProcessOutput(process);
+		if (process.ExitCode != 0)
+			throw new InvalidOperationException($"Build failed with exit code {process.ExitCode}");
 	}
 	
-	public static void RunCSProj()
+	public static async Task RunCSProj()
 	{
 		Process process = new();
 		process.StartInfo.FileName = "dotnet";
@@ -136,73 +152,45 @@ public class Compilation
 		process.StartInfo.RedirectStandardOutput = true;
 		process.StartInfo.RedirectStandardError = true;
 		process.Start();
-		process.WaitForExit();
-		Console.WriteLine(process.StandardOutput.ReadToEnd());
-		Console.WriteLine(process.StandardError.ReadToEnd());
+		
+		await Task.WhenAny(
+			process.WaitForExitAsync(),
+			DebugProcess(process));
+		
+		await PrintProcessOutput(process);
+		if (process.ExitCode != 0)
+			throw new InvalidOperationException($"Build failed with exit code {process.ExitCode}");
+	}
+	
+	private static async Task PrintProcessOutput(Process process)
+	{
+		Console.Write(await process.StandardOutput.ReadToEndAsync());
+		Console.ForegroundColor = ConsoleColor.Red;
+		Console.Write(await process.StandardError.ReadToEndAsync());
+		Console.ResetColor();
+	}
+	
+	private static async Task DebugProcess(Process process)
+	{
+		while (!process.HasExited)
+		{
+			await PrintProcessOutput(process);
+			await Task.Delay(250);
+		}
 	}
 	
 	public static string GetComponentBaseTypeName(string prefabPath, string id, TomlTable componentTable)
 	{
-		string className = $"{Path.GetFileNameWithoutExtension(prefabPath)}_{id}";
-		if (File.Exists(className + ".cs"))
-			return className;
-		
 		if (componentTable.TryGetValue("Prefab", out object basePrefab))
 		{
-			string basePrefabPath = $"{Path.GetDirectoryName(prefabPath)}/{(string)basePrefab}";
-			(string baseId, object baseComponentTable) = Toml.ToModel(File.ReadAllText(basePrefabPath)).First();
-			return GetComponentBaseTypeName(basePrefabPath, baseId, (TomlTable)baseComponentTable);
+			string basePrefabPath = $"{((string)basePrefab).Replace(".", "/")}.prefab.toml";
+			TomlTable baseComponentTable = (TomlTable)Toml.ToModel(File.ReadAllText(basePrefabPath))["This"];
+			return GetComponentBaseTypeName(basePrefabPath, "This", baseComponentTable);
 		}
 		
-		if (!componentTable.TryGetValue("Component", out object typeName))
-			throw new InvalidOperationException($"Component table {id} of {prefabPath} does not contain a Component key or Prefab key");
+		if (componentTable.TryGetValue("Component", out object typeName))
+			return ((string)typeName).Split(",")[0];
 		
-		return ((string)typeName).Split(",")[0];
-	}
-	
-	public static Type GetComponentBaseType(string prefabPath, string id, TomlTable componentTable, Assembly projectAssembly)
-	{
-		string className = $"{Path.GetFileNameWithoutExtension(prefabPath)}_{id}";
-		if (File.Exists(className + ".cs"))
-			return projectAssembly.GetType(className) ?? throw new NullReferenceException($"Type {className} does not exist");
-		
-		if (componentTable.TryGetValue("Prefab", out object basePrefab))
-		{
-			string basePrefabPath = $"{Path.GetDirectoryName(prefabPath)}/{(string)basePrefab}";
-			(string baseId, object baseComponentTable) = Toml.ToModel(File.ReadAllText(basePrefabPath)).First();
-			return GetComponentBaseType(basePrefabPath, baseId, (TomlTable)baseComponentTable, projectAssembly);
-		}
-		
-		if (!componentTable.TryGetValue("Component", out object typeName))
-			throw new InvalidOperationException($"Component table {id} of {prefabPath} does not contain a Component key or Prefab key");
-		
-		return Type.GetType((string)typeName) ?? throw new NullReferenceException($"Type {(string)typeName} does not exist");
-	}
-	
-	public static Dictionary<string, (bool baseTypeIsIInitialize, Dictionary<string, string> events)> GetSerializedEvents(string prefabPath)
-	{
-		AssemblyLoadContext assemblyLoadContext = new("EchidnaProject", true);
-		// AssemblyName assemblyName = new("EchidnaProject");
-		// AssemblyDependencyResolver resolver = new(CompilationDllPath);
-		using FileStream fileStream = new(CompilationDllPath, FileMode.Open, FileAccess.Read);
-		Assembly assembly = assemblyLoadContext.LoadFromStream(fileStream);
-		
-		TomlTable table = Toml.ToModel(File.ReadAllText(prefabPath));
-		Dictionary<string, (bool baseTypeIsIInitialize, Dictionary<string, string> events)> serializedEvents = new();
-		foreach ((string id, object value) in table)
-		{
-			TomlTable valueTable = (TomlTable)value;
-			Type baseType = GetComponentBaseType(prefabPath, id, valueTable, assembly);
-			Dictionary<string, string> events = baseType
-				.GetEvents()
-				.Where(@event => @event.GetCustomAttributes<SerializedEventAttribute>().Any())
-				.Where(@event => valueTable.ContainsKey(@event.Name))
-				.ToDictionary(@event => @event.Name, @event => (string)valueTable[@event.Name]);
-			if (events.Count != 0)
-				serializedEvents.Add(id, (baseType.GetInterface("IInitialize") != null, events));
-		}
-		
-		assemblyLoadContext.Unload();
-		return serializedEvents;
+		return GetPrefabFileNameWithoutExtension(prefabPath) + (id is null or "This" ? "" : "_" + id);
 	}
 }

@@ -2,11 +2,9 @@
 using Echidna2.Core;
 using Echidna2.Gui;
 using Echidna2.Serialization;
-using JetBrains.Annotations;
 
 namespace Echidna2.Prefabs.Gui;
 
-[UsedImplicitly, Prefab("Prefabs/Gui/ButtonRect.toml")]
 public partial class ButtonRect : INotificationPropagator, IInitialize, ICanBeLaidOut
 {
 	[SerializedReference, ExposeMembersInClass] public Named Named { get; set; } = null!;
@@ -14,7 +12,26 @@ public partial class ButtonRect : INotificationPropagator, IInitialize, ICanBeLa
 	[SerializedReference, ExposeMembersInClass] public FullLayout Layout { get; set; } = null!;
 	[SerializedReference, ExposeMembersInClass] public Rect Rect { get; set; } = null!;
 	[SerializedReference, ExposeMembersInClass] public Hierarchy PrefabChildren { get; set; } = null!;
-	[SerializedReference, ExposeMembersInClass] public Button Button { get; set; } = null!;
+	
+	private Button? _Button = default!;
+	[SerializedReference, ExposeMembersInClass] public Button Button
+	{
+		get => _Button;
+		set
+		{
+			if (_Button is not null)
+				Unsetup_Button();
+			_Button = value;
+			if (_Button is not null)
+				Setup_Button();
+		}
+	}
+	protected virtual void Setup_Button()
+	{
+	}
+	protected virtual void Unsetup_Button()
+	{
+	}
 	
 	[DontExpose] public bool HasBeenInitialized { get; set; }
 	

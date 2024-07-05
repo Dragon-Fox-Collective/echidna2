@@ -4,12 +4,10 @@ using Echidna2.Mathematics;
 using Echidna2.Rendering;
 using Echidna2.Rendering3D;
 using Echidna2.Serialization;
-using JetBrains.Annotations;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 
 namespace Echidna2.Prefabs.Editor;
 
-[UsedImplicitly, Prefab("Prefabs/EditorViewport3D.toml")]
 public partial class EditorViewport3D : INotificationPropagator, IUpdate, IMouseDown, IMouseMoved, IMouseUp, IMouseWheelScrolled, IKeyDown, IKeyUp
 {
 	[SerializedReference, ExposeMembersInClass] public Viewport3D Viewport { get; set; } = null!;
@@ -29,8 +27,8 @@ public partial class EditorViewport3D : INotificationPropagator, IUpdate, IMouse
 	
 	public void Notify<T>(T notification) where T : notnull
 	{
-		if (notification is IMouseDown.Notification || notification is IMouseMoved.Notification || notification is IMouseUp.Notification)
-			INotificationPropagator.Notify(new EditorNotification<T>(notification), Viewport);
+		if (notification is MouseDown_Notification || notification is MouseMoved_Notification || notification is MouseUp_Notification)
+			INotificationPropagator.Notify(Activator.CreateInstance(Project.Singleton.Assembly.GetType("Notifications.Editor.EditorNotification_Notification`1").MakeGenericType(typeof(T)), notification), Viewport);
 		else
 			INotificationPropagator.Notify(notification, Viewport);
 	}
@@ -84,9 +82,9 @@ public partial class EditorViewport3D : INotificationPropagator, IUpdate, IMouse
 		{
 			double zoomAmount = 1 + Math.Abs(offset.Y) * ZoomFactor;
 			if (offset.Y > 0)
-				cameraDistance *= zoomAmount;
-			else
 				cameraDistance /= zoomAmount;
+			else
+				cameraDistance *= zoomAmount;
 		}
 	}
 	

@@ -1,0 +1,27 @@
+[This]
+Interfaces = [
+    "IFieldEditor<Quaternion>",
+]
+Properties = [
+    { PropertyType = "Component", Type = "Vector3FieldEditor", Name = "VectorFieldEditor" },
+    { PropertyType = "Public", Type = "Quaternion", Name = "Value", SetterContent = """
+_Value = value;
+VectorFieldEditor.Load(value.ToEulerAngles());
+""" },
+    { PropertyType = "Event", Type = "object?", Name = "ValueChanged" },
+]
+Events = [
+    { EventType = "Reference", Target = "VectorFieldEditor", Name = "ValueChanged", Args = [{ Name = "vector", Type = "object?", CastTo = "Vector3" }], Content = """
+_Value = Quaternion.FromEulerAngles(vector);
+ValueChanged?.Invoke(Value);
+""" },
+]
+Functions = [
+    { ReturnType = "void", Name = "Load", Args = [{ Type = "Quaternion", Name = "value" }], Content = "Value = value;" },
+]
+
+[This.Values]
+VectorFieldEditor = "2"
+
+[2]
+Prefab = "Prefabs.Editor.FieldEditors.Vector3FieldEditor"

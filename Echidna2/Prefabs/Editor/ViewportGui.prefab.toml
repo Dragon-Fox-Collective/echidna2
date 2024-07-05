@@ -1,0 +1,44 @@
+﻿[This]
+Component = "Echidna2.Prefabs.Editor.ViewportGui, Echidna2"
+[This.Values]
+Named = "2"
+RectTransform = "3"
+RenderTarget = "5"
+Hierarchy = "6"
+Camera = "7"
+GuiRectLayout = "8"
+GuiRectTransform = "9"
+
+[2]
+Component = "Echidna2.Core.Named, Echidna2.Core"
+[2.Values]
+Name = "Viewport"
+
+[3]
+Component = "Echidna2.Gui.RectTransform, Echidna2.Gui"
+
+[5]
+Component = "Echidna2.Rendering.RenderTarget, Echidna2.Rendering"
+[5.Values]
+CameraHaver = "7"
+
+[6]
+Component = "Echidna2.Core.Hierarchy, Echidna2.Core"
+
+[7]
+Component = "Echidna2.Gui.GuiCamera, Echidna2.Gui"
+[7.Values]
+Size = { X = 800.0, Y = 600.0 }
+World = "6"
+
+[8]
+Component = "Echidna2.Gui.RectLayout, Echidna2.Gui"
+[8.Values]
+Hierarchy = "6"
+RectTransform = "9"
+
+[9]
+Component = "Echidna2.Gui.RectTransform, Echidna2.Gui"
+[9.Values]
+LocalSize = { X = 800.0, Y = 600.0 }
+IsGlobal = true

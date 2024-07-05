@@ -1,11 +1,9 @@
 ﻿using Echidna2.Core;
 using Echidna2.Gui;
 using Echidna2.Serialization;
-using JetBrains.Annotations;
 
 namespace Echidna2.Prefabs.Gui;
 
-[UsedImplicitly, Prefab("Prefabs/Gui/HLayoutWithHierarchy.toml")]
 public partial class HLayoutWithHierarchy : INotificationPropagator, ICanBeLaidOut
 {
 	[SerializedReference, ExposeMembersInClass] public Named Named { get; set; } = null!;

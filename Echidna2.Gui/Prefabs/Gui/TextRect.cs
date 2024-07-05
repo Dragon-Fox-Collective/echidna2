@@ -1,11 +1,9 @@
 ﻿using Echidna2.Core;
 using Echidna2.Gui;
 using Echidna2.Serialization;
-using JetBrains.Annotations;
 
 namespace Echidna2.Prefabs.Gui;
 
-[UsedImplicitly, Prefab("Prefabs/Gui/TextRect.toml")]
 public partial class TextRect : INotificationPropagator, ICanBeLaidOut, IInitialize
 {
 	[SerializedReference, ExposeMembersInClass] public Named Named { get; set; } = null!;

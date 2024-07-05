@@ -37,7 +37,7 @@ public class NumberSerializer<T> : Serializer
 	public object Deserialize(object? value, object data) => (T)Convert.ChangeType(data, typeof(T), CultureInfo.InvariantCulture);
 }
 
-public class SubComponentSerializer(Func<TomlTable, object> deserializeValue, string fieldName, string componentId) : Serializer<TomlTable, object>
+public class SubComponentSerializer(Func<TomlTable, object> deserializeValue) : Serializer<TomlTable, object>
 {
 	public TomlTable Serialize(object value)
 	{
@@ -49,20 +49,14 @@ public class SubComponentSerializer(Func<TomlTable, object> deserializeValue, st
 		{
 			IMemberWrapper wrapper = IMemberWrapper.Wrap(member);
 			SerializedValueAttribute attribute = wrapper.Member.GetCustomAttribute<SerializedValueAttribute>()!;
-			Serializer serializer = attribute.GetSerializer(wrapper.FieldType, null, null, null);
+			Serializer serializer = attribute.GetSerializer(wrapper.FieldType, null);
 			table.Add(wrapper.Name, serializer.Serialize(wrapper.GetValue(value)!));
 		}
 		
 		return table;
 	}
 	
-	public object Deserialize(object? value, TomlTable data)
-	{
-		object deserializedValue = deserializeValue(data);
-		if (data.Count != 0)
-			Console.WriteLine($"WARN: Unused table {fieldName} {data.ToDelimString()} of {componentId} leftover");
-		return deserializedValue;
-	}
+	public object Deserialize(object? value, TomlTable data) => deserializeValue(data);
 }
 
 public class ColorSerializer : Serializer<TomlTable, Color>
@@ -84,10 +78,6 @@ public class ColorSerializer : Serializer<TomlTable, Color>
 			(int)((double)data["R"] * 255),
 			(int)((double)data["G"] * 255),
 			(int)((double)data["B"] * 255));
-		data.Remove("A");
-		data.Remove("R");
-		data.Remove("G");
-		data.Remove("B");
 		return color;
 	}
 }

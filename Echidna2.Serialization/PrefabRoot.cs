@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using Echidna2.Serialization.TomlFiles;
 
 namespace Echidna2.Serialization;
 
@@ -7,12 +8,14 @@ public class PrefabRoot : IPrefabChangeRegistry
 	public List<PrefabInstance> ChildPrefabs = [];
 	public List<object> Components = [];
 	
+	public List<(object, Component)> ComponentPairs = [];
+	
 	public Dictionary<MemberPath, object> SerializedData = new();
 	
 	public List<(object Component, MemberInfo Field)> FavoriteFields = [];
 	
 	public object RootObject = null!;
-	public string PrefabPath = null!;
+	public Prefab Prefab = null!;
 	
 	public PrefabInstance? GetPrefabInstance(IMemberPath path)
 	{
@@ -30,6 +33,29 @@ public class PrefabRoot : IPrefabChangeRegistry
 	}
 	
 	public void RegisterChangeInSelf(MemberPath path) => SerializedData[path] = path.Value;
+	
+	public bool Owns(object component) => Components.Contains(component) || ChildPrefabs.Any(child => child.PrefabRoot.RootObject == component);
+	
+	public IEnumerable<object> GetAllComponentsOf(object rootComponent)
+	{
+		List<object> foundComponents = [];
+		List<object> componentsToSearch = [rootComponent];
+		
+		while (componentsToSearch.TryPop(out object? component))
+		{
+			if (foundComponents.Contains(component)) continue;
+			foundComponents.Add(component);
+			
+			Component componentData = ComponentPairs.First(pair => pair.Item1 == component).Item2;
+			componentsToSearch.AddRange(componentData.Properties
+				.Where(prop => prop.PropertyType is PropertyType.Component)
+				.Select(prop => IMemberWrapper.Wrap(component.GetType().GetMember(prop.Name).First()).GetValue(component))!);
+		}
+		
+		return foundComponents;
+	}
+	
+	public IEnumerable<object> GetAllOwnedComponentsOf(object rootComponent) => GetAllComponentsOf(rootComponent).Where(Owns);
 }
 
 public class PrefabInstance(PrefabRoot prefabRoot) : IPrefabChangeRegistry

@@ -1,0 +1,19 @@
+﻿[This]
+Component = "Echidna2.Prefabs.Gui.TextRect, Echidna2.Gui"
+[This.Values]
+Named = "2"
+RectTransform = "3"
+Text = "4"
+
+[2]
+Component = "Echidna2.Core.Named, Echidna2.Core"
+[2.Values]
+Name = "Text"
+
+[3]
+Component = "Echidna2.Gui.RectTransform, Echidna2.Gui"
+
+[4]
+Component = "Echidna2.Gui.Text, Echidna2.Gui"
+[4.Values]
+RectTransform = "3"

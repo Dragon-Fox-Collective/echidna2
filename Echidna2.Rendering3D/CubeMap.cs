@@ -1,10 +1,13 @@
-﻿using OpenTK.Graphics.OpenGL4;
+﻿using Echidna2.Serialization;
+using OpenTK.Graphics.OpenGL4;
 using StbImageSharp;
 
 namespace Echidna2.Rendering3D;
 
 public class CubeMap(string rightPath, string leftPath, string forwardPath, string backPath, string upPath, string downPath)
 {
+	static CubeMap() => SerializedValueAttribute.AddDefaultSerializer(typeof(CubeMap), new CubeMapSerializer());
+	
 	private static readonly string BaseDirectory = $"{AppContext.BaseDirectory}/Assets/Skybox";
 	public static readonly CubeMap Skybox = new(
 		$"{BaseDirectory}/right.png",
