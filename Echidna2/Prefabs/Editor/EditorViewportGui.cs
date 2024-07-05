@@ -46,9 +46,9 @@ public partial class EditorViewportGui : INotificationPropagator, IMouseDown, IM
 		{
 			double zoomAmount = 1 + Math.Abs(offset.Y) * ZoomFactor;
 			if (offset.Y > 0)
-				Camera.Zoom *= zoomAmount;
-			else
 				Camera.Zoom /= zoomAmount;
+			else
+				Camera.Zoom *= zoomAmount;
 		}
 	}
 }

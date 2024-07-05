@@ -82,9 +82,9 @@ public partial class EditorViewport3D : INotificationPropagator, IUpdate, IMouse
 		{
 			double zoomAmount = 1 + Math.Abs(offset.Y) * ZoomFactor;
 			if (offset.Y > 0)
-				cameraDistance *= zoomAmount;
-			else
 				cameraDistance /= zoomAmount;
+			else
+				cameraDistance *= zoomAmount;
 		}
 	}
 	
