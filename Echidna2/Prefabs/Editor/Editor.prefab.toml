@@ -35,6 +35,7 @@ EditorInstantiators = new Dictionary<Type, Func<IFieldEditor>>()
     { typeof(Quaternion), Instantiator("Prefabs.Editor.FieldEditors.QuaternionFieldEditor") },
     { typeof(Color), Instantiator("Prefabs.Editor.FieldEditors.ColorFieldEditor") },
 };
+AddChild(Viewport);
 """ },
 ]
 Functions = [
@@ -48,6 +49,14 @@ ComponentPanel.GetType().GetMethod("set_SelectedObject").Invoke(ComponentPanel, 
     { ReturnType = "void", Name = "SerializePrefab", Args = [], Content = """
 if (PrefabRoot is null) return;
 Project.Serialize(PrefabRoot);
+""" },
+    { ReturnType = "void", Name = "SwitchView", Args = [{ Type = "Viewport", Name = "viewport" }], Content = """
+Viewport.ClearChildren();
+QueueRemoveChild(Viewport);
+Viewport = viewport;
+QueueAddChild(Viewport);
+if (PrefabRoot is not null)
+    Viewport.AddChild(PrefabRoot.RootObject);
 """ },
     { Static = true, ReturnType = "void", Name = "OpenNewWindow", Args = [], Content = """
 // :/ cubemap no longer static constructed because nothing references it since the skybox is a toml now
@@ -121,12 +130,18 @@ Hierarchy = "04"
 [04]
 Component = "Echidna2.Core.Hierarchy, Echidna2.Core"
 [04.Values]
-Children = [ "2", "3" ]
+Children = [ "3" ]
 
 [2]
 Prefab = "Prefabs.Editor.EditorViewport3D"
 [2.Values]
-Name = "Scene"
+Name = "3D Scene"
+AnchorPreset = "Full"
+
+[002]
+Prefab = "Prefabs.Editor.EditorViewportGui"
+[002.Values]
+Name = "Gui Scene"
 AnchorPreset = "Full"
 
 [3]
@@ -199,17 +214,39 @@ Children = [ "11", "12", "13" ]
 
 [11]
 Prefab = "Prefabs.Gui.ButtonRect"
+Properties = [
+    { PropertyType = "Reference", Type = "Editor", Name = "Editor" },
+    { PropertyType = "Reference", Type = "Viewport", Name = "Viewport" },
+]
+Events = [
+    { EventType = "Self", Target = "Button", Name = "Clicked", Args = [], Content = """
+Editor.SwitchView(Viewport);
+""" },
+]
 [11.Values]
 Name = "3D View Button"
 MinimumSize = { X = 26.0, Y = 26.0 }
 Color = { R = 1.0, G = 0.0, B = 0.0, A = 1.0 }
+Editor = "This"
+Viewport = "2"
 
 [12]
 Prefab = "Prefabs.Gui.ButtonRect"
+Properties = [
+    { PropertyType = "Reference", Type = "Editor", Name = "Editor" },
+    { PropertyType = "Reference", Type = "Viewport", Name = "Viewport" },
+]
+Events = [
+    { EventType = "Self", Target = "Button", Name = "Clicked", Args = [], Content = """
+Editor.SwitchView(Viewport);
+""" },
+]
 [12.Values]
 Name = "2D View Button"
 MinimumSize = { X = 26.0, Y = 26.0 }
 Color = { R = 0.0, G = 0.0, B = 1.0, A = 1.0 }
+Editor = "This"
+Viewport = "002"
 
 [13]
 Prefab = "Prefabs.Gui.ButtonRect"

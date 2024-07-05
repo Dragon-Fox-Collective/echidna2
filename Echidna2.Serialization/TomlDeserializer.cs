@@ -80,7 +80,8 @@ public partial class Project
 				if (refPath.IsEmpty()) throw new InvalidOperationException("Reference path part is empty");
 				
 				(string id, string rest) = refPath.SplitFirst('.');
-				(object value, Component valueTable) = components.First(pair => pair.ComponentTable.Id == id);
+				(object value, Component valueTable) = components.FirstOrDefault(pair => pair.ComponentTable.Id == id);
+				if (value == null) throw new InvalidOperationException($"Component of id '{id}' in prefab '{prefab}' does not exist");
 				
 				if (rest.IsEmpty()) return value;
 				
