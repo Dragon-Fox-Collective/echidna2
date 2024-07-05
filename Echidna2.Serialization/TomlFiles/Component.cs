@@ -77,7 +77,7 @@ public class Component
 		return scriptString;
 	}
 	
-	public override string ToString() => $"{Source} {ClassName}";
+	public override string ToString() => Source is NoSource ? ClassName : $"{Source} {ClassName}";
 }
 
 public class ComponentSource;

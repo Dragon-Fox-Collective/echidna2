@@ -49,7 +49,7 @@ if (SelectedObject is null) return;
 
 ComponentNameText.TextString = "Favorites";
 
-List<object> availableComponents = ComponentUtils.GetAllComponents(SelectedObject).ToList();
+List<object> availableComponents = Editor.PrefabRoot.GetAllComponentsOf(SelectedObject).ToList();
 IEnumerable<(object Component, MemberInfo Member)> availableFields = Editor.PrefabRoot.FavoriteFields
     .Where(zip => availableComponents.Contains(zip.Component));
 
@@ -134,7 +134,7 @@ favoritesButton.Clicked += () => SelectedComponent = null;
 favoritesButton.MinimumSize = (40, 40);
 Components.AddChild(favoritesButton);
 
-foreach (object component in ComponentUtils.GetAllComponents(SelectedObject).Where(Editor.PrefabRoot.Owns))
+foreach (object component in Editor.PrefabRoot.GetAllOwnedComponentsOf(SelectedObject))
 {
     ButtonRect button = Project.Instantiate<ButtonRect>("Prefabs.Editor.ComponentSelectionButton");
     button.Clicked += () => SelectedComponent = component;

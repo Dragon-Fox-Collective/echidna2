@@ -25,17 +25,21 @@ public partial class Project
 				case TypeSource source:
 					component = DeserializeComponent(componentTable.Id, typeName ?? source.Type, typeName != null);
 					prefabRoot.Components.Add(component);
+					prefabRoot.ComponentPairs.Add((component, componentTable));
 					break;
 				
 				case PrefabSource source:
 					PrefabRoot componentPrefabRoot = Deserialize(Prefabs[source.Path], typeName);
+					component = componentPrefabRoot.RootObject;
 					PrefabInstance componentPrefabInstance = new(componentPrefabRoot);
 					prefabRoot.ChildPrefabs.Add(componentPrefabInstance);
-					component = componentPrefabRoot.RootObject;
+					prefabRoot.ComponentPairs.Add((component, componentTable));
 					break;
 				
 				default:
 					component = DeserializeComponent(componentTable.Id, componentTable.ClassName, true);
+					prefabRoot.Components.Add(component);
+					prefabRoot.ComponentPairs.Add((component, componentTable));
 					break;
 			}
 			
