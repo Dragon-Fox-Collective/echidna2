@@ -19,6 +19,15 @@ public class Arg
 		return arg;
 	}
 	
+	public TomlTable ToToml()
+	{
+		TomlTable table = new();
+		table.Add("Name", Name);
+		table.Add("Type", Type);
+		table.Add("CastTo", CastTo);
+		return table;
+	}
+	
 	public string StringifyCS() => $"{Type} {Name}";
 	public string StringifyCSCast() => HasCast ? $"({CastTo}){Name}!" : Name;
 	public string StringifyCSCasted() => HasCast ? $"{CastTo} {Name}" : StringifyCS();

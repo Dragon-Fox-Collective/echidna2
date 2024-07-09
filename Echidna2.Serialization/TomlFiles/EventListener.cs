@@ -24,6 +24,18 @@ public class EventListener
 		return eventListener;
 	}
 	
+	public TomlTable ToToml()
+	{
+		TomlTable table = new();
+		table.Add("EventType", EventType.ToString());
+		table.Add("Name", Name);
+		table.Add("Target", Target);
+		table.Add("Args", Args.Select(arg => arg.ToToml()).ToList());
+		table.Add("Content", Content);
+		table.Add("Function", Function);
+		return table;
+	}
+	
 	public string StringifyCSAdd() => $"\t\t{Target}.{Name} += {(UsesFunction ? Function : $"{Target}_{Name}")};\n";
 	public string StringifyCSSub() => $"\t\t{Target}.{Name} -= {(UsesFunction ? Function : $"{Target}_{Name}")};\n";
 	

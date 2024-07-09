@@ -4,16 +4,14 @@
 Properties = [
     { PropertyType = "Component", Type = "FullRectWindow", Name = "Window" },
     { PropertyType = "Reference", Type = "ICanAddChildren", Name = "ComponentList" },
-    { PropertyType = "Public", Type = "Type", Name = "ComponentType" },
-    { PropertyType = "Public", Type = "FieldEditors.ReferenceFieldEditor", Name = "Field" },
+    { PropertyType = "Public", Type = "object", Name = "SelectedObject" },
     { PropertyType = "Private", Type = "Editor", Name = "Editor" },
     { PropertyType = "Private", Type = "bool", Name = "HasBeenInitialized" },
-    { PropertyType = "Private", Type = "ButtonText", Name = "NullText" },
     { PropertyType = "Public", Type = "PrefabRoot?", Name = "PrefabRoot", GetterContent = "return Editor.PrefabRoot;", HasSetter = false },
-    { PropertyType = "Private", Type = "(object Component, ButtonText Text)?", Name = "SelectedComponent", SetterComponent = """
-(SelectedComponent?.Text ?? NullText).Color = Color.White;
+    { PropertyType = "Private", Type = "(string ComponentPath, ButtonText Text)?", Name = "SelectedComponent", SetterContent = """
+if (SelectedComponent is not null) SelectedComponent.Value.Text.Color = System.Drawing.Color.White;
 _SelectedComponent = value;
-(SelectedComponent?.Text ?? NullText).Color = Color.DeepSkyBlue;
+if (SelectedComponent is not null) SelectedComponent.Value.Text.Color = System.Drawing.Color.DeepSkyBlue;
 """ },
 ]
 Events = [
@@ -23,41 +21,15 @@ Editor = notification.Editor;
     { EventType = "Notification", Name = "Initialize", Content = """
 if (HasBeenInitialized) return;
 
-NullText = Project.Instantiate<ButtonText>("Prefabs.Gui.ButtonText");
-NullText.TextString = "Default value";
-NullText.LocalScale = (0.5, 0.5);
-NullText.Justification = TextJustification.Left;
-NullText.Clicked += () => SelectedComponent = null;
-if (Field.Value is null)
-    SelectedComponent = null;
-
-foreach ((object component, ComponentUtils.ReferencePath? reference) in ComponentUtils.GetAllReferencesToComponentsOfType(PrefabRoot.RootObject, ComponentType, true)
-             .Where(pair => PrefabRoot.Components.Contains(pair.Component))
-             .Concat(PrefabRoot.Components
-                 .Where(component => component.GetType().IsAssignableTo(ComponentType))
-                 .Select(component => (component, (ComponentUtils.ReferencePath?) null)))
-             .DistinctBy(pair => pair.Item1))
+foreach (string classPath in Project.Singleton.Prefabs.Keys)
 {
     ButtonText text = Project.Instantiate<ButtonText>("Prefabs.Gui.ButtonText");
-    
-    if (reference is null)
-        text.TextString = $"Unparented {component.GetType().Name}";
-    else if (reference.Component is IHasChildren hasChildren && hasChildren.Children.Contains(component))
-        text.TextString = $"{component.GetType().Name} under\\n\\t{reference}";
-    else
-        text.TextString = $"{component.GetType().Name} on\\n\\t{reference}";
-    
+    text.TextString = classPath;
     text.LocalScale = (0.5, 0.5);
     text.Justification = TextJustification.Left;
-    
-    text.Clicked += () => SelectedComponent = (component, text);
-    if (component == Field.Value)
-        SelectedComponent = (component, text);
-    
+    text.Clicked += () => SelectedComponent = (classPath, text);
     ComponentList.AddChild(text);
 }
-
-ComponentList.AddChild(NullText);
 """ },
     { EventType = "Reference", Target = "Window", Name = "CloseWindowRequest", Args = [], Content = """
 Hierarchy.Parent.QueueRemoveChild(this);
@@ -65,12 +37,8 @@ Hierarchy.Parent.QueueRemoveChild(this);
 ]
 Functions = [
     { ReturnType = "void", Name = "AddNewComponent", Args = [], Content = """
-object component = Activator.CreateInstance(ComponentType)!;
-PrefabRoot.Components.Add(component);
-Field.Value = component;
-""" },
-    { ReturnType = "void", Name = "UseSelectedComponent", Args = [], Content = """
-Field.Value = SelectedComponent?.Component ?? throw new NotImplementedException("Figure out how to use a default value");
+if (SelectedComponent is null) return;
+PrefabRoot.AddComponent(SelectedComponent.Value.ComponentPath, SelectedObject);
 """ },
 ]
 
@@ -86,35 +54,14 @@ LocalSize = { X = 300, Y = 400 }
 Depth = 15
 Children = [ "4" ]
 
-[2]
-Prefab = "Prefabs.Gui.ButtonRect"
-Properties = [
-    { PropertyType = "Reference", Type = "AddComponentWindow", Name = "AddComponentWindow" },
-    { PropertyType = "Reference", Type = "FullRectWindow", Name = "Window" },
-]
-Events = [
-    { EventType = "Self", Target = "Button", Name = "Clicked", Args = [], Content = """
-Window.CloseWindow();
-AddComponentWindow.AddNewComponent();
-""" },
-]
-[2.Values]
-Margin = 5.0
-Children = [ "3" ]
-AddComponentWindow = "This"
-Window = "1"
-
-[3]
-Prefab = "Prefabs.Gui.TextRect"
-TextString = "Add New Component"
-LocalScale = { X = 0.5, Y = 0.5 }
-
 [4]
 Prefab = "Prefabs.Gui.VLayoutWithHierarchy"
-Children = [ "10", "2", "5" ]
+[4.Values]
+Children = [ "10", "5" ]
 
 [5]
 Prefab = "Prefabs.Gui.HLayoutWithHierarchy"
+[5.Values]
 Children  = [ "6", "8" ]
 
 [6]
@@ -135,6 +82,7 @@ Window = "1"
 
 [7]
 Prefab = "Prefabs.Gui.TextRect"
+[7.Values]
 TextString = "Cancel"
 LocalScale = { X = 0.5, Y = 0.5 }
 
@@ -147,7 +95,7 @@ Properties = [
 Events = [
     { EventType = "Self", Target = "Button", Name = "Clicked", Args = [], Content = """
 Window.CloseWindow();
-AddComponentWindow.UseSelectedComponent();
+AddComponentWindow.AddNewComponent();
 """ },
 ]
 [8.Values]
@@ -159,15 +107,18 @@ Window = "1"
 
 [9]
 Prefab = "Prefabs.Gui.TextRect"
+[9.Values]
 TextString = "Confirm"
 LocalScale = { X = 0.5, Y = 0.5 }
 
 [10]
 Prefab = "Prefabs.Gui.FullRectWithHierarchy"
+[10.Values]
 VerticalExpand = true
 Margin = 5.0
 Children = [ "11" ]
 
 [11]
 Prefab = "Prefabs.Gui.VLayoutWithHierarchy"
+[11.Values]
 Spacing = 5

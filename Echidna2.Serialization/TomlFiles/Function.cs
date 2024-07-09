@@ -23,6 +23,18 @@ public class Function
 		return function;
 	}
 	
+	public TomlTable ToToml()
+	{
+		TomlTable table = new();
+		table.Add("FunctionType", FunctionType.ToString());
+		table.Add("Static", IsStatic);
+		table.Add("ReturnType", ReturnType);
+		table.Add("Name", Name);
+		table.Add("Args", Args.Select(arg => arg.ToToml()).ToList());
+		table.Add("Content", Content);
+		return table;
+	}
+	
 	public string StringifyCS()
 	{
 		string scriptString = "";

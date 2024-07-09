@@ -1,4 +1,4 @@
-﻿Using = ["Notifications.Editor", "Echidna2.Prefabs.Gui", "System.Reflection", "Echidna2.Gui", "Prefabs.Editor.FieldEditors"]
+﻿Using = ["Notifications.Editor", "Echidna2.Prefabs.Gui", "System.Reflection", "Echidna2.Gui", "Prefabs.Editor.FieldEditors", "System.Drawing"]
 
 [This]
 Properties = [
@@ -98,7 +98,7 @@ if (fieldEditor is not null)
     fieldEditor.ValueChanged += value =>
     {
         wrapper.SetValue(component, value);
-        Editor.PrefabRoot?.RegisterChange(new MemberPath(wrapper, new ComponentPath(component)));
+        Editor.PrefabRoot?.SerializeChange(component, wrapper.Name, value);
         Editor.SerializePrefab();
     };
     layout.AddChild(fieldEditor);
@@ -129,16 +129,31 @@ FieldEditors.ReferenceFieldEditor NewReferenceFieldEditorOfType(Type type)
 Components.ClearChildren();
 if (SelectedObject is null) return;
 
-ButtonRect favoritesButton = Project.Instantiate<ButtonRect>("Prefabs.Editor.ComponentSelectionButton");
-favoritesButton.Clicked += () => SelectedComponent = null;
-favoritesButton.MinimumSize = (40, 40);
-Components.AddChild(favoritesButton);
+{
+    ButtonRect favoritesButton = Project.Instantiate<ButtonRect>("Prefabs.Editor.ComponentSelectionButton");
+    favoritesButton.Clicked += () => SelectedComponent = null;
+    favoritesButton.MinimumSize = (40, 40);
+    Components.AddChild(favoritesButton);
+}
 
 foreach (object component in Editor.PrefabRoot.GetAllOwnedComponentsOf(SelectedObject))
 {
     ButtonRect button = Project.Instantiate<ButtonRect>("Prefabs.Editor.ComponentSelectionButton");
     button.Clicked += () => SelectedComponent = component;
     Components.AddChild(button);
+}
+
+{
+    ButtonRect addButton = Project.Instantiate<ButtonRect>("Prefabs.Editor.ComponentSelectionButton");
+    addButton.Clicked += () =>
+    {
+        AddComponentWindow window = Project.Instantiate<AddComponentWindow>("Prefabs.Editor.AddComponentWindow");
+        window.SelectedObject = SelectedObject;
+        INotificationPropagator.Notify(new EditorInitialize_Notification(Editor), window);
+        Editor.QueueAddChild(window);
+    };
+    addButton.MinimumSize = (20, 20);
+    Components.AddChild(addButton);
 }
 """ },
 ]

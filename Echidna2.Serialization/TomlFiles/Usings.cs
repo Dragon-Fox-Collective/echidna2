@@ -1,4 +1,6 @@
-﻿namespace Echidna2.Serialization.TomlFiles;
+﻿using Tomlyn.Model;
+
+namespace Echidna2.Serialization.TomlFiles;
 
 public class Usings
 {
@@ -11,6 +13,13 @@ public class Usings
 		Usings usings = new();
 		usings.Value.AddRange(array);
 		return usings;
+	}
+	
+	public TomlArray ToToml()
+	{
+		TomlArray array = [];
+		array.AddRange(Value);
+		return array;
 	}
 	
     public string StringifyCS()

@@ -48,7 +48,7 @@ ComponentPanel.GetType().GetMethod("set_SelectedObject").Invoke(ComponentPanel, 
     { FunctionType = "Private", Static = true, ReturnType = "Func<IFieldEditor>", Name = "Instantiator", Args = [{ Type = "string", Name = "path" }], Content = "return () => Project.Instantiate<IFieldEditor>(path);" },
     { ReturnType = "void", Name = "SerializePrefab", Args = [], Content = """
 if (PrefabRoot is null) return;
-Project.Serialize(PrefabRoot);
+PrefabRoot.Prefab.Save();
 """ },
     { ReturnType = "void", Name = "SwitchView", Args = [{ Type = "Viewport", Name = "viewport" }], Content = """
 Viewport.ClearChildren();
@@ -70,7 +70,7 @@ Editor root = Project.Instantiate<Editor>("Prefabs.Editor.Editor");
 root.Notify(new EditorInitialize_Notification(root));
 
 PrefabRoot prefab = Project.Deserialize(root.InitialPrefabPath);
-Project.Serialize(prefab);
+prefab.Prefab.Save();
 prefab = Project.Deserialize(root.InitialPrefabPath);
 
 root.PrefabRoot = prefab;

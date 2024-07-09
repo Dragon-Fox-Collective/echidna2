@@ -35,6 +35,20 @@ public class Property
 		return property;
 	}
 	
+	public TomlTable ToToml()
+	{
+		TomlTable table = new();
+		table.Add("Type", Type);
+		table.Add("Name", Name);
+		table.Add("PropertyType", PropertyType.ToString());
+		table.Add("ExposeProperties", ExposeProperties);
+		table.Add("GetterContent", GetterContent);
+		table.Add("SetterContent", SetterContent);
+		table.Add("AdderContent", AdderContent);
+		table.Add("RemoverContent", RemoverContent);
+		return table;
+	}
+	
 	public string StringifyCS()
 	{
 		return PropertyType switch

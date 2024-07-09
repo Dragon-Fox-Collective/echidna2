@@ -9,6 +9,8 @@ public class Namespace
 		return new Namespace { Value = Compilation.GetPrefabClassNamespace(prefabPath) };
 	}
 	
+	public string ToToml() => Value;
+	
 	public string StringifyCS()
 	{
 		return $"namespace {Value};\n\n";
