@@ -53,7 +53,7 @@ public static class SerializationTests
 		
 		// Act
 		PrefabRoot prefab = Project.Deserialize(AppContext.BaseDirectory + "Prefabs.Test.SubcomponentPrefabTest");
-		TomlTable table = Project.Serialize(prefab);
+		TomlTable table = prefab.Prefab.ToToml();
 		
 		// Assert
 		Assert.False(((TomlTable)table["0"]).ContainsKey("Reference"));

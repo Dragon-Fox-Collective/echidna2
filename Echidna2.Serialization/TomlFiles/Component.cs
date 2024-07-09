@@ -8,6 +8,7 @@ public class Component
 	public ComponentSource Source = new NoSource();
 	public bool IsRoot => Id == "This";
 	public bool IsSubclass => Id != "This";
+	private string baseClassName = "";
 	public string ClassName = "";
 	public List<string> Interfaces = [];
 	public List<Property> Properties = [];
@@ -34,26 +35,39 @@ public class Component
 		component.Properties = table.GetList<TomlTable>("Properties").Select(propTable => Property.FromToml(propTable, component.EventsListeners)).ToList();
 		component.Functions = table.GetList<TomlTable>("Functions").Select(Function.FromToml).ToList();
 		component.Values = table.GetDict("Values");
-		
-		if (component.Components.Any())
-			component.Interfaces.Add("INotificationPropagator");
-		
-		foreach (EventListener @event in component.EventsListeners.Where(@event => @event.EventType == EventType.Notification))
-			component.Interfaces.Add($"INotificationListener<{@event.Name}_Notification>");
-		
 		if (component.IsSubclass)
-			component.Interfaces.Insert(0, Compilation.GetComponentBaseTypeName(prefabPath, id, table));
-		
+			component.baseClassName = Compilation.GetComponentBaseTypeName(prefabPath, id, table);
 		return component;
+	}
+	
+	public TomlTable ToToml()
+	{
+		TomlTable table = new();
+		if (Source is TypeSource typeSource) table.Add("Component", typeSource.Type);
+		if (Source is PrefabSource prefabSource) table.Add("Prefab", prefabSource.Path);
+		if (Interfaces.Count != 0) table.Add("Interfaces", Interfaces);
+		if (EventsListeners.Count != 0) table.Add("Events", EventsListeners.Select(@event => @event.ToToml()).ToList());
+		if (Properties.Count != 0) table.Add("Properties", Properties.Select(prop => prop.ToToml()).ToList());
+		if (Functions.Count != 0) table.Add("Functions", Functions.Select(func => func.ToToml()).ToList());
+		if (Values.Count != 0) table.Add("Values", Values);
+		return table;
 	}
 	
 	public string StringifyCS()
 	{
 		if (!NeedsCustomClass) return "";
 		
+		List<string> interfaces = Interfaces.ToList();
+		if (Components.Any())
+			interfaces.Add("INotificationPropagator");
+		foreach (EventListener @event in EventsListeners.Where(@event => @event.EventType == EventType.Notification))
+			interfaces.Add($"INotificationListener<{@event.Name}_Notification>");
+		if (IsSubclass)
+			interfaces.Insert(0, baseClassName);
+		
 		string scriptString = "";
 		scriptString += $"public partial class {ClassName}";
-		if (Interfaces.Count != 0) scriptString += " : " + Interfaces.Join(", ");
+		if (interfaces.Count != 0) scriptString += " : " + interfaces.Join(", ");
 		scriptString += "\n";
 		scriptString += "{\n";
 		scriptString += Properties.Select(property => property.StringifyCS()).Join();

@@ -1,38 +1,26 @@
 ﻿using System.Reflection;
 using Echidna2.Serialization.TomlFiles;
+using TooManyExtensions;
 
 namespace Echidna2.Serialization;
 
-public class PrefabRoot : IPrefabChangeRegistry
+public class PrefabRoot
 {
 	public List<PrefabInstance> ChildPrefabs = [];
 	public List<object> Components = [];
 	
 	public List<(object, Component)> ComponentPairs = [];
 	
-	public Dictionary<MemberPath, object> SerializedData = new();
-	
 	public List<(object Component, MemberInfo Field)> FavoriteFields = [];
 	
 	public object RootObject = null!;
 	public Prefab Prefab = null!;
 	
-	public PrefabInstance? GetPrefabInstance(IMemberPath path)
+	public void SerializeChange(object component, string member, object value)
 	{
-		return ChildPrefabs.FirstOrDefault(child => child.PrefabRoot.RootObject == path.Root.Component);
+		Component connectedData = ComponentPairs.First(pair => pair.Item1 == component).Item2;
+		connectedData.Values[member] = value;
 	}
-	
-	public IPrefabChangeRegistry? GetChangeRegistry(IMemberPath path)
-	{
-		return Components.Contains(path.Root.Component) ? this : GetPrefabInstance(path);
-	}
-	
-	public void RegisterChange(MemberPath path)
-	{
-		GetChangeRegistry(path)?.RegisterChangeInSelf(path.HighestMemberPath);
-	}
-	
-	public void RegisterChangeInSelf(MemberPath path) => SerializedData[path] = path.Value;
 	
 	public bool Owns(object component) => Components.Contains(component) || ChildPrefabs.Any(child => child.PrefabRoot.RootObject == component);
 	
@@ -46,32 +34,45 @@ public class PrefabRoot : IPrefabChangeRegistry
 			if (foundComponents.Contains(component)) continue;
 			foundComponents.Add(component);
 			
-			Component componentData = ComponentPairs.First(pair => pair.Item1 == component).Item2;
+			Component componentData = ComponentPairs.First(pair => pair.Item1 == component, $"Prefab '{Prefab}' has no pair for object '{component}' (out of {ComponentPairs.ToDelimString()})").Unwrap().Item2;
 			componentsToSearch.AddRange(componentData.Properties
 				.Where(prop => prop.PropertyType is PropertyType.Component)
-				.Select(prop => IMemberWrapper.Wrap(component.GetType().GetMember(prop.Name).First()).GetValue(component))!);
+				.Select(prop => (string)componentData.Values.Get(prop.Name).Expect($"Component '{componentData}' has no value for property {prop.Name} (out of {componentData.Values.ToDelimString()})"))
+				.Select(id => ComponentPairs.First(pair => pair.Item2.Id == id, $"Prefab '{Prefab}' has no pair for id '{id}' (out of {ComponentPairs.ToDelimString()})").Unwrap().Item1));
 		}
 		
 		return foundComponents;
 	}
 	
 	public IEnumerable<object> GetAllOwnedComponentsOf(object rootComponent) => GetAllComponentsOf(rootComponent).Where(Owns);
-}
-
-public class PrefabInstance(PrefabRoot prefabRoot) : IPrefabChangeRegistry
-{
-	public PrefabRoot PrefabRoot => prefabRoot;
-	public Dictionary<MemberPath, object> SerializedChanges = new();
 	
-	public void RegisterChangeInSelf(MemberPath path)
+	public object AddComponent(string componentPath, object connectedObject)
 	{
-		if (path.Root.Component != prefabRoot.RootObject)
-			throw new ArgumentException("Component must be the root object of the prefab");
-		SerializedChanges[path] = path.Value;
+		object component = Project.Instantiate<object>(componentPath);
+		string id = Guid.NewGuid().ToString();
+		Component data = new();
+		data.Id = id;
+		data.Source = new PrefabSource(componentPath);
+		Components.Add(component);
+		ComponentPairs.Add((component, data));
+		Prefab.Components.Add(data);
+		
+		Property property = new();
+		property.Name = componentPath.SplitLast('.').Item2;
+		property.Type = componentPath;
+		property.PropertyType = PropertyType.Component;
+		
+		Component connectedData = ComponentPairs.First(pair => pair.Item1 == connectedObject).Item2;
+		connectedData.Properties.Add(property);
+		connectedData.Values.Add(property.Name, id);
+		
+		Prefab.Save();
+		
+		return component;
 	}
 }
 
-public interface IPrefabChangeRegistry
+public class PrefabInstance(PrefabRoot prefabRoot)
 {
-	public void RegisterChangeInSelf(MemberPath path);
+	public PrefabRoot PrefabRoot => prefabRoot;
 }

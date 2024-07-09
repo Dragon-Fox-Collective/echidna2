@@ -16,19 +16,17 @@ ValueChanged?.Invoke(value);
     { PropertyType = "Public", Type = "Type", Name = "ComponentType" },
     { PropertyType = "Private", Type = "Editor", Name = "Editor" },
     { PropertyType = "Event", Type = "object?", Name = "ValueChanged" },
-    { PropertyType = "Event", Type = "AddComponentWindow", Name = "WindowOpened" },
 ]
 Events = [
     { EventType = "Notification", Name = "EditorInitialize", Content = """
 Editor = notification.Editor;
 """ },
     { EventType = "Reference", Target = "Button", Name = "MouseDown", Args = [], Content = """
-AddComponentWindow window = Project.Instantiate<AddComponentWindow>("Prefabs.Editor.AddComponentWindow");
+SelectReferenceWindow window = Project.Instantiate<SelectReferenceWindow>("Prefabs.Editor.SelectReferenceWindow");
 window.ComponentType = ComponentType;
 window.Field = this;
 INotificationPropagator.Notify(new EditorInitialize_Notification(Editor), window);
 Editor.QueueAddChild(window);
-WindowOpened?.Invoke(window);
 """ },
 ]
 Functions = [

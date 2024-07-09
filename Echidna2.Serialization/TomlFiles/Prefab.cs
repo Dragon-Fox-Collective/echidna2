@@ -21,12 +21,27 @@ public class Prefab
 		Prefab prefab = new();
 		TomlTable table = Toml.ToModel(File.ReadAllText(prefabPath));
 		prefab.Usings = Usings.FromToml(table.GetList<string>("Using"));
+		prefab.FavoriteFields = table.GetList<string>("FavoriteFields");
 		prefab.Namespace = Namespace.FromToml(prefabPath);
 		prefab.Components = [];
 		foreach ((string id, object componentTable) in table.Where(IdIsValidComponentId))
 			prefab.Components.Add(Component.FromToml(prefabPath, id, (TomlTable)componentTable));
-		prefab.FavoriteFields = table.GetList<string>("FavoriteFields");
 		return prefab;
+	}
+	
+	public TomlTable ToToml()
+	{
+		TomlTable table = new();
+		table.Add("FavoriteFields", FavoriteFields);
+		table.Add("Using", Usings.ToToml());
+		foreach (Component component in Components)
+			table.Add(component.Id, component.ToToml());
+		return table;
+	}
+	
+	public void Save()
+	{
+		File.WriteAllText(Path, CustomTomlStringifier.Stringify(ToToml()));
 	}
 	
 	public string StringifyCS()

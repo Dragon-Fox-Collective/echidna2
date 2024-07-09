@@ -50,10 +50,10 @@ public partial class Project
 		}
 		
 		foreach ((object component, Component componentTable) in components)
-			DeserializeReference(prefabRoot, new ComponentPath(component), component, componentTable.Values, GetReferenceFrom);
+			DeserializeReference(component, componentTable.Values, GetReferenceFrom);
 		
 		foreach ((object component, Component componentTable) in components)
-			DeserializeValue(prefabRoot, new ComponentPath(component), component, componentTable.Values);
+			DeserializeValue(component, componentTable.Values);
 		
 		prefabRoot.FavoriteFields = prefab.FavoriteFields.Select(refPath =>
 			{
@@ -104,7 +104,7 @@ public partial class Project
 		return constructor.Invoke([]);
 	}
 	
-	private void DeserializeReference(PrefabRoot prefabRoot, IMemberPath path, object component, Dictionary<string, object> values, Func<string, object> getReferenceFrom)
+	private void DeserializeReference(object component, Dictionary<string, object> values, Func<string, object> getReferenceFrom)
 	{
 		MemberInfo[] members = component.GetType().GetMembers(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
 			.Where(member => member.GetCustomAttribute<SerializedReferenceAttribute>() is not null)
@@ -114,16 +114,14 @@ public partial class Project
 		foreach (MemberInfo member in members)
 		{
 			IMemberWrapper wrapper = IMemberWrapper.Wrap(member);
-			MemberPath memberPath = new(wrapper, path);
 			ReferenceSerializer serializer = wrapper.GetCustomAttribute<SerializedReferenceAttribute>()!.GetSerializer(wrapper.FieldType);
 			object serializedValue = values[member.Name];
 			object deserializedValue = serializer.Deserialize(wrapper.GetValue(component), serializedValue, getReferenceFrom);
 			wrapper.SetValue(component, deserializedValue);
-			prefabRoot.RegisterChange(memberPath);
 		}
 	}
 	
-	private object DeserializeValue(PrefabRoot prefabRoot, IMemberPath path, object component, Dictionary<string, object> values)
+	private object DeserializeValue(object component, Dictionary<string, object> values)
 	{
 		MemberInfo[] members = component.GetType().GetMembers(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
 			.Where(member => member.GetCustomAttribute<SerializedValueAttribute>() != null)
@@ -133,12 +131,10 @@ public partial class Project
 		foreach (MemberInfo member in members)
 		{
 			IMemberWrapper wrapper = IMemberWrapper.Wrap(member);
-			MemberPath memberPath = new(wrapper, path);
-			Serializer serializer = wrapper.GetCustomAttribute<SerializedValueAttribute>()!.GetSerializer(wrapper.FieldType, data => DeserializeValue(prefabRoot, memberPath, wrapper.GetValue(component)!, data.ToDictionary()));
+			Serializer serializer = wrapper.GetCustomAttribute<SerializedValueAttribute>()!.GetSerializer(wrapper.FieldType, data => DeserializeValue(wrapper.GetValue(component)!, data.ToDictionary()));
 			object serializedValue = values[member.Name];
 			object deserializedValue = serializer.Deserialize(wrapper.GetValue(component), serializedValue);
 			wrapper.SetValue(component, deserializedValue);
-			prefabRoot.RegisterChange(memberPath);
 		}
 		
 		return component;
