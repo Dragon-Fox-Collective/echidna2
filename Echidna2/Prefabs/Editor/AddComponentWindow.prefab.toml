@@ -54,6 +54,11 @@ LocalSize = { X = 300, Y = 400 }
 Depth = 15
 Children = [ "4" ]
 
+[2]
+Prefab = "Prefabs.Gui.ScrollArea"
+[2.Values]
+Children = [ "11" ]
+
 [4]
 Prefab = "Prefabs.Gui.VLayoutWithHierarchy"
 [4.Values]
@@ -116,7 +121,7 @@ Prefab = "Prefabs.Gui.FullRectWithHierarchy"
 [10.Values]
 VerticalExpand = true
 Margin = 5.0
-Children = [ "11" ]
+Children = [ "2" ]
 
 [11]
 Prefab = "Prefabs.Gui.VLayoutWithHierarchy"

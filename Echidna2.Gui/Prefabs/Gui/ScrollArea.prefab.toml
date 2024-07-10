@@ -1,0 +1,5 @@
+[This]
+Prefab = "Prefabs.Gui.FullLayoutWithHierarchy"
+
+[This.Values]
+ClipChildren = true

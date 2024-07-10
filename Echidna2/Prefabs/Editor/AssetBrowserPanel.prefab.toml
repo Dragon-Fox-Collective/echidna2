@@ -54,7 +54,12 @@ Files = "2"
 Prefab = "Prefabs.Gui.FullRectWithHierarchy"
 [1.Values]
 Margin = 10.0
-Children = [ "2" ]
+Children = [ "3" ]
 
 [2]
 Prefab = "Prefabs.Gui.VLayoutWithHierarchy"
+
+[3]
+Prefab = "Prefabs.Gui.ScrollArea"
+[3.Values]
+Children = [ "2" ]
