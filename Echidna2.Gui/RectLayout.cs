@@ -5,9 +5,11 @@ using Echidna2.Serialization;
 
 namespace Echidna2.Gui;
 
-public class RectLayout : INotificationHook<Update_Notification>, INotificationHook<Draw_Notification>
+public class RectLayout : INotificationHook<Update_Notification>, INotificationHook<Draw_Notification>, INotificationHook<IMouseNotification>
 {
 	[SerializedValue] public bool ClipChildren;
+	
+	private List<IMouseNotification> clippedClicks = [];
 	
 	private List<(RectTransform child, RectTransform.LocalTransformChangedHandler handler)> localTransformChangedHandlers = [];
 	
@@ -99,6 +101,24 @@ public class RectLayout : INotificationHook<Update_Notification>, INotificationH
 	{
 		if (ClipChildren)
 			ScissorStack.PopScissor();
+	}
+	
+	public void OnPreNotify(IMouseNotification notification)
+	{
+		if (!notification.Clipped && ClipChildren && !RectTransform.ContainsGlobalPoint(notification.GlobalPosition.XY))
+		{
+			notification.Clipped = true;
+			clippedClicks.Add(notification);
+		}
+	}
+	public void OnPostNotify(IMouseNotification notification)
+	{
+		
+	}
+	public void OnPostPropagate(IMouseNotification notification)
+	{
+		if (clippedClicks.Remove(notification))
+			notification.Clipped = false;
 	}
 }
 

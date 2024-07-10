@@ -26,11 +26,11 @@ public class Button : IButton, IMouseDown, IMouseUp, IMouseMoved
 	private bool wasPressed;
 	private bool wasInside;
 	
-	public void OnMouseDown(MouseButton button, Vector2 position, Vector3 globalPosition)
+	public void OnMouseDown(MouseButton button, Vector2 position, Vector3 globalPosition, bool clipped)
 	{
 		if (button != MouseButton.Left) return;
 		
-		if (RectTransform.ContainsGlobalPoint(globalPosition.XY))
+		if (!clipped && RectTransform.ContainsGlobalPoint(globalPosition.XY))
 		{
 			wasPressed = true;
 			MouseDown?.Invoke();
@@ -41,7 +41,7 @@ public class Button : IButton, IMouseDown, IMouseUp, IMouseMoved
 		}
 	}
 	
-	public void OnMouseUp(MouseButton button, Vector2 position, Vector3 globalPosition)
+	public void OnMouseUp(MouseButton button, Vector2 position, Vector3 globalPosition, bool clipped)
 	{
 		if (button != MouseButton.Left) return;
 		
@@ -59,12 +59,12 @@ public class Button : IButton, IMouseDown, IMouseUp, IMouseMoved
 		}
 	}
 	
-	public void OnMouseMoved(Vector2 position, Vector2 delta, Vector3 globalPosition)
+	public void OnMouseMoved(Vector2 position, Vector2 delta, Vector3 globalPosition, bool clipped)
 	{
 		if (wasPressed)
 			Dragged?.Invoke();
 		
-		if (RectTransform.ContainsGlobalPoint(globalPosition.XY))
+		if (!clipped && RectTransform.ContainsGlobalPoint(globalPosition.XY))
 		{
 			if (!wasInside)
 			{

@@ -23,24 +23,24 @@ public partial class EditorViewportGui : INotificationPropagator, IMouseDown, IM
 			INotificationPropagator.Notify(notification, Viewport);
 	}
 	
-	public void OnMouseDown(MouseButton button, Vector2 position, Vector3 globalPosition)
+	public void OnMouseDown(MouseButton button, Vector2 position, Vector3 globalPosition, bool clipped)
 	{
-		if (button == MouseButton.Left && this.ContainsGlobalPoint(globalPosition.XY))
+		if (button == MouseButton.Left && !clipped && this.ContainsGlobalPoint(globalPosition.XY))
 			isDragging = true;
 	}
 	
-	public void OnMouseMoved(Vector2 position, Vector2 delta, Vector3 globalPosition)
+	public void OnMouseMoved(Vector2 position, Vector2 delta, Vector3 globalPosition, bool clipped)
 	{
 		if (isDragging)
 			Camera.GlobalPosition += Camera.Zoom * -delta;
 	}
 	
-	public void OnMouseUp(MouseButton button, Vector2 position, Vector3 globalPosition)
+	public void OnMouseUp(MouseButton button, Vector2 position, Vector3 globalPosition, bool clipped)
 	{
 		isDragging = false;
 	}
 	
-	public void OnMouseWheelScrolled(Vector2 offset, Vector2 position, Vector3 globalPosition)
+	public void OnMouseWheelScrolled(Vector2 offset, Vector2 position, Vector3 globalPosition, bool clipped)
 	{
 		if (this.ContainsGlobalPoint(globalPosition.XY))
 		{

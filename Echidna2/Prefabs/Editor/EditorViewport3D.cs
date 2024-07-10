@@ -43,16 +43,16 @@ public partial class EditorViewport3D : INotificationPropagator, IUpdate, IMouse
 		Viewport.Camera.Transform.LookAt(CameraPivot, Math.Cos(cameraPitch) >= 0 ? Vector3.Up : Vector3.Down, Vector3.North);
 	}
 	
-	public void OnMouseDown(MouseButton button, Vector2 position, Vector3 globalPosition)
+	public void OnMouseDown(MouseButton button, Vector2 position, Vector3 globalPosition, bool clipped)
 	{
-		if (button == MouseButton.Left && this.ContainsGlobalPoint(globalPosition.XY))
+		if (button == MouseButton.Left && !clipped && this.ContainsGlobalPoint(globalPosition.XY))
 			if (isModifierPressed)
 				isPanning = true;
 			else
 				isOrbiting = true;
 	}
 	
-	public void OnMouseMoved(Vector2 position, Vector2 delta, Vector3 globalPosition)
+	public void OnMouseMoved(Vector2 position, Vector2 delta, Vector3 globalPosition, bool clipped)
 	{
 		if (isOrbiting)
 		{
@@ -67,7 +67,7 @@ public partial class EditorViewport3D : INotificationPropagator, IUpdate, IMouse
 		}
 	}
 	
-	public void OnMouseUp(MouseButton button, Vector2 position, Vector3 globalPosition)
+	public void OnMouseUp(MouseButton button, Vector2 position, Vector3 globalPosition, bool clipped)
 	{
 		if (button == MouseButton.Left)
 		{
@@ -76,7 +76,7 @@ public partial class EditorViewport3D : INotificationPropagator, IUpdate, IMouse
 		}
 	}
 	
-	public void OnMouseWheelScrolled(Vector2 offset, Vector2 position, Vector3 globalPosition)
+	public void OnMouseWheelScrolled(Vector2 offset, Vector2 position, Vector3 globalPosition, bool clipped)
 	{
 		if (this.ContainsGlobalPoint(globalPosition.XY))
 		{

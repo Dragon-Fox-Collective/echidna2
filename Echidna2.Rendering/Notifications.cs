@@ -15,56 +15,67 @@ public interface IDraw : INotificationListener<Draw_Notification>
 	public void OnDraw();
 }
 
-public class MouseMoved_Notification(Vector2 position, Vector2 delta, Vector3 globalPosition)
+public interface IMouseNotification
+{
+	public Vector2 Position { get; }
+	public Vector3 GlobalPosition { get; }
+	public bool Clipped { get; set; }
+}
+
+public class MouseMoved_Notification(Vector2 position, Vector2 delta, Vector3 globalPosition) : IMouseNotification
 {
 	public Vector2 Position { get; } = position;
 	public Vector2 Delta { get; } = delta;
 	public Vector3 GlobalPosition { get; } = globalPosition;
+	public bool Clipped { get; set; } = false;
 }
 [DontExpose]
 public interface IMouseMoved : INotificationListener<MouseMoved_Notification>
 {
-	void INotificationListener<MouseMoved_Notification>.OnNotify(MouseMoved_Notification notification) => OnMouseMoved(notification.Position, notification.Delta, notification.GlobalPosition);
-	public void OnMouseMoved(Vector2 position, Vector2 delta, Vector3 globalPosition);
+	void INotificationListener<MouseMoved_Notification>.OnNotify(MouseMoved_Notification notification) => OnMouseMoved(notification.Position, notification.Delta, notification.GlobalPosition, notification.Clipped);
+	public void OnMouseMoved(Vector2 position, Vector2 delta, Vector3 globalPosition, bool clipped);
 }
 
-public class MouseDown_Notification(MouseButton button, Vector2 position, Vector3 globalPosition)
+public class MouseDown_Notification(MouseButton button, Vector2 position, Vector3 globalPosition) : IMouseNotification
 {
 	public MouseButton Button { get; } = button;
 	public Vector2 Position { get; } = position;
 	public Vector3 GlobalPosition { get; } = globalPosition;
+	public bool Clipped { get; set; } = false;
 }
 [DontExpose]
 public interface IMouseDown : INotificationListener<MouseDown_Notification>
 {
-	void INotificationListener<MouseDown_Notification>.OnNotify(MouseDown_Notification notification) => OnMouseDown(notification.Button, notification.Position, notification.GlobalPosition);
-	public void OnMouseDown(MouseButton button, Vector2 position, Vector3 globalPosition);
+	void INotificationListener<MouseDown_Notification>.OnNotify(MouseDown_Notification notification) => OnMouseDown(notification.Button, notification.Position, notification.GlobalPosition, notification.Clipped);
+	public void OnMouseDown(MouseButton button, Vector2 position, Vector3 globalPosition, bool clipped);
 }
 
-public class MouseUp_Notification(MouseButton button, Vector2 position, Vector3 globalPosition)
+public class MouseUp_Notification(MouseButton button, Vector2 position, Vector3 globalPosition) : IMouseNotification
 {
 	public MouseButton Button { get; } = button;
 	public Vector2 Position { get; } = position;
 	public Vector3 GlobalPosition { get; } = globalPosition;
+	public bool Clipped { get; set; } = false;
 }
 [DontExpose]
 public interface IMouseUp : INotificationListener<MouseUp_Notification>
 {
-	void INotificationListener<MouseUp_Notification>.OnNotify(MouseUp_Notification notification) => OnMouseUp(notification.Button, notification.Position, notification.GlobalPosition);
-	public void OnMouseUp(MouseButton button, Vector2 position, Vector3 globalPosition);
+	void INotificationListener<MouseUp_Notification>.OnNotify(MouseUp_Notification notification) => OnMouseUp(notification.Button, notification.Position, notification.GlobalPosition, notification.Clipped);
+	public void OnMouseUp(MouseButton button, Vector2 position, Vector3 globalPosition, bool clipped);
 }
 
-public class MouseWheelScrolled_Notification(Vector2 offset, Vector2 position, Vector3 globalPosition)
+public class MouseWheelScrolled_Notification(Vector2 offset, Vector2 position, Vector3 globalPosition) : IMouseNotification
 {
 	public Vector2 Offset { get; } = offset;
 	public Vector2 Position { get; } = position;
 	public Vector3 GlobalPosition { get; } = globalPosition;
+	public bool Clipped { get; set; } = false;
 }
 [DontExpose]
 public interface IMouseWheelScrolled : INotificationListener<MouseWheelScrolled_Notification>
 {
-	void INotificationListener<MouseWheelScrolled_Notification>.OnNotify(MouseWheelScrolled_Notification notification) => OnMouseWheelScrolled(notification.Offset, notification.Position, notification.GlobalPosition);
-	public void OnMouseWheelScrolled(Vector2 offset, Vector2 position, Vector3 globalPosition);
+	void INotificationListener<MouseWheelScrolled_Notification>.OnNotify(MouseWheelScrolled_Notification notification) => OnMouseWheelScrolled(notification.Offset, notification.Position, notification.GlobalPosition, notification.Clipped);
+	public void OnMouseWheelScrolled(Vector2 offset, Vector2 position, Vector3 globalPosition, bool clipped);
 }
 
 public class KeyDown_Notification(Keys key)
