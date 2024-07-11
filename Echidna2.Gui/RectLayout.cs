@@ -24,6 +24,7 @@ public class RectLayout : INotificationHook<Update_Notification>, INotificationH
 			{
 				Hierarchy.ChildAdded -= AddLayoutChild;
 				Hierarchy.ChildRemoved -= RemoveLayoutChild;
+				ChildrenThatCanBeLaidOut.ForEach(RemoveLayoutChild);
 			}
 			
 			hierarchy = value;
@@ -32,6 +33,7 @@ public class RectLayout : INotificationHook<Update_Notification>, INotificationH
 			{
 				Hierarchy.ChildAdded += AddLayoutChild;
 				Hierarchy.ChildRemoved += RemoveLayoutChild;
+				ChildrenThatCanBeLaidOut.ForEach(AddLayoutChild);
 			}
 		}
 	}

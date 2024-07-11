@@ -62,4 +62,4 @@ Prefab = "Prefabs.Gui.VLayoutWithHierarchy"
 [3]
 Prefab = "Prefabs.Gui.ScrollArea"
 [3.Values]
-Children = [ "2" ]
+Content = [ "2" ]

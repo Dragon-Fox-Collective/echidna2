@@ -104,6 +104,7 @@ public interface IHasChildren
 
 public interface ICanAddChildren
 {
+	public IEnumerable<object> Children { get; set; }
 	public void AddChild(object child);
 	public void QueueAddChild(object child);
 	public bool RemoveChild(object child);

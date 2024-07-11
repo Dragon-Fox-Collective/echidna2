@@ -7,6 +7,8 @@ public class Property
 	public string Name = "";
 	public string Type = "";
 	public PropertyType PropertyType;
+	public string PropertySerializer = "";
+	public bool HasPropertySerializer => !PropertySerializer.IsEmpty();
 	public bool ExposeProperties = false;
 	public List<EventListener> EventListeners = [];
 	
@@ -26,6 +28,7 @@ public class Property
 		property.Type = table.GetCasted<string>("Type");
 		property.Name = table.GetCasted<string>("Name");
 		property.PropertyType = Enum.Parse<PropertyType>(table.GetCasted<string>("PropertyType"));
+		property.PropertySerializer = table.GetString("PropertySerializer");
 		property.ExposeProperties = table.GetCasted("ExposeProperties", property.PropertyType == PropertyType.Component);
 		property.EventListeners = eventListeners.Where(eventListener => eventListener.EventType == EventType.Reference && eventListener.Target == property.Name).ToList();
 		property.GetterContent = table.GetString("GetterContent");
@@ -66,7 +69,7 @@ public class Property
 	{
 		string scriptString = "";
 		scriptString += $"\tprivate {Type} _{Name} = default!;\n";
-		scriptString += $"\t[SerializedReference{(ExposeProperties ? ", ExposeMembersInClass" : "")}] public {Type} {Name}\n";
+		scriptString += $"\t[SerializedReference{(HasPropertySerializer ? $"(typeof({PropertySerializer}))" : "")}{(ExposeProperties ? ", ExposeMembersInClass" : "")}] public {Type} {Name}\n";
 		scriptString += StringifyCSReferenceGetterAndSetter();
 		return scriptString;
 	}
@@ -74,7 +77,7 @@ public class Property
 	{
 		string scriptString = "";
 		scriptString += $"\tprivate {Type} _{Name} = default!;\n";
-		scriptString += $"\t[SerializedReference] public {Type} {Name}\n";
+		scriptString += $"\t[SerializedReference{(HasPropertySerializer ? $"(typeof({PropertySerializer}))" : "")}] public {Type} {Name}\n";
 		scriptString += StringifyCSReferenceGetterAndSetter();
 		return scriptString;
 	}
@@ -82,7 +85,7 @@ public class Property
 	{
 		string scriptString = "";
 		scriptString += $"\tprivate {Type} _{Name} = default!;\n";
-		scriptString += $"\t[SerializedValue] public {Type} {Name}\n";
+		scriptString += $"\t[SerializedValue{(HasPropertySerializer ? $"(typeof({PropertySerializer}))" : "")}] public {Type} {Name}\n";
 		scriptString += StringifyCSValueGetterAndSetter();
 		return scriptString;
 	}
@@ -137,7 +140,16 @@ public class Property
 	{
 		string scriptString = "";
 		scriptString += "\t{\n";
-		scriptString += $"\t\tget => _{Name};\n";
+		if (HasCustomGetter)
+		{
+			scriptString += "\t\tget\n";
+			scriptString += "\t\t{\n";
+			scriptString += "\t\t\t" + GetterContent.Indent().Indent().Indent() + "\n";
+			scriptString += "\t\t}\n";
+		}
+		else
+			scriptString += $"\t\tget => _{Name};\n";
+		
 		scriptString += "\t\tset\n";
 		scriptString += "\t\t{\n";
 		
@@ -145,7 +157,10 @@ public class Property
 		scriptString += $"\t\t\t\tUnsetup_{Name}();\n";
 		scriptString += "\n";
 		
-		scriptString += $"\t\t\t_{Name} = value;\n";
+		if (HasCustomSetter)
+			scriptString += "\t\t\t" + SetterContent.Indent().Indent().Indent() + "\n";
+		else
+			scriptString += $"\t\t\t_{Name} = value;\n";
 		scriptString += "\n";
 		
 		scriptString += $"\t\t\tif (_{Name} is not null)\n";
@@ -208,15 +223,15 @@ public class Property
 	}
 	private string StringifyCSComponentAbstract()
 	{
-		return $"\t[SerializedReference{(ExposeProperties ? ", ExposeMembersInClass" : "")}] {Type} {Name} {{ get; set; }}\n";
+		return $"\t[SerializedReference{(HasPropertySerializer ? $"(typeof({PropertySerializer}))" : "")}{(ExposeProperties ? ", ExposeMembersInClass" : "")}] {Type} {Name} {{ get; set; }}\n";
 	}
 	private string StringifyCSReferenceAbstract()
 	{
-		return $"\t[SerializedReference] {Type} {Name} {{ get; set; }}\n";
+		return $"\t[SerializedReference{(HasPropertySerializer ? $"(typeof({PropertySerializer}))" : "")}] {Type} {Name} {{ get; set; }}\n";
 	}
 	private string StringifyCSValueAbstract()
 	{
-		return $"\t[SerializedValue] {Type} {Name} {{ get; set; }}\n";
+		return $"\t[SerializedValue{(HasPropertySerializer ? $"(typeof({PropertySerializer}))" : "")}] {Type} {Name} {{ get; set; }}\n";
 	}
 	private string StringifyCSPublicAbstract()
 	{

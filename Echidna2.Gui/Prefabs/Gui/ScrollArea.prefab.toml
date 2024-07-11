@@ -1,5 +1,104 @@
+Using = ["Echidna2.Gui", "Echidna2.Prefabs.Gui"]
+
 [This]
-Prefab = "Prefabs.Gui.FullLayoutWithHierarchy"
+Interfaces = [
+    "ICanBeLaidOut",
+]
+
+[[This.Properties]]
+PropertyType = "Component"
+Type = "Named"
+Name = "Named"
+
+[[This.Properties]]
+PropertyType = "Component"
+Type = "RectTransform"
+Name = "RectTransform"
+
+[[This.Properties]]
+PropertyType = "Component"
+Type = "FullLayout"
+Name = "Layout"
+
+[[This.Properties]]
+PropertyType = "Component"
+Type = "Hierarchy"
+Name = "LayoutChildren"
+
+[[This.Properties]]
+PropertyType = "Reference"
+Type = "ICanAddChildren"
+Name = "PrefabChildren"
+
+[[This.Properties]]
+PropertyType = "Reference"
+PropertySerializer = "ChildrenSerializer"
+Type = "IEnumerable<object>"
+Name = "Content"
+SetterContent = "PrefabChildren.Children = value;"
+GetterContent = "return PrefabChildren.Children;"
 
 [This.Values]
+Named = "02"
+RectTransform = "04"
+Layout = "05"
+LayoutChildren = "03"
+PrefabChildren = "2"
+
+[02]
+Component = "Echidna2.Core.Named, Echidna2.Core"
+
+[02.Values]
+Name = "Scroll Area"
+
+[03]
+Component = "Echidna2.Core.Hierarchy, Echidna2.Core"
+
+[03.Values]
+Children = [ "1" ]
+
+[04]
+Component = "Echidna2.Gui.RectTransform, Echidna2.Gui"
+
+[05]
+Component = "Echidna2.Gui.FullLayout, Echidna2.Gui"
+
+[05.Values]
+RectTransform = "04"
+Hierarchy = "03"
+
+[1]
+Prefab = "Prefabs.Gui.HLayoutWithHierarchy"
+
+[1.Values]
+Children = [ "5", "3" ]
+
+[2]
+Prefab = "Prefabs.Gui.FullLayoutWithHierarchy"
+
+[2.Values]
+Name = "Area"
 ClipChildren = true
+
+[3]
+Prefab = "Prefabs.Gui.FullRectWithHierarchy"
+
+[3.Values]
+Name = "Scroll Bar Container"
+Children = [ "4" ]
+
+[4]
+Prefab = "Prefabs.Gui.ButtonRect"
+
+[4.Values]
+Name = "Scroll Bar"
+MinimumSize = { X = 20, Y = 20 }
+
+[5]
+Prefab = "Prefabs.Gui.FullRectWithHierarchy"
+
+[5.Values]
+Name = "Area"
+HorizontalExpand = true
+Margin = 5
+Children = [ "2" ]
