@@ -22,7 +22,7 @@ public class Window
 	public Camera? Camera { get; set; }
 	public PostProcessing? PostProcessing { get; set; }
 	
-	private Vector2 mousePosition;
+	private Vector3 globalMousePosition;
 	
 	public Window(GameWindow gameWindow)
 	{
@@ -32,7 +32,7 @@ public class Window
 		gameWindow.Unload += OnDispose;
 		gameWindow.UpdateFrame += args => OnUpdate(args.Time);
 		gameWindow.RenderFrame += _ => OnDraw();
-		gameWindow.MouseMove += args => OnMouseMoved(args.Position, new Vector2(args.DeltaX, -args.DeltaY));
+		gameWindow.MouseMove += args => OnMouseMoved(args.Position);
 		gameWindow.MouseDown += args => OnMouseDown(args.Button);
 		gameWindow.MouseUp += args => OnMouseUp(args.Button);
 		gameWindow.MouseWheel += args => OnMouseWheel(args.Offset);
@@ -46,66 +46,68 @@ public class Window
 		GL.ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		GL.Enable(EnableCap.DepthTest);
 		GL.Enable(EnableCap.DepthClamp);
-		Camera?.Notify(new Initialize_Notification());
+		Camera?.Notify(new InitializeNotification());
 	}
 	
 	private void OnDispose()
 	{
-		Camera?.Notify(new Dispose_Notification());
+		Camera?.Notify(new DisposeNotification());
 	}
 	
 	private void OnUpdate(double deltaTime)
 	{
-		Camera?.Notify(new PreUpdate_Notification());
-		Camera?.Notify(new Update_Notification(deltaTime));
-		Camera?.Notify(new PostUpdate_Notification());
+		Camera?.Notify(new PreUpdateNotification());
+		Camera?.Notify(new UpdateNotification(deltaTime));
+		Camera?.Notify(new PostUpdateNotification());
 	}
 	
 	private void OnDraw()
 	{
 		if (Camera is null) return;
-		Camera.Notify(new DrawPass_Notification());
+		Camera.Notify(new DrawPassNotification());
 		GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
 		GL.Viewport(0, 0, (int)Camera.Size.X, (int)Camera.Size.Y);
 		GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit | ClearBufferMask.StencilBufferBit);
 		PostProcessing?.BeginRender();
-		Camera.Notify(new Draw_Notification(Camera));
+		Camera.Notify(new DrawNotification(Camera));
 		PostProcessing?.EndRender();
 		PostProcessing?.Render();
 		GameWindow.SwapBuffers();
 	}
 	
-	private void OnMouseMoved(Vector2 position, Vector2 delta)
+	private void OnMouseMoved(Vector2 position)
 	{
-		mousePosition = position;
-		Camera?.Notify(new MouseMoved_Notification(mousePosition, delta, Camera.ScreenToGlobal(mousePosition)));
+		Vector3 newGlobalMousePosition = Camera.ScreenToGlobal(position);
+		Vector3 delta = newGlobalMousePosition - globalMousePosition;
+		globalMousePosition = newGlobalMousePosition;
+		Camera?.Notify(new MouseMovedNotification(delta, globalMousePosition));
 	}
 	
 	private void OnMouseDown(MouseButton button)
 	{
-		Camera?.Notify(new MouseDown_Notification(button, mousePosition, Camera.ScreenToGlobal(mousePosition)));
+		Camera?.Notify(new MouseDownNotification(button, globalMousePosition));
 	}
 	
 	private void OnMouseUp(MouseButton button)
 	{
-		Camera?.Notify(new MouseUp_Notification(button, mousePosition, Camera.ScreenToGlobal(mousePosition)));
+		Camera?.Notify(new MouseUpNotification(button, globalMousePosition));
 	}
 	
 	private void OnMouseWheel(Vector2 offset)
 	{
-		Camera?.Notify(new MouseWheelScrolled_Notification(offset, mousePosition, Camera.ScreenToGlobal(mousePosition)));
+		Camera?.Notify(new MouseWheelScrolledNotification(offset, globalMousePosition));
 	}
 	
 	private void OnKeyDown(Keys key, KeyModifiers modifiers, bool isRepeat)
 	{
 		if (!isRepeat)
-			Camera?.Notify(new KeyDown_Notification(key));
-		Camera?.Notify(new TextInput_Notification(key, modifiers));
+			Camera?.Notify(new KeyDownNotification(key));
+		Camera?.Notify(new TextInputNotification(key, modifiers));
 	}
 	
 	private void OnKeyUp(Keys key)
 	{
-		Camera?.Notify(new KeyUp_Notification(key));
+		Camera?.Notify(new KeyUpNotification(key));
 	}
 	
 	private void OnResize(Vector2i size)

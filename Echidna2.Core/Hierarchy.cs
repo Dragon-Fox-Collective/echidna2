@@ -2,7 +2,7 @@
 
 namespace Echidna2.Core;
 
-public class Hierarchy : INotificationPropagator, IHasChildren, ICanAddChildren, IInitialize
+public class Hierarchy : INotificationPropagator, IHasChildren, ICanAddChildren, INotificationListener<InitializeNotification>
 {
 	public delegate void ChildAddedHandler(object child);
 	public event ChildAddedHandler? ChildAdded;
@@ -25,13 +25,17 @@ public class Hierarchy : INotificationPropagator, IHasChildren, ICanAddChildren,
 	
 	private HashSet<object> currentNotifications = [];
 	
-	[DontExpose] public bool HasBeenInitialized { get; set; }
+	private bool hasBeenInitialized;
 	
-	public void OnInitialize() { }
+	public void OnNotify(InitializeNotification notification)
+	{
+		if (hasBeenInitialized) return;
+		hasBeenInitialized = true;
+	}
 	
 	public void Notify<T>(T notification) where T : notnull
 	{
-		if (notification is AddedToHierarchy_Notification addedToHierarchy)
+		if (notification is AddedToHierarchyNotification addedToHierarchy)
 		{
 			Parent = addedToHierarchy.Parent;
 			return;
@@ -45,9 +49,9 @@ public class Hierarchy : INotificationPropagator, IHasChildren, ICanAddChildren,
 	public void AddChild(object child)
 	{
 		children.Add(child);
-		if (HasBeenInitialized)
-			INotificationPropagator.Notify(new Initialize_Notification(), child);
-		INotificationPropagator.Notify(new AddedToHierarchy_Notification(this), child);
+		if (hasBeenInitialized)
+			INotificationPropagator.Notify(new InitializeNotification(), child);
+		INotificationPropagator.Notify(new AddedToHierarchyNotification(this), child);
 		ChildAdded?.Invoke(child);
 	}
 	

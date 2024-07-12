@@ -53,7 +53,7 @@ public struct Vector3(double x, double y, double z) : IEquatable<Vector3>, IEnum
 	public double DistanceToSquared(Vector3 other) => (other - this).LengthSquared;
 	public Vector3 ProjectedOnto(Vector3 other) => Project(this, other);
 	public Vector3 ProjectedOrthogonalOnto(Vector3 other) => ProjectOrthogonal(this, other);
-	public Vector3 ClampBetween(Vector3 a, Vector3 b) => Clamp(this, a, b);
+	public Vector3 ClampedBetween(Vector3 a, Vector3 b) => Clamp(this, a, b);
 	
 	public static Vector3 operator +(Vector3 a) => a;
 	public static Vector3 operator +(Vector3 a, Vector3 b) => new(a.X + b.X, a.Y + b.Y, a.Z + b.Z);

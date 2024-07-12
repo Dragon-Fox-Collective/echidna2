@@ -33,7 +33,7 @@ box.AddChild(layout);
 ButtonRect button = Project.Instantiate<ButtonRect>("Prefabs.Gui.ButtonRect");
 button.AnchorPreset = AnchorPreset.Full;
 button.Margin = 5;
-button.MouseUp += () => ItemSelected?.Invoke(obj);
+button.MouseUp += _ => ItemSelected?.Invoke(obj);
 layout.AddChild(button);
 
 TextRect text = Project.Instantiate<TextRect>("Prefabs.Gui.TextRect");

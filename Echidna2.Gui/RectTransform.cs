@@ -5,15 +5,15 @@ namespace Echidna2.Gui;
 
 public interface IRectTransform
 {
-	public Vector2 LocalPosition { get; }
-	public Vector2 GlobalPosition { get; }
-	public Vector2 LocalSize { get; }
-	public Vector2 GlobalSize { get; }
-	public Vector2 LocalScale { get; }
-	public Matrix4 LocalTransform { get; }
-	public Matrix4 GlobalTransform { get; }
-	public int Depth { get; }
-	public Vector2 MinimumSize { get; }
+	public Vector2 LocalPosition { get; set; }
+	public Vector2 GlobalPosition { get; set; }
+	public Vector2 LocalSize { get; set; }
+	public Vector2 GlobalSize { get; set; }
+	public Vector2 LocalScale { get; set; }
+	public Matrix4 LocalTransform { get; set; }
+	public Matrix4 GlobalTransform { get; set; }
+	public int Depth { get; set; }
+	public Vector2 MinimumSize { get; set; }
 }
 
 public class RectTransform : IRectTransform

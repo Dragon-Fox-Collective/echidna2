@@ -1,10 +1,60 @@
-Using = ["Echidna2.Gui"]
+Using = ["Echidna2.Gui", "Echidna2.Rendering"]
 
 [This]
 Prefab = "Prefabs.Gui.FullLayoutWithHierarchy"
 
+[[This.Properties]]
+PropertyType = "Reference"
+Type = "IRectTransform"
+Name = "Top"
+
+[[This.Properties]]
+PropertyType = "Reference"
+Type = "IRectTransform"
+Name = "Bottom"
+
+[[This.Properties]]
+PropertyType = "Reference"
+Type = "IRectTransform"
+Name = "SliderBar"
+
+[[This.Properties]]
+PropertyType = "Private"
+Type = "Vector2"
+Name = "DraggingStart"
+
+[[This.Properties]]
+PropertyType = "Private"
+Type = "Vector2"
+Name = "SliderStart"
+
+[[This.Functions]]
+ReturnType = "void"
+Name = "StartDraggingSlider"
+Args = [{ Name = "position", Type = "Vector2" }]
+Content = """
+DraggingStart = position;
+SliderStart = SliderBar.GlobalPosition;
+"""
+
+[[This.Functions]]
+ReturnType = "void"
+Name = "DragSlider"
+Args = [{ Name = "position", Type = "Vector2" }]
+Content = """
+Vector2 delta = position - DraggingStart;
+position = SliderStart + delta;
+SliderBar.GlobalPosition = position.ClampedBetween(Bottom.GlobalPosition, Top.GlobalPosition);
+
+double total = Top.GlobalPosition.DistanceTo(Bottom.GlobalPosition);
+double fraction = SliderBar.GlobalPosition.DistanceTo(Top.GlobalPosition) / total;
+"""
+
 [This.Values]
 Name = "Slider"
+Top = "4"
+Bottom = "5"
+SliderBar = "1"
 MinimumSize = { X = 20, Y = 20 }
 Children = [ "2", "3" ]
 
@@ -13,32 +63,31 @@ Prefab = "Prefabs.Gui.ButtonRect"
 
 [[1.Properties]]
 PropertyType = "Reference"
-Type = "IRectTransform"
-Name = "Top"
+Type = "Slider"
+Name = "Slider"
 
-[[1.Properties]]
-PropertyType = "Reference"
-Type = "IRectTransform"
-Name = "Bottom"
+[[1.Events]]
+EventType = "Self"
+Target = "Button"
+Name = "Clicked"
+Args = [{ Name = "notification", Type = "MouseUpNotification" }]
+Content = """
+Slider.StartDraggingSlider(notification.GlobalPosition.XY);
+"""
 
 [[1.Events]]
 EventType = "Self"
 Target = "Button"
 Name = "Dragged"
-Args = [{ Name = "delta", Type = "Vector2"}]
+Args = [{ Name = "notification", Type = "MouseMovedNotification" }]
 Content = """
-GlobalPosition += delta;
-GlobalPosition = GlobalPosition.ClampBetween(Bottom.GlobalPosition, Top.GlobalPosition);
-
-double total = Top.GlobalPosition.DistanceTo(Bottom.GlobalPosition);
-double fraction = GlobalPosition.DistanceTo(Top.GlobalPosition) / total;
+Slider.DragSlider(notification.GlobalPosition.XY);
 """
 
 [1.Values]
 Name = "Bar"
+Slider = "This"
 LocalSize = { X = 20, Y = 20 }
-Top = "4"
-Bottom = "5"
 
 [2]
 Prefab = "Prefabs.Gui.RectLayoutWithHierarchy"

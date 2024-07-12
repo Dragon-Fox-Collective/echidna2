@@ -106,7 +106,7 @@ if (fieldEditor is not null)
 
 ButtonRect favoriteButton = Project.Instantiate<ButtonRect>("Prefabs.Gui.ButtonRect");
 favoriteButton.MinimumSize = (25, 25);
-favoriteButton.Clicked += () =>
+favoriteButton.Clicked += _ =>
 {
     if (Editor.PrefabRoot is null) return;
     
@@ -121,7 +121,7 @@ FieldEditors.ReferenceFieldEditor NewReferenceFieldEditorOfType(Type type)
 {
     FieldEditors.ReferenceFieldEditor referenceFieldEditor = Project.Instantiate<FieldEditors.ReferenceFieldEditor>("Prefabs.Editor.FieldEditors.ReferenceFieldEditor");
     referenceFieldEditor.ComponentType = type;
-    INotificationPropagator.Notify(new EditorInitialize_Notification(Editor), referenceFieldEditor);
+    INotificationPropagator.Notify(new EditorInitializeNotification(Editor), referenceFieldEditor);
     return referenceFieldEditor;
 }
 """ },
@@ -131,7 +131,7 @@ if (SelectedObject is null) return;
 
 {
     ButtonRect favoritesButton = Project.Instantiate<ButtonRect>("Prefabs.Editor.ComponentSelectionButton");
-    favoritesButton.Clicked += () => SelectedComponent = null;
+    favoritesButton.Clicked += _ => SelectedComponent = null;
     favoritesButton.MinimumSize = (40, 40);
     Components.AddChild(favoritesButton);
 }
@@ -139,17 +139,17 @@ if (SelectedObject is null) return;
 foreach (object component in Editor.PrefabRoot.GetAllOwnedComponentsOf(SelectedObject))
 {
     ButtonRect button = Project.Instantiate<ButtonRect>("Prefabs.Editor.ComponentSelectionButton");
-    button.Clicked += () => SelectedComponent = component;
+    button.Clicked += _ => SelectedComponent = component;
     Components.AddChild(button);
 }
 
 {
     ButtonRect addButton = Project.Instantiate<ButtonRect>("Prefabs.Editor.ComponentSelectionButton");
-    addButton.Clicked += () =>
+    addButton.Clicked += _ =>
     {
         AddComponentWindow window = Project.Instantiate<AddComponentWindow>("Prefabs.Editor.AddComponentWindow");
         window.SelectedObject = SelectedObject;
-        INotificationPropagator.Notify(new EditorInitialize_Notification(Editor), window);
+        INotificationPropagator.Notify(new EditorInitializeNotification(Editor), window);
         Editor.QueueAddChild(window);
     };
     addButton.MinimumSize = (20, 20);

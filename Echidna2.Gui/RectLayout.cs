@@ -5,7 +5,7 @@ using Echidna2.Serialization;
 
 namespace Echidna2.Gui;
 
-public class RectLayout : INotificationHook<Update_Notification>, INotificationHook<Draw_Notification>, INotificationHook<IMouseNotification>
+public class RectLayout : INotificationHook<UpdateNotification>, INotificationHook<DrawNotification>, INotificationHook<IMouseNotification>
 {
 	[SerializedValue] public bool ClipChildren;
 	
@@ -63,7 +63,7 @@ public class RectLayout : INotificationHook<Update_Notification>, INotificationH
 		}
 	}
 	
-	public virtual void OnPreNotify(Update_Notification notification)
+	public virtual void OnPreNotify(UpdateNotification notification)
 	{
 		foreach (ICanBeLaidOut child in ChildrenThatCanBeLaidOut)
 		{
@@ -82,16 +82,16 @@ public class RectLayout : INotificationHook<Update_Notification>, INotificationH
 			// Console.WriteLine($"{(child as INamed)?.Name ?? "No name"} {childRect.AnchorPreset} {left} {right} {bottom} {top} {childRect.MinimumSize} {childRect.LocalSize} {childRect.LocalPosition} {childRect.Depth}");
 		}
 	}
-	public virtual void OnPostNotify(Update_Notification notification)
+	public virtual void OnPostNotify(UpdateNotification notification)
 	{
 		
 	}
-	public virtual void OnPostPropagate(Update_Notification notification)
+	public virtual void OnPostPropagate(UpdateNotification notification)
 	{
 		
 	}
 	
-	public void OnPreNotify(Draw_Notification notification)
+	public void OnPreNotify(DrawNotification notification)
 	{
 		if (ClipChildren)
 		{
@@ -100,11 +100,11 @@ public class RectLayout : INotificationHook<Update_Notification>, INotificationH
 			ScissorStack.PushScissor(screenPosition.X - screenSize.X / 2, screenPosition.Y - screenSize.Y / 2, screenSize.X, screenSize.Y);
 		}
 	}
-	public void OnPostNotify(Draw_Notification notification)
+	public void OnPostNotify(DrawNotification notification)
 	{
 		
 	}
-	public void OnPostPropagate(Draw_Notification notification)
+	public void OnPostPropagate(DrawNotification notification)
 	{
 		if (ClipChildren)
 			ScissorStack.PopScissor();

@@ -1,25 +1,21 @@
-﻿using Echidna2.Mathematics;
+﻿using Echidna2.Core;
+using Echidna2.Mathematics;
 using Echidna2.Rendering;
 using Echidna2.Serialization;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 
 namespace Echidna2.Gui;
 
-public interface IButton
+public class Button : INotificationListener<MouseDownNotification>, INotificationListener<MouseUpNotification>, INotificationListener<MouseMovedNotification>
 {
-	public event Action? Clicked;
-}
-
-public class Button : IButton, IMouseDown, IMouseUp, IMouseMoved
-{
-	public event Action? Clicked;
-	public event Action<Vector2>? Dragged;
-	public event Action? MouseDown;
-	public event Action? MouseDownOutside;
-	public event Action? MouseUp;
-	public event Action? MouseUpOutside;
-	public event Action? MouseEnter;
-	public event Action? MouseExit;
+	public event Action<MouseUpNotification>? Clicked;
+	public event Action<MouseMovedNotification>? Dragged;
+	public event Action<MouseDownNotification>? MouseDown;
+	public event Action<MouseDownNotification>? MouseDownOutside;
+	public event Action<MouseUpNotification>? MouseUp;
+	public event Action<MouseUpNotification>? MouseUpOutside;
+	public event Action<MouseMovedNotification>? MouseEnter;
+	public event Action<MouseMovedNotification>? MouseExit;
 	
 	[SerializedReference] public IRectTransform RectTransform { get; set; } = null!;
 	
@@ -28,50 +24,50 @@ public class Button : IButton, IMouseDown, IMouseUp, IMouseMoved
 	
 	private Vector3 lastGlobalPosition;
 	
-	public void OnMouseDown(MouseButton button, Vector2 position, Vector3 globalPosition, bool clipped)
+	public void OnNotify(MouseDownNotification notification)
 	{
-		if (button != MouseButton.Left) return;
+		if (notification.Button != MouseButton.Left) return;
 		
-		if (!clipped && RectTransform.ContainsGlobalPoint(globalPosition.XY))
+		if (!notification.Clipped && RectTransform.ContainsGlobalPoint(notification.GlobalPosition.XY))
 		{
 			wasPressed = true;
-			MouseDown?.Invoke();
+			MouseDown?.Invoke(notification);
 		}
 		else
 		{
-			MouseDownOutside?.Invoke();
+			MouseDownOutside?.Invoke(notification);
 		}
 	}
 	
-	public void OnMouseUp(MouseButton button, Vector2 position, Vector3 globalPosition, bool clipped)
+	public void OnNotify(MouseUpNotification notification)
 	{
-		if (button != MouseButton.Left) return;
+		if (notification.Button != MouseButton.Left) return;
 		
 		if (wasPressed)
 		{
 			wasPressed = false;
-			MouseUp?.Invoke();
+			MouseUp?.Invoke(notification);
 			
-			if (RectTransform.ContainsGlobalPoint(globalPosition.XY))
-				Clicked?.Invoke();
+			if (RectTransform.ContainsGlobalPoint(notification.GlobalPosition.XY))
+				Clicked?.Invoke(notification);
 		}
 		else
 		{
-			MouseUpOutside?.Invoke();
+			MouseUpOutside?.Invoke(notification);
 		}
 	}
 	
-	public void OnMouseMoved(Vector2 position, Vector2 delta, Vector3 globalPosition, bool clipped)
+	public void OnNotify(MouseMovedNotification notification)
 	{
 		if (wasPressed)
-			Dragged?.Invoke(globalPosition.XY - lastGlobalPosition.XY);
+			Dragged?.Invoke(notification);
 		
-		if (!clipped && RectTransform.ContainsGlobalPoint(globalPosition.XY))
+		if (!notification.Clipped && RectTransform.ContainsGlobalPoint(notification.GlobalPosition.XY))
 		{
 			if (!wasInside)
 			{
 				wasInside = true;
-				MouseEnter?.Invoke();
+				MouseEnter?.Invoke(notification);
 			}
 		}
 		else
@@ -79,10 +75,10 @@ public class Button : IButton, IMouseDown, IMouseUp, IMouseMoved
 			if (wasInside)
 			{
 				wasInside = false;
-				MouseExit?.Invoke();
+				MouseExit?.Invoke(notification);
 			}
 		}
 		
-		lastGlobalPosition = globalPosition;
+		lastGlobalPosition = notification.GlobalPosition;
 	}
 }

@@ -7,7 +7,7 @@ public class Component
 	public string Id = "";
 	public ComponentSource Source = new NoSource();
 	public bool IsRoot => Id == "This";
-	public bool IsSubclass => Id != "This";
+	public bool IsSubclass => Source is not NoSource && NeedsCustomClass;
 	private string baseClassName = "";
 	public string ClassName = "";
 	public List<string> Interfaces = [];
@@ -17,9 +17,7 @@ public class Component
 	public List<Function> Functions = [];
 	public Dictionary<string, object> Values = [];
 	
-	public bool NeedsCustomClass => IsSubclass
-		? Components.Any() || Properties.Count != 0 || EventsListeners.Count != 0 || Functions.Count != 0 || Interfaces.Count > 1
-		: Source is NoSource;
+	public bool NeedsCustomClass => Components.Any() || Properties.Count != 0 || EventsListeners.Count != 0 || Functions.Count != 0 || Interfaces.Count > 1;
 	
 	public static Component FromToml(string prefabPath, string id, TomlTable table)
 	{
@@ -61,7 +59,7 @@ public class Component
 		if (Components.Any())
 			interfaces.Add("INotificationPropagator");
 		foreach (EventListener @event in EventsListeners.Where(@event => @event.EventType == EventType.Notification))
-			interfaces.Add($"INotificationListener<{@event.Name}_Notification>");
+			interfaces.Add($"INotificationListener<{@event.Name}Notification>");
 		if (IsSubclass)
 			interfaces.Insert(0, baseClassName);
 		
@@ -73,7 +71,8 @@ public class Component
 		scriptString += Properties.Select(property => property.StringifyCS()).Join();
 		if (Components.Any()) scriptString += "\n" + StringifyCSNotify();
 		scriptString += "\n";
-		scriptString += EventsListeners.Where(@event => @event.EventType is EventType.Self or EventType.Notification).Select(@event => @event.StringifyCS() + "\n").Join();
+		scriptString += EventsListeners.Where(@event => @event.EventType is EventType.Self).GroupBy(@event => @event.Target).Select(group => StringifyCSEventListenersSelf(group.Key, group.ToArray()) + "\n").Join();
+		scriptString += EventsListeners.Where(@event => @event.EventType is EventType.Notification).Select(@event => @event.StringifyCS() + "\n").Join();
 		scriptString += "\n";
 		scriptString += Functions.Select(function => function.StringifyCS()).Join();
 		scriptString += "}\n";
@@ -88,6 +87,31 @@ public class Component
 		scriptString += $"\t\tINotificationPropagator.Notify(notification, {Components.Select(component => component.Name).Join(", ")});\n";
 		scriptString += "\t}\n";
 		scriptString += "\n";
+		return scriptString;
+	}
+	
+	private static string StringifyCSEventListenersSelf(string target, ICollection<EventListener> eventListeners)
+	{
+		string scriptString = "";
+		scriptString += $"\tprotected override void Setup_{target}()\n";
+		scriptString += "\t{\n";
+		scriptString += $"\t\tbase.Setup_{target}();\n";
+		foreach (EventListener @event in eventListeners)
+			scriptString += @event.StringifyCSAdd();
+		scriptString += "\t}\n";
+		
+		scriptString += $"\tprotected override void Unsetup_{target}()\n";
+		scriptString += "\t{\n";
+		scriptString += $"\t\tbase.Unsetup_{target}();\n";
+		foreach (EventListener @event in eventListeners)
+			scriptString += @event.StringifyCSSub();
+		scriptString += "\t}\n";
+		
+		foreach (EventListener @event in eventListeners)
+			scriptString += @event.StringifyCS();
+		
+		scriptString += "\n";
+		
 		return scriptString;
 	}
 	

@@ -5,7 +5,7 @@ using OpenTK.Graphics.OpenGL4;
 
 namespace Echidna2.Rendering;
 
-public class RenderTarget : IInitialize, INotificationHook<DrawPass_Notification>, IDispose
+public class RenderTarget : INotificationListener<InitializeNotification>, INotificationHook<DrawPassNotification>, INotificationListener<DisposeNotification>
 {
 	private int colorTexture;
 	private int depthTexture;
@@ -18,10 +18,14 @@ public class RenderTarget : IInitialize, INotificationHook<DrawPass_Notification
 	[SerializedReference] public IHasCamera CameraHaver = null!;
 	public Camera Camera => CameraHaver.HavedCamera;
 	
-	[DontExpose] public bool HasBeenInitialized { get; set; }
+	private bool hasBeenInitialized;
+	private bool hasBeenDisposed;
 	
-	public void OnInitialize()
+	public void OnNotify(InitializeNotification notification)
 	{
+		if (hasBeenInitialized) return;
+		hasBeenInitialized = true;
+		
 		colorTexture = GL.GenTexture();
 		depthTexture = GL.GenTexture();
 		frameBufferObject = GL.GenFramebuffer();
@@ -60,15 +64,15 @@ public class RenderTarget : IInitialize, INotificationHook<DrawPass_Notification
 		GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
 	}
 	
-	public void OnPreNotify(DrawPass_Notification notification)
+	public void OnPreNotify(DrawPassNotification notification)
 	{
 		
 	}
-	public void OnPostNotify(DrawPass_Notification notification)
+	public void OnPostNotify(DrawPassNotification notification)
 	{
 		
 	}
-	public void OnPostPropagate(DrawPass_Notification notification)
+	public void OnPostPropagate(DrawPassNotification notification)
 	{
 		if (currentSize != Camera.Size)
 		{
@@ -79,11 +83,14 @@ public class RenderTarget : IInitialize, INotificationHook<DrawPass_Notification
 		GL.BindFramebuffer(FramebufferTarget.Framebuffer, frameBufferObject);
 		GL.Viewport(0, 0, (int)Camera.Size.X, (int)Camera.Size.Y);
 		GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit | ClearBufferMask.StencilBufferBit);
-		Camera.Notify(new Draw_Notification(Camera));
+		Camera.Notify(new DrawNotification(Camera));
 	}
 	
-	public void OnDispose()
+	public void OnNotify(DisposeNotification notification)
 	{
+		if (hasBeenDisposed) return;
+		hasBeenDisposed = true;
+		
 		GL.DeleteTexture(colorTexture);
 		GL.DeleteTexture(depthTexture);
 		GL.DeleteFramebuffer(frameBufferObject);

@@ -8,7 +8,7 @@ using OpenTK.Windowing.GraphicsLibraryFramework;
 
 namespace Echidna2.Prefabs.Editor;
 
-public partial class EditorViewport3D : INotificationPropagator, IUpdate, IMouseDown, IMouseMoved, IMouseUp, IMouseWheelScrolled, IKeyDown, IKeyUp
+public partial class EditorViewport3D : INotificationPropagator, INotificationListener<UpdateNotification>, INotificationListener<MouseDownNotification>, INotificationListener<MouseMovedNotification>, INotificationListener<MouseUpNotification>, INotificationListener<MouseWheelScrolledNotification>, INotificationListener<KeyDownNotification>, INotificationListener<KeyUpNotification>
 {
 	[SerializedReference, ExposeMembersInClass] public Viewport3D Viewport { get; set; } = null!;
 	[SerializedReference] public Transform3D CameraPivot { get; set; } = null!;
@@ -27,13 +27,13 @@ public partial class EditorViewport3D : INotificationPropagator, IUpdate, IMouse
 	
 	public void Notify<T>(T notification) where T : notnull
 	{
-		if (notification is MouseDown_Notification || notification is MouseMoved_Notification || notification is MouseUp_Notification)
-			INotificationPropagator.Notify(Activator.CreateInstance(Project.Singleton.Assembly.GetType("Notifications.Editor.EditorNotification_Notification`1").MakeGenericType(typeof(T)), notification), Viewport);
+		if (notification is MouseDownNotification || notification is MouseMovedNotification || notification is MouseUpNotification)
+			INotificationPropagator.Notify(Activator.CreateInstance(Project.Singleton.Assembly.GetType("Notifications.Editor.EditorNotificationNotification`1").MakeGenericType(typeof(T)), notification), Viewport);
 		else
 			INotificationPropagator.Notify(notification, Viewport);
 	}
 	
-	public void OnUpdate(double deltaTime)
+	public void OnNotify(UpdateNotification notification)
 	{
 		Viewport.Camera.Transform.GlobalPosition = CameraPivot.GlobalPosition + cameraDistance * new Vector3(
 			Math.Cos(cameraPitch) * Math.Cos(cameraYaw),
@@ -43,60 +43,60 @@ public partial class EditorViewport3D : INotificationPropagator, IUpdate, IMouse
 		Viewport.Camera.Transform.LookAt(CameraPivot, Math.Cos(cameraPitch) >= 0 ? Vector3.Up : Vector3.Down, Vector3.North);
 	}
 	
-	public void OnMouseDown(MouseButton button, Vector2 position, Vector3 globalPosition, bool clipped)
+	public void OnNotify(MouseDownNotification notification)
 	{
-		if (button == MouseButton.Left && !clipped && this.ContainsGlobalPoint(globalPosition.XY))
+		if (notification.Button == MouseButton.Left && !notification.Clipped && this.ContainsGlobalPoint(notification.GlobalPosition.XY))
 			if (isModifierPressed)
 				isPanning = true;
 			else
 				isOrbiting = true;
 	}
 	
-	public void OnMouseMoved(Vector2 position, Vector2 delta, Vector3 globalPosition, bool clipped)
+	public void OnNotify(MouseMovedNotification notification)
 	{
 		if (isOrbiting)
 		{
-			cameraYaw -= delta.X * OrbitFactor;
-			cameraPitch -= delta.Y * OrbitFactor;
+			cameraYaw -= notification.GlobalDelta.X * OrbitFactor;
+			cameraPitch -= notification.GlobalDelta.Y * OrbitFactor;
 		}
 		else if (isPanning)
 		{
 			CameraPivot.GlobalPosition +=
-				-delta.X * PanFactor * cameraDistance * Viewport.Camera.Transform.GlobalTransform.Right +
-				-delta.Y * PanFactor * cameraDistance * Viewport.Camera.Transform.GlobalTransform.Forward;
+				-notification.GlobalDelta.X * PanFactor * cameraDistance * Viewport.Camera.Transform.GlobalTransform.Right +
+				-notification.GlobalDelta.Y * PanFactor * cameraDistance * Viewport.Camera.Transform.GlobalTransform.Forward;
 		}
 	}
 	
-	public void OnMouseUp(MouseButton button, Vector2 position, Vector3 globalPosition, bool clipped)
+	public void OnNotify(MouseUpNotification notification)
 	{
-		if (button == MouseButton.Left)
+		if (notification.Button == MouseButton.Left)
 		{
 			isOrbiting = false;
 			isPanning = false;
 		}
 	}
 	
-	public void OnMouseWheelScrolled(Vector2 offset, Vector2 position, Vector3 globalPosition, bool clipped)
+	public void OnNotify(MouseWheelScrolledNotification notification)
 	{
-		if (this.ContainsGlobalPoint(globalPosition.XY))
+		if (this.ContainsGlobalPoint(notification.GlobalPosition.XY))
 		{
-			double zoomAmount = 1 + Math.Abs(offset.Y) * ZoomFactor;
-			if (offset.Y > 0)
+			double zoomAmount = 1 + Math.Abs(notification.Offset.Y) * ZoomFactor;
+			if (notification.Offset.Y > 0)
 				cameraDistance /= zoomAmount;
 			else
 				cameraDistance *= zoomAmount;
 		}
 	}
 	
-	public void OnKeyDown(Keys key)
+	public void OnNotify(KeyDownNotification notification)
 	{
-		if (key is Keys.LeftShift)
+		if (notification.Key is Keys.LeftShift)
 			isModifierPressed = true;
 	}
 	
-	public void OnKeyUp(Keys key)
+	public void OnNotify(KeyUpNotification notification)
 	{
-		if (key is Keys.LeftShift)
+		if (notification.Key is Keys.LeftShift)
 			isModifierPressed = false;
 	}
 }

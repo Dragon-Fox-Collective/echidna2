@@ -12,11 +12,11 @@ public static class ButtonNotificationTests
 		// Arrange
 		ButtonWithTransform button = new();
 		bool buttonClicked = false;
-		button.Clicked += () => buttonClicked = true;
+		button.Clicked += _ => buttonClicked = true;
 		
 		// Act
-		button.Notify(new MouseDown_Notification(MouseButton.Left, (0, 0), (0, 0, 0)));
-		button.Notify(new MouseUp_Notification(MouseButton.Left, (0, 0), (0, 0, 0)));
+		button.Notify(new MouseDownNotification(MouseButton.Left, (0, 0, 0)));
+		button.Notify(new MouseUpNotification(MouseButton.Left, (0, 0, 0)));
 		
 		// Assert
 		Assert.True(buttonClicked, "Button wasn't clicked");
@@ -28,15 +28,15 @@ public static class ButtonNotificationTests
 		// Arrange
 		ButtonWithTransform button = new();
 		bool buttonClicked = false;
-		button.Clicked += () => buttonClicked = true;
+		button.Clicked += _ => buttonClicked = true;
 		
 		VisibilityLayerWithTransform visibilityLayer = new();
 		visibilityLayer.IsSelfVisible = true;
 		visibilityLayer.AddChild(button);
 		
 		// Act
-		visibilityLayer.Notify(new MouseDown_Notification(MouseButton.Left, (0, 0), (0, 0, 0)));
-		visibilityLayer.Notify(new MouseUp_Notification(MouseButton.Left, (0, 0), (0, 0, 0)));
+		visibilityLayer.Notify(new MouseDownNotification(MouseButton.Left, (0, 0, 0)));
+		visibilityLayer.Notify(new MouseUpNotification(MouseButton.Left, (0, 0, 0)));
 		
 		// Assert
 		Assert.True(buttonClicked, "Button wasn't clicked");
@@ -48,15 +48,15 @@ public static class ButtonNotificationTests
 		// Arrange
 		ButtonWithTransform button = new();
 		bool buttonClicked = false;
-		button.Clicked += () => buttonClicked = true;
+		button.Clicked += _ => buttonClicked = true;
 		
 		VisibilityLayerWithTransform visibilityLayer = new();
 		visibilityLayer.IsSelfVisible = false;
 		visibilityLayer.AddChild(button);
 		
 		// Act
-		visibilityLayer.Notify(new MouseDown_Notification(MouseButton.Left, (0, 0), (0, 0, 0)));
-		visibilityLayer.Notify(new MouseUp_Notification(MouseButton.Left, (0, 0), (0, 0, 0)));
+		visibilityLayer.Notify(new MouseDownNotification(MouseButton.Left, (0, 0, 0)));
+		visibilityLayer.Notify(new MouseUpNotification(MouseButton.Left, (0, 0, 0)));
 		
 		// Assert
 		Assert.False(buttonClicked, "Button was clicked");

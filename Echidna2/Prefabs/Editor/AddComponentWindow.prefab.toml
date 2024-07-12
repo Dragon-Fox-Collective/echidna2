@@ -1,4 +1,4 @@
-﻿Using = ["Notifications.Editor", "Echidna2.Prefabs.Gui", "Echidna2.Gui"]
+﻿Using = ["Notifications.Editor", "Echidna2.Prefabs.Gui", "Echidna2.Gui", "Echidna2.Rendering"]
 
 [This]
 Properties = [
@@ -20,6 +20,7 @@ Editor = notification.Editor;
 """ },
     { EventType = "Notification", Name = "Initialize", Content = """
 if (HasBeenInitialized) return;
+HasBeenInitialized = true;
 
 foreach (string classPath in Project.Singleton.Prefabs.Keys)
 {
@@ -27,7 +28,7 @@ foreach (string classPath in Project.Singleton.Prefabs.Keys)
     text.TextString = classPath;
     text.LocalScale = (0.5, 0.5);
     text.Justification = TextJustification.Left;
-    text.Clicked += () => SelectedComponent = (classPath, text);
+    text.Clicked += _ => SelectedComponent = (classPath, text);
     ComponentList.AddChild(text);
 }
 """ },
@@ -76,7 +77,7 @@ Properties = [
     { PropertyType = "Reference", Type = "FullRectWindow", Name = "Window" },
 ]
 Events = [
-    { EventType = "Self", Target = "Button", Name = "Clicked", Args = [], Content = """
+    { EventType = "Self", Target = "Button", Name = "Clicked", Args = [{ Name = "notification", Type = "MouseUpNotification" }], Content = """
 Window.CloseWindow();
 """ },
 ]
@@ -99,7 +100,7 @@ Properties = [
     { PropertyType = "Reference", Type = "FullRectWindow", Name = "Window" },
 ]
 Events = [
-    { EventType = "Self", Target = "Button", Name = "Clicked", Args = [], Content = """
+    { EventType = "Self", Target = "Button", Name = "Clicked", Args = [{ Name = "notification", Type = "MouseUpNotification" }], Content = """
 Window.CloseWindow();
 AddComponentWindow.AddNewComponent();
 """ },

@@ -9,7 +9,7 @@ public class HorizontalLayout : RectLayout
 	
 	[SerializedValue] public HorizontalLayoutDirection LayoutDirection = HorizontalLayoutDirection.LeftToRight;
 	
-	public override void OnPreNotify(Update_Notification notification)
+	public override void OnPreNotify(UpdateNotification notification)
 	{
 		List<RectTransform> laidOutChildren = ChildrenThatCanBeLaidOut.Select(child => child.RectTransform).ToList();
 		

@@ -11,6 +11,8 @@ public class EventListener
 	public string Content = "";
 	public bool UsesFunction => !Function.IsEmpty();
 	public string Function = "";
+	private string FunctionName => UsesFunction ? Function : $"{Target}_{Name}";
+	private string TargetName => $"{Target}.{Name}";
 	
 	public static EventListener FromToml(TomlTable table)
 	{
@@ -36,52 +38,21 @@ public class EventListener
 		return table;
 	}
 	
-	public string StringifyCSAdd() => $"\t\t{Target}.{Name} += {(UsesFunction ? Function : $"{Target}_{Name}")};\n";
-	public string StringifyCSSub() => $"\t\t{Target}.{Name} -= {(UsesFunction ? Function : $"{Target}_{Name}")};\n";
+	public string StringifyCSAdd() => $"\t\t{TargetName} += {FunctionName};\n";
+	public string StringifyCSSub() => $"\t\t{TargetName} -= {FunctionName};\n";
 	
-	public string StringifyCS()
+	public string StringifyCS() => EventType switch
 	{
-		if (UsesFunction) return "";
-		return EventType switch
-		{
-			EventType.Self => StringifyCSSelf(),
-			EventType.Notification => StringifyCSNotification(),
-			EventType.Reference => StringifyCSReference(),
-			_ => throw new ArgumentOutOfRangeException(EventType.ToString()),
-		} + "\n";
-	}
-	private string StringifyCSSelf()
-	{
-		string scriptString = "";
-		scriptString += $"\tprotected override void Setup_{Target}()\n";
-		scriptString += "\t{\n";
-		scriptString += $"\t\tbase.Setup_{Target}();\n";
-		scriptString += $"\t\t{Target}.{Name} += {Target}_{Name};\n";
-		scriptString += "\t}\n";
-		
-		scriptString += $"\tprotected override void Unsetup_{Target}()\n";
-		scriptString += "\t{\n";
-		scriptString += $"\t\tbase.Unsetup_{Target}();\n";
-		scriptString += $"\t\t{Target}.{Name} -= {Target}_{Name};\n";
-		scriptString += "\t}\n";
-		
-		if (Args.Any(arg => arg.HasCast))
-		{
-			scriptString += $"\tprivate void {Target}_{Name}({Args.Select(arg => arg.StringifyCS()).Join(", ")})";
-			scriptString += $" => {Target}_{Name}({Args.Select(arg => arg.StringifyCSCast()).Join(", ")});\n";
-			scriptString += $"\tprivate void {Target}_{Name}({Args.Select(arg => arg.StringifyCSCasted()).Join(", ")})\n";
-		}
-		else
-			scriptString += $"\tprivate void {Target}_{Name}({Args.Select(arg => arg.StringifyCS()).Join(", ")})\n";
-		scriptString += "\t{\n";
-		scriptString += "\t\t" + Content.Indent().Indent() + "\n";
-		scriptString += "\t}\n";
-		return scriptString;
-	}
+		EventType.Self => StringifyCSReference(),
+		EventType.Notification => StringifyCSNotification(),
+		EventType.Reference => StringifyCSReference(),
+		_ => throw new ArgumentOutOfRangeException(EventType.ToString()),
+	};
+	
 	private string StringifyCSNotification()
 	{
 		string scriptString = "";
-		scriptString += $"\tpublic void OnNotify({Name}_Notification notification)\n";
+		scriptString += $"\tpublic void OnNotify({Name}Notification notification)\n";
 		scriptString += "\t{\n";
 		scriptString += "\t\t" + Content.Indent().Indent() + "\n";
 		scriptString += "\t}\n";
@@ -92,12 +63,16 @@ public class EventListener
 		string scriptString = "";
 		if (Args.Any(arg => arg.HasCast))
 		{
-			scriptString += $"\tprivate void {Target}_{Name}({Args.Select(arg => arg.StringifyCS()).Join(", ")})";
-			scriptString += $" => {Target}_{Name}({Args.Select(arg => arg.StringifyCSCast()).Join(", ")});\n";
-			scriptString += $"\tprivate void {Target}_{Name}({Args.Select(arg => arg.StringifyCSCasted()).Join(", ")})\n";
+			scriptString += $"\tprivate void {FunctionName}({Args.Select(arg => arg.StringifyCS()).Join(", ")})";
+			scriptString += $" => {FunctionName}({Args.Select(arg => arg.StringifyCSCast()).Join(", ")});\n";
+			if (UsesFunction) return scriptString;
+			scriptString += $"\tprivate void {FunctionName}({Args.Select(arg => arg.StringifyCSCasted()).Join(", ")})\n";
 		}
 		else
-			scriptString += $"\tprivate void {Target}_{Name}({Args.Select(arg => arg.StringifyCS()).Join(", ")})\n";
+		{
+			if (UsesFunction) return scriptString;
+			scriptString += $"\tprivate void {FunctionName}({Args.Select(arg => arg.StringifyCS()).Join(", ")})\n";
+		}
 		scriptString += "\t{\n";
 		scriptString += "\t\t" + Content.Indent().Indent() + "\n";
 		scriptString += "\t}\n";

@@ -9,7 +9,7 @@ public class VerticalLayout : RectLayout
 	
 	[SerializedValue] public VerticalLayoutDirection LayoutDirection = VerticalLayoutDirection.TopToBottom;
 	
-	public override void OnPreNotify(Update_Notification notification)
+	public override void OnPreNotify(UpdateNotification notification)
 	{
 		List<RectTransform> laidOutChildren = ChildrenThatCanBeLaidOut.Select(child => child.RectTransform).ToList();
 		

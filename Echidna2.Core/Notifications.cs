@@ -71,54 +71,18 @@ public interface INotificationPropagator
 	}
 }
 
-public class Initialize_Notification;
-[DontExpose]
-public interface IInitialize : INotificationListener<Initialize_Notification>
-{
-	public bool HasBeenInitialized { get; set; }
-	void INotificationListener<Initialize_Notification>.OnNotify(Initialize_Notification notification)
-	{
-		if (HasBeenInitialized)	return;
-		HasBeenInitialized = true;
-		OnInitialize();
-	}
-	public void OnInitialize();
-}
+public class InitializeNotification;
 
-public class PreUpdate_Notification;
-[DontExpose]
-public interface IPreUpdate : INotificationListener<PreUpdate_Notification>
-{
-	void INotificationListener<PreUpdate_Notification>.OnNotify(PreUpdate_Notification notification) => OnPreUpdate();
-	public void OnPreUpdate();
-}
+public class PreUpdateNotification;
 
-public class Update_Notification(double deltaTime)
+public class UpdateNotification(double deltaTime)
 {
 	public double DeltaTime { get; } = deltaTime;
 }
-[DontExpose]
-public interface IUpdate : INotificationListener<Update_Notification>
-{
-	void INotificationListener<Update_Notification>.OnNotify(Update_Notification notification) => OnUpdate(notification.DeltaTime);
-	public void OnUpdate(double deltaTime);
-}
 
-public class PostUpdate_Notification;
-[DontExpose]
-public interface IPostUpdate : INotificationListener<PostUpdate_Notification>
-{
-	void INotificationListener<PostUpdate_Notification>.OnNotify(PostUpdate_Notification notification) => OnPostUpdate();
-	public void OnPostUpdate();
-}
+public class PostUpdateNotification;
 
-public class AddedToHierarchy_Notification(Hierarchy parent)
+public class AddedToHierarchyNotification(Hierarchy parent)
 {
 	public Hierarchy Parent { get; } = parent;
-}
-[DontExpose]
-public interface IAddedToHierarchy : INotificationListener<AddedToHierarchy_Notification>
-{
-	void INotificationListener<AddedToHierarchy_Notification>.OnNotify(AddedToHierarchy_Notification notification) => OnAddedToHierarchy(notification.Parent);
-	public void OnAddedToHierarchy(Hierarchy parent);
 }

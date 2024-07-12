@@ -17,7 +17,7 @@ public partial class Project
 		
 		foreach (Component componentTable in prefab.Components)
 		{
-			string? typeName = componentTable.IsRoot ? rootTypeName : componentTable.NeedsCustomClass ? componentTable.ClassName : null;
+			string? typeName = (componentTable.IsRoot ? rootTypeName : null) ?? (componentTable.NeedsCustomClass ? componentTable.ClassName : null);
 			
 			object component;
 			switch (componentTable.Source)
@@ -37,7 +37,7 @@ public partial class Project
 					break;
 				
 				default:
-					component = DeserializeComponent(componentTable.Id, componentTable.ClassName, true);
+					component = DeserializeComponent(componentTable.Id, typeName ?? componentTable.ClassName, true);
 					prefabRoot.Components.Add(component);
 					prefabRoot.ComponentPairs.Add((component, componentTable));
 					break;

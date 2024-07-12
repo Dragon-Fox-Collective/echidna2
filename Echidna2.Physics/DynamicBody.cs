@@ -6,7 +6,7 @@ using Echidna2.Serialization;
 
 namespace Echidna2.Physics;
 
-public class DynamicBody : IUpdate, IInitializeIntoSimulation
+public class DynamicBody : INotificationListener<UpdateNotification>, INotificationListener<InitializeIntoSimulationNotification>
 {
 	private PhysicsMaterial physicsMaterial;
 	[SerializedValue] public PhysicsMaterial PhysicsMaterial
@@ -60,14 +60,14 @@ public class DynamicBody : IUpdate, IInitializeIntoSimulation
 		}
 	}
 	
-	public void OnIntializeIntoWorld(WorldSimulation simulation)
+	public void OnNotify(InitializeIntoSimulationNotification notification)
 	{
-		Simulation = simulation;
-		Handle = simulation.AddDynamicBody(Transform, Shape, Inertia, PhysicsMaterial, CollisionFilter);
-		Reference = simulation[Handle];
+		Simulation = notification.Simulation;
+		Handle = Simulation.AddDynamicBody(Transform, Shape, Inertia, PhysicsMaterial, CollisionFilter);
+		Reference = Simulation[Handle];
 	}
 	
-	public void OnUpdate(double deltaTime)
+	public void OnNotify(UpdateNotification notification)
 	{
 		GlobalPosition = Reference.Pose.Position;
 		GlobalRotation = Reference.Pose.Orientation;
