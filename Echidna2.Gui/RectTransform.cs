@@ -31,10 +31,18 @@ public class RectTransform : IRectTransform
 			RecalculateLocalTransform();
 		}
 	}
-	public Vector2 GlobalPosition => GlobalTransform.Translation.XY;
+	[SerializedValue] public Vector2 GlobalPosition
+	{
+		get => GlobalTransform.Translation.XY;
+		set => LocalPosition = GlobalTransform.InverseTransformPoint(LocalTransform.TransformPoint(value));
+	}
 	
 	[SerializedValue] public Vector2 LocalSize { get; set; }
-	public Vector2 GlobalSize => GlobalTransform.InverseTransformVector(LocalSize);
+	[SerializedValue] public Vector2 GlobalSize
+	{
+		get => GlobalTransform.TransformVector(LocalSize);
+		set => LocalSize = GlobalTransform.InverseTransformVector(value);
+	}
 	
 	private Vector2 localScale = Vector2.One;
 	[SerializedValue] public Vector2 LocalScale

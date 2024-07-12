@@ -13,7 +13,7 @@ public interface IButton
 public class Button : IButton, IMouseDown, IMouseUp, IMouseMoved
 {
 	public event Action? Clicked;
-	public event Action? Dragged;
+	public event Action<Vector2>? Dragged;
 	public event Action? MouseDown;
 	public event Action? MouseDownOutside;
 	public event Action? MouseUp;
@@ -25,6 +25,8 @@ public class Button : IButton, IMouseDown, IMouseUp, IMouseMoved
 	
 	private bool wasPressed;
 	private bool wasInside;
+	
+	private Vector3 lastGlobalPosition;
 	
 	public void OnMouseDown(MouseButton button, Vector2 position, Vector3 globalPosition, bool clipped)
 	{
@@ -62,7 +64,7 @@ public class Button : IButton, IMouseDown, IMouseUp, IMouseMoved
 	public void OnMouseMoved(Vector2 position, Vector2 delta, Vector3 globalPosition, bool clipped)
 	{
 		if (wasPressed)
-			Dragged?.Invoke();
+			Dragged?.Invoke(globalPosition.XY - lastGlobalPosition.XY);
 		
 		if (!clipped && RectTransform.ContainsGlobalPoint(globalPosition.XY))
 		{
@@ -80,5 +82,7 @@ public class Button : IButton, IMouseDown, IMouseUp, IMouseMoved
 				MouseExit?.Invoke();
 			}
 		}
+		
+		lastGlobalPosition = globalPosition;
 	}
 }

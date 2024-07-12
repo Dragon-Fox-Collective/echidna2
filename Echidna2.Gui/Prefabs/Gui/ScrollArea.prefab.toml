@@ -81,18 +81,10 @@ Name = "Area"
 ClipChildren = true
 
 [3]
-Prefab = "Prefabs.Gui.FullRectWithHierarchy"
+Prefab = "Prefabs.Gui.Slider"
 
 [3.Values]
-Name = "Scroll Bar Container"
-Children = [ "4" ]
-
-[4]
-Prefab = "Prefabs.Gui.ButtonRect"
-
-[4.Values]
-Name = "Scroll Bar"
-MinimumSize = { X = 20, Y = 20 }
+VerticalExpand = true
 
 [5]
 Prefab = "Prefabs.Gui.FullRectWithHierarchy"

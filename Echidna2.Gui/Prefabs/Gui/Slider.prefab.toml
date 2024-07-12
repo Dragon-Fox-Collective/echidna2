@@ -1,0 +1,73 @@
+Using = ["Echidna2.Gui"]
+
+[This]
+Prefab = "Prefabs.Gui.FullLayoutWithHierarchy"
+
+[This.Values]
+Name = "Slider"
+MinimumSize = { X = 20, Y = 20 }
+Children = [ "2", "3" ]
+
+[1]
+Prefab = "Prefabs.Gui.ButtonRect"
+
+[[1.Properties]]
+PropertyType = "Reference"
+Type = "IRectTransform"
+Name = "Top"
+
+[[1.Properties]]
+PropertyType = "Reference"
+Type = "IRectTransform"
+Name = "Bottom"
+
+[[1.Events]]
+EventType = "Self"
+Target = "Button"
+Name = "Dragged"
+Args = [{ Name = "delta", Type = "Vector2"}]
+Content = """
+GlobalPosition += delta;
+GlobalPosition = GlobalPosition.ClampBetween(Bottom.GlobalPosition, Top.GlobalPosition);
+
+double total = Top.GlobalPosition.DistanceTo(Bottom.GlobalPosition);
+double fraction = GlobalPosition.DistanceTo(Top.GlobalPosition) / total;
+"""
+
+[1.Values]
+Name = "Bar"
+LocalSize = { X = 20, Y = 20 }
+Top = "4"
+Bottom = "5"
+
+[2]
+Prefab = "Prefabs.Gui.RectLayoutWithHierarchy"
+
+[2.Values]
+Name = "Bar Container"
+LayOutChildren = false
+Children = [ "1" ]
+
+[3]
+Prefab = "Prefabs.Gui.RectWithHierarchy"
+
+[3.Values]
+Name = "Background"
+Children = [ "4", "5" ]
+
+[4]
+Prefab = "Prefabs.Gui.RectWithHierarchy"
+
+[4.Values]
+Name = "Top"
+MinimumSize = { X = 20, Y = 20 }
+AnchorPreset = "WideTop"
+
+[5]
+Prefab = "Prefabs.Gui.RectWithHierarchy"
+
+[5.Values]
+Name = "Bottom"
+MinimumSize = { X = 20, Y = 20 }
+AnchorPreset = "WideBottom"
+
