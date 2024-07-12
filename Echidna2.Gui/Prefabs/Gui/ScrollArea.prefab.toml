@@ -85,6 +85,7 @@ Prefab = "Prefabs.Gui.Slider"
 
 [3.Values]
 VerticalExpand = true
+Value = 1
 
 [5]
 Prefab = "Prefabs.Gui.FullRectWithHierarchy"

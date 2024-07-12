@@ -28,6 +28,21 @@ PropertyType = "Private"
 Type = "Vector2"
 Name = "SliderStart"
 
+[[This.Properties]]
+PropertyType = "Value"
+Type = "double"
+Name = "Value"
+SetterContent = """
+_Value = value.Clamped();
+"""
+
+[[This.Events]]
+EventType = "Notification"
+Name = "Update"
+Content = """
+SliderBar.GlobalPosition = Value.Lerp(Bottom.GlobalPosition, Top.GlobalPosition);
+"""
+
 [[This.Functions]]
 ReturnType = "void"
 Name = "StartDraggingSlider"
@@ -44,10 +59,10 @@ Args = [{ Name = "position", Type = "Vector2" }]
 Content = """
 Vector2 delta = position - DraggingStart;
 position = SliderStart + delta;
-SliderBar.GlobalPosition = position.ClampedBetween(Bottom.GlobalPosition, Top.GlobalPosition);
+position = position.ClampedBetween(Bottom.GlobalPosition, Top.GlobalPosition);
 
 double total = Top.GlobalPosition.DistanceTo(Bottom.GlobalPosition);
-double fraction = SliderBar.GlobalPosition.DistanceTo(Top.GlobalPosition) / total;
+Value = position.DistanceTo(Bottom.GlobalPosition) / total;
 """
 
 [This.Values]
@@ -56,6 +71,7 @@ Top = "4"
 Bottom = "5"
 SliderBar = "1"
 MinimumSize = { X = 20, Y = 20 }
+Value = 0
 Children = [ "2", "3" ]
 
 [1]
@@ -69,8 +85,8 @@ Name = "Slider"
 [[1.Events]]
 EventType = "Self"
 Target = "Button"
-Name = "Clicked"
-Args = [{ Name = "notification", Type = "MouseUpNotification" }]
+Name = "MouseDown"
+Args = [{ Name = "notification", Type = "MouseDownNotification" }]
 Content = """
 Slider.StartDraggingSlider(notification.GlobalPosition.XY);
 """

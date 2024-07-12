@@ -95,6 +95,12 @@ public struct Vector3(double x, double y, double z) : IEquatable<Vector3>, IEnum
 		
 		return valueRelativeToA + a;
 	}
+	public static Vector3 Lerp(Vector3 a, Vector3 b, double t) => a + (b - a) * t;
 	
 	public static Vector3 Sum<T>(IEnumerable<T> source, Func<T, Vector3> selector) => source.Aggregate(Zero, (current, item) => current + selector(item));
+}
+
+public static class Vector3Extensions
+{
+	public static Vector3 Lerp(this double t, Vector3 a, Vector3 b) => Vector3.Lerp(a, b, t);
 }

@@ -71,6 +71,7 @@ public static class Compilation
 		<Reference Include="..\Echidna2.Rendering3D.dll" />
 		<Reference Include="..\Echidna2.Serialization.dll" />
 		<Reference Include="..\Echidna2.SourceGenerators.dll" />
+		<Reference Include="..\TooManyExtensions.dll" />
 		<Analyzer Include="..\Echidna2.SourceGenerators.dll" />
 	</ItemGroup>
 

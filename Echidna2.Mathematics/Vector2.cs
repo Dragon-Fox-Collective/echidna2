@@ -92,6 +92,12 @@ public struct Vector2(double x, double y) : IEquatable<Vector2>, IEnumerable<dou
 		
 		return valueRelativeToA + a;
 	}
+	public static Vector2 Lerp(Vector2 a, Vector2 b, double t) => a + (b - a) * t;
 	
 	public static Vector2 Sum<T>(IEnumerable<T> source, Func<T, Vector2> selector) => source.Aggregate(Zero, (current, item) => current + selector(item));
+}
+
+public static class Vector2Extensions
+{
+	public static Vector2 Lerp(this double t, Vector2 a, Vector2 b) => Vector2.Lerp(a, b, t);
 }
