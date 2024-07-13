@@ -67,7 +67,7 @@ staticConstructorLoad = Shader.Quad;
 
 
 Editor root = Project.Instantiate<Editor>("Prefabs.Editor.Editor");
-root.Notify(new EditorInitialize_Notification(root));
+root.Notify(new EditorInitializeNotification(root));
 
 PrefabRoot prefab = Project.Deserialize(root.InitialPrefabPath);
 prefab.Prefab.Save();
@@ -219,7 +219,7 @@ Properties = [
     { PropertyType = "Reference", Type = "Viewport", Name = "Viewport" },
 ]
 Events = [
-    { EventType = "Self", Target = "Button", Name = "Clicked", Args = [], Content = """
+    { EventType = "Self", Target = "Button", Name = "Clicked", Args = [{ Name = "notification", Type = "MouseUpNotification" }], Content = """
 Editor.SwitchView(Viewport);
 """ },
 ]
@@ -237,7 +237,7 @@ Properties = [
     { PropertyType = "Reference", Type = "Viewport", Name = "Viewport" },
 ]
 Events = [
-    { EventType = "Self", Target = "Button", Name = "Clicked", Args = [], Content = """
+    { EventType = "Self", Target = "Button", Name = "Clicked", Args = [{ Name = "notification", Type = "MouseUpNotification" }], Content = """
 Editor.SwitchView(Viewport);
 """ },
 ]
@@ -280,7 +280,7 @@ Properties = [
     { PropertyType = "Reference", Type = "IVisibility", Name = "Panel" },
 ]
 Events = [
-    { EventType = "Self", Target = "Button", Name = "Clicked", Args = [], Content = """
+    { EventType = "Self", Target = "Button", Name = "Clicked", Args = [{ Name = "notification", Type = "MouseUpNotification" }], Content = """
 Panel.ToggleVisibility();
 """ },
 ]
@@ -296,7 +296,7 @@ Properties = [
     { PropertyType = "Reference", Type = "IVisibility", Name = "Panel" },
 ]
 Events = [
-    { EventType = "Self", Target = "Button", Name = "Clicked", Args = [], Content = """
+    { EventType = "Self", Target = "Button", Name = "Clicked", Args = [{ Name = "notification", Type = "MouseUpNotification" }], Content = """
 Panel.ToggleVisibility();
 """ },
 ]
@@ -312,7 +312,7 @@ Properties = [
     { PropertyType = "Reference", Type = "IVisibility", Name = "Panel" },
 ]
 Events = [
-    { EventType = "Self", Target = "Button", Name = "Clicked", Args = [], Content = """
+    { EventType = "Self", Target = "Button", Name = "Clicked", Args = [{ Name = "notification", Type = "MouseUpNotification" }], Content = """
 Panel.ToggleVisibility();
 """ },
 ]

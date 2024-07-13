@@ -5,13 +5,13 @@ using Echidna2.Rendering;
 
 namespace Echidna2.Rendering3D;
 
-public class MeshRenderer(Transform3D transform) : INotificationListener<Draw_Notification>
+public class MeshRenderer(Transform3D transform) : INotificationListener<DrawNotification>
 {
 	public Mesh Mesh { get; set; } = Mesh.Cube;
 	public Shader Shader { get; set; } = Shader.Solid;
 	public Color Color { get; set; } = Color.Gray;
 	
-	public void OnNotify(Draw_Notification notification)
+	public void OnNotify(DrawNotification notification)
 	{
 		Shader.Bind();
 		Shader.SetMatrix4("view", notification.Camera.ViewMatrix);

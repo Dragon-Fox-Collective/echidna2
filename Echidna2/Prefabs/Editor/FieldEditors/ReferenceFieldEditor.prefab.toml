@@ -1,4 +1,4 @@
-﻿Using = ["Notifications.Editor", "Echidna2.Prefabs.Gui", "Echidna2.Gui"]
+﻿Using = ["Notifications.Editor", "Echidna2.Prefabs.Gui", "Echidna2.Gui", "Echidna2.Rendering"]
 
 [This]
 Interfaces = [
@@ -21,11 +21,11 @@ Events = [
     { EventType = "Notification", Name = "EditorInitialize", Content = """
 Editor = notification.Editor;
 """ },
-    { EventType = "Reference", Target = "Button", Name = "MouseDown", Args = [], Content = """
+    { EventType = "Reference", Target = "Button", Name = "MouseDown", Args = [{ Name = "Notification", Type = "MouseDownNotification" }], Content = """
 SelectReferenceWindow window = Project.Instantiate<SelectReferenceWindow>("Prefabs.Editor.SelectReferenceWindow");
 window.ComponentType = ComponentType;
 window.Field = this;
-INotificationPropagator.Notify(new EditorInitialize_Notification(Editor), window);
+INotificationPropagator.Notify(new EditorInitializeNotification(Editor), window);
 Editor.QueueAddChild(window);
 """ },
 ]

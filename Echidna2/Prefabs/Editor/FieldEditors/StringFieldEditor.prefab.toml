@@ -57,10 +57,10 @@ else
     CursorPosition = tempCursorPosition;
 }
 """ },
-    { EventType = "Reference", Target = "Button", Name = "MouseDown", Args = [], Content = """
+    { EventType = "Reference", Target = "Button", Name = "MouseDown", Args = [{ Name = "Notification", Type = "MouseDownNotification" }], Content = """
 IsFocused = true;
 """ },
-    { EventType = "Reference", Target = "Button", Name = "MouseDownOutside", Args = [], Content = """
+    { EventType = "Reference", Target = "Button", Name = "MouseDownOutside", Args = [{ Name = "Notification", Type = "MouseDownNotification" }], Content = """
 IsFocused = false;
 """ },
 ]

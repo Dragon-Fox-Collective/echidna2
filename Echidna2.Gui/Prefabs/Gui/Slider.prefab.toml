@@ -1,0 +1,144 @@
+Using = ["Echidna2.Gui", "Echidna2.Rendering"]
+
+[This]
+Prefab = "Prefabs.Gui.FullLayoutWithHierarchy"
+
+[[This.Properties]]
+PropertyType = "Reference"
+Type = "IRectTransform"
+Name = "Top"
+
+[[This.Properties]]
+PropertyType = "Reference"
+Type = "IRectTransform"
+Name = "Bottom"
+
+[[This.Properties]]
+PropertyType = "Reference"
+Type = "IRectTransform"
+Name = "SliderBar"
+
+[[This.Properties]]
+PropertyType = "Private"
+Type = "Vector2"
+Name = "DraggingStart"
+
+[[This.Properties]]
+PropertyType = "Private"
+Type = "Vector2"
+Name = "SliderStart"
+
+[[This.Properties]]
+PropertyType = "Value"
+Type = "double"
+Name = "Value"
+SetterContent = """
+_Value = value.Clamped();
+ValueChanged?.Invoke(Value);
+"""
+
+[[This.Properties]]
+PropertyType = "Event"
+Type = "double"
+Name = "ValueChanged"
+
+[[This.Events]]
+EventType = "Notification"
+Name = "Update"
+Content = """
+SliderBar.GlobalPosition = Value.Lerp(Bottom.GlobalPosition, Top.GlobalPosition);
+"""
+
+[[This.Functions]]
+ReturnType = "void"
+Name = "StartDraggingSlider"
+Args = [{ Name = "position", Type = "Vector2" }]
+Content = """
+DraggingStart = position;
+SliderStart = SliderBar.GlobalPosition;
+"""
+
+[[This.Functions]]
+ReturnType = "void"
+Name = "DragSlider"
+Args = [{ Name = "position", Type = "Vector2" }]
+Content = """
+Vector2 delta = position - DraggingStart;
+position = SliderStart + delta;
+position = position.ClampedBetween(Bottom.GlobalPosition, Top.GlobalPosition);
+
+double total = Top.GlobalPosition.DistanceTo(Bottom.GlobalPosition);
+Value = position.DistanceTo(Bottom.GlobalPosition) / total;
+"""
+
+[This.Values]
+Name = "Slider"
+Top = "4"
+Bottom = "5"
+SliderBar = "1"
+MinimumSize = { X = 20, Y = 20 }
+Value = 0
+Children = [ "2", "3" ]
+
+[1]
+Prefab = "Prefabs.Gui.ButtonRect"
+
+[[1.Properties]]
+PropertyType = "Reference"
+Type = "Slider"
+Name = "Slider"
+
+[[1.Events]]
+EventType = "Self"
+Target = "Button"
+Name = "MouseDown"
+Args = [{ Name = "notification", Type = "MouseDownNotification" }]
+Content = """
+Slider.StartDraggingSlider(notification.GlobalPosition.XY);
+"""
+
+[[1.Events]]
+EventType = "Self"
+Target = "Button"
+Name = "Dragged"
+Args = [{ Name = "notification", Type = "MouseMovedNotification" }]
+Content = """
+Slider.DragSlider(notification.GlobalPosition.XY);
+"""
+
+[1.Values]
+Name = "Bar"
+Slider = "This"
+LocalSize = { X = 20, Y = 20 }
+
+[2]
+Prefab = "Prefabs.Gui.RectLayoutWithHierarchy"
+
+[2.Values]
+Name = "Bar Container"
+LayOutChildren = false
+Children = [ "1" ]
+
+[3]
+Prefab = "Prefabs.Gui.RectWithHierarchy"
+
+[3.Values]
+Name = "Background"
+Children = [ "4", "5" ]
+
+[4]
+Prefab = "Prefabs.Gui.RectWithHierarchy"
+
+[4.Values]
+Name = "Top"
+MinimumSize = { X = 20, Y = 20 }
+AnchorPreset = "WideTop"
+
+[5]
+Prefab = "Prefabs.Gui.RectWithHierarchy"
+
+[5.Values]
+Name = "Bottom"
+MinimumSize = { X = 20, Y = 20 }
+AnchorPreset = "WideBottom"
+

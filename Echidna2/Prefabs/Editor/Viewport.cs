@@ -10,7 +10,7 @@ namespace Echidna2.Prefabs.Editor;
 
 public interface Viewport : ICanAddChildren;
 
-public partial class ViewportGui : Viewport, INotificationPropagator, ICanBeLaidOut, INotificationListener<Draw_Notification>, IUpdate
+public partial class ViewportGui : Viewport, INotificationPropagator, ICanBeLaidOut, INotificationListener<DrawNotification>, INotificationListener<UpdateNotification>
 {
 	[SerializedReference, ExposeMembersInClass] public Named Named { get; set; } = null!;
 	[SerializedReference, ExposeMembersInClass] public RectTransform RectTransform { get; set; } = null!;
@@ -24,11 +24,11 @@ public partial class ViewportGui : Viewport, INotificationPropagator, ICanBeLaid
 	
 	public void Notify<T>(T notification) where T : notnull
 	{
-		if (notification is not Draw_Notification)
+		if (notification is not DrawNotification)
 			INotificationPropagator.Notify(notification, Hierarchy, RenderTarget, GuiRectLayout);
 	}
 	
-	public void OnNotify(Draw_Notification notification)
+	public void OnNotify(DrawNotification notification)
 	{
 		Shader.Bind();
 		Shader.SetMatrix4("view", notification.Camera.ViewMatrix);
@@ -40,13 +40,13 @@ public partial class ViewportGui : Viewport, INotificationPropagator, ICanBeLaid
 		Mesh.Quad.Draw();
 	}
 	
-	public void OnUpdate(double deltaTime)
+	public void OnNotify(UpdateNotification notification)
 	{
 		Camera.Size = RectTransform.LocalSize;
 	}
 }
 
-public partial class Viewport3D : Viewport, INotificationPropagator, ICanBeLaidOut, INotificationListener<Draw_Notification>, IUpdate
+public partial class Viewport3D : Viewport, INotificationPropagator, ICanBeLaidOut, INotificationListener<DrawNotification>, INotificationListener<UpdateNotification>
 {
 	[SerializedReference, ExposeMembersInClass] public Named Named { get; set; } = null!;
 	[SerializedReference, ExposeMembersInClass] public RectTransform RectTransform { get; set; } = null!;
@@ -58,11 +58,11 @@ public partial class Viewport3D : Viewport, INotificationPropagator, ICanBeLaidO
 	
 	public void Notify<T>(T notification) where T : notnull
 	{
-		if (notification is not Draw_Notification)
+		if (notification is not DrawNotification)
 			INotificationPropagator.Notify(notification, Hierarchy, RenderTarget);
 	}
 	
-	public void OnNotify(Draw_Notification notification)
+	public void OnNotify(DrawNotification notification)
 	{
 		Shader.Bind();
 		Shader.SetMatrix4("view", notification.Camera.ViewMatrix);
@@ -74,7 +74,7 @@ public partial class Viewport3D : Viewport, INotificationPropagator, ICanBeLaidO
 		Mesh.Quad.Draw();
 	}
 	
-	public void OnUpdate(double deltaTime)
+	public void OnNotify(UpdateNotification notification)
 	{
 		Camera.Size = RectTransform.LocalSize;
 	}

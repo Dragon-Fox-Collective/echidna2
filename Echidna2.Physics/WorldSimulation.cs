@@ -12,7 +12,7 @@ using Echidna2.Serialization;
 
 namespace Echidna2.Physics;
 
-public class WorldSimulation : IUpdate, IInitialize
+public class WorldSimulation : INotificationListener<UpdateNotification>, INotificationListener<InitializeNotification>
 {
 	public double PhysicsDeltaTime { get; set; } = 1 / 60.0;
 	private double accumulatedTime = 0;
@@ -25,10 +25,9 @@ public class WorldSimulation : IUpdate, IInitialize
 	public readonly CollidableProperty<PhysicsMaterial> PhysicsMaterials = new();
 	public readonly CollidableProperty<CollisionFilter> CollisionFilters = new();
 	
-	[DontExpose] public bool HasBeenInitialized { get; set; }
 	private bool hasBeenDisposed;
 	
-	public void OnInitialize()
+	public void OnNotify(InitializeNotification notification)
 	{
 		simulation = Simulation.Create(
 			bufferPool,
@@ -39,18 +38,18 @@ public class WorldSimulation : IUpdate, IInitialize
 			},
 			new PoseIntegratorCallbacks(),
 			new SolveDescription(8, 1));
-		INotificationPropagator.Notify(new IInitializeIntoSimulation.Notification(this), World);
+		INotificationPropagator.Notify(new InitializeIntoSimulationNotification(this), World);
 	}
 	
-	public void OnUpdate(double deltaTime)
+	public void OnNotify(UpdateNotification notification)
 	{
-		accumulatedTime += deltaTime;
+		accumulatedTime += notification.DeltaTime;
 		
 		while (accumulatedTime >= PhysicsDeltaTime)
 		{
 			double physicsDeltaTime = PhysicsDeltaTime;
 			accumulatedTime -= physicsDeltaTime;
-			World.Notify(new IPhysicsUpdate.Notification(physicsDeltaTime));
+			World.Notify(new PhysicsUpdateNotification(physicsDeltaTime));
 			simulation.Timestep((float)physicsDeltaTime, threadDispatcher);
 		}
 	}

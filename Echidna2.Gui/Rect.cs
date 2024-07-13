@@ -6,7 +6,7 @@ using Echidna2.Serialization;
 
 namespace Echidna2.Gui;
 
-public class Rect : INotificationListener<Draw_Notification>
+public class Rect : INotificationListener<DrawNotification>
 {
 	private static readonly Shader Shader = new(ShaderNodeUtil.MainVertexShader, File.ReadAllText("Assets/rect.frag"));
 	
@@ -14,7 +14,7 @@ public class Rect : INotificationListener<Draw_Notification>
 	
 	[SerializedValue] public Color Color { get; set; } = Color.Gray;
 	
-	public void OnNotify(Draw_Notification notification)
+	public void OnNotify(DrawNotification notification)
 	{
 		Shader.Bind();
 		Shader.SetMatrix4("view", notification.Camera.ViewMatrix);

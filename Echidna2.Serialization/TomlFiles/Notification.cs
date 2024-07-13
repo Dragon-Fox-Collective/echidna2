@@ -19,7 +19,7 @@ public class Notification
 		TomlTable table = Toml.ToModel(File.ReadAllText(prefabPath));
 		notification.Usings = Usings.FromToml(table.GetList<string>("Using"));
 		notification.Namespace = Namespace.FromToml(prefabPath);
-		notification.ClassName = Compilation.GetPrefabClassName(prefabPath) + "_Notification";
+		notification.ClassName = Compilation.GetPrefabClassName(prefabPath) + "Notification";
 		notification.Generics = table.GetList<TomlTable>("Generics").Select(Generic.FromToml).ToList();
 		notification.Args = table.GetList<TomlTable>("Args").Select(Arg.FromToml).ToList();
 		return notification;

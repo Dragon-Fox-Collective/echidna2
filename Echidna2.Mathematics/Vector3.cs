@@ -51,6 +51,9 @@ public struct Vector3(double x, double y, double z) : IEquatable<Vector3>, IEnum
 	public double Dot(Vector3 other) => Dot(this, other);
 	public double DistanceTo(Vector3 other) => (other - this).Length;
 	public double DistanceToSquared(Vector3 other) => (other - this).LengthSquared;
+	public Vector3 ProjectedOnto(Vector3 other) => Project(this, other);
+	public Vector3 ProjectedOrthogonalOnto(Vector3 other) => ProjectOrthogonal(this, other);
+	public Vector3 ClampedBetween(Vector3 a, Vector3 b) => Clamp(this, a, b);
 	
 	public static Vector3 operator +(Vector3 a) => a;
 	public static Vector3 operator +(Vector3 a, Vector3 b) => new(a.X + b.X, a.Y + b.Y, a.Z + b.Z);
@@ -70,6 +73,34 @@ public struct Vector3(double x, double y, double z) : IEquatable<Vector3>, IEnum
 	
 	public static Vector3 Cross(Vector3 a, Vector3 b) => new(a.Y * b.Z - a.Z * b.Y, a.Z * b.X - a.X * b.Z, a.X * b.Y - a.Y * b.X);
 	public static double Dot(Vector3 a, Vector3 b) => a.X * b.X + a.Y * b.Y + a.Z * b.Z;
+	public static Vector3 Project(Vector3 a, Vector3 b) => Dot(a, b) / b.LengthSquared * b;
+	public static Vector3 ProjectOrthogonal(Vector3 a, Vector3 b) => a - Project(a, b);
+	public static Vector3 Clamp(Vector3 value, Vector3 a, Vector3 b)
+	{
+		Vector3 valueRelativeToA = value - a;
+		Vector3 bRelativeToA = b - a;
+		Vector3 aRelativeToB = a - b;
+		valueRelativeToA = Project(valueRelativeToA, bRelativeToA);
+		Vector3 valueRelativeToB = valueRelativeToA + aRelativeToB;
+		
+		bool outsideA = valueRelativeToA.LengthSquared > bRelativeToA.LengthSquared;
+		bool outsideB = valueRelativeToB.LengthSquared > aRelativeToB.LengthSquared;
+		
+		if (outsideA && outsideB)
+			valueRelativeToA = valueRelativeToA.LengthSquared < valueRelativeToB.LengthSquared ? Zero : bRelativeToA;
+		else if (outsideA)
+			valueRelativeToA = bRelativeToA;
+		else if (outsideB)
+			valueRelativeToA = Zero;
+		
+		return valueRelativeToA + a;
+	}
+	public static Vector3 Lerp(Vector3 a, Vector3 b, double t) => a + (b - a) * t;
 	
 	public static Vector3 Sum<T>(IEnumerable<T> source, Func<T, Vector3> selector) => source.Aggregate(Zero, (current, item) => current + selector(item));
+}
+
+public static class Vector3Extensions
+{
+	public static Vector3 Lerp(this double t, Vector3 a, Vector3 b) => Vector3.Lerp(a, b, t);
 }

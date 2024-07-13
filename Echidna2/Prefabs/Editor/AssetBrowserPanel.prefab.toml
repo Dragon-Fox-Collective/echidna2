@@ -33,7 +33,7 @@ foreach (string filePath in Directory.GetFiles(directoryPath, "*.prefab.toml", S
     ButtonRect button = Project.Instantiate<ButtonRect>("Prefabs.Gui.ButtonRect");
     button.AnchorPreset = AnchorPreset.Full;
     button.Margin = 5;
-    button.Clicked += () => Editor.PrefabRoot = Project.Deserialize(Compilation.GetPrefabClassDottedPath(filePath));
+    button.Clicked += _ => Editor.PrefabRoot = Project.Deserialize(Compilation.GetPrefabClassDottedPath(filePath));
     Files.AddChild(button);
     
     TextRect buttonText = Project.Instantiate<TextRect>("Prefabs.Gui.TextRect");
@@ -54,7 +54,12 @@ Files = "2"
 Prefab = "Prefabs.Gui.FullRectWithHierarchy"
 [1.Values]
 Margin = 10.0
-Children = [ "2" ]
+Children = [ "3" ]
 
 [2]
 Prefab = "Prefabs.Gui.VLayoutWithHierarchy"
+
+[3]
+Prefab = "Prefabs.Gui.ScrollArea"
+[3.Values]
+Content = [ "2" ]
