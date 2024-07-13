@@ -1,4 +1,4 @@
-Using = ["Echidna2.Gui", "Echidna2.Prefabs.Gui"]
+Using = ["Echidna2.Gui", "Echidna2.Prefabs.Gui", "Echidna2.Rendering"]
 
 [This]
 Interfaces = [
@@ -55,6 +55,14 @@ Content = """
 double possibleMovement = (PrefabChildren.LocalSize.Y - PrefabChildrenContainer.LocalSize.Y).Clamped(0, float.MaxValue);
 PrefabChildren.LocalPosition = new Vector2(0, -Slider.Value.Map(0, 1, -1, 1) * possibleMovement / 2);
 PrefabChildren.LocalSize = new Vector2(PrefabChildrenContainer.LocalSize.X, PrefabChildren.MinimumSize.Y);
+"""
+
+[[This.Events]]
+EventType = "Notification"
+Name = "MouseWheelScrolled"
+Content = """
+if (RectTransform.ContainsGlobalPoint(notification.GlobalPosition.XY))
+    Slider.Value += notification.Offset.Y * 0.05;
 """
 
 [This.Values]
