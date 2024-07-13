@@ -34,7 +34,13 @@ Type = "double"
 Name = "Value"
 SetterContent = """
 _Value = value.Clamped();
+ValueChanged?.Invoke(Value);
 """
+
+[[This.Properties]]
+PropertyType = "Event"
+Type = "double"
+Name = "ValueChanged"
 
 [[This.Events]]
 EventType = "Notification"

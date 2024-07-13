@@ -27,8 +27,13 @@ Name = "LayoutChildren"
 
 [[This.Properties]]
 PropertyType = "Reference"
-Type = "ICanAddChildren"
+Type = "FullLayoutWithHierarchy"
 Name = "PrefabChildren"
+
+[[This.Properties]]
+PropertyType = "Reference"
+Type = "RectLayoutWithHierarchy"
+Name = "PrefabChildrenContainer"
 
 [[This.Properties]]
 PropertyType = "Reference"
@@ -38,12 +43,28 @@ Name = "Content"
 SetterContent = "PrefabChildren.Children = value;"
 GetterContent = "return PrefabChildren.Children;"
 
+[[This.Properties]]
+PropertyType = "Reference"
+Type = "Slider"
+Name = "Slider"
+
+[[This.Events]]
+EventType = "Notification"
+Name = "Update"
+Content = """
+double possibleMovement = (PrefabChildren.LocalSize.Y - PrefabChildrenContainer.LocalSize.Y).Clamped(0, float.MaxValue);
+PrefabChildren.LocalPosition = new Vector2(0, -Slider.Value.Map(0, 1, -1, 1) * possibleMovement / 2);
+PrefabChildren.LocalSize = new Vector2(PrefabChildrenContainer.LocalSize.X, PrefabChildren.MinimumSize.Y);
+"""
+
 [This.Values]
 Named = "02"
 RectTransform = "04"
 Layout = "05"
 LayoutChildren = "03"
 PrefabChildren = "2"
+PrefabChildrenContainer = "6"
+Slider = "3"
 
 [02]
 Component = "Echidna2.Core.Named, Echidna2.Core"
@@ -78,7 +99,6 @@ Prefab = "Prefabs.Gui.FullLayoutWithHierarchy"
 
 [2.Values]
 Name = "Area"
-ClipChildren = true
 
 [3]
 Prefab = "Prefabs.Gui.Slider"
@@ -91,7 +111,14 @@ Value = 1
 Prefab = "Prefabs.Gui.FullRectWithHierarchy"
 
 [5.Values]
-Name = "Area"
 HorizontalExpand = true
 Margin = 5
+Children = [ "6" ]
+
+[6]
+Prefab = "Prefabs.Gui.RectLayoutWithHierarchy"
+
+[6.Values]
+LayOutChildren = false
+ClipChildren = true
 Children = [ "2" ]
