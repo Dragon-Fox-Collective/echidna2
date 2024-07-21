@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 using Echidna2.Serialization.TomlFiles;
 using Tomlyn.Model;
+using TooManyExtensions;
 
 namespace Echidna2.Serialization;
 
@@ -10,7 +11,7 @@ public partial class Project
 	/// <param name="rootTypeName">Like Editor_06 instead of Editor</param>
 	private PrefabRoot Deserialize(Prefab prefab, string? rootTypeName = null)
 	{
-		List<(object Component, Component ComponentTable)> components = [];
+		List<ComponentPair> components = [];
 		
 		PrefabRoot prefabRoot = new();
 		prefabRoot.Prefab = prefab;
@@ -25,7 +26,7 @@ public partial class Project
 				case TypeSource source:
 					component = DeserializeComponent(componentTable.Id, typeName ?? source.Type, typeName != null);
 					prefabRoot.Components.Add(component);
-					prefabRoot.ComponentPairs.Add((component, componentTable));
+					prefabRoot.ComponentPairs.Add(new ComponentPair(component, componentTable));
 					break;
 				
 				case PrefabSource source:
@@ -33,62 +34,63 @@ public partial class Project
 					component = componentPrefabRoot.RootObject;
 					PrefabInstance componentPrefabInstance = new(componentPrefabRoot);
 					prefabRoot.ChildPrefabs.Add(componentPrefabInstance);
-					prefabRoot.ComponentPairs.Add((component, componentTable));
+					prefabRoot.ComponentPairs.Add(new ComponentPair(component, componentTable));
 					break;
 				
 				default:
 					component = DeserializeComponent(componentTable.Id, typeName ?? componentTable.ClassName, true);
 					prefabRoot.Components.Add(component);
-					prefabRoot.ComponentPairs.Add((component, componentTable));
+					prefabRoot.ComponentPairs.Add(new ComponentPair(component, componentTable));
 					break;
 			}
 			
 			if (componentTable.IsRoot)
 				prefabRoot.RootObject = component;
 			
-			components.Add((component, componentTable));
+			components.Add(new ComponentPair(component, componentTable));
 		}
 		
-		foreach ((object component, Component componentTable) in components)
-			DeserializeReference(component, componentTable.Values, GetReferenceFrom);
+		foreach (ComponentPair pair in components)
+			DeserializeReference(pair.Object, pair.Component.Values, GetReferenceFrom);
 		
-		foreach ((object component, Component componentTable) in components)
-			DeserializeValue(component, componentTable.Values);
+		foreach (ComponentPair pair in components)
+			DeserializeValue(pair.Object, pair.Component.Values);
 		
 		prefabRoot.FavoriteFields = prefab.FavoriteFields.Select(refPath =>
 			{
 				(string componentPath, string fieldPath) = refPath.SplitLast('.');
-				object component = componentPath.IsEmpty() ? prefabRoot.RootObject : GetReferenceFrom(componentPath);
-				MemberInfo? field = component.GetType().GetMember(fieldPath).FirstOrDefault();
+				ComponentPair pair = componentPath.IsEmpty() ? prefabRoot.RootPair : GetReferenceAndComponentFrom(componentPath);
+				MemberInfo? field = pair.Object.GetType().GetMember(fieldPath).FirstOrDefault();
 				if (field == null)
 				{
 					Console.WriteLine($"WARN: Field '{refPath}' of '{prefab}' does not exist");
-					return default;
+					return Option.None<(ComponentPair, IMemberWrapper)>();
 				}
-				return (component, field);
+				return Option.Some((pair, IMemberWrapper.Wrap(field)));
 			})
-				.Where(pair => pair != default)
+				.WhereSome()
 				.ToList();
 		
 		return prefabRoot;
 		
 		
-		object GetReferenceFrom(string refPath)
+		ComponentPair GetReferenceAndComponentFrom(string refPath)
 		{
 			while (true)
 			{
 				if (refPath.IsEmpty()) throw new InvalidOperationException("Reference path part is empty");
 				
 				(string id, string rest) = refPath.SplitFirst('.');
-				(object value, Component valueTable) = components.FirstOrDefault(pair => pair.ComponentTable.Id == id);
-				if (value == null) throw new InvalidOperationException($"Component of id '{id}' in prefab '{prefab}' does not exist");
+				ComponentPair pair = components.FirstOrNone(pair => pair.Component.Id == id).Expect($"Component of id '{id}' in prefab '{prefab}' does not exist");
 				
-				if (rest.IsEmpty()) return value;
+				if (rest.IsEmpty()) return pair;
 				
 				refPath = (string)rest.Split('.')
-					.Aggregate<string, object>(valueTable, (current, name) => ((TomlTable)current)[name]);
+					.Aggregate<string, object>(pair.Component, (current, name) => ((TomlTable)current)[name]);
 			}
 		}
+		
+		object GetReferenceFrom(string refPath) => GetReferenceAndComponentFrom(refPath).Object;
 	}
 	
 	private object DeserializeComponent(string id, string typeName, bool useProjectAssembly)

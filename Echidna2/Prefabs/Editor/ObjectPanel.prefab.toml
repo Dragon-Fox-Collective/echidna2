@@ -8,7 +8,7 @@ Properties = [
 _PrefabRoot = value;
 HierarchyDisplay.HierarchyToDisplay = PrefabRoot;
 """ },
-    { PropertyType = "Event", Type = "object", Name = "ItemSelected", AdderContent = "HierarchyDisplay.ItemSelected += value;", RemoverContent = "HierarchyDisplay.ItemSelected -= value;" },
+    { PropertyType = "Event", Type = "Echidna2.Serialization.ComponentPair", Name = "ItemSelected", AdderContent = "HierarchyDisplay.ItemSelected += value;", RemoverContent = "HierarchyDisplay.ItemSelected -= value;" },
 ]
 
 [This.Values]

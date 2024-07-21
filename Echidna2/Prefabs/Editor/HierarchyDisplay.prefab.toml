@@ -12,42 +12,44 @@ DisplayElements.ClearChildren();
 _HierarchyToDisplay = value;
 if (HierarchyToDisplay is not null)
 {
-    FullLayoutWithHierarchy box = BoxOfHierarchy(HierarchyToDisplay, HierarchyToDisplay.RootObject);
+    FullLayoutWithHierarchy box = BoxOfHierarchy(HierarchyToDisplay, HierarchyToDisplay.RootPair);
     box.LeftMargin = 0;
     DisplayElements.AddChild(box);
 }
 """ },
-    { PropertyType = "Event", Type = "object", Name = "ItemSelected" },
+    { PropertyType = "Event", Type = "ComponentPair", Name = "ItemSelected" },
 ]
 Functions = [
-    { FunctionType = "Private", ReturnType = "FullLayoutWithHierarchy", Name = "BoxOfHierarchy", Args = [{ Type = "PrefabRoot", Name = "root" }, { Type = "object", Name = "obj" }], Content = """
+    { FunctionType = "Private", ReturnType = "FullLayoutWithHierarchy", Name = "BoxOfHierarchy", Args = [{ Type = "PrefabRoot", Name = "root" }, { Type = "ComponentPair", Name = "component" }], Content = """
+string name = INamed.GetName(component.Object);
+
 FullLayoutWithHierarchy box = Project.Instantiate<FullLayoutWithHierarchy>("Prefabs.Gui.FullLayoutWithHierarchy");
-box.Name = $"Box for {obj}";
+box.Name = $"Box for {name}";
 box.AnchorPreset = AnchorPreset.Full;
 box.LeftMargin = 10;
 VLayoutWithHierarchy layout = Project.Instantiate<VLayoutWithHierarchy>("Prefabs.Gui.VLayoutWithHierarchy");
-layout.Name = $"Layout for box for {obj}";
+layout.Name = $"Layout for box for {name}";
 layout.AnchorPreset = AnchorPreset.Full;
 box.AddChild(layout);
 
 ButtonRect button = Project.Instantiate<ButtonRect>("Prefabs.Gui.ButtonRect");
 button.AnchorPreset = AnchorPreset.Full;
 button.Margin = 5;
-button.MouseUp += _ => ItemSelected?.Invoke(obj);
+button.MouseUp += _ => ItemSelected?.Invoke(component);
 layout.AddChild(button);
 
 TextRect text = Project.Instantiate<TextRect>("Prefabs.Gui.TextRect");
-text.TextString = INamed.GetName(obj);
-if (obj is INamed named)
+text.TextString = name;
+if (component.Object is INamed named)
     named.NameChanged += name => text.TextString = name;
 text.Justification = TextJustification.Left;
 text.AnchorPreset = AnchorPreset.Full;
 text.LocalScale = Vector2.One * 0.5;
 button.AddChild(text);
 
-if (obj is IHasChildren hasChildren)
+if (component.Object is IHasChildren hasChildren)
     foreach (object child in hasChildren.Children.Where(root.Owns))
-        layout.AddChild(BoxOfHierarchy(root, child));
+        layout.AddChild(BoxOfHierarchy(root, new ComponentPair(child, root[child])));
 
 return box;
 """ },

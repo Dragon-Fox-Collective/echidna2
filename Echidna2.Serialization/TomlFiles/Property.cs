@@ -245,6 +245,8 @@ public class Property
 	{
 		return $"\tevent Action<{Type}>? {Name};\n";
 	}
+	
+	public override string ToString() => $"{PropertyType} {Type} {Name}";
 }
 
 public enum PropertyType

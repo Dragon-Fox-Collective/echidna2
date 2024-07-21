@@ -1,4 +1,4 @@
-﻿Using = ["Notifications.Editor", "Echidna2.Prefabs.Gui", "System.Reflection", "Echidna2.Gui", "Prefabs.Editor.FieldEditors", "System.Drawing", "Prefabs.Gui"]
+﻿Using = ["Notifications.Editor", "Echidna2.Prefabs.Gui", "System.Reflection", "Echidna2.Gui", "Prefabs.Editor.FieldEditors", "System.Drawing", "Prefabs.Gui", "TooManyExtensions"]
 
 [This]
 Properties = [
@@ -11,24 +11,24 @@ Properties = [
     { PropertyType = "Reference", Type = "ICanAddChildren", Name = "Functions" },
     { PropertyType = "Reference", Type = "ICanAddChildren", Name = "Components" },
     { PropertyType = "Private", Type = "Editor", Name = "Editor" },
-    { PropertyType = "Public", Type = "object?", Name = "SelectedObject", SetterContent = """
+    { PropertyType = "Public", Type = "Option<ComponentPair>", Name = "SelectedObject", SetterContent = """
 _SelectedObject = value;
-if (SelectedObject is not null)
+if (SelectedObject.TrySome(out var selectedObject))
 {
-    if (SelectedObject is INamed named)
+    if (selectedObject.Object is INamed named)
         named.NameChanged += name => PrefabNameText.TextString = name;
-    PrefabNameText.TextString = INamed.GetName(SelectedObject);
+    PrefabNameText.TextString = INamed.GetName(selectedObject.Object);
 }
 else
 {
     PrefabNameText.TextString = "No object selected";
 }
 
-SelectedComponent = null;
+SelectedComponent = Option.None<ComponentPair>();
 
 INotificationPropagator.NotificationFinished += RefreshComponents;
 """ },
-    { PropertyType = "Public", Type = "object?", Name = "SelectedComponent", SetterContent = """
+    { PropertyType = "Public", Type = "Option<ComponentPair>", Name = "SelectedComponent", SetterContent = """
 _SelectedComponent = value;
 INotificationPropagator.NotificationFinished += RefreshFields;
 """ },
@@ -40,41 +40,95 @@ Editor = notification.Editor;
 ]
 Functions = [
     { ReturnType = "void", Name = "RefreshFields", Args = [], Content = """
-if (SelectedComponent is null)
+if (SelectedComponent.TryNone(out var selectedComponent))
     RefreshFavoritedFields();
 else
-    RefreshSelectedComponentFields();
+    RefreshSelectedComponentFields(selectedComponent);
 """ },
     { FunctionType = "Private", ReturnType = "void", Name = "RefreshFavoritedFields", Args = [], Content = """
 ClearFields();
 if (Editor.PrefabRoot is null) return;
-if (SelectedObject is null) return;
+if (SelectedObject.TryNone(out var selectedObject)) return;
+
+Console.WriteLine($"Refreshing favorite fields for {selectedObject}");
 
 ComponentNameText.TextString = "Favorites";
 
-List<object> availableComponents = Editor.PrefabRoot.GetAllComponentsOf(SelectedObject).ToList();
-IEnumerable<(object Component, MemberInfo Member)> availableFields = Editor.PrefabRoot.FavoriteFields
+List<ComponentPair> availableComponents = Editor.PrefabRoot.GetAllComponentsOf(selectedObject).ToList();
+IEnumerable<(ComponentPair, IMemberWrapper)> availableFields = Editor.PrefabRoot.FavoriteFields
     .Where(zip => availableComponents.Contains(zip.Component));
 
-if (Editor.PrefabRoot.ChildPrefabs.FirstOrDefault(prefab => prefab.PrefabRoot.RootObject == SelectedObject) is { } selectedPrefab)
+if (Editor.PrefabRoot.ChildPrefabs.TryFirst(prefab => prefab.PrefabRoot.RootObject == selectedObject.Object, out var selectedPrefab))
     availableFields = availableFields.Concat(selectedPrefab.PrefabRoot.FavoriteFields);
 
-foreach ((object component, MemberInfo member) in availableFields)
+foreach ((ComponentPair component, IMemberWrapper member) in availableFields)
     AddField(member, component);
 """ },
-    { FunctionType = "Private", ReturnType = "void", Name = "RefreshSelectedComponentFields", Args = [], Content = """
+    { FunctionType = "Private", ReturnType = "void", Name = "RefreshSelectedComponentFields", Args = [{ Type = "ComponentPair", Name = "selectedComponent" }], Content = """
 ClearFields();
-if (SelectedComponent is null) return;
 
-ComponentNameText.TextString = SelectedComponent.GetType().Name;
+Console.WriteLine($"Refreshing fields for {selectedComponent}");
 
-foreach (MemberInfo member in SelectedComponent.GetType()
-             .GetMembers(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
-             .Where(member => member.GetCustomAttribute<SerializedValueAttribute>() is not null ||
-                              member.GetCustomAttribute<SerializedReferenceAttribute>() is not null))
-    AddField(member, SelectedComponent);
+ComponentNameText.TextString = selectedComponent.Object.GetType().Name;
+
+foreach (var property in selectedComponent.Component.Properties)
+{
+    HLayoutWithHierarchy layout = Project.Instantiate<HLayoutWithHierarchy>("Prefabs.Gui.HLayoutWithHierarchy");
+    layout.Name = property.Name + " Property Layout";
+    Properties.AddChild(layout);
+    
+    FullLayoutWithHierarchy textClipper = Project.Instantiate<FullLayoutWithHierarchy>("Prefabs.Gui.FullLayoutWithHierarchy");
+    textClipper.ClipChildren = true;
+    layout.AddChild(textClipper);
+    
+    TextRect text = Project.Instantiate<TextRect>("Prefabs.Gui.TextRect");
+    text.TextString = property.Name;
+    text.LocalScale = (0.5, 0.5);
+    text.MinimumSize = (300, 0);
+    text.Justification = TextJustification.Left;
+    textClipper.AddChild(text);
+}
+
+foreach (var eventListener in selectedComponent.Component.EventListeners)
+{
+    HLayoutWithHierarchy layout = Project.Instantiate<HLayoutWithHierarchy>("Prefabs.Gui.HLayoutWithHierarchy");
+    layout.Name = eventListener.Name + " Event Listener Layout";
+    Events.AddChild(layout);
+    
+    FullLayoutWithHierarchy textClipper = Project.Instantiate<FullLayoutWithHierarchy>("Prefabs.Gui.FullLayoutWithHierarchy");
+    textClipper.ClipChildren = true;
+    layout.AddChild(textClipper);
+    
+    TextRect text = Project.Instantiate<TextRect>("Prefabs.Gui.TextRect");
+    text.TextString = eventListener.Name;
+    text.LocalScale = (0.5, 0.5);
+    text.MinimumSize = (300, 0);
+    text.Justification = TextJustification.Left;
+    textClipper.AddChild(text);
+}
+
+foreach (var function in selectedComponent.Component.Functions)
+{
+    HLayoutWithHierarchy layout = Project.Instantiate<HLayoutWithHierarchy>("Prefabs.Gui.HLayoutWithHierarchy");
+    layout.Name = function.Name + " Function Layout";
+    Functions.AddChild(layout);
+    
+    FullLayoutWithHierarchy textClipper = Project.Instantiate<FullLayoutWithHierarchy>("Prefabs.Gui.FullLayoutWithHierarchy");
+    textClipper.ClipChildren = true;
+    layout.AddChild(textClipper);
+    
+    TextRect text = Project.Instantiate<TextRect>("Prefabs.Gui.TextRect");
+    text.TextString = function.Name;
+    text.LocalScale = (0.5, 0.5);
+    text.MinimumSize = (300, 0);
+    text.Justification = TextJustification.Left;
+    textClipper.AddChild(text);
+}
+
+foreach (IMemberWrapper member in Editor.PrefabRoot.GetAllSerializedFieldsOf(selectedComponent))
+    AddField(member, selectedComponent);
 """ },
-    { FunctionType = "Private", ReturnType = "void", Name = "AddField", Args = [{ Type = "MemberInfo", Name = "member" }, { Type = "object", Name = "component" }], Content = """
+    { FunctionType = "Private", ReturnType = "void", Name = "AddField", Args = [{ Type = "IMemberWrapper", Name = "member" }, { Type = "ComponentPair", Name = "component" }], Content = """
 HLayoutWithHierarchy layout = Project.Instantiate<HLayoutWithHierarchy>("Prefabs.Gui.HLayoutWithHierarchy");
 layout.Name = member.Name + " Field Layout";
 Fields.AddChild(layout);
@@ -90,18 +144,17 @@ text.MinimumSize = (300, 0);
 text.Justification = TextJustification.Left;
 textClipper.AddChild(text);
 
-IMemberWrapper wrapper = IMemberWrapper.Wrap(member);
 IFieldEditor? fieldEditor =
-    member.GetCustomAttribute<SerializedValueAttribute>() is not null ? Editor.HasRegisteredFieldEditor(wrapper.FieldType) ? Editor.InstantiateFieldEditor(wrapper.FieldType) : null :
-    member.GetCustomAttribute<SerializedReferenceAttribute>() is not null ? NewReferenceFieldEditorOfType(wrapper.FieldType) :
+    member.GetCustomAttribute<SerializedValueAttribute>() is not null ? Editor.HasRegisteredFieldEditor(member.FieldType) ? Editor.InstantiateFieldEditor(member.FieldType) : null :
+    member.GetCustomAttribute<SerializedReferenceAttribute>() is not null ? NewReferenceFieldEditorOfType(member.FieldType) :
     null;
 if (fieldEditor is not null)
 {
-    fieldEditor.Load(wrapper.GetValue(component));
+    fieldEditor.Load(member.GetValue(component.Object));
     fieldEditor.ValueChanged += value =>
     {
-        wrapper.SetValue(component, value);
-        Editor.PrefabRoot?.SerializeChange(component, wrapper.Name, value);
+        member.SetValue(component.Object, value);
+        component.Component.Values[member.Name] = value;
         Editor.SerializePrefab();
     };
     layout.AddChild(fieldEditor);
@@ -136,19 +189,20 @@ Functions.ClearChildren();
 """ },
     { ReturnType = "void", Name = "RefreshComponents", Args = [], Content = """
 Components.ClearChildren();
-if (SelectedObject is null) return;
+if (SelectedObject.TryNone(out var selectedObject)) return;
 
 {
     ButtonRect favoritesButton = Project.Instantiate<ButtonRect>("Prefabs.Editor.ComponentSelectionButton");
-    favoritesButton.Clicked += _ => SelectedComponent = null;
+    favoritesButton.Clicked += _ => SelectedComponent = Option.None<ComponentPair>();
     favoritesButton.MinimumSize = (40, 40);
     Components.AddChild(favoritesButton);
 }
 
-foreach (object component in Editor.PrefabRoot.GetAllOwnedComponentsOf(SelectedObject))
+Console.WriteLine($"Refreshing components for {selectedObject}, {Editor.PrefabRoot.GetAllOwnedComponentsOf(selectedObject).ToDelimString()}");
+foreach (ComponentPair component in Editor.PrefabRoot.GetAllOwnedComponentsOf(selectedObject))
 {
     ButtonRect button = Project.Instantiate<ButtonRect>("Prefabs.Editor.ComponentSelectionButton");
-    button.Clicked += _ => SelectedComponent = component;
+    button.Clicked += _ => SelectedComponent = Option.Some(component);
     Components.AddChild(button);
 }
 
@@ -157,7 +211,7 @@ foreach (object component in Editor.PrefabRoot.GetAllOwnedComponentsOf(SelectedO
     addButton.Clicked += _ =>
     {
         AddComponentWindow window = Project.Instantiate<AddComponentWindow>("Prefabs.Editor.AddComponentWindow");
-        window.SelectedObject = SelectedObject;
+        window.SelectedObject = selectedObject.Object;
         INotificationPropagator.Notify(new EditorInitializeNotification(Editor), window);
         Editor.QueueAddChild(window);
     };

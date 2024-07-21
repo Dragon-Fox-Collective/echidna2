@@ -1,4 +1,4 @@
-﻿Using = ["Echidna2.Gui", "System.Drawing", "OpenTK.Windowing.Desktop", "Echidna2.Rendering", "Echidna2.Rendering3D", "Echidna2.Prefabs.Editor", "Prefabs.Editor.FieldEditors", "Notifications.Editor"]
+﻿Using = ["Echidna2.Gui", "System.Drawing", "OpenTK.Windowing.Desktop", "Echidna2.Rendering", "Echidna2.Rendering3D", "Echidna2.Prefabs.Editor", "Prefabs.Editor.FieldEditors", "Notifications.Editor", "TooManyExtensions"]
 
 [This]
 Interfaces = [
@@ -39,9 +39,9 @@ AddChild(Viewport);
 """ },
 ]
 Functions = [
-    { ReturnType = "void", Name = "OnObjectSelected", Args = [{ Type = "object", Name = "obj" }], Content = """
-Console.WriteLine("Selected " + obj);
-ComponentPanel.SelectedObject = obj;
+    { ReturnType = "void", Name = "OnObjectSelected", Args = [{ Type = "ComponentPair", Name = "component" }], Content = """
+Console.WriteLine("Selected " + component.Object);
+ComponentPanel.SelectedObject = Option.Some(component);
 """ },
     { ReturnType = "IFieldEditor", Name = "InstantiateFieldEditor", Args = [{ Type = "Type", Name = "type" }], Content = "return EditorInstantiators[type]();" },
     { ReturnType = "bool", Name = "HasRegisteredFieldEditor", Args = [{ Type = "Type", Name = "type" }], Content = "return EditorInstantiators.ContainsKey(type);" },

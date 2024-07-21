@@ -1,5 +1,4 @@
-﻿using System.Reflection;
-using Echidna2.Serialization.TomlFiles;
+﻿using Echidna2.Serialization.TomlFiles;
 using TooManyExtensions;
 
 namespace Echidna2.Serialization;
@@ -9,42 +8,67 @@ public class PrefabRoot
 	public List<PrefabInstance> ChildPrefabs = [];
 	public List<object> Components = [];
 	
-	public List<(object, Component)> ComponentPairs = [];
+	public List<ComponentPair> ComponentPairs = [];
 	
-	public List<(object Component, MemberInfo Field)> FavoriteFields = [];
+	public List<(ComponentPair Component, IMemberWrapper Member)> FavoriteFields = [];
 	
 	public object RootObject = null!;
+	public Component RootComponent => Prefab.ThisComponent;
+	public ComponentPair RootPair => new(RootObject, RootComponent);
 	public Prefab Prefab = null!;
 	
-	public void SerializeChange(object component, string member, object value)
-	{
-		Component connectedData = ComponentPairs.First(pair => pair.Item1 == component).Item2;
-		connectedData.Values[member] = value;
-	}
-	
 	public bool Owns(object component) => Components.Contains(component) || ChildPrefabs.Any(child => child.PrefabRoot.RootObject == component);
+	public bool Owns(ComponentPair pair) => Owns(pair.Object);
 	
-	public IEnumerable<object> GetAllComponentsOf(object rootComponent)
+	public IEnumerable<IMemberWrapper> GetAllSerializedFieldsOf(ComponentPair rootComponent)
 	{
-		List<object> foundComponents = [];
-		List<object> componentsToSearch = [rootComponent];
+		List<IMemberWrapper> foundFields = [];
+		List<ComponentPair> foundComponents = [];
+		List<ComponentPair> componentsToSearch = [rootComponent];
 		
-		while (componentsToSearch.TryPop(out object? component))
+		while (componentsToSearch.TryPop(out ComponentPair component))
 		{
 			if (foundComponents.Contains(component)) continue;
 			foundComponents.Add(component);
 			
-			Component componentData = ComponentPairs.First(pair => pair.Item1 == component, $"Prefab '{Prefab}' has no pair for object '{component}' (out of {ComponentPairs.ToDelimString()})").Unwrap().Item2;
-			componentsToSearch.AddRange(componentData.Properties
+			foundFields.AddRange(component.Component.Properties
+				.Where(prop => prop.PropertyType is PropertyType.Component or PropertyType.Reference or PropertyType.Value)
+				.Select(prop => IMemberWrapper.Wrap(component.Object.GetType().GetMember(prop.Name).FirstOrNone().Expect($"Component '{component}' has no field '{prop.Name}' (out of {component.Object.GetType().GetMembers().ToDelimString()})"))));
+			
+			if (component.SourceComponent.TrySome(out ComponentPair source))
+				componentsToSearch.Add(source);
+			
+			componentsToSearch.AddRange(component.Component.Properties
+				.Where(prop => prop.ExposeProperties)
+				.Select(prop => IMemberWrapper.Wrap(component.Object.GetType().GetMember(prop.Name).FirstOrNone().Expect($"Component '{component}' has no field '{prop.Name}' (out of {component.Object.GetType().GetMembers().ToDelimString()})")))
+				.Select(member => member.GetValue(component.Object))
+				.WhereNotNull()
+				.Select(obj => new ComponentPair(obj, this[obj])));
+		}
+		
+		return foundFields;
+	}
+	
+	public IEnumerable<ComponentPair> GetAllComponentsOf(ComponentPair rootComponent)
+	{
+		List<ComponentPair> foundComponents = [];
+		List<ComponentPair> componentsToSearch = [rootComponent];
+		
+		while (componentsToSearch.TryPop(out ComponentPair component))
+		{
+			if (foundComponents.Contains(component)) continue;
+			foundComponents.Add(component);
+			
+			componentsToSearch.AddRange(component.Component.Properties
 				.Where(prop => prop.PropertyType is PropertyType.Component)
-				.Select(prop => (string)componentData.Values.Get(prop.Name).Expect($"Component '{componentData}' has no value for property {prop.Name} (out of {componentData.Values.ToDelimString()})"))
-				.Select(id => ComponentPairs.First(pair => pair.Item2.Id == id, $"Prefab '{Prefab}' has no pair for id '{id}' (out of {ComponentPairs.ToDelimString()})").Unwrap().Item1));
+				.Select(prop => (string)component.Component.Values.Get(prop.Name).Expect($"Component '{component.Component}' has no value for property {prop.Name} (out of {component.Component.Values.ToDelimString()})"))
+				.Select(id => ComponentPairs.First(pair => pair.Component.Id == id, $"Prefab '{Prefab}' has no pair for id '{id}' (out of {ComponentPairs.ToDelimString()})").Unwrap()));
 		}
 		
 		return foundComponents;
 	}
 	
-	public IEnumerable<object> GetAllOwnedComponentsOf(object rootComponent) => GetAllComponentsOf(rootComponent).Where(Owns);
+	public IEnumerable<ComponentPair> GetAllOwnedComponentsOf(ComponentPair rootComponent) => GetAllComponentsOf(rootComponent).Where(Owns);
 	
 	public object AddComponent(string componentPath, object connectedObject)
 	{
@@ -54,7 +78,7 @@ public class PrefabRoot
 		data.Id = id;
 		data.Source = new PrefabSource(componentPath);
 		Components.Add(component);
-		ComponentPairs.Add((component, data));
+		ComponentPairs.Add(new ComponentPair(component, data));
 		Prefab.Components.Add(data);
 		
 		Property property = new();
@@ -63,7 +87,7 @@ public class PrefabRoot
 		property.PropertyType = PropertyType.Component;
 		property.ExposeProperties = true;
 		
-		Component connectedData = ComponentPairs.First(pair => pair.Item1 == connectedObject).Item2;
+		Component connectedData = this[connectedObject];
 		connectedData.Properties.Add(property);
 		connectedData.Values.Add(property.Name, id);
 		
@@ -71,6 +95,12 @@ public class PrefabRoot
 		
 		return component;
 	}
+	
+	public Option<Component> GetComponent(object obj) => ComponentPairs.FirstOrNone(pair => pair.Object == obj)
+		.Map(pair => pair.Component)
+		.OrElse(() => ChildPrefabs.Select(child => child.PrefabRoot.GetComponent(obj)).FirstSome());
+	public Component this[object obj] => GetComponent(obj)
+		.Expect($"Prefab '{Prefab}' has no pair for object '{obj}' (out of {ComponentPairs.ToDelimString()})");
 }
 
 public class PrefabInstance(PrefabRoot prefabRoot)

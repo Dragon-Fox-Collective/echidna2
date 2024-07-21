@@ -53,5 +53,7 @@ public class Prefab
 		return scriptString;
 	}
 	
+	public Component this[string id] => Components.First(c => c.Id == id);
+	
 	public override string ToString() => Path;
 }

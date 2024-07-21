@@ -1,4 +1,5 @@
 ﻿using Tomlyn.Model;
+using TooManyExtensions;
 
 namespace Echidna2.Serialization.TomlFiles;
 
@@ -6,6 +7,7 @@ public class Component
 {
 	public string Id = "";
 	public ComponentSource Source = new NoSource();
+	public Option<Component> SourceComponent => Source is PrefabSource prefabSource ? Option.Some(Project.Singleton!.Prefabs[prefabSource.Path].ThisComponent) : Option.None<Component>();
 	public bool IsRoot => Id == "This";
 	public bool IsSubclass => Source is not NoSource && NeedsCustomClass;
 	private string baseClassName = "";
@@ -13,11 +15,11 @@ public class Component
 	public List<string> Interfaces = [];
 	public List<Property> Properties = [];
 	public IEnumerable<Property> Components => Properties.Where(property => property.PropertyType == PropertyType.Component);
-	public List<EventListener> EventsListeners = [];
+	public List<EventListener> EventListeners = [];
 	public List<Function> Functions = [];
 	public Dictionary<string, object> Values = [];
 	
-	public bool NeedsCustomClass => Components.Any() || Properties.Count != 0 || EventsListeners.Count != 0 || Functions.Count != 0 || Interfaces.Count != 0;
+	public bool NeedsCustomClass => Components.Any() || Properties.Count != 0 || EventListeners.Count != 0 || Functions.Count != 0 || Interfaces.Count != 0;
 	
 	public static Component FromToml(string prefabPath, string id, TomlTable table)
 	{
@@ -29,8 +31,8 @@ public class Component
 			new NoSource();
 		component.ClassName = Compilation.GetPrefabClassName(prefabPath, id);
 		component.Interfaces = table.GetList<string>("Interfaces");
-		component.EventsListeners = table.GetList<TomlTable>("Events").Select(EventListener.FromToml).ToList();
-		component.Properties = table.GetList<TomlTable>("Properties").Select(propTable => Property.FromToml(propTable, component.EventsListeners)).ToList();
+		component.EventListeners = table.GetList<TomlTable>("Events").Select(EventListener.FromToml).ToList();
+		component.Properties = table.GetList<TomlTable>("Properties").Select(propTable => Property.FromToml(propTable, component.EventListeners)).ToList();
 		component.Functions = table.GetList<TomlTable>("Functions").Select(Function.FromToml).ToList();
 		component.Values = table.GetDict("Values");
 		if (component.IsSubclass)
@@ -44,7 +46,7 @@ public class Component
 		if (Source is TypeSource typeSource) table.Add("Component", typeSource.Type);
 		if (Source is PrefabSource prefabSource) table.Add("Prefab", prefabSource.Path);
 		if (Interfaces.Count != 0) table.Add("Interfaces", Interfaces);
-		if (EventsListeners.Count != 0) table.Add("Events", EventsListeners.Select(@event => @event.ToToml()).ToList());
+		if (EventListeners.Count != 0) table.Add("Events", EventListeners.Select(@event => @event.ToToml()).ToList());
 		if (Properties.Count != 0) table.Add("Properties", Properties.Select(prop => prop.ToToml()).ToList());
 		if (Functions.Count != 0) table.Add("Functions", Functions.Select(func => func.ToToml()).ToList());
 		if (Values.Count != 0) table.Add("Values", Values);
@@ -58,7 +60,7 @@ public class Component
 		List<string> interfaces = Interfaces.ToList();
 		if (Components.Any())
 			interfaces.Add("INotificationPropagator");
-		foreach (EventListener @event in EventsListeners.Where(@event => @event.EventType == EventType.Notification))
+		foreach (EventListener @event in EventListeners.Where(@event => @event.EventType == EventType.Notification))
 			interfaces.Add($"INotificationListener<{@event.Name}Notification>");
 		if (IsSubclass)
 			interfaces.Insert(0, baseClassName);
@@ -71,8 +73,8 @@ public class Component
 		scriptString += Properties.Select(property => property.StringifyCS()).Join();
 		if (Components.Any()) scriptString += "\n" + StringifyCSNotify();
 		scriptString += "\n";
-		scriptString += EventsListeners.Where(@event => @event.EventType is EventType.Self).GroupBy(@event => @event.Target).Select(group => StringifyCSEventListenersSelf(group.Key, group.ToArray()) + "\n").Join();
-		scriptString += EventsListeners.Where(@event => @event.EventType is EventType.Notification).Select(@event => @event.StringifyCS() + "\n").Join();
+		scriptString += EventListeners.Where(@event => @event.EventType is EventType.Self).GroupBy(@event => @event.Target).Select(group => StringifyCSEventListenersSelf(group.Key, group.ToArray()) + "\n").Join();
+		scriptString += EventListeners.Where(@event => @event.EventType is EventType.Notification).Select(@event => @event.StringifyCS() + "\n").Join();
 		scriptString += "\n";
 		scriptString += Functions.Select(function => function.StringifyCS()).Join();
 		scriptString += "}\n";
