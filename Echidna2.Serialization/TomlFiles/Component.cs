@@ -17,7 +17,7 @@ public class Component
 	public List<Function> Functions = [];
 	public Dictionary<string, object> Values = [];
 	
-	public bool NeedsCustomClass => Components.Any() || Properties.Count != 0 || EventsListeners.Count != 0 || Functions.Count != 0 || Interfaces.Count > 1;
+	public bool NeedsCustomClass => Components.Any() || Properties.Count != 0 || EventsListeners.Count != 0 || Functions.Count != 0 || Interfaces.Count != 0;
 	
 	public static Component FromToml(string prefabPath, string id, TomlTable table)
 	{
