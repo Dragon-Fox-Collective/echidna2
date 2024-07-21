@@ -73,20 +73,10 @@ ComponentNameText.TextString = selectedComponent.Object.GetType().Name;
 
 foreach (var property in selectedComponent.Component.Properties)
 {
-    HLayoutWithHierarchy layout = Project.Instantiate<HLayoutWithHierarchy>("Prefabs.Gui.HLayoutWithHierarchy");
-    layout.Name = property.Name + " Property Layout";
-    Properties.AddChild(layout);
-    
-    FullLayoutWithHierarchy textClipper = Project.Instantiate<FullLayoutWithHierarchy>("Prefabs.Gui.FullLayoutWithHierarchy");
-    textClipper.ClipChildren = true;
-    layout.AddChild(textClipper);
-    
-    TextRect text = Project.Instantiate<TextRect>("Prefabs.Gui.TextRect");
-    text.TextString = property.Name;
-    text.LocalScale = (0.5, 0.5);
-    text.MinimumSize = (300, 0);
-    text.Justification = TextJustification.Left;
-    textClipper.AddChild(text);
+    ButtonRectWithText button = Project.Instantiate<ButtonRectWithText>("Prefabs.Gui.ButtonRectWithText");
+    button.Name = property.Name;
+    button.TextString = property.Name;
+    Properties.AddChild(button);
 }
 
 foreach (var eventListener in selectedComponent.Component.EventListeners)

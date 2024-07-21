@@ -29,13 +29,11 @@ box.AnchorPreset = AnchorPreset.Full;
 box.LeftMargin = 10;
 VLayoutWithHierarchy layout = Project.Instantiate<VLayoutWithHierarchy>("Prefabs.Gui.VLayoutWithHierarchy");
 layout.Name = $"Layout for box for {name}";
-layout.AnchorPreset = AnchorPreset.Full;
 box.AddChild(layout);
 
 ButtonRect button = Project.Instantiate<ButtonRect>("Prefabs.Gui.ButtonRect");
-button.AnchorPreset = AnchorPreset.Full;
 button.Margin = 5;
-button.MouseUp += _ => ItemSelected?.Invoke(component);
+button.Clicked += _ => ItemSelected?.Invoke(component);
 layout.AddChild(button);
 
 TextRect text = Project.Instantiate<TextRect>("Prefabs.Gui.TextRect");
@@ -43,7 +41,6 @@ text.TextString = name;
 if (component.Object is INamed named)
     named.NameChanged += name => text.TextString = name;
 text.Justification = TextJustification.Left;
-text.AnchorPreset = AnchorPreset.Full;
 text.LocalScale = Vector2.One * 0.5;
 button.AddChild(text);
 
