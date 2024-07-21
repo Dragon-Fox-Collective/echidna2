@@ -59,6 +59,7 @@ public class Hierarchy : INotificationPropagator, IHasChildren, ICanAddChildren,
 		{
 			INotificationPropagator.Notify(new InitializeNotification(), child);
 			ChildAdded?.Invoke(child);
+			INotificationPropagator.Notify(new AddedToHierarchyNotification(this), child);
 		}
 	}
 	
