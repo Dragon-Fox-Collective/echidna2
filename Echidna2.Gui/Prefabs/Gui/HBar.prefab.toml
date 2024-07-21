@@ -1,0 +1,39 @@
+Using = ["Echidna2.Gui"]
+
+[This]
+Interfaces = ["ICanBeLaidOut"]
+
+[[This.Properties]]
+PropertyType = "Component"
+Type = "Named"
+Name = "Named"
+
+[[This.Properties]]
+PropertyType = "Component"
+Type = "RectTransform"
+Name = "RectTransform"
+
+[[This.Properties]]
+PropertyType = "Component"
+Type = "Rect"
+Name = "Rect"
+
+[This.Values]
+Named = "2"
+RectTransform = "4"
+Rect = "6"
+
+[2]
+Component = "Echidna2.Core.Named, Echidna2.Core"
+[2.Values]
+Name = "Horizontal Bar"
+
+[4]
+Component = "Echidna2.Gui.RectTransform, Echidna2.Gui"
+[4.Values]
+MinimumSize = { X = 0.0, Y = 2.0 }
+
+[6]
+Component = "Echidna2.Gui.Rect, Echidna2.Gui"
+[6.Values]
+RectTransform = "4"

@@ -44,7 +44,7 @@ public class Property
 		table.Add("Type", Type);
 		table.Add("Name", Name);
 		table.Add("PropertyType", PropertyType.ToString());
-		table.Add("ExposeProperties", ExposeProperties);
+		if (ExposeProperties ^ (PropertyType == PropertyType.Component)) table.Add("ExposeProperties", ExposeProperties);
 		if (HasCustomGetter) table.Add("GetterContent", GetterContent);
 		if (HasCustomSetter) table.Add("SetterContent", SetterContent);
 		if (HasCustomAdder) table.Add("AdderContent", AdderContent);

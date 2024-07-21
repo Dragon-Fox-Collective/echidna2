@@ -10,7 +10,7 @@ Properties = [
     { PropertyType = "Component", Type = "RectLayout", Name = "RectLayout" },
     { PropertyType = "Component", Type = "Hierarchy", Name = "PrefabChildren" },
     { PropertyType = "Reference", Type = "Viewport", Name = "Viewport" },
-    { PropertyType = "Reference", Type = "object", Name = "ComponentPanel" },
+    { PropertyType = "Reference", Type = "ComponentPanel", Name = "ComponentPanel" },
     { PropertyType = "Reference", Type = "ObjectPanel", Name = "ObjectPanel" },
     { PropertyType = "Value", Type = "string", Name = "InitialPrefabPath" },
     { PropertyType = "Public", Type = "PrefabRoot", Name = "PrefabRoot", SetterContent = """
@@ -41,7 +41,7 @@ AddChild(Viewport);
 Functions = [
     { ReturnType = "void", Name = "OnObjectSelected", Args = [{ Type = "object", Name = "obj" }], Content = """
 Console.WriteLine("Selected " + obj);
-ComponentPanel.GetType().GetMethod("set_SelectedObject").Invoke(ComponentPanel, [obj]); // FIXME: lol. lmao even. revert to an acutal assignment asap
+ComponentPanel.SelectedObject = obj;
 """ },
     { ReturnType = "IFieldEditor", Name = "InstantiateFieldEditor", Args = [{ Type = "Type", Name = "type" }], Content = "return EditorInstantiators[type]();" },
     { ReturnType = "bool", Name = "HasRegisteredFieldEditor", Args = [{ Type = "Type", Name = "type" }], Content = "return EditorInstantiators.ContainsKey(type);" },

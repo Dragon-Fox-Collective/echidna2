@@ -6,6 +6,9 @@ Properties = [
     { PropertyType = "Reference", Type = "TextRect", Name = "PrefabNameText" },
     { PropertyType = "Reference", Type = "TextRect", Name = "ComponentNameText" },
     { PropertyType = "Reference", Type = "ICanAddChildren", Name = "Fields" },
+    { PropertyType = "Reference", Type = "ICanAddChildren", Name = "Properties" },
+    { PropertyType = "Reference", Type = "ICanAddChildren", Name = "Events" },
+    { PropertyType = "Reference", Type = "ICanAddChildren", Name = "Functions" },
     { PropertyType = "Reference", Type = "ICanAddChildren", Name = "Components" },
     { PropertyType = "Private", Type = "Editor", Name = "Editor" },
     { PropertyType = "Public", Type = "object?", Name = "SelectedObject", SetterContent = """
@@ -43,7 +46,7 @@ else
     RefreshSelectedComponentFields();
 """ },
     { FunctionType = "Private", ReturnType = "void", Name = "RefreshFavoritedFields", Args = [], Content = """
-Fields.ClearChildren();
+ClearFields();
 if (Editor.PrefabRoot is null) return;
 if (SelectedObject is null) return;
 
@@ -60,7 +63,7 @@ foreach ((object component, MemberInfo member) in availableFields)
     AddField(member, component);
 """ },
     { FunctionType = "Private", ReturnType = "void", Name = "RefreshSelectedComponentFields", Args = [], Content = """
-Fields.ClearChildren();
+ClearFields();
 if (SelectedComponent is null) return;
 
 ComponentNameText.TextString = SelectedComponent.GetType().Name;
@@ -125,6 +128,12 @@ FieldEditors.ReferenceFieldEditor NewReferenceFieldEditorOfType(Type type)
     return referenceFieldEditor;
 }
 """ },
+    { ReturnType = "void", Name = "ClearFields", Args = [], Content = """
+Fields.ClearChildren();
+Properties.ClearChildren();
+Events.ClearChildren();
+Functions.ClearChildren();
+""" },
     { ReturnType = "void", Name = "RefreshComponents", Args = [], Content = """
 Components.ClearChildren();
 if (SelectedObject is null) return;
@@ -164,6 +173,9 @@ Rect = "1"
 PrefabNameText = "3"
 ComponentNameText = "4"
 Fields = "5"
+Properties = "9"
+Events = "12"
+Functions = "14"
 Components = "7"
 
 [1]
@@ -211,5 +223,56 @@ Name = "Component List"
 Prefab = "Prefabs.Gui.ScrollArea"
 [8.Values]
 Name = "Fields Scroll Area"
-Content = [ "5" ]
+Content = [ "11" ]
 VerticalExpand = true
+
+[9]
+Prefab = "Prefabs.Gui.VLayoutWithHierarchy"
+[9.Values]
+Name = "Properties"
+
+[10]
+Prefab = "Prefabs.Gui.TextRect"
+[10.Values]
+Name = "Properties Label"
+LocalScale = { X = 0.5, Y = 0.5 }
+TextString = "Properties"
+
+[11]
+Prefab = "Prefabs.Gui.VLayoutWithHierarchy"
+[11.Values]
+Name = "Scroll Area Content"
+Children = [ "10", "9", "16", "13", "12", "17", "15", "14", "18", "5" ]
+
+[12]
+Prefab = "Prefabs.Gui.VLayoutWithHierarchy"
+[12.Values]
+Name = "Events"
+
+[13]
+Prefab = "Prefabs.Gui.TextRect"
+[13.Values]
+Name = "Events Label"
+LocalScale = { X = 0.5, Y = 0.5 }
+TextString = "Events"
+
+[14]
+Prefab = "Prefabs.Gui.VLayoutWithHierarchy"
+[14.Values]
+Name = "Functions"
+
+[15]
+Prefab = "Prefabs.Gui.TextRect"
+[15.Values]
+Name = "Functions Label"
+LocalScale = { X = 0.5, Y = 0.5 }
+TextString = "Functions"
+
+[16]
+Prefab = "Prefabs.Gui.HBar"
+
+[17]
+Prefab = "Prefabs.Gui.HBar"
+
+[18]
+Prefab = "Prefabs.Gui.HBar"

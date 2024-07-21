@@ -61,6 +61,7 @@ public class PrefabRoot
 		property.Name = componentPath.SplitLast('.').Item2;
 		property.Type = componentPath;
 		property.PropertyType = PropertyType.Component;
+		property.ExposeProperties = true;
 		
 		Component connectedData = ComponentPairs.First(pair => pair.Item1 == connectedObject).Item2;
 		connectedData.Properties.Add(property);
