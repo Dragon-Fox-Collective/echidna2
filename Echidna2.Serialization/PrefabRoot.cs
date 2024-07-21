@@ -33,14 +33,16 @@ public class PrefabRoot
 			
 			foundFields.AddRange(component.Component.Properties
 				.Where(prop => prop.PropertyType is PropertyType.Component or PropertyType.Reference or PropertyType.Value)
-				.Select(prop => IMemberWrapper.Wrap(component.Object.GetType().GetMember(prop.Name).FirstOrNone().Expect($"Component '{component}' has no field '{prop.Name}' (out of {component.Object.GetType().GetMembers().ToDelimString()})"))));
+				.Select(rootComponent.GetMember)
+				.WhereSome()); // If it's None, the project probably hasn't been recompiled yet, or the field is shadowed
 			
 			if (component.SourceComponent.TrySome(out ComponentPair source))
 				componentsToSearch.Add(source);
 			
 			componentsToSearch.AddRange(component.Component.Properties
 				.Where(prop => prop.ExposeProperties)
-				.Select(prop => IMemberWrapper.Wrap(component.Object.GetType().GetMember(prop.Name).FirstOrNone().Expect($"Component '{component}' has no field '{prop.Name}' (out of {component.Object.GetType().GetMembers().ToDelimString()})")))
+				.Select(rootComponent.GetMember)
+				.WhereSome() // ''
 				.Select(member => member.GetValue(component.Object))
 				.WhereNotNull()
 				.Select(obj => new ComponentPair(obj, this[obj])));

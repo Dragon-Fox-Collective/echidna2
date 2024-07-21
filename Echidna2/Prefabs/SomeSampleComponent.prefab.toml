@@ -1,0 +1,4 @@
+[[This.Properties]]
+PropertyType = "Value"
+Type = "double"
+Name = "SomeDouble"
