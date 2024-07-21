@@ -1,4 +1,4 @@
-﻿Using = ["Notifications.Editor", "Echidna2.Prefabs.Gui", "System.Reflection", "Echidna2.Gui", "Prefabs.Editor.FieldEditors", "System.Drawing"]
+﻿Using = ["Notifications.Editor", "Echidna2.Prefabs.Gui", "System.Reflection", "Echidna2.Gui", "Prefabs.Editor.FieldEditors", "System.Drawing", "Prefabs.Gui"]
 
 [This]
 Properties = [
@@ -177,7 +177,7 @@ Prefab = "Prefabs.Gui.VLayoutWithHierarchy"
 [2.Values]
 Name = "Interior Layout"
 HorizontalExpand = true
-Children = [ "3", "4", "5" ]
+Children = [ "3", "4", "8" ]
 
 [3]
 Prefab = "Prefabs.Gui.TextRect"
@@ -206,3 +206,10 @@ Children = [ "2", "7" ]
 Prefab = "Prefabs.Gui.VLayoutWithHierarchy"
 [7.Values]
 Name = "Component List"
+
+[8]
+Prefab = "Prefabs.Gui.ScrollArea"
+[8.Values]
+Name = "Fields Scroll Area"
+Content = [ "5" ]
+VerticalExpand = true

@@ -45,10 +45,10 @@ public class Property
 		table.Add("Name", Name);
 		table.Add("PropertyType", PropertyType.ToString());
 		table.Add("ExposeProperties", ExposeProperties);
-		table.Add("GetterContent", GetterContent);
-		table.Add("SetterContent", SetterContent);
-		table.Add("AdderContent", AdderContent);
-		table.Add("RemoverContent", RemoverContent);
+		if (HasCustomGetter) table.Add("GetterContent", GetterContent);
+		if (HasCustomSetter) table.Add("SetterContent", SetterContent);
+		if (HasCustomAdder) table.Add("AdderContent", AdderContent);
+		if (HasCustomRemover) table.Add("RemoverContent", RemoverContent);
 		return table;
 	}
 	
