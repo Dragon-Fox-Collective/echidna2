@@ -38,7 +38,7 @@ public interface INotificationPropagator
 	public static void Notify<T>(T notification, ICollection<object> objects) where T : notnull
 	{
 		if (objects.Any<object?>(child => child is null))
-			throw new NullReferenceException($"Null child in Notify with objects {objects.ToDelimString()}");
+			throw new NullReferenceException($"Null child in Notify with notification {notification}, objects {objects.ToDelimString()}");
 		
 		bool newNotification = !currentNotifications.Contains(notification);
 		if (newNotification)

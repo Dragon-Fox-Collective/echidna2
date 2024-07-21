@@ -31,6 +31,12 @@ public class Hierarchy : INotificationPropagator, IHasChildren, ICanAddChildren,
 	{
 		if (hasBeenInitialized) return;
 		hasBeenInitialized = true;
+		
+		foreach (object child in children)
+		{
+			ChildAdded?.Invoke(child);
+			INotificationPropagator.Notify(new AddedToHierarchyNotification(this), child);
+		}
 	}
 	
 	public void Notify<T>(T notification) where T : notnull
@@ -50,9 +56,10 @@ public class Hierarchy : INotificationPropagator, IHasChildren, ICanAddChildren,
 	{
 		children.Add(child);
 		if (hasBeenInitialized)
+		{
 			INotificationPropagator.Notify(new InitializeNotification(), child);
-		INotificationPropagator.Notify(new AddedToHierarchyNotification(this), child);
-		ChildAdded?.Invoke(child);
+			ChildAdded?.Invoke(child);
+		}
 	}
 	
 	public void QueueAddChild(object child)

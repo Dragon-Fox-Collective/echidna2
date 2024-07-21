@@ -49,7 +49,7 @@ public class PrefabRoot
 	public object AddComponent(string componentPath, object connectedObject)
 	{
 		object component = Project.Instantiate<object>(componentPath);
-		string id = Guid.NewGuid().ToString();
+		string id = Enumerable.Range(0, (int)Math.Ceiling(128 / 3.0)).Select(_ => Random.Shared.Choose(["0", "1", "2", "3", "4", "5", "6", "7"])).Join(); // GUIDs stay mad
 		Component data = new();
 		data.Id = id;
 		data.Source = new PrefabSource(componentPath);
