@@ -73,37 +73,92 @@ ComponentNameText.TextString = selectedComponent.Object.GetType().Name;
 
 foreach (var property in selectedComponent.Component.Properties)
 {
-    HLayoutWithHierarchy layout = Project.Instantiate<HLayoutWithHierarchy>("Prefabs.Gui.HLayoutWithHierarchy");
-    layout.Name = property.Name + " Property Layout";
+    VLayoutWithHierarchy layout = Project.Instantiate<VLayoutWithHierarchy>("Prefabs.Gui.VLayoutWithHierarchy");
     Events.AddChild(layout);
     
-    FullLayoutWithHierarchy textClipper = Project.Instantiate<FullLayoutWithHierarchy>("Prefabs.Gui.FullLayoutWithHierarchy");
-    textClipper.ClipChildren = true;
-    layout.AddChild(textClipper);
-    
-    TextRect text = Project.Instantiate<TextRect>("Prefabs.Gui.TextRect");
-    text.TextString = property.Name;
-    text.LocalScale = (0.5, 0.5);
-    text.MinimumSize = (300, 0);
-    text.Justification = TextJustification.Left;
-    textClipper.AddChild(text);
-    
-    ButtonRectWithText removeButton = Project.Instantiate<ButtonRectWithText>("Prefabs.Gui.ButtonRectWithText");
-    removeButton.Name = "Remove Button";
-    removeButton.TextString = "Remove";
-    removeButton.HorizontalExpand = true;
-    removeButton.Clicked += _ =>
     {
-        selectedComponent.Component.Properties.Remove(property);
-        selectedComponent.Component.Values.Remove(property.Name);
-    };
-    layout.AddChild(removeButton);
+        HLayoutWithHierarchy hLayout = Project.Instantiate<HLayoutWithHierarchy>("Prefabs.Gui.HLayoutWithHierarchy");
+        layout.AddChild(hLayout);
+        
+        FullLayoutWithHierarchy textClipper = Project.Instantiate<FullLayoutWithHierarchy>("Prefabs.Gui.FullLayoutWithHierarchy");
+        textClipper.ClipChildren = true;
+        hLayout.AddChild(textClipper);
+        
+        TextRect text = Project.Instantiate<TextRect>("Prefabs.Gui.TextRect");
+        text.TextString = property.Name;
+        text.LocalScale = (0.5, 0.5);
+        text.MinimumSize = (300, 0);
+        text.Justification = TextJustification.Left;
+        textClipper.AddChild(text);
+        
+        ButtonRectWithText removeButton = Project.Instantiate<ButtonRectWithText>("Prefabs.Gui.ButtonRectWithText");
+        removeButton.Name = "Remove Button";
+        removeButton.TextString = "Remove";
+        removeButton.HorizontalExpand = true;
+        removeButton.Clicked += _ =>
+        {
+            selectedComponent.Component.Properties.Remove(property);
+            selectedComponent.Component.Values.Remove(property.Name);
+        };
+        hLayout.AddChild(removeButton);
+    }
+    
+    {
+        HLayoutWithHierarchy hLayout = Project.Instantiate<HLayoutWithHierarchy>("Prefabs.Gui.HLayoutWithHierarchy");
+        layout.AddChild(hLayout);
+        
+        FullLayoutWithHierarchy textClipper = Project.Instantiate<FullLayoutWithHierarchy>("Prefabs.Gui.FullLayoutWithHierarchy");
+        textClipper.ClipChildren = true;
+        hLayout.AddChild(textClipper);
+        
+        TextRect text = Project.Instantiate<TextRect>("Prefabs.Gui.TextRect");
+        text.TextString = "Name";
+        text.LocalScale = (0.5, 0.5);
+        text.MinimumSize = (300, 0);
+        text.Justification = TextJustification.Left;
+        textClipper.AddChild(text);
+        
+        IFieldEditor fieldEditor = Editor.InstantiateFieldEditor(typeof(string))!;
+        fieldEditor.Load(property.Name);
+        fieldEditor.ValueChanged += value =>
+        {
+            selectedComponent.Component.Values.Remove(property.Name, out var oldValue);
+            property.Name = (string)value;
+            selectedComponent.Component.Values[property.Name] = oldValue;
+            Editor.SerializePrefab();
+        };
+        hLayout.AddChild(fieldEditor);
+    }
+    
+    {
+        HLayoutWithHierarchy hLayout = Project.Instantiate<HLayoutWithHierarchy>("Prefabs.Gui.HLayoutWithHierarchy");
+        layout.AddChild(hLayout);
+        
+        FullLayoutWithHierarchy textClipper = Project.Instantiate<FullLayoutWithHierarchy>("Prefabs.Gui.FullLayoutWithHierarchy");
+        textClipper.ClipChildren = true;
+        hLayout.AddChild(textClipper);
+        
+        TextRect text = Project.Instantiate<TextRect>("Prefabs.Gui.TextRect");
+        text.TextString = "Type";
+        text.LocalScale = (0.5, 0.5);
+        text.MinimumSize = (300, 0);
+        text.Justification = TextJustification.Left;
+        textClipper.AddChild(text);
+        
+        IFieldEditor fieldEditor = Editor.InstantiateFieldEditor(typeof(string))!;
+        fieldEditor.Load(property.Type);
+        fieldEditor.ValueChanged += value =>
+        {
+            property.Type = (string)value;
+            Editor.SerializePrefab();
+        };
+        hLayout.AddChild(fieldEditor);
+    }
 }
 
 foreach (var eventListener in selectedComponent.Component.EventListeners)
 {
     HLayoutWithHierarchy layout = Project.Instantiate<HLayoutWithHierarchy>("Prefabs.Gui.HLayoutWithHierarchy");
-    layout.Name = eventListener.Name + " Event Listener Layout";
     Events.AddChild(layout);
     
     FullLayoutWithHierarchy textClipper = Project.Instantiate<FullLayoutWithHierarchy>("Prefabs.Gui.FullLayoutWithHierarchy");
@@ -121,7 +176,6 @@ foreach (var eventListener in selectedComponent.Component.EventListeners)
 foreach (var function in selectedComponent.Component.Functions)
 {
     HLayoutWithHierarchy layout = Project.Instantiate<HLayoutWithHierarchy>("Prefabs.Gui.HLayoutWithHierarchy");
-    layout.Name = function.Name + " Function Layout";
     Functions.AddChild(layout);
     
     FullLayoutWithHierarchy textClipper = Project.Instantiate<FullLayoutWithHierarchy>("Prefabs.Gui.FullLayoutWithHierarchy");
