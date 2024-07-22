@@ -32,8 +32,8 @@ public class Prefab
 	public TomlTable ToToml()
 	{
 		TomlTable table = new();
-		table.Add("FavoriteFields", FavoriteFields);
-		table.Add("Using", Usings.ToToml());
+		if (FavoriteFields.Count != 0) table.Add("FavoriteFields", FavoriteFields);
+		if (Usings.Value.Count != 0) table.Add("Using", Usings.ToToml());
 		foreach (Component component in Components)
 			table.Add(component.Id, component.ToToml());
 		return table;

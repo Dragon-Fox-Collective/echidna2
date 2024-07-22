@@ -73,10 +73,31 @@ ComponentNameText.TextString = selectedComponent.Object.GetType().Name;
 
 foreach (var property in selectedComponent.Component.Properties)
 {
-    ButtonRectWithText button = Project.Instantiate<ButtonRectWithText>("Prefabs.Gui.ButtonRectWithText");
-    button.Name = property.Name;
-    button.TextString = property.Name;
-    Properties.AddChild(button);
+    HLayoutWithHierarchy layout = Project.Instantiate<HLayoutWithHierarchy>("Prefabs.Gui.HLayoutWithHierarchy");
+    layout.Name = property.Name + " Property Layout";
+    Events.AddChild(layout);
+    
+    FullLayoutWithHierarchy textClipper = Project.Instantiate<FullLayoutWithHierarchy>("Prefabs.Gui.FullLayoutWithHierarchy");
+    textClipper.ClipChildren = true;
+    layout.AddChild(textClipper);
+    
+    TextRect text = Project.Instantiate<TextRect>("Prefabs.Gui.TextRect");
+    text.TextString = property.Name;
+    text.LocalScale = (0.5, 0.5);
+    text.MinimumSize = (300, 0);
+    text.Justification = TextJustification.Left;
+    textClipper.AddChild(text);
+    
+    ButtonRectWithText removeButton = Project.Instantiate<ButtonRectWithText>("Prefabs.Gui.ButtonRectWithText");
+    removeButton.Name = "Remove Button";
+    removeButton.TextString = "Remove";
+    removeButton.HorizontalExpand = true;
+    removeButton.Clicked += _ =>
+    {
+        selectedComponent.Component.Properties.Remove(property);
+        selectedComponent.Component.Values.Remove(property.Name);
+    };
+    layout.AddChild(removeButton);
 }
 
 foreach (var eventListener in selectedComponent.Component.EventListeners)
