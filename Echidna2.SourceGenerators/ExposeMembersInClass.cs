@@ -94,6 +94,9 @@ namespace Echidna2.SourceGenerators
 		
 		public static IEnumerable<INamedTypeSymbol> GetAllExposedInterfacesIncludingConflicts(ITypeSymbol type)
 		{
+			if (type.TypeKind == TypeKind.Interface && !type.GetAttributes().Any(attribute => attribute.AttributeClass?.Name == "DontExposeAttribute"))
+				yield return (INamedTypeSymbol)type;
+			
 			foreach (INamedTypeSymbol inter in type.AllInterfaces.Where(inter => !inter.GetAttributes().Any(attribute => attribute.AttributeClass?.Name == "DontExposeAttribute")))
 				yield return inter;
 			
