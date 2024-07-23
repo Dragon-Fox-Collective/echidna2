@@ -1,0 +1,22 @@
+Using = [
+    "Echidna2.Prefabs.Gui",
+    "Echidna2.Gui",
+]
+
+[This]
+Interfaces = [
+    "ICanBeLaidOut",
+]
+
+[[This.Properties]]
+Name = "FullRectWithHierarchy"
+Type = "FullRectWithHierarchy"
+PropertyType = "Component"
+
+[This.Values]
+FullRectWithHierarchy = "1"
+
+[1]
+Prefab = "Prefabs.Gui.FullRectWithHierarchy"
+[1.Values]
+Color = { R = 0.2, G = 0.2, B = 0.2, A = 1.0 }

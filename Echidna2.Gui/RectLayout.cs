@@ -13,7 +13,7 @@ public class RectLayout : INotificationHook<UpdateNotification>, INotificationHo
 	
 	private List<IMouseNotification> clippedClicks = [];
 	
-	private List<(RectTransform child, RectTransform.LocalTransformChangedHandler handler)> localTransformChangedHandlers = [];
+	private List<(RectTransform child, IRectTransform.LocalTransformChangedHandler handler)> localTransformChangedHandlers = [];
 	
 	[SerializedReference] public RectTransform RectTransform { get; set; } = null!;
 	private Hierarchy? hierarchy;
@@ -46,7 +46,7 @@ public class RectLayout : INotificationHook<UpdateNotification>, INotificationHo
 		if (child is ICanBeLaidOut childLaidOut)
 		{
 			RectTransform childRect = childLaidOut.RectTransform;
-			RectTransform.LocalTransformChangedHandler handler = () => childRect.GlobalTransform = RectTransform.GlobalTransform * childRect.LocalTransform;
+			IRectTransform.LocalTransformChangedHandler handler = () => childRect.GlobalTransform = RectTransform.GlobalTransform * childRect.LocalTransform;
 			localTransformChangedHandlers.Add((childRect, handler));
 			childRect.LocalTransformChanged += handler;
 		}
@@ -57,7 +57,7 @@ public class RectLayout : INotificationHook<UpdateNotification>, INotificationHo
 		if (child is ICanBeLaidOut childLaidOut)
 		{
 			RectTransform childRect = childLaidOut.RectTransform;
-			(RectTransform child, RectTransform.LocalTransformChangedHandler handler) tuple = localTransformChangedHandlers.First(tuple => tuple.child == childRect);
+			(RectTransform child, IRectTransform.LocalTransformChangedHandler handler) tuple = localTransformChangedHandlers.First(tuple => tuple.child == childRect);
 			childRect.LocalTransformChanged -= tuple.handler;
 			localTransformChangedHandlers.Remove(tuple);
 		}

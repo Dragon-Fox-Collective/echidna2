@@ -9,16 +9,16 @@ Properties = [
     { PropertyType = "Component", Type = "RectTransform", Name = "RectTransform" },
     { PropertyType = "Component", Type = "RectLayout", Name = "RectLayout" },
     { PropertyType = "Component", Type = "Hierarchy", Name = "PrefabChildren" },
-    { PropertyType = "Reference", Type = "Viewport", Name = "Viewport" },
+    { PropertyType = "Reference", Type = "object", Name = "Viewport" },
     { PropertyType = "Reference", Type = "ComponentPanel", Name = "ComponentPanel" },
     { PropertyType = "Reference", Type = "ObjectPanel", Name = "ObjectPanel" },
     { PropertyType = "Value", Type = "string", Name = "InitialPrefabPath" },
     { PropertyType = "Public", Type = "PrefabRoot", Name = "PrefabRoot", SetterContent = """
-Viewport.ClearChildren();
+Viewport? viewviewport = Viewport as Viewport;
+viewviewport?.ClearChildren();
 _PrefabRoot = value;
 ObjectPanel.PrefabRoot = value;
-if (PrefabRoot is not null)
-    Viewport.AddChild(PrefabRoot.RootObject);
+viewviewport?.AddChild(PrefabRoot.RootObject);
 """ },
     { PropertyType = "Private", Type = "Dictionary<Type, Func<IFieldEditor>>", Name = "EditorInstantiators" },
     { PropertyType = "Private", Type = "bool", Name = "HasBeenInitialized" },
@@ -50,13 +50,14 @@ ComponentPanel.SelectedObject = Option.Some(component);
 if (PrefabRoot is null) return;
 PrefabRoot.Prefab.Save();
 """ },
-    { ReturnType = "void", Name = "SwitchView", Args = [{ Type = "Viewport", Name = "viewport" }], Content = """
-Viewport.ClearChildren();
+    { ReturnType = "void", Name = "SwitchView", Args = [{ Type = "object", Name = "viewport" }], Content = """
+Viewport? viewviewport = Viewport as Viewport;
+viewviewport?.ClearChildren();
 QueueRemoveChild(Viewport);
 Viewport = viewport;
 QueueAddChild(Viewport);
 if (PrefabRoot is not null)
-    Viewport.AddChild(PrefabRoot.RootObject);
+    viewviewport?.AddChild(PrefabRoot.RootObject);
 """ },
     { Static = true, ReturnType = "void", Name = "OpenNewWindow", Args = [], Content = """
 // :/ cubemap no longer static constructed because nothing references it since the skybox is a toml now
@@ -216,7 +217,7 @@ Children = [ "11", "12", "13" ]
 Prefab = "Prefabs.Gui.ButtonRect"
 Properties = [
     { PropertyType = "Reference", Type = "Editor", Name = "Editor" },
-    { PropertyType = "Reference", Type = "Viewport", Name = "Viewport" },
+    { PropertyType = "Reference", Type = "object", Name = "Viewport" },
 ]
 Events = [
     { EventType = "Self", Target = "Button", Name = "Clicked", Args = [{ Name = "notification", Type = "MouseUpNotification" }], Content = """
@@ -234,7 +235,7 @@ Viewport = "2"
 Prefab = "Prefabs.Gui.ButtonRect"
 Properties = [
     { PropertyType = "Reference", Type = "Editor", Name = "Editor" },
-    { PropertyType = "Reference", Type = "Viewport", Name = "Viewport" },
+    { PropertyType = "Reference", Type = "object", Name = "Viewport" },
 ]
 Events = [
     { EventType = "Self", Target = "Button", Name = "Clicked", Args = [{ Name = "notification", Type = "MouseUpNotification" }], Content = """
@@ -250,10 +251,21 @@ Viewport = "002"
 
 [13]
 Prefab = "Prefabs.Gui.ButtonRect"
+Properties = [
+    { PropertyType = "Reference", Type = "Editor", Name = "Editor" },
+    { PropertyType = "Reference", Type = "object", Name = "Viewport" },
+]
+Events = [
+    { EventType = "Self", Target = "Button", Name = "Clicked", Args = [{ Name = "notification", Type = "MouseUpNotification" }], Content = """
+Editor.SwitchView(Viewport);
+""" },
+]
 [13.Values]
 Name = "Gui View Button"
 MinimumSize = { X = 26.0, Y = 26.0 }
 Color = { R = 0.0, G = 1.0, B = 0.0, A = 1.0 }
+Editor = "This"
+Viewport = "23"
 
 [14]
 Prefab = "Prefabs.Gui.FullRectWithHierarchy"
@@ -361,3 +373,9 @@ AnchorOffsetRight = -70.0
 AnchorOffsetLeft = -70.0
 IsSelfVisible = false
 MinimumSize = { X = 300.0, Y = 400.0 }
+
+[23]
+Prefab = "Prefabs.Editor.CodeViewport"
+[23.Values]
+Name = "Code Scene"
+AnchorPreset = "Full"

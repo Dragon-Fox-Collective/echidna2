@@ -1,6 +1,5 @@
 ﻿using System.Reflection;
 using Echidna2.Serialization.TomlFiles;
-using Tomlyn.Model;
 using TooManyExtensions;
 
 namespace Echidna2.Serialization;
@@ -74,20 +73,11 @@ public partial class Project
 		return prefabRoot;
 		
 		
-		ComponentPair GetReferenceAndComponentFrom(string refPath)
+		ComponentPair GetReferenceAndComponentFrom(string id)
 		{
-			while (true)
-			{
-				if (refPath.IsEmpty()) throw new InvalidOperationException("Reference path part is empty");
-				
-				(string id, string rest) = refPath.SplitFirst('.');
-				ComponentPair pair = components.FirstOrNone(pair => pair.Component.Id == id).Expect($"Component of id '{id}' in prefab '{prefab}' does not exist");
-				
-				if (rest.IsEmpty()) return pair;
-				
-				refPath = (string)rest.Split('.')
-					.Aggregate<string, object>(pair.Component, (current, name) => ((TomlTable)current)[name]);
-			}
+			if (id.IsEmpty()) throw new InvalidOperationException("Reference id is empty");
+			ComponentPair pair = components.FirstOrNone(pair => pair.Component.Id == id).Expect($"Component of id '{id}' in prefab '{prefab}' does not exist");
+			return pair;
 		}
 		
 		object GetReferenceFrom(string refPath) => GetReferenceAndComponentFrom(refPath).Object;

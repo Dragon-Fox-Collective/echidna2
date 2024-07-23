@@ -5,6 +5,9 @@ namespace Echidna2.Gui;
 
 public interface IRectTransform
 {
+	public delegate void LocalTransformChangedHandler();
+	public event LocalTransformChangedHandler? LocalTransformChanged;
+	
 	public Vector2 LocalPosition { get; set; }
 	public Vector2 GlobalPosition { get; set; }
 	public Vector2 LocalSize { get; set; }
@@ -14,12 +17,33 @@ public interface IRectTransform
 	public Matrix4 GlobalTransform { get; set; }
 	public int Depth { get; set; }
 	public Vector2 MinimumSize { get; set; }
+	public Vector2 MinimumSizeToParent { get; }
+	
+	public AnchorPreset AnchorPreset { get; set; }
+	
+	public double AnchorLeft { get; set; }
+	public double AnchorRight { get; set; }
+	public double AnchorBottom { get; set; }
+	public double AnchorTop { get; set; }
+	
+	public double AnchorOffsetLeft { get; set; }
+	public double AnchorOffsetRight { get; set; }
+	public double AnchorOffsetBottom { get; set; }
+	public double AnchorOffsetTop { get; set; }
+	
+	public LayoutSizing HorizontalSizing { get; set; }
+	public bool HorizontalExpand { get; set; }
+	public double HorizontalExpandWeight { get; set; }
+	public LayoutSizing VerticalSizing { get; set; }
+	public bool VerticalExpand { get; set; }
+	public double VerticalExpandWeight { get; set; }
+	
+	public bool IsGlobal { get; set; }
 }
 
 public class RectTransform : IRectTransform
 {
-	public delegate void LocalTransformChangedHandler();
-	public event LocalTransformChangedHandler? LocalTransformChanged;
+	public event IRectTransform.LocalTransformChangedHandler? LocalTransformChanged;
 	
 	private Vector2 localPosition;
 	[SerializedValue] public Vector2 LocalPosition
