@@ -74,7 +74,7 @@ ComponentNameText.TextString = selectedComponent.Object.GetType().Name;
 foreach (var property in selectedComponent.Component.Properties)
 {
     VLayoutWithHierarchy layout = Project.Instantiate<VLayoutWithHierarchy>("Prefabs.Gui.VLayoutWithHierarchy");
-    Events.AddChild(layout);
+    Properties.AddChild(layout);
     
     {
         HLayoutWithHierarchy hLayout = Project.Instantiate<HLayoutWithHierarchy>("Prefabs.Gui.HLayoutWithHierarchy");
@@ -153,6 +153,115 @@ foreach (var property in selectedComponent.Component.Properties)
             Editor.SerializePrefab();
         };
         hLayout.AddChild(fieldEditor);
+    }
+    
+    {
+        HLayoutWithHierarchy hLayout = Project.Instantiate<HLayoutWithHierarchy>("Prefabs.Gui.HLayoutWithHierarchy");
+        layout.AddChild(hLayout);
+        
+        FullLayoutWithHierarchy textClipper = Project.Instantiate<FullLayoutWithHierarchy>("Prefabs.Gui.FullLayoutWithHierarchy");
+        textClipper.ClipChildren = true;
+        hLayout.AddChild(textClipper);
+        
+        TextRect text = Project.Instantiate<TextRect>("Prefabs.Gui.TextRect");
+        text.TextString = "Property Type";
+        text.LocalScale = (0.5, 0.5);
+        text.MinimumSize = (300, 0);
+        text.Justification = TextJustification.Left;
+        textClipper.AddChild(text);
+        
+        IFieldEditor fieldEditor = Editor.InstantiateFieldEditor(typeof(string))!;
+        fieldEditor.Load(property.PropertyType.ToString());
+        fieldEditor.ValueChanged += value =>
+        {
+            property.PropertyType = Enum.Parse<Echidna2.Serialization.TomlFiles.PropertyType>((string)value);
+            Editor.SerializePrefab();
+        };
+        hLayout.AddChild(fieldEditor);
+    }
+    
+    {
+        HLayoutWithHierarchy hLayout = Project.Instantiate<HLayoutWithHierarchy>("Prefabs.Gui.HLayoutWithHierarchy");
+        layout.AddChild(hLayout);
+        
+        FullLayoutWithHierarchy textClipper = Project.Instantiate<FullLayoutWithHierarchy>("Prefabs.Gui.FullLayoutWithHierarchy");
+        textClipper.ClipChildren = true;
+        hLayout.AddChild(textClipper);
+        
+        TextRect text = Project.Instantiate<TextRect>("Prefabs.Gui.TextRect");
+        text.TextString = "Getter Content";
+        text.LocalScale = (0.5, 0.5);
+        text.MinimumSize = (300, 0);
+        text.Justification = TextJustification.Left;
+        textClipper.AddChild(text);
+        
+        ButtonRectWithText openButton = Project.Instantiate<ButtonRectWithText>("Prefabs.Gui.ButtonRectWithText");
+        openButton.HorizontalExpand = true;
+        openButton.TextString = "Open";
+        hLayout.AddChild(openButton);
+    }
+    
+    {
+        HLayoutWithHierarchy hLayout = Project.Instantiate<HLayoutWithHierarchy>("Prefabs.Gui.HLayoutWithHierarchy");
+        layout.AddChild(hLayout);
+        
+        FullLayoutWithHierarchy textClipper = Project.Instantiate<FullLayoutWithHierarchy>("Prefabs.Gui.FullLayoutWithHierarchy");
+        textClipper.ClipChildren = true;
+        hLayout.AddChild(textClipper);
+        
+        TextRect text = Project.Instantiate<TextRect>("Prefabs.Gui.TextRect");
+        text.TextString = "Setter Content";
+        text.LocalScale = (0.5, 0.5);
+        text.MinimumSize = (300, 0);
+        text.Justification = TextJustification.Left;
+        textClipper.AddChild(text);
+        
+        ButtonRectWithText openButton = Project.Instantiate<ButtonRectWithText>("Prefabs.Gui.ButtonRectWithText");
+        openButton.HorizontalExpand = true;
+        openButton.TextString = "Open";
+        hLayout.AddChild(openButton);
+    }
+    
+    {
+        HLayoutWithHierarchy hLayout = Project.Instantiate<HLayoutWithHierarchy>("Prefabs.Gui.HLayoutWithHierarchy");
+        layout.AddChild(hLayout);
+        
+        FullLayoutWithHierarchy textClipper = Project.Instantiate<FullLayoutWithHierarchy>("Prefabs.Gui.FullLayoutWithHierarchy");
+        textClipper.ClipChildren = true;
+        hLayout.AddChild(textClipper);
+        
+        TextRect text = Project.Instantiate<TextRect>("Prefabs.Gui.TextRect");
+        text.TextString = "Adder Content";
+        text.LocalScale = (0.5, 0.5);
+        text.MinimumSize = (300, 0);
+        text.Justification = TextJustification.Left;
+        textClipper.AddChild(text);
+        
+        ButtonRectWithText openButton = Project.Instantiate<ButtonRectWithText>("Prefabs.Gui.ButtonRectWithText");
+        openButton.HorizontalExpand = true;
+        openButton.TextString = "Open";
+        hLayout.AddChild(openButton);
+    }
+    
+    {
+        HLayoutWithHierarchy hLayout = Project.Instantiate<HLayoutWithHierarchy>("Prefabs.Gui.HLayoutWithHierarchy");
+        layout.AddChild(hLayout);
+        
+        FullLayoutWithHierarchy textClipper = Project.Instantiate<FullLayoutWithHierarchy>("Prefabs.Gui.FullLayoutWithHierarchy");
+        textClipper.ClipChildren = true;
+        hLayout.AddChild(textClipper);
+        
+        TextRect text = Project.Instantiate<TextRect>("Prefabs.Gui.TextRect");
+        text.TextString = "Remover Content";
+        text.LocalScale = (0.5, 0.5);
+        text.MinimumSize = (300, 0);
+        text.Justification = TextJustification.Left;
+        textClipper.AddChild(text);
+        
+        ButtonRectWithText openButton = Project.Instantiate<ButtonRectWithText>("Prefabs.Gui.ButtonRectWithText");
+        openButton.HorizontalExpand = true;
+        openButton.TextString = "Open";
+        hLayout.AddChild(openButton);
     }
 }
 
@@ -361,7 +470,21 @@ TextString = "Properties"
 Prefab = "Prefabs.Gui.VLayoutWithHierarchy"
 [11.Values]
 Name = "Scroll Area Content"
-Children = [ "10", "9", "16", "13", "12", "17", "15", "14", "18", "5" ]
+Children = [
+    "10",
+    "9",
+    "19",
+    "16",
+    "13",
+    "12",
+    "20",
+    "17",
+    "15",
+    "14",
+    "21",
+    "18",
+    "5",
+]
 
 [12]
 Prefab = "Prefabs.Gui.VLayoutWithHierarchy"
@@ -395,3 +518,21 @@ Prefab = "Prefabs.Gui.HBar"
 
 [18]
 Prefab = "Prefabs.Gui.HBar"
+
+[19]
+Prefab = "Prefabs.Gui.ButtonRect"
+[19.Values]
+MinimumSize = { X = 20, Y = 20 }
+HorizontalSizing = "FitCenter"
+
+[20]
+Prefab = "Prefabs.Gui.ButtonRect"
+[20.Values]
+MinimumSize = { X = 20, Y = 20 }
+HorizontalSizing = "FitCenter"
+
+[21]
+Prefab = "Prefabs.Gui.ButtonRect"
+[21.Values]
+MinimumSize = { X = 20, Y = 20 }
+HorizontalSizing = "FitCenter"
