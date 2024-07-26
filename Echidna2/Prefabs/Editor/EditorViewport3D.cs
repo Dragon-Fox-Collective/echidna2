@@ -8,7 +8,7 @@ using OpenTK.Windowing.GraphicsLibraryFramework;
 
 namespace Echidna2.Prefabs.Editor;
 
-public partial class EditorViewport3D : INotificationPropagator, INotificationListener<UpdateNotification>, INotificationListener<MouseDownNotification>, INotificationListener<MouseMovedNotification>, INotificationListener<MouseUpNotification>, INotificationListener<MouseWheelScrolledNotification>, INotificationListener<KeyDownNotification>, INotificationListener<KeyUpNotification>
+public partial class EditorViewport3D : Viewport, INotificationPropagator, INotificationListener<UpdateNotification>, INotificationListener<MouseDownNotification>, INotificationListener<MouseMovedNotification>, INotificationListener<MouseUpNotification>, INotificationListener<MouseWheelScrolledNotification>, INotificationListener<KeyDownNotification>, INotificationListener<KeyUpNotification>
 {
 	[SerializedReference, ExposeMembersInClass] public Viewport3D Viewport { get; set; } = null!;
 	[SerializedReference] public Transform3D CameraPivot { get; set; } = null!;
@@ -27,7 +27,7 @@ public partial class EditorViewport3D : INotificationPropagator, INotificationLi
 	
 	public void Notify<T>(T notification) where T : notnull
 	{
-		if (notification is MouseDownNotification || notification is MouseMovedNotification || notification is MouseUpNotification)
+		if (notification is MouseDownNotification or MouseMovedNotification or MouseUpNotification)
 			INotificationPropagator.Notify(Activator.CreateInstance(Project.Singleton.Assembly.GetType("Notifications.Editor.EditorNotificationNotification`1").MakeGenericType(typeof(T)), notification), Viewport);
 		else
 			INotificationPropagator.Notify(notification, Viewport);

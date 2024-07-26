@@ -5,8 +5,11 @@
 ]
 
 [This]
+Interfaces = [
+    "Viewport",
+]
 NotifyContent = """
-if (notification is MouseDownNotification || notification is MouseMovedNotification || notification is MouseUpNotification)
+if (notification is MouseDownNotification or MouseMovedNotification or MouseUpNotification)
 {
     INotificationPropagator.Notify(notification, components.Without(Viewport).ToArray());
     INotificationPropagator.Notify(new EditorNotificationNotification<T>(notification), Viewport);

@@ -10,7 +10,7 @@ namespace Echidna2.Prefabs.Editor;
 
 public interface Viewport : ICanAddChildren;
 
-public partial class ViewportGui : Viewport, INotificationPropagator, ICanBeLaidOut, INotificationListener<DrawNotification>, INotificationListener<UpdateNotification>
+public partial class ViewportGui : INotificationPropagator, ICanBeLaidOut, INotificationListener<DrawNotification>, INotificationListener<UpdateNotification>
 {
 	[SerializedReference, ExposeMembersInClass] public Named Named { get; set; } = null!;
 	[SerializedReference, ExposeMembersInClass] public RectTransform RectTransform { get; set; } = null!;
@@ -46,7 +46,7 @@ public partial class ViewportGui : Viewport, INotificationPropagator, ICanBeLaid
 	}
 }
 
-public partial class Viewport3D : Viewport, INotificationPropagator, ICanBeLaidOut, INotificationListener<DrawNotification>, INotificationListener<UpdateNotification>
+public partial class Viewport3D : INotificationPropagator, ICanBeLaidOut, INotificationListener<DrawNotification>, INotificationListener<UpdateNotification>
 {
 	[SerializedReference, ExposeMembersInClass] public Named Named { get; set; } = null!;
 	[SerializedReference, ExposeMembersInClass] public RectTransform RectTransform { get; set; } = null!;

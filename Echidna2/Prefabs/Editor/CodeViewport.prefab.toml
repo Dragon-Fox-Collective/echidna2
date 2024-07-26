@@ -1,29 +1,60 @@
 Using = [
+    "Notifications.Editor",
     "Echidna2.Prefabs.Gui",
-    "Echidna2.Gui",
-]
-
-[This]
-Interfaces = [
-    "ICanBeLaidOut",
+    "Echidna2.Prefabs.Editor",
+    "Echidna2.Rendering",
 ]
 
 [[This.Properties]]
-Name = "RectWithHierarchy"
-Type = "RectWithHierarchy"
 PropertyType = "Component"
+Type = "ViewportGui"
+Name = "Viewport"
+
+[[This.Properties]]
+PropertyType = "Component"
+Type = "ViewportGuiControls"
+Name = "Controls"
+
+[[This.Events]]
+EventType = "Reference"
+Target = "Controls"
+Name = "Moved"
+Args = [{ Type = "Vector2", Name = "position" }]
+Content = """
+Camera.GlobalPosition = position;
+"""
+
+[[This.Events]]
+EventType = "Reference"
+Target = "Controls"
+Name = "Zoomed"
+Args = [{ Type = "double", Name = "zoom" }]
+Content = """
+Camera.Zoom = zoom;
+"""
 
 [This.Values]
-RectWithHierarchy = "1"
-
-[1]
-Prefab = "Prefabs.Gui.RectWithHierarchy"
-[1.Values]
-Color = { R = 0.2, G = 0.2, B = 0.2, A = 1.0 }
-Children = [ "2" ]
+Viewport = "2"
+Controls = "3"
 
 [2]
-Prefab = "Prefabs.Gui.RectWithHierarchy"
+Prefab = "Prefabs.Editor.ViewportGui"
 [2.Values]
-MinimumSize = { X = 40.0, Y = 40.0 }
-AnchorPreset = "Center"
+Children = [ "4" ]
+
+[3]
+Prefab = "Prefabs.Editor.ViewportGuiControls"
+[3.Values]
+RectTransform = "2"
+
+[4]
+Prefab = "Prefabs.Gui.FullRectWithHierarchy"
+[4.Values]
+Margin = 5.0
+Children = [ "5" ]
+
+[5]
+Prefab = "Prefabs.Gui.TextRect"
+[5.Values]
+TextString = "This is a node"
+MinimumSize = { X = 250, Y = 0 }
