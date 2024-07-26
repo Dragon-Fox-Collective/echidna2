@@ -14,11 +14,11 @@ Properties = [
     { PropertyType = "Reference", Type = "ObjectPanel", Name = "ObjectPanel" },
     { PropertyType = "Value", Type = "string", Name = "InitialPrefabPath" },
     { PropertyType = "Public", Type = "PrefabRoot", Name = "PrefabRoot", SetterContent = """
-Viewport? viewviewport = Viewport as Viewport;
-viewviewport?.ClearChildren();
+EditorViewport? editorViewport = Viewport as EditorViewport;
+editorViewport?.ClearChildren();
 _PrefabRoot = value;
 ObjectPanel.PrefabRoot = value;
-viewviewport?.AddChild(PrefabRoot.RootObject);
+editorViewport?.AddChild(PrefabRoot.RootObject);
 """ },
     { PropertyType = "Private", Type = "Dictionary<Type, Func<IFieldEditor>>", Name = "EditorInstantiators" },
     { PropertyType = "Private", Type = "bool", Name = "HasBeenInitialized" },
@@ -51,13 +51,13 @@ if (PrefabRoot is null) return;
 PrefabRoot.Prefab.Save();
 """ },
     { ReturnType = "void", Name = "SwitchView", Args = [{ Type = "object", Name = "viewport" }], Content = """
-Viewport? viewviewport = Viewport as Viewport;
-viewviewport?.ClearChildren();
+EditorViewport? editorViewport = Viewport as EditorViewport;
+editorViewport?.ClearChildren();
 QueueRemoveChild(Viewport);
 Viewport = viewport;
 QueueAddChild(Viewport);
 if (PrefabRoot is not null)
-    viewviewport?.AddChild(PrefabRoot.RootObject);
+    editorViewport?.AddChild(PrefabRoot.RootObject);
 """ },
     { Static = true, ReturnType = "void", Name = "OpenNewWindow", Args = [], Content = """
 // :/ cubemap no longer static constructed because nothing references it since the skybox is a toml now

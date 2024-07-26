@@ -6,7 +6,7 @@
 
 [This]
 Interfaces = [
-    "Viewport",
+    "EditorViewport",
 ]
 NotifyContent = """
 if (notification is MouseDownNotification or MouseMovedNotification or MouseUpNotification)

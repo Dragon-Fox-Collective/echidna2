@@ -8,7 +8,7 @@ using OpenTK.Windowing.GraphicsLibraryFramework;
 
 namespace Echidna2.Prefabs.Editor;
 
-public partial class EditorViewport3D : Viewport, INotificationPropagator, INotificationListener<UpdateNotification>, INotificationListener<MouseDownNotification>, INotificationListener<MouseMovedNotification>, INotificationListener<MouseUpNotification>, INotificationListener<MouseWheelScrolledNotification>, INotificationListener<KeyDownNotification>, INotificationListener<KeyUpNotification>
+public partial class EditorViewport3D : EditorViewport, INotificationPropagator, INotificationListener<UpdateNotification>, INotificationListener<MouseDownNotification>, INotificationListener<MouseMovedNotification>, INotificationListener<MouseUpNotification>, INotificationListener<MouseWheelScrolledNotification>, INotificationListener<KeyDownNotification>, INotificationListener<KeyUpNotification>
 {
 	[SerializedReference, ExposeMembersInClass] public Viewport3D Viewport { get; set; } = null!;
 	[SerializedReference] public Transform3D CameraPivot { get; set; } = null!;

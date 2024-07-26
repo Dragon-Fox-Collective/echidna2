@@ -8,7 +8,7 @@ using OpenTK.Graphics.OpenGL4;
 
 namespace Echidna2.Prefabs.Editor;
 
-public interface Viewport : ICanAddChildren;
+public interface EditorViewport : ICanAddChildren;
 
 public partial class ViewportGui : INotificationPropagator, ICanBeLaidOut, INotificationListener<DrawNotification>, INotificationListener<UpdateNotification>
 {
