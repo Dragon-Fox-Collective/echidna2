@@ -1,0 +1,91 @@
+Using = [
+    "Echidna2.Rendering",
+    "OpenTK.Windowing.GraphicsLibraryFramework",
+    "Echidna2.Gui",
+]
+
+[[This.Properties]]
+PropertyType = "Value"
+Type = "double"
+Name = "ZoomFactor"
+
+[[This.Properties]]
+PropertyType = "Reference"
+Type = "IRectTransform"
+Name = "RectTransform"
+Expose = false
+
+[[This.Properties]]
+PropertyType = "Private"
+Type = "bool"
+Name = "IsDragging"
+
+[[This.Properties]]
+PropertyType = "Value"
+Type = "Vector2"
+Name = "Position"
+SetterContent = """
+_Position = value;
+Moved?.Invoke(Position);
+"""
+
+[[This.Properties]]
+PropertyType = "Value"
+Type = "double"
+Name = "Zoom"
+SetterContent = """
+_Zoom = value;
+Zoomed?.Invoke(Zoom);
+"""
+
+[[This.Properties]]
+PropertyType = "Event"
+Type = "Vector2"
+Name = "Moved"
+
+[[This.Properties]]
+PropertyType = "Event"
+Type = "double"
+Name = "Zoomed"
+
+[[This.Events]]
+EventType = "Notification"
+Name = "MouseDown"
+Content = """
+if (notification is { Button: MouseButton.Left, Clipped: false } && RectTransform.ContainsGlobalPoint(notification.GlobalPosition.XY))
+    IsDragging = true;
+"""
+
+[[This.Events]]
+EventType = "Notification"
+Name = "MouseUp"
+Content = """
+if (notification is { Button: MouseButton.Left })
+    IsDragging = false;
+"""
+
+[[This.Events]]
+EventType = "Notification"
+Name = "MouseMoved"
+Content = """
+if (IsDragging)
+    Position += Zoom * -notification.GlobalDelta.XY;
+"""
+
+[[This.Events]]
+EventType = "Notification"
+Name = "MouseWheelScrolled"
+Content = """
+if (RectTransform.ContainsGlobalPoint(notification.GlobalPosition.XY))
+{
+    double zoomAmount = 1 + Math.Abs(notification.Offset.Y) * ZoomFactor;
+    if (notification.Offset.Y > 0)
+        Zoom /= zoomAmount;
+    else
+        Zoom *= zoomAmount;
+}
+"""
+
+[This.Values]
+Zoom = 1
+ZoomFactor = 0.1

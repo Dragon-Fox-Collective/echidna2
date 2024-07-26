@@ -9,14 +9,21 @@ Interfaces = [
 ]
 
 [[This.Properties]]
-Name = "FullRectWithHierarchy"
-Type = "FullRectWithHierarchy"
+Name = "RectWithHierarchy"
+Type = "RectWithHierarchy"
 PropertyType = "Component"
 
 [This.Values]
-FullRectWithHierarchy = "1"
+RectWithHierarchy = "1"
 
 [1]
-Prefab = "Prefabs.Gui.FullRectWithHierarchy"
+Prefab = "Prefabs.Gui.RectWithHierarchy"
 [1.Values]
 Color = { R = 0.2, G = 0.2, B = 0.2, A = 1.0 }
+Children = [ "2" ]
+
+[2]
+Prefab = "Prefabs.Gui.RectWithHierarchy"
+[2.Values]
+MinimumSize = { X = 40.0, Y = 40.0 }
+AnchorPreset = "Center"

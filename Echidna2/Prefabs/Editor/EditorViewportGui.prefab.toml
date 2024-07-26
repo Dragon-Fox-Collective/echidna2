@@ -1,7 +1,56 @@
-﻿[This]
-Component = "Echidna2.Prefabs.Editor.EditorViewportGui, Echidna2"
+﻿Using = [
+    "Notifications.Editor",
+    "Echidna2.Prefabs.Editor",
+    "Echidna2.Rendering",
+]
+
+[This]
+NotifyContent = """
+if (notification is MouseDownNotification || notification is MouseMovedNotification || notification is MouseUpNotification)
+{
+    INotificationPropagator.Notify(notification, components.Without(Viewport).ToArray());
+    INotificationPropagator.Notify(new EditorNotificationNotification<T>(notification), Viewport);
+}
+else
+    INotificationPropagator.Notify(notification, components);
+"""
+
+[[This.Properties]]
+PropertyType = "Component"
+Type = "ViewportGui"
+Name = "Viewport"
+
+[[This.Properties]]
+PropertyType = "Component"
+Type = "ViewportGuiControls"
+Name = "Controls"
+
+[[This.Events]]
+EventType = "Reference"
+Target = "Controls"
+Name = "Moved"
+Args = [{ Type = "Vector2", Name = "position" }]
+Content = """
+Camera.GlobalPosition = position;
+"""
+
+[[This.Events]]
+EventType = "Reference"
+Target = "Controls"
+Name = "Zoomed"
+Args = [{ Type = "double", Name = "zoom" }]
+Content = """
+Camera.Zoom = zoom;
+"""
+
 [This.Values]
 Viewport = "2"
+Controls = "3"
 
 [2]
 Prefab = "Prefabs.Editor.ViewportGui"
+
+[3]
+Prefab = "Prefabs.Editor.ViewportGuiControls"
+[3.Values]
+RectTransform = "2"

@@ -12,6 +12,8 @@ public class Component
 	public bool IsSubclass => Source is not NoSource && NeedsCustomClass;
 	private string baseClassName = "";
 	public string ClassName = "";
+	public string NotifyContent = "";
+	public bool HasCustomNotify => !NotifyContent.IsEmpty();
 	public List<string> Interfaces = [];
 	public List<Property> Properties = [];
 	public IEnumerable<Property> Components => Properties.Where(property => property.PropertyType == PropertyType.Component);
@@ -30,6 +32,7 @@ public class Component
 			table.TryGetValue("Prefab", out object? prefabPathValue) ? new PrefabSource((string)prefabPathValue) :
 			new NoSource();
 		component.ClassName = Compilation.GetPrefabClassName(prefabPath, id);
+		component.NotifyContent = table.GetString("NotifyContent");
 		component.Interfaces = table.GetList<string>("Interfaces");
 		component.EventListeners = table.GetList<TomlTable>("Events").Select(EventListener.FromToml).ToList();
 		component.Properties = table.GetList<TomlTable>("Properties").Select(propTable => Property.FromToml(propTable, component.EventListeners)).ToList();
@@ -45,6 +48,7 @@ public class Component
 		TomlTable table = new();
 		if (Source is TypeSource typeSource) table.Add("Component", typeSource.Type);
 		if (Source is PrefabSource prefabSource) table.Add("Prefab", prefabSource.Path);
+		if (HasCustomNotify) table.Add("NotifyContent", NotifyContent);
 		if (Interfaces.Count != 0) table.Add("Interfaces", Interfaces);
 		if (EventListeners.Count != 0) table.Add("Events", EventListeners.Select(@event => @event.ToToml()).ToList());
 		if (Properties.Count != 0) table.Add("Properties", Properties.Select(prop => prop.ToToml()).ToList());
@@ -86,7 +90,11 @@ public class Component
 		string scriptString = "";
 		scriptString += "\tpublic void Notify<T>(T notification) where T : notnull\n";
 		scriptString += "\t{\n";
-		scriptString += $"\t\tINotificationPropagator.Notify(notification, {Components.Select(component => component.Name).Join(", ")});\n";
+		scriptString += $"\t\tobject[] components = [{Components.Select(component => component.Name).Join(", ")}];\n";
+		if (HasCustomNotify)
+			scriptString += $"\t\t{NotifyContent.Indent().Indent()}\n";
+		else
+			scriptString += "\t\tINotificationPropagator.Notify(notification, components);\n";
 		scriptString += "\t}\n";
 		scriptString += "\n";
 		return scriptString;

@@ -9,6 +9,7 @@ public class Property
 	public PropertyType PropertyType;
 	public string PropertySerializer = "";
 	public bool HasPropertySerializer => !PropertySerializer.IsEmpty();
+	public bool Expose = false;
 	public bool ExposeProperties = false;
 	public List<EventListener> EventListeners = [];
 	
@@ -22,6 +23,22 @@ public class Property
 	public bool HasCustomRemover => !RemoverContent.IsEmpty();
 	public string RemoverContent = "";
 	
+	private string AttributesString
+	{
+		get
+		{
+			List<string> attributes = [];
+			if (PropertyType is PropertyType.Component or PropertyType.Reference)
+				attributes.Add(HasPropertySerializer ? $"SerializedReference(typeof({PropertySerializer}))" : "SerializedReference");
+			if (PropertyType is PropertyType.Value)
+				attributes.Add(HasPropertySerializer ? $"SerializedValue(typeof({PropertySerializer}))" : "SerializedValue");
+			if (ExposeProperties) attributes.Add("ExposeMembersInClass");
+			if (!Expose) attributes.Add("DontExpose");
+			
+			return attributes.Count != 0 ? attributes.ToDelimString() + " " : "";
+		}
+	}
+	
 	public static Property FromToml(TomlTable table, IEnumerable<EventListener> eventListeners)
 	{
 		Property property = new();
@@ -29,6 +46,7 @@ public class Property
 		property.Name = table.GetCasted<string>("Name");
 		property.PropertyType = Enum.Parse<PropertyType>(table.GetCasted<string>("PropertyType"));
 		property.PropertySerializer = table.GetString("PropertySerializer");
+		property.Expose = table.GetCasted("Expose", true);
 		property.ExposeProperties = table.GetCasted("ExposeProperties", property.PropertyType == PropertyType.Component);
 		property.EventListeners = eventListeners.Where(eventListener => eventListener.EventType == EventType.Reference && eventListener.Target == property.Name).ToList();
 		property.GetterContent = table.GetString("GetterContent");
@@ -44,6 +62,7 @@ public class Property
 		table.Add("Type", Type);
 		table.Add("Name", Name);
 		table.Add("PropertyType", PropertyType.ToString());
+		if (!Expose) table.Add("Expose", Expose);
 		if (ExposeProperties ^ (PropertyType == PropertyType.Component)) table.Add("ExposeProperties", ExposeProperties);
 		if (HasCustomGetter) table.Add("GetterContent", GetterContent);
 		if (HasCustomSetter) table.Add("SetterContent", SetterContent);
@@ -54,55 +73,17 @@ public class Property
 	
 	public string StringifyCS()
 	{
-		return PropertyType switch
-		{
-			PropertyType.Component => StringifyCSComponent(),
-			PropertyType.Reference => StringifyCSReference(),
-			PropertyType.Value => StringifyCSValue(),
-			PropertyType.Public => StringifyCSPublic(),
-			PropertyType.Private => StringifyCSPrivate(),
-			PropertyType.Event => StringifyCSEvent(),
-			_ => throw new ArgumentOutOfRangeException(PropertyType.ToString())
-		} + "\n";
-	}
-	private string StringifyCSComponent()
-	{
-		string scriptString = "";
-		scriptString += $"\tprivate {Type} _{Name} = default!;\n";
-		scriptString += $"\t[SerializedReference{(HasPropertySerializer ? $"(typeof({PropertySerializer}))" : "")}{(ExposeProperties ? ", ExposeMembersInClass" : "")}] public {Type} {Name}\n";
-		scriptString += StringifyCSReferenceGetterAndSetter();
-		return scriptString;
-	}
-	private string StringifyCSReference()
-	{
-		string scriptString = "";
-		scriptString += $"\tprivate {Type} _{Name} = default!;\n";
-		scriptString += $"\t[SerializedReference{(HasPropertySerializer ? $"(typeof({PropertySerializer}))" : "")}] public {Type} {Name}\n";
-		scriptString += StringifyCSReferenceGetterAndSetter();
-		return scriptString;
+		return (PropertyType is PropertyType.Event ? StringifyCSEvent() : StringifyCSValue()) + "\n";
 	}
 	private string StringifyCSValue()
 	{
 		string scriptString = "";
 		scriptString += $"\tprivate {Type} _{Name} = default!;\n";
-		scriptString += $"\t[SerializedValue{(HasPropertySerializer ? $"(typeof({PropertySerializer}))" : "")}] public {Type} {Name}\n";
-		scriptString += StringifyCSValueGetterAndSetter();
-		return scriptString;
-	}
-	private string StringifyCSPublic()
-	{
-		string scriptString = "";
-		scriptString += $"\tprivate {Type} _{Name} = default!;\n";
-		scriptString += $"\tpublic {Type} {Name}\n";
-		scriptString += StringifyCSValueGetterAndSetter();
-		return scriptString;
-	}
-	private string StringifyCSPrivate()
-	{
-		string scriptString = "";
-		scriptString += $"\tprivate {Type} _{Name} = default!;\n";
-		scriptString += $"\tprivate {Type} {Name}\n";
-		scriptString += StringifyCSValueGetterAndSetter();
+		scriptString += $"\t{AttributesString}public {Type} {Name}\n";
+		if (PropertyType is PropertyType.Component or PropertyType.Reference)
+			scriptString += StringifyCSReferenceGetterAndSetter();
+		else if (PropertyType is PropertyType.Value or PropertyType.Public or PropertyType.Private)
+			scriptString += StringifyCSValueGetterAndSetter();
 		return scriptString;
 	}
 	private string StringifyCSEvent()
@@ -135,7 +116,7 @@ public class Property
 		}
 		return scriptString;
 	}
-
+	
 	private string StringifyCSReferenceGetterAndSetter()
 	{
 		string scriptString = "";
@@ -210,36 +191,11 @@ public class Property
 	
 	public string StringifyCSAbstract()
 	{
-		return PropertyType switch
-		{
-			PropertyType.Component => StringifyCSComponentAbstract(),
-			PropertyType.Reference => StringifyCSReferenceAbstract(),
-			PropertyType.Value => StringifyCSValueAbstract(),
-			PropertyType.Public => StringifyCSPublicAbstract(),
-			PropertyType.Private => StringifyCSPrivateAbstract(),
-			PropertyType.Event => StringifyCSEventAbstract(),
-			_ => throw new ArgumentOutOfRangeException(PropertyType.ToString())
-		};
-	}
-	private string StringifyCSComponentAbstract()
-	{
-		return $"\t[SerializedReference{(HasPropertySerializer ? $"(typeof({PropertySerializer}))" : "")}{(ExposeProperties ? ", ExposeMembersInClass" : "")}] {Type} {Name} {{ get; set; }}\n";
-	}
-	private string StringifyCSReferenceAbstract()
-	{
-		return $"\t[SerializedReference{(HasPropertySerializer ? $"(typeof({PropertySerializer}))" : "")}] {Type} {Name} {{ get; set; }}\n";
+		return PropertyType is PropertyType.Event ? StringifyCSEventAbstract() : StringifyCSValueAbstract();
 	}
 	private string StringifyCSValueAbstract()
 	{
-		return $"\t[SerializedValue{(HasPropertySerializer ? $"(typeof({PropertySerializer}))" : "")}] {Type} {Name} {{ get; set; }}\n";
-	}
-	private string StringifyCSPublicAbstract()
-	{
-		return $"\t{Type} {Name} {{ get; set; }}\n";
-	}
-	private string StringifyCSPrivateAbstract()
-	{
-		return $"\t{Type} {Name} {{ get; set; }}\n";
+		return $"\t{AttributesString} public {Type} {Name} {{ get; set; }}\n";
 	}
 	private string StringifyCSEventAbstract()
 	{
