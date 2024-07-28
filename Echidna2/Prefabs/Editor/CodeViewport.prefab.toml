@@ -51,10 +51,20 @@ RectTransform = "2"
 Prefab = "Prefabs.Gui.FullRectWithHierarchy"
 [4.Values]
 Margin = 5.0
-Children = [ "5" ]
+Children = [ "6" ]
 
 [5]
 Prefab = "Prefabs.Gui.TextRect"
 [5.Values]
 TextString = "This is a node"
 MinimumSize = { X = 250, Y = 0 }
+
+[6]
+Prefab = "Prefabs.Gui.VLayoutWithHierarchy"
+[6.Values]
+Children = [ "5", "7" ]
+
+[7]
+Prefab = "Prefabs.Gui.ButtonRect"
+[7.Values]
+MinimumSize = { X = 50.0, Y = 30.0 }

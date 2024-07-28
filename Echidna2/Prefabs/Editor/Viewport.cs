@@ -24,8 +24,59 @@ public partial class ViewportGui : INotificationPropagator, ICanBeLaidOut, INoti
 	
 	public void Notify<T>(T notification) where T : notnull
 	{
-		if (notification is not DrawNotification)
-			INotificationPropagator.Notify(notification, Hierarchy, RenderTarget, GuiRectLayout);
+		object[] components = [Hierarchy, RenderTarget, GuiRectLayout];
+		
+		switch (notification)
+		{
+			case DrawNotification:
+				break;
+			
+			case MouseMovedNotification mouseMovedNotification:
+			{
+				Vector3 transformedDelta = Camera.ViewMatrix.InverseTransformVector(mouseMovedNotification.GlobalDelta);
+				Vector3 transformedPosition = Camera.ViewMatrix.InverseTransformPoint(mouseMovedNotification.GlobalPosition);
+				MouseMovedNotification transformedNotification = new(transformedDelta, transformedPosition)
+				{
+					Clipped = mouseMovedNotification.Clipped,
+				};
+				INotificationPropagator.Notify(transformedNotification, components);
+				break;
+			}
+			case MouseDownNotification mouseDownNotification:
+			{
+				Vector3 transformedPosition = Camera.ViewMatrix.InverseTransformPoint(mouseDownNotification.GlobalPosition);
+				MouseDownNotification transformedNotification = new(mouseDownNotification.Button, transformedPosition)
+				{
+					Clipped = mouseDownNotification.Clipped,
+				};
+				INotificationPropagator.Notify(transformedNotification, components);
+				break;
+			}
+			case MouseUpNotification mouseUpNotification:
+			{
+				Vector3 transformedPosition = Camera.ViewMatrix.InverseTransformPoint(mouseUpNotification.GlobalPosition);
+				MouseUpNotification transformedNotification = new(mouseUpNotification.Button, transformedPosition)
+				{
+					Clipped = mouseUpNotification.Clipped,
+				};
+				INotificationPropagator.Notify(transformedNotification, components);
+				break;
+			}
+			case MouseWheelScrolledNotification mouseWheelScrolledNotification:
+			{
+				Vector3 transformedPosition = Camera.ViewMatrix.InverseTransformPoint(mouseWheelScrolledNotification.GlobalPosition);
+				MouseWheelScrolledNotification transformedNotification = new(mouseWheelScrolledNotification.Offset, transformedPosition)
+				{
+					Clipped = mouseWheelScrolledNotification.Clipped,
+				};
+				INotificationPropagator.Notify(transformedNotification, components);
+				break;
+			}
+			
+			default:
+				INotificationPropagator.Notify(notification, components);
+				break;
+		}
 	}
 	
 	public void OnNotify(DrawNotification notification)
