@@ -1,0 +1,22 @@
+[This]
+Prefab = "Prefabs.Gui.FullRectWithHierarchy"
+[This.Values]
+Margin = 5.0
+AnchorPreset = "Center"
+Children = [ "1" ]
+
+[1]
+Prefab = "Prefabs.Gui.VLayoutWithHierarchy"
+[1.Values]
+Children = [ "2", "3" ]
+
+[2]
+Prefab = "Prefabs.Gui.TextRect"
+[2.Values]
+TextString = "This is a node"
+MinimumSize = { X = 250, Y = 0 }
+
+[3]
+Prefab = "Prefabs.Gui.ButtonRect"
+[3.Values]
+MinimumSize = { X = 50.0, Y = 30.0 }

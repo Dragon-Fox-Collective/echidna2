@@ -30,6 +30,7 @@ public interface IRectTransform
 	public double AnchorOffsetRight { get; set; }
 	public double AnchorOffsetBottom { get; set; }
 	public double AnchorOffsetTop { get; set; }
+	public Vector2 AnchorOffsetPosition { get; set; }
 	
 	public LayoutSizing HorizontalSizing { get; set; }
 	public bool HorizontalExpand { get; set; }
@@ -154,6 +155,15 @@ public class RectTransform : IRectTransform
 	[SerializedValue] public double AnchorOffsetRight { get; set; }
 	[SerializedValue] public double AnchorOffsetBottom { get; set; }
 	[SerializedValue] public double AnchorOffsetTop { get; set; }
+	[SerializedValue] public Vector2 AnchorOffsetPosition
+	{
+		get => new((AnchorOffsetLeft + AnchorOffsetRight) * 0.5, (AnchorOffsetBottom + AnchorOffsetTop) * 0.5);
+		set
+		{
+			AnchorOffsetLeft = AnchorOffsetRight = value.X;
+			AnchorOffsetBottom = AnchorOffsetTop = value.Y;
+		}
+	}
 	
 	[SerializedValue] public LayoutSizing HorizontalSizing { get; set; }
 	[SerializedValue] public bool HorizontalExpand { get; set; }

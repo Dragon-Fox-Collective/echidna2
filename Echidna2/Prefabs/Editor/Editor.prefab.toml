@@ -201,8 +201,7 @@ Prefab = "Prefabs.Gui.FullRectWithHierarchy"
 [9.Values]
 Name = "Scene Context Buttons"
 AnchorPreset = "TopCenter"
-AnchorOffsetTop = -10.0
-AnchorOffsetBottom = -10.0
+AnchorOffsetPosition = { X = 0.0, Y = -10.0 }
 Margin = 10.0
 Children = [ "10" ]
 
@@ -272,10 +271,7 @@ Prefab = "Prefabs.Gui.FullRectWithHierarchy"
 [14.Values]
 Name = "Side Panel Buttons"
 AnchorPreset = "TopRight"
-AnchorOffsetTop = -10.0
-AnchorOffsetBottom = -10.0
-AnchorOffsetRight = -10.0
-AnchorOffsetLeft = -10.0
+AnchorOffsetPosition = { X = -10.0, Y = -10.0 }
 Margin = 10.0
 Children = [ "15" ]
 
@@ -345,10 +341,7 @@ Color = { R = 1.0, G = 0.0, B = 1.0, A = 1.0 }
 Prefab = "Prefabs.Editor.ObjectPanel"
 [20.Values]
 AnchorPreset = "TopRight"
-AnchorOffsetTop = -10.0
-AnchorOffsetBottom = -10.0
-AnchorOffsetRight = -70.0
-AnchorOffsetLeft = -70.0
+AnchorOffsetPosition = { X = -70.0, Y = -10.0 }
 IsSelfVisible = false
 MinimumSize = { X = 300.0, Y = 400.0 }
 
@@ -356,10 +349,7 @@ MinimumSize = { X = 300.0, Y = 400.0 }
 Prefab = "Prefabs.Editor.ComponentPanel"
 [21.Values]
 AnchorPreset = "TopRight"
-AnchorOffsetTop = -10.0
-AnchorOffsetBottom = -10.0
-AnchorOffsetRight = -70.0
-AnchorOffsetLeft = -70.0
+AnchorOffsetPosition = { X = -70.0, Y = -10.0 }
 IsSelfVisible = false
 MinimumSize = { X = 400.0, Y = 600.0 }
 
@@ -367,10 +357,7 @@ MinimumSize = { X = 400.0, Y = 600.0 }
 Prefab = "Prefabs.Editor.AssetBrowserPanel"
 [22.Values]
 AnchorPreset = "TopRight"
-AnchorOffsetTop = -10.0
-AnchorOffsetBottom = -10.0
-AnchorOffsetRight = -70.0
-AnchorOffsetLeft = -70.0
+AnchorOffsetPosition = { X = -70.0, Y = -10.0 }
 IsSelfVisible = false
 MinimumSize = { X = 300.0, Y = 400.0 }
 

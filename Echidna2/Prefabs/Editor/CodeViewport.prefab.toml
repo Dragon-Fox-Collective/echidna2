@@ -40,7 +40,7 @@ Controls = "3"
 [2]
 Prefab = "Prefabs.Editor.ViewportGui"
 [2.Values]
-Children = [ "4" ]
+Children = [ "4", "5" ]
 
 [3]
 Prefab = "Prefabs.Editor.ViewportGuiControls"
@@ -48,23 +48,11 @@ Prefab = "Prefabs.Editor.ViewportGuiControls"
 RectTransform = "2"
 
 [4]
-Prefab = "Prefabs.Gui.FullRectWithHierarchy"
+Prefab = "Prefabs.Editor.CodeNode"
 [4.Values]
-Margin = 5.0
-Children = [ "6" ]
+AnchorOffsetPosition = { X = 0.0, Y = 0.0 }
 
 [5]
-Prefab = "Prefabs.Gui.TextRect"
+Prefab = "Prefabs.Editor.CodeNode"
 [5.Values]
-TextString = "This is a node"
-MinimumSize = { X = 250, Y = 0 }
-
-[6]
-Prefab = "Prefabs.Gui.VLayoutWithHierarchy"
-[6.Values]
-Children = [ "5", "7" ]
-
-[7]
-Prefab = "Prefabs.Gui.ButtonRect"
-[7.Values]
-MinimumSize = { X = 50.0, Y = 30.0 }
+AnchorOffsetPosition = { X = 300.0, Y = 300.0 }
