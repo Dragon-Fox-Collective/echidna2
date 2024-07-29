@@ -45,7 +45,7 @@ public partial class EditorViewport3D : EditorViewport, INotificationPropagator,
 	
 	public void OnNotify(MouseDownNotification notification)
 	{
-		if (notification.Button == MouseButton.Left && !notification.Clipped && this.ContainsGlobalPoint(notification.GlobalPosition.XY))
+		if (notification.Button == MouseButton.Middle && !notification.Clipped && this.ContainsGlobalPoint(notification.GlobalPosition.XY))
 			if (isModifierPressed)
 				isPanning = true;
 			else
@@ -69,7 +69,7 @@ public partial class EditorViewport3D : EditorViewport, INotificationPropagator,
 	
 	public void OnNotify(MouseUpNotification notification)
 	{
-		if (notification.Button == MouseButton.Left)
+		if (notification.Button == MouseButton.Middle)
 		{
 			isOrbiting = false;
 			isPanning = false;

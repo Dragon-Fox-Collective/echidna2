@@ -52,7 +52,7 @@ Name = "Zoomed"
 EventType = "Notification"
 Name = "MouseDown"
 Content = """
-if (notification is { Button: MouseButton.Left, Clipped: false } && RectTransform.ContainsGlobalPoint(notification.GlobalPosition.XY))
+if (notification is { Button: MouseButton.Middle, Clipped: false } && RectTransform.ContainsGlobalPoint(notification.GlobalPosition.XY))
     IsDragging = true;
 """
 
@@ -60,7 +60,7 @@ if (notification is { Button: MouseButton.Left, Clipped: false } && RectTransfor
 EventType = "Notification"
 Name = "MouseUp"
 Content = """
-if (notification is { Button: MouseButton.Left })
+if (notification is { Button: MouseButton.Middle })
     IsDragging = false;
 """
 
